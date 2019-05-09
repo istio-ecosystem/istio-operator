@@ -13,6 +13,10 @@ message IstioInstaller {
 }
 
 // InstallerSpec defines the desired state of IstioInstaller.
+// The spec is a used to define a customization of the default values that are supplied with an Istio charts release.
+// It is grouped at the top level by feature, where behavior of Istio functional areas is specified.
+// Each feature contains components, where k8s resource level defaults can be overridden.
+// Because the spec is a customization API, specifying an empty InstallerSpec results in a default Istio installation.
 message InstallerSpec {
     // Prefix added to all namespaces for any installed component.
     string default_namespace_prefix = 5;
@@ -95,8 +99,8 @@ message SecurityFeatureSpec {
     // Will result in delays starting the pods while secrets are propagated, not recommended for tests.
     google.protobuf.BoolValue control_plane_mtls = 13;
 
-    // Enables MTLS for service to service traffic.
-    google.protobuf.BoolValue data_plane_mtls = 14;
+    // Enables strict MTLS for service to service traffic, or permissive mode MTLS if unset.
+    google.protobuf.BoolValue data_plane_mtls_strict = 14;
 
     CitadelComponentSpec citadel = 20;
     CertManagerComponentSpec cert_manager = 21;
@@ -207,17 +211,9 @@ message KubernetesResourcesSpec {
     // k8s nodeSelector.
     // https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
     map<string, string> node_selector = 7;
-    // k8s ImagePullPolicy setting for all containers.
-    // https://kubernetes.io/docs/concepts/containers/images/#updating-images
-
-    // k8s node affinity.
+    // k8s affinity.
     // https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-    message NodeAffinity {
-        uint32 arch_amd64 = 1;
-        uint32 arch_s390x = 2;
-        uint32 arch_ppc64le = 3;
-    }
-    NodeAffinity node_affinity = 8;
+    k8s.io.api.core.v1.Affinity = 8;
     // k8s imagePullPolicy.
     // https://kubernetes.io/docs/concepts/containers/images/
     string image_pull_policy = 9;
