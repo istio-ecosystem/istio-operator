@@ -7,23 +7,24 @@ import "k8s.io/api/autoscaling/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "github.com/gogo/protobuf/protobuf/google/protobuf/wrappers.proto";
 
-message IstioInstaller {
-    InstallerSpec spec = 3;
-    InstallerStatus status = 4;
+message IstioInstall {
+    InstallSpec spec = 3;
+    InstallStatus status = 4;
 }
 
-// InstallerSpec defines the desired state of IstioInstaller.
+// InstallSpec defines the desired state of IstioInstaller.
 // The spec is a used to define a customization of the default values that are supplied with an Istio charts release.
 // It is grouped at the top level by feature, where behavior of Istio functional areas is specified.
 // Each feature contains components, where k8s resource level defaults can be overridden.
-// Because the spec is a customization API, specifying an empty InstallerSpec results in a default Istio installation.
-message InstallerSpec {
+// Because the spec is a customization API, specifying an empty InstallSpec results in a default Istio installation.
+message InstallSpec {
     // Prefix added to all namespaces for any installed component.
     string default_namespace_prefix = 5;
 
     // Selection and configuration of core Istio features.
     TrafficManagementFeatureSpec traffic_management = 25;
-    PolicyTelemetryFeatureSpec policy_telemetry = 26;
+    PolicyFeatureSpec policy = 26;
+    TelemetryFeatureSpec telemetry = 27;
     SecurityFeatureSpec security = 28;
     ConfigManagementFeatureSpec config_management = 29;
 
@@ -66,8 +67,14 @@ message TrafficManagementFeatureSpec {
     SidecarInjectorComponentSpec sidecar_injector = 32;
 }
 
-// Configuration options for the policy and telemetry feature.
-message PolicyTelemetryFeatureSpec {
+// Configuration options for the policy feature.
+message PolicyFeatureSpec {
+    // Selects whether policy is installed.
+    // Must be enabled to enable any sub-component.
+    google.protobuf.BoolValue enabled = 1;
+    // Namespace that all policy components are installed into.
+    string namespace = 2;
+
     // Default behavior of the sidecar for handling outbound traffic from the application.
     enum OutboundPolicy {
         // Outbound traffic to unknown destinations will be allowed, in case there are no
@@ -84,6 +91,16 @@ message PolicyTelemetryFeatureSpec {
     OutboundPolicy outbound_traffic_policy_mode = 11;
 
     PolicyComponentSpec policy = 50;
+}
+
+// Configuration options for the telemetry feature.
+message TelemetryFeatureSpec {
+    // Selects whether telemetry is installed.
+    // Must be enabled to enable any sub-component.
+    google.protobuf.BoolValue enabled = 1;
+    // Namespace that all telemetry components are installed into.
+    string namespace = 2;
+
     TelemetryComponentSpec telemetry = 51;
 }
 
@@ -109,7 +126,13 @@ message SecurityFeatureSpec {
 
 // Configuration options for configuration management feature.
 message ConfigManagementFeatureSpec {
-    GalleyComponentSpec galley = 1;
+    // Selects whether security feature is installed. Must be set for any sub-component to be installed.
+    google.protobuf.BoolValue enabled = 1;
+
+    // Namespace that security components are installed into.
+    string namespace = 2;
+
+    GalleyComponentSpec galley = 20;
 }
 
 // Configuration options for the pilot component.
@@ -213,7 +236,7 @@ message KubernetesResourcesSpec {
     map<string, string> node_selector = 7;
     // k8s affinity.
     // https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-    k8s.io.api.core.v1.Affinity = 8;
+    k8s.io.api.core.v1.Affinity affinity = 8;
     // k8s imagePullPolicy.
     // https://kubernetes.io/docs/concepts/containers/images/
     string image_pull_policy = 9;
@@ -379,8 +402,8 @@ message k8sObjectOverlay {
     repeated PathValue patches = 4;
 }
 
-// Observed state of IstioInstaller.
-message InstallerStatus {
+// Observed state of IstioInstall.
+message InstallStatus {
     enum Status {
         NONE = 0;
         UPDATING = 1;
@@ -428,10 +451,11 @@ message TestKube {
     k8s.io.api.core.v1.Probe readiness_probe = 81;
     k8s.io.api.autoscaling.v1.HorizontalPodAutoscalerSpec hpa_spec = 86;
     PodDisruptionBudgetSpec pod_disruption_budget = 87;
+    k8s.io.api.core.v1.Affinity affinity = 8;
 
     map<string, string> pod_annotations = 90;
     map<string, string> node_selector = 92;
 
     // Kustomize style overrides for k8s resources in rendered manifests.
-    repeated k8sObjectOverlay k8s_object_override = 100;
+    repeated k8sObjectOverlay overlays = 100;
 }
