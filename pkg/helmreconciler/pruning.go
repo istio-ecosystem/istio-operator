@@ -12,7 +12,7 @@ import (
 
 func (h *HelmReconciler) prune(all bool) error {
 	allErrors := []error{}
-	namespacedResources, nonNamespacedResources := h.customizer.Markings().GetResourceTypes()
+	namespacedResources, nonNamespacedResources := h.customizer.PruningDetails().GetResourceTypes()
 	targetNamespace := h.customizer.Input().GetTargetNamespace()
 	err := h.pruneResources(namespacedResources, all, targetNamespace)
 	if err != nil {
@@ -27,8 +27,8 @@ func (h *HelmReconciler) prune(all bool) error {
 
 func (h *HelmReconciler) pruneResources(gvks []schema.GroupVersionKind, all bool, namespace string) error {
 	allErrors := []error{}
-	ownerLabels := h.customizer.Markings().GetOwnerLabels()
-	ownerAnnotations := h.customizer.Markings().GetOwnerAnnotations()
+	ownerLabels := h.customizer.PruningDetails().GetOwnerLabels()
+	ownerAnnotations := h.customizer.PruningDetails().GetOwnerAnnotations()
 	for _, gvk := range gvks {
 		objects := &unstructured.UnstructuredList{}
 		objects.SetGroupVersionKind(gvk)

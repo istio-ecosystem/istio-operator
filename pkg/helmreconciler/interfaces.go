@@ -9,9 +9,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// RenderingCustomizer encompasses all the customization details for a specific rendering invocation.
 type RenderingCustomizer interface {
+	// Input returns the RenderingInput that should be used to rendering the charts.
 	Input() RenderingInput
-	Markings() ResourceMarkings
+	// PruningDetails returns the details required to support pruning of obsolete resources.
+	PruningDetails() PruningDetails
+	// Listener returns the RenderingListener that should handle the rendering callbacks.
 	Listener() RenderingListener
 }
 
@@ -20,8 +24,9 @@ type RenderingCustomizerFactory interface {
 	NewCustomizer(obj runtime.Object) (RenderingCustomizer, error)
 }
 
-// ResourceMarkings define the labels and annotations used to mark resources managed by the operator.
-type ResourceMarkings interface {
+// PruningDetails define the labels and annotations used to mark resources managed by the operator, as well as the
+// resource types managed by the operator.
+type PruningDetails interface {
 	// GetOwnerLabels returns the labels applied to all resources managed by the operator.
 	// These are used as label selectors when selecting resources managed by the operator (e.g. as part of pruning
 	// operations).  A typical example might be:
@@ -92,9 +97,9 @@ type RenderingListener interface {
 	ResourceCreated(created runtime.Object) error
 	// ResourceUpdated occurs after a resource has been updated.  This method is similar to ResourceCreated, but applies
 	// to client.Update().
-	// new represents the new state of the object
-	// existing represents the existing state of the object
-	ResourceUpdated(new, existing runtime.Object) error
+	// updated represents the new state of the object
+	// old represents the existing state of the object
+	ResourceUpdated(updated, old runtime.Object) error
 	// ResourceError occurs after a create/update/delete operation fails.
 	// obj is the object on which the error occurred.
 	// err is the error returned from the api server.

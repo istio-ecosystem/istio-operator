@@ -20,8 +20,8 @@ func (f *IstioRenderingCustomizerFactory) NewCustomizer(instance runtime.Object)
 		return nil, fmt.Errorf("object is not an IstioControlPlane resource")
 	}
 	return &helmreconciler.SimpleRenderingCustomizer{
-		InputValue:    NewIstioRenderingInput(istioControlPlane),
-		MarkingsValue: NewIstioResourceMarkings(istioControlPlane),
-		ListenerValue: NewIstioRenderingListener(istioControlPlane),
+		InputValue:          NewIstioRenderingInput(istioControlPlane),
+		PruningDetailsValue: NewIstioPruningDetails(istioControlPlane),
+		ListenerValue:       NewIstioRenderingListener(istioControlPlane),
 	}, nil
 }

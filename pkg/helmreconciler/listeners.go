@@ -401,27 +401,27 @@ func (l *DefaultRenderingListener) EndReconcile(instance runtime.Object, err err
 	return nil
 }
 
-// NewMarkingsDecorator creates a new RenderingListener that applies ResourceMarkings to
+// NewPruningMarkingsDecorator creates a new RenderingListener that applies PruningDetails to
 // rendered resources.
-// markings are the ResourceMarkings (owner labels and owner annotations) to be applied to the resources
-func NewMarkingsDecorator(markings ResourceMarkings) RenderingListener {
-	return &markingsDecorator{DefaultRenderingListener: &DefaultRenderingListener{}}
+// pruneDetails are the PruningDetails (owner labels and owner annotations) to be applied to the resources
+func NewPruningMarkingsDecorator(pruneDetails PruningDetails) RenderingListener {
+	return &pruningMarkingsDecorator{DefaultRenderingListener: &DefaultRenderingListener{}}
 }
 
-type markingsDecorator struct {
+type pruningMarkingsDecorator struct {
 	*DefaultRenderingListener
-	markings ResourceMarkings
+	pruningDetails PruningDetails
 }
 
 // BeginResource applies owner labels and annotations to the object
-func (d *markingsDecorator) BeginResource(obj runtime.Object) (runtime.Object, error) {
-	for key, value := range d.markings.GetOwnerLabels() {
+func (d *pruningMarkingsDecorator) BeginResource(obj runtime.Object) (runtime.Object, error) {
+	for key, value := range d.pruningDetails.GetOwnerLabels() {
 		err := common.SetLabel(obj, key, value)
 		if err != nil {
 			return obj, err
 		}
 	}
-	for key, value := range d.markings.GetOwnerAnnotations() {
+	for key, value := range d.pruningDetails.GetOwnerAnnotations() {
 		err := common.SetAnnotation(obj, key, value)
 		if err != nil {
 			return obj, err

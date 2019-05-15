@@ -47,7 +47,7 @@ func (f *Factory) New(instance runtime.Object, client client.Client, logger logr
 }
 
 // wrapCustomizer creates a new internalCustomizer object wrapping the delegate, by inject a LoggingRenderingListener,
-// an OwnerReferenceDecorator, and a MarkingsDecorator into a CompositeRenderingListener that includes the listener
+// an OwnerReferenceDecorator, and a PruningDetailsDecorator into a CompositeRenderingListener that includes the listener
 // from the delegate.  This ensures the HelmReconciler can properly implement pruning, etc.
 // instance is the custom resource to be processed by the HelmReconciler
 // delegate is the delegate
@@ -57,13 +57,13 @@ func wrapCustomizer(instance runtime.Object, delegate RenderingCustomizer) (*Sim
 		return nil, err
 	}
 	return &SimpleRenderingCustomizer{
-		InputValue:    delegate.Input(),
-		MarkingsValue: delegate.Markings(),
+		InputValue:          delegate.Input(),
+		PruningDetailsValue: delegate.PruningDetails(),
 		ListenerValue: &CompositeRenderingListener{
 			Listeners: []RenderingListener{
 				&LoggingRenderingListener{Level: 1},
 				ownerReferenceDecorator,
-				NewMarkingsDecorator(delegate.Markings()),
+				NewPruningMarkingsDecorator(delegate.PruningDetails()),
 				delegate.Listener(),
 			},
 		},

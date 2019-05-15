@@ -74,12 +74,12 @@ var (
 	}
 )
 
-// NewResourceMarkings creates a new ResourceMarkings object specific to the instance.
-func NewIstioResourceMarkings(instance *v1alpha1.IstioControlPlane) helmreconciler.ResourceMarkings {
+// NewPruningDetails creates a new PruningDetails object specific to the instance.
+func NewIstioPruningDetails(instance *v1alpha1.IstioControlPlane) helmreconciler.PruningDetails {
 	gvk := instance.GetObjectKind().GroupVersionKind()
 	name := instance.GetName()
 	generation := strconv.FormatInt(instance.GetGeneration(), 10)
-	return &helmreconciler.SimpleResourceMarkings{
+	return &helmreconciler.SimplePruningDetails{
 		OwnerLabels: map[string]string{
 			OwnerNameKey:  name,
 			OwnerGroupKey: gvk.Group,

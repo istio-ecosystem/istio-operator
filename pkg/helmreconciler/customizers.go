@@ -12,8 +12,8 @@ import (
 type SimpleRenderingCustomizer struct {
 	// InputValue represents the RenderingInput for this customizer
 	InputValue RenderingInput
-	// MarkingsValue represents the ResourceMarkings for this customizer
-	MarkingsValue ResourceMarkings
+	// PruningDetailsValue represents the PruningDetails for this customizer
+	PruningDetailsValue PruningDetails
 	// ListenerValue represents the RenderingListener for this customizer
 	ListenerValue RenderingListener
 }
@@ -25,8 +25,8 @@ func (c *SimpleRenderingCustomizer) Input() RenderingInput {
 	return c.InputValue
 }
 
-func (c *SimpleRenderingCustomizer) Markings() ResourceMarkings {
-	return c.MarkingsValue
+func (c *SimpleRenderingCustomizer) PruningDetails() PruningDetails {
+	return c.PruningDetailsValue
 }
 
 func (c *SimpleRenderingCustomizer) Listener() RenderingListener {
@@ -37,7 +37,7 @@ func (c *SimpleRenderingCustomizer) RegisterReconciler(reconciler *HelmReconcile
 	if registrar, ok := c.InputValue.(ReconcilerListener); ok {
 		registrar.RegisterReconciler(reconciler)
 	}
-	if registrar, ok := c.MarkingsValue.(ReconcilerListener); ok {
+	if registrar, ok := c.PruningDetailsValue.(ReconcilerListener); ok {
 		registrar.RegisterReconciler(reconciler)
 	}
 	if registrar, ok := c.ListenerValue.(ReconcilerListener); ok {
@@ -45,9 +45,9 @@ func (c *SimpleRenderingCustomizer) RegisterReconciler(reconciler *HelmReconcile
 	}
 }
 
-// SimpleResourceMarkings is a helper to implement ResourceMarkings from a known set of labels,
+// SimplePruningDetails is a helper to implement PruningDetails from a known set of labels,
 // annotations, and resource types.
-type SimpleResourceMarkings struct {
+type SimplePruningDetails struct {
 	// OwnerLabels to be added to all rendered resources.
 	OwnerLabels map[string]string
 	// OwnerAnnotations to be added to all rendered resources.
@@ -58,10 +58,10 @@ type SimpleResourceMarkings struct {
 	NonNamespacedResources []schema.GroupVersionKind
 }
 
-var _ ResourceMarkings = &SimpleResourceMarkings{}
+var _ PruningDetails = &SimplePruningDetails{}
 
 // GetOwnerLabels returns this.OwnerLabels
-func (m *SimpleResourceMarkings) GetOwnerLabels() map[string]string {
+func (m *SimplePruningDetails) GetOwnerLabels() map[string]string {
 	if m.OwnerLabels == nil {
 		return map[string]string{}
 	}
@@ -69,7 +69,7 @@ func (m *SimpleResourceMarkings) GetOwnerLabels() map[string]string {
 }
 
 // GetOwnerAnnotations returns this.OwnerAnnotations
-func (m *SimpleResourceMarkings) GetOwnerAnnotations() map[string]string {
+func (m *SimplePruningDetails) GetOwnerAnnotations() map[string]string {
 	if m.OwnerAnnotations == nil {
 		return map[string]string{}
 	}
@@ -77,7 +77,7 @@ func (m *SimpleResourceMarkings) GetOwnerAnnotations() map[string]string {
 }
 
 // GetResourceTypes returns this.NamespacedResources and this.NonNamespacedResources
-func (m *SimpleResourceMarkings) GetResourceTypes() (namespaced []schema.GroupVersionKind, nonNamespaced []schema.GroupVersionKind) {
+func (m *SimplePruningDetails) GetResourceTypes() (namespaced []schema.GroupVersionKind, nonNamespaced []schema.GroupVersionKind) {
 	return m.NamespacedResources, m.NonNamespacedResources
 }
 
