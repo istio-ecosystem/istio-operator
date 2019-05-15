@@ -7,6 +7,123 @@ import "k8s.io/api/autoscaling/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "github.com/gogo/protobuf/protobuf/google/protobuf/wrappers.proto";
 
+/*
+IstioInstall is a schema for both defining and overlaying Istio control plane installations.
+The Istio operator uses a compiled-in InstallSpec as default installation values, along with compiled-in install charts.
+Running the operator with an empty user defined InstallSpec results in an installation with default values, using the
+default charts.
+
+The simplest install specialization is to point the user InstallSpec baseValuesPath to a different values file, for
+example an Istio auth installation, which will use the values associated with the auth installation profile for Istio.
+
+Further specialization are possible at three levels:
+
+1. New APIs defined in this file
+
+Feature API: this API groups an Istio install by features and allows enabling/disabling the features, as well as some
+additional high level settings that are feature specific. Each feature contains one or more components, which
+correspond to Istio components in the cluster.
+
+k8s API: this API is a pass through to k8s resource settings for Istio k8s resources. It allows customizing Istio k8s
+resources like Affinity, Resource requests/limits, PodDisruptionBudgetSpec, Selectors etc. in a more consistent and
+k8s specific way compared to values.yaml. See KubernetesResourcesSpec in this file for details.
+
+2. values.yaml
+
+The entirety of values.yaml settings is accessible through InstallSpec. They are included for backward compatibility,
+but also because many of the values will be moved to configuration CRs that are consumed directly by Istio components
+rather than being install time parameters. The only remaining fields will be k8s resource settings which will be
+replaced by the new API above.
+
+Values.yaml profiles are also embedded in the operator, wrapped inside InstallSpecs CommonComponentSpec/ValueOverrides
+field.
+
+3. k8s resource overlays
+
+Once a manifest is rendered from InstallSpec, a further specialization can be applied by specifying k8s resource
+overlays. The concept is similar to kustomize, where JSON patches are applied for object paths. This allows
+customization at the lowest level and eliminates the need to create ad-hoc template parameters.
+
+EXAMPLES
+
+1. Default Istio install
+
+spec: ~
+
+2. Default remote profile install
+
+spec:
+  baseSpecPath: istio-remote.yaml
+
+3. Default install with telemetry disabled
+
+spec:
+  telemetry:
+    enabled: false
+
+4. Default install with each feature installed to different namespace and security components in separate namespaces
+
+spec:
+  traffic_management:
+    namespace: istio-traffic-management
+  policy:
+    namespace: istio-policy
+  telemetry:
+    namespace: istio-telemetry
+  config_management:
+    namespace: istio-config-management
+  security:
+    citadel:
+      namespace: istio-citadel
+    cert_manager:
+      namespace: istio-cert-manager
+    node_agent:
+      namespace: istio-node-agent
+
+5. Default install with specialized k8s settings for pilot
+
+spec:
+  traffic_management:
+    pilot:
+        k8s:
+          resources:
+            limits:
+              cpu: 444m
+              memory: 333Mi
+            requests:
+              cpu: 222m
+              memory: 111Mi
+          readinessProbe:
+            failureThreshold: 44
+            initialDelaySeconds: 11
+            periodSeconds: 22
+            successThreshold: 33
+
+6. Default install with values.yaml customizations for proxy
+
+spec:
+  traffic_management:
+    proxy:
+      valuesOverrides:
+      - global.proxy.enableCoreDump: true
+      - global.proxy.dnsRefreshRate: 10s
+
+7. Default install with modification to container flag in galley
+
+spec:
+  configuration_management:
+    galley:
+      k8s:
+        overlays:
+        - apiVersion: extensions/v1beta1
+          kind: Deployment
+          name: istio-galley
+          patches:
+          - path: spec.template.spec.containers.[name:galley].command.[--livenessProbeInterval]
+            value: --livenessProbeInterval=123s
+*/
+
+
 message IstioInstall {
     InstallSpec spec = 3;
     InstallStatus status = 4;
@@ -39,18 +156,23 @@ message InstallSpec {
     // Global k8s defaults. Can be overridden per component.
     KubernetesResourcesSpec k8s_defaults = 80;
 
+    // URL for the base spec. e.g.
+    //   istio-auth.yaml (looks in default dir)
+    //   file://var/istio/install/values/custom/custom-install.yaml
+    // Uses compiled in default install spec by default.
+    string base_spec_path = 100;
     // URL for the install package. e.g.
     //   http://github.com/istio/istio/releases/install/1.1.2
     //   http://github.com/istio/istio/releases/install/lts
     //   file://tmp/istio-installer/nightly
     // Uses compiled in install package by default.
-    string custom_package_path = 100;
+    string custom_package_path = 102;
     // Root for docker image paths e.g. docker.io/istio-release.
     // Releases are published to docker hub under 'istio' project.
     // Daily builds from prow are on gcr.io, and nightly builds from circle on docker.io/istionightly
-    string hub = 101;
+    string hub = 103;
     // Version tag for docker images e.g. 1.0.6
-    string tag = 102;
+    string tag = 104;
 }
 
 // Configuration options for traffic management.
@@ -168,6 +290,7 @@ message TelemetryComponentSpec {
 // Configuration options for Citadel component.
 message CitadelComponentSpec {
     CommonComponentSpec common = 1;
+
     bool self_signed = 11;
     bool create_mesh_policy = 12;
 }
@@ -191,7 +314,7 @@ message GalleyComponentSpec {
 message CommonComponentSpec {
     // Selects whether this component is installed.
     google.protobuf.BoolValue enabled = 1;
-    // Namespace that all resources for this component are installed into.
+    // Namespace that all resources for this component are installed into. Override for parent feature namespace.
     string namespace = 2;
     // LogLevel sets the component log level. Mappings to underlying log levels are not necessarily 1:1 and depend on
     // component support of these levels e.g. DEBUG or INFO may result in the same log verbosity.
@@ -292,6 +415,7 @@ message LoadBalancingGatewayConfig {
 // Common config for all gateway types.
 message GatewayConfig {
     CommonComponentSpec common = 1;
+    string namespace = 3;
 
     // NodePort, ClusterIP or LoadBalancer.
     string type = 10;
