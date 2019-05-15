@@ -15,7 +15,6 @@
 package main
 
 import (
-	"istio.io/operator/pkg/controller/istiocontrolplane"
 	"context"
 	"fmt"
 	"os"

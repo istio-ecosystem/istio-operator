@@ -20,16 +20,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func (h *HelmReconciler) renderCharts(input RenderingInput) (map[string][]manifest.Manifest, error) {
+func (h *HelmReconciler) renderCharts(input RenderingInput) (ChartManifestsMap, error) {
 	rawVals, err := yaml.Marshal(input.GetValues())
 	if err != nil {
-		return map[string][]manifest.Manifest{}, err
+		return ChartManifestsMap{}, err
 	}
 	config := &chart.Config{Raw: string(rawVals), Values: map[string]*chart.Value{}}
 
 	c, err := chartutil.Load(input.GetChartPath())
 	if err != nil {
-		return map[string][]manifest.Manifest{}, err
+		return ChartManifestsMap{}, err
 	}
 
 	renderOpts := renderutil.Options{
@@ -46,7 +46,7 @@ func (h *HelmReconciler) renderCharts(input RenderingInput) (map[string][]manife
 	}
 	renderedTemplates, err := renderutil.Render(c, config, renderOpts)
 	if err != nil {
-		return map[string][]manifest.Manifest{}, err
+		return ChartManifestsMap{}, err
 	}
 
 	return collectManifestsByChart(manifest.SplitManifests(renderedTemplates)), err
@@ -54,8 +54,8 @@ func (h *HelmReconciler) renderCharts(input RenderingInput) (map[string][]manife
 
 // collectManifestsByChart returns a map of chart->[]manifest.  names for subcharts
 // will be of the form <root-name>/charts/<subchart-name>, e.g. istio/charts/galley
-func collectManifestsByChart(manifests []manifest.Manifest) map[string][]manifest.Manifest {
-	manifestsByChart := make(map[string][]manifest.Manifest)
+func collectManifestsByChart(manifests []manifest.Manifest) ChartManifestsMap {
+	manifestsByChart := make(ChartManifestsMap)
 	for _, chartManifest := range manifests {
 		pathSegments := strings.Split(chartManifest.Name, "/")
 		chartName := pathSegments[0]
@@ -130,7 +130,7 @@ func (h *HelmReconciler) processObject(obj *unstructured.Unstructured) error {
 		return utilerrors.NewAggregate(allErrors)
 	}
 
-	mutatedObj, err := h.customizer.BeginResource(obj)
+	mutatedObj, err := h.customizer.Listener().BeginResource(obj)
 	if err != nil {
 		h.logger.Error(err, "error preprocessing object")
 		return err
@@ -154,11 +154,11 @@ func (h *HelmReconciler) processObject(obj *unstructured.Unstructured) error {
 			err = h.client.Create(context.TODO(), mutatedObj)
 			if err == nil {
 				// special handling
-				if err = h.customizer.ResourceCreated(mutatedObj); err != nil {
+				if err = h.customizer.Listener().ResourceCreated(mutatedObj); err != nil {
 					h.logger.Error(err, "unexpected error occurred during postprocessing of new resource")
 				}
 			} else {
-				listenerErr := h.customizer.ResourceError(mutatedObj, err)
+				listenerErr := h.customizer.Listener().ResourceError(mutatedObj, err)
 				if listenerErr != nil {
 					h.logger.Error(listenerErr, "unexpected error occurred invoking ResourceError on listener")
 				}
@@ -168,11 +168,11 @@ func (h *HelmReconciler) processObject(obj *unstructured.Unstructured) error {
 		h.logger.Info("updating existing resource")
 		mutatedObj, err = patch.Apply()
 		if err == nil {
-			if err = h.customizer.ResourceUpdated(mutatedObj, receiver); err != nil {
+			if err = h.customizer.Listener().ResourceUpdated(mutatedObj, receiver); err != nil {
 				h.logger.Error(err, "unexpected error occurred during postprocessing of updated resource")
 			}
 		} else {
-			listenerErr := h.customizer.ResourceError(mutatedObj, err)
+			listenerErr := h.customizer.Listener().ResourceError(mutatedObj, err)
 			if listenerErr != nil {
 				h.logger.Error(listenerErr, "unexpected error occurred invoking ResourceError on listener")
 			}

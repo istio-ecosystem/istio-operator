@@ -1,7 +1,6 @@
 package helmreconciler
 
 import (
-	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/helm/pkg/manifest"
@@ -9,66 +8,42 @@ import (
 	"istio.io/operator/pkg/controller/common"
 )
 
-// Customizer encapsulates all customization applied during rendering, including input, markings, and listeners.
-type Customizer struct {
-	input    RenderingInput
-	markings ResourceMarkings
-	listener RenderingListener
+// SimpleRenderingCustomizer provides the basics needed for a RenderingCustomizer composed of static instances.
+type SimpleRenderingCustomizer struct {
+	// InputValue represents the RenderingInput for this customizer
+	InputValue RenderingInput
+	// MarkingsValue represents the ResourceMarkings for this customizer
+	MarkingsValue ResourceMarkings
+	// ListenerValue represents the RenderingListener for this customizer
+	ListenerValue RenderingListener
 }
 
-// CustomizerFactory creates Customizer objects using the specified factories.
-type CustomizerFactory struct {
-	// Logger is...
-	Logger logr.Logger
-	// InputFactory is the factory used to create RenderingInput for the custom resource
-	InputFactory RenderingInputFactory
-	// MarkingsFactory is the factory used to create ResourceMarkings for the custom resource
-	MarkingsFactory ResourceMarkingsFactory
-	// ListenerFactory is the factory used to create RenderingListener for the custom resource
-	ListenerFactory RenderingListenerFactory
+var _ RenderingCustomizer = &SimpleRenderingCustomizer{}
+var _ ReconcilerListener = &SimpleRenderingCustomizer{}
+
+func (c *SimpleRenderingCustomizer) Input() RenderingInput {
+	return c.InputValue
 }
 
-var _ RenderingInput = &Customizer{}
-var _ ResourceMarkings = &Customizer{}
-var _ RenderingListener = &Customizer{}
-
-// NewCustomizer creates a new Customizer object for the specified custom resource.  Effectively, this delegates
-// to the factories on this object.  That said, it will inject a LoggingRenderingListener, an OwnerReferenceDecorator,
-// and a MarkingsDecorator into a CompositeRenderingListener that includes the listener created by the
-// RenderingListenerFactory.  This ensures the HelmReconciler can properly implement pruning, etc.
-// instance is the custom resource to be processed by the HelmReconciler
-func (f *CustomizerFactory) NewCustomizer(instance runtime.Object) (*Customizer, error) {
-	input, err := f.InputFactory.NewRenderingInput(instance)
-	if err != nil {
-		return nil, err
-	}
-	markings, err := f.MarkingsFactory.NewResourceMarkings(instance)
-	if err != nil {
-		return nil, err
-	}
-	listener, err := f.ListenerFactory.NewRenderingListener(instance)
-	if err != nil {
-		return nil, err
-	}
-	ownerReferenceDecorator, err := NewOwnerReferenceDecorator(instance)
-	if err != nil {
-		return nil, err
-	}
-	return &Customizer{
-		input:    input,
-		markings: markings,
-		listener: &CompositeRenderingListener{
-			Listeners: []RenderingListener{
-				&LoggingRenderingListener{Level: 1},
-				ownerReferenceDecorator,
-				NewMarkingsDecorator(markings),
-				listener,
-			},
-		},
-	}, nil
+func (c *SimpleRenderingCustomizer) Markings() ResourceMarkings {
+	return c.MarkingsValue
 }
 
-// Helpers
+func (c *SimpleRenderingCustomizer) Listener() RenderingListener {
+	return c.ListenerValue
+}
+
+func (c *SimpleRenderingCustomizer) RegisterReconciler(reconciler *HelmReconciler) {
+	if registrar, ok := c.InputValue.(ReconcilerListener); ok {
+		registrar.RegisterReconciler(reconciler)
+	}
+	if registrar, ok := c.MarkingsValue.(ReconcilerListener); ok {
+		registrar.RegisterReconciler(reconciler)
+	}
+	if registrar, ok := c.ListenerValue.(ReconcilerListener); ok {
+		registrar.RegisterReconciler(reconciler)
+	}
+}
 
 // SimpleResourceMarkings is a helper to implement ResourceMarkings from a known set of labels,
 // annotations, and resource types.
@@ -104,130 +79,6 @@ func (m *SimpleResourceMarkings) GetOwnerAnnotations() map[string]string {
 // GetResourceTypes returns this.NamespacedResources and this.NonNamespacedResources
 func (m *SimpleResourceMarkings) GetResourceTypes() (namespaced []schema.GroupVersionKind, nonNamespaced []schema.GroupVersionKind) {
 	return m.NamespacedResources, m.NonNamespacedResources
-}
-
-// RegisterReconciler registers the HelmReconciler with the RenderingListener
-func (c *Customizer) RegisterReconciler(reconciler *HelmReconciler) {
-	if reconcilerListener, ok := c.listener.(ReconcilerListener); ok {
-		reconcilerListener.RegisterReconciler(reconciler)
-	}
-}
-
-//
-// RenderingInput
-//
-
-// GetChartPath simply delegates to input.GetChartPath
-func (c *Customizer) GetChartPath() string {
-	return c.input.GetChartPath()
-}
-
-// GetValues simply delegates to input.GetValues
-func (c *Customizer) GetValues() map[string]interface{} {
-	return c.input.GetValues()
-}
-
-// GetTargetNamespace simply delegates to input.GetTargetNamespace
-func (c *Customizer) GetTargetNamespace() string {
-	return c.input.GetTargetNamespace()
-}
-
-// GetProcessingOrder simply delegates to input.GetProcessingOrder
-func (c *Customizer) GetProcessingOrder(manifests map[string][]manifest.Manifest) ([]string, error) {
-	return c.input.GetProcessingOrder(manifests)
-}
-
-//
-// ResourceMarkings
-//
-
-// GetOwnerLabels simply delegates to markings.GetOwnerLabels
-func (c *Customizer) GetOwnerLabels() map[string]string {
-	return c.markings.GetOwnerLabels()
-}
-
-// GetOwnerAnnotations simply delegates to markings.GetOwnerAnnotations
-func (c *Customizer) GetOwnerAnnotations() map[string]string {
-	return c.markings.GetOwnerAnnotations()
-}
-
-// GetResourceTypes simply delegates to markings.GetResourceTypes
-func (c *Customizer) GetResourceTypes() (namespaced []schema.GroupVersionKind, nonNamespaced []schema.GroupVersionKind) {
-	return c.markings.GetResourceTypes()
-}
-
-//
-// RenderingListener
-//
-
-// BeginReconcile simply delegates to listener.BeginReconcile
-func (c *Customizer) BeginReconcile(instance runtime.Object) error {
-	return c.listener.BeginReconcile(instance)
-}
-
-// BeginDelete simply delegates to listener.BeginDelete
-func (c *Customizer) BeginDelete(instance runtime.Object) error {
-	return c.listener.BeginDelete(instance)
-}
-
-// BeginChart simply delegates to listener.BeginChart
-func (c *Customizer) BeginChart(chart string, manifests []manifest.Manifest) ([]manifest.Manifest, error) {
-	return c.listener.BeginChart(chart, manifests)
-}
-
-// BeginResource simply delegates to listener.BeginResource
-func (c *Customizer) BeginResource(obj runtime.Object) (runtime.Object, error) {
-	return c.listener.BeginResource(obj)
-}
-
-// ResourceCreated simply delegates to listener.ResourceCreated
-func (c *Customizer) ResourceCreated(created runtime.Object) error {
-	return c.listener.ResourceCreated(created)
-}
-
-// ResourceUpdated simply delegates to listener.ResourceUpdated
-func (c *Customizer) ResourceUpdated(updated runtime.Object, old runtime.Object) error {
-	return c.listener.ResourceUpdated(updated, old)
-}
-
-// ResourceDeleted simply delegates to listener.ResourceDeleted
-func (c *Customizer) ResourceDeleted(deleted runtime.Object) error {
-	return c.listener.ResourceDeleted(deleted)
-}
-
-// ResourceError simply delegates to listener.ResourceError
-func (c *Customizer) ResourceError(obj runtime.Object, err error) error {
-	return c.listener.ResourceError(obj, err)
-}
-
-// EndResource simply delegates to listener.EndResource
-func (c *Customizer) EndResource(obj runtime.Object) error {
-	return c.listener.EndResource(obj)
-}
-
-// EndChart simply delegates to listener.EndChart
-func (c *Customizer) EndChart(chart string) error {
-	return c.listener.EndChart(chart)
-}
-
-// BeginPrune simply delegates to listener.BeginPrune
-func (c *Customizer) BeginPrune(all bool) error {
-	return c.listener.BeginPrune(all)
-}
-
-// EndPrune simply delegates to listener.EndPrune
-func (c *Customizer) EndPrune() error {
-	return c.listener.EndPrune()
-}
-
-// EndDelete simply delegates to listener.EndDelete
-func (c *Customizer) EndDelete(instance runtime.Object, err error) error {
-	return c.listener.EndDelete(instance, err)
-}
-
-// EndReconcile simply delegates to listener.EndReconcile
-func (c *Customizer) EndReconcile(instance runtime.Object, err error) error {
-	return c.listener.EndReconcile(instance, err)
 }
 
 // DefaultChartCustomizerFactory is a factory for creating DefaultChartCustomizer objects
@@ -406,10 +257,11 @@ func (c *DefaultChartCustomizer) BeginChart(chart string, manifests []manifest.M
 
 // BeginResource adds the chart annotation to the resource (ChartAnnotationKey=ChartName)
 func (c *DefaultChartCustomizer) BeginResource(obj runtime.Object) (runtime.Object, error) {
+	var err error
 	if len(c.ChartName) > 0 && len(c.ChartAnnotationKey) > 0 {
-		common.SetAnnotation(obj, c.ChartAnnotationKey, c.ChartName)
+		err = common.SetAnnotation(obj, c.ChartAnnotationKey, c.ChartName)
 	}
-	return obj, nil
+	return obj, err
 }
 
 // ResourceCreated adds the created object to NewResourcesByKind

@@ -12,8 +12,8 @@ import (
 
 func (h *HelmReconciler) prune(all bool) error {
 	allErrors := []error{}
-	namespacedResources, nonNamespacedResources := h.customizer.GetResourceTypes()
-	targetNamespace := h.customizer.GetTargetNamespace()
+	namespacedResources, nonNamespacedResources := h.customizer.Markings().GetResourceTypes()
+	targetNamespace := h.customizer.Input().GetTargetNamespace()
 	err := h.pruneResources(namespacedResources, all, targetNamespace)
 	if err != nil {
 		allErrors = append(allErrors, err)
@@ -27,8 +27,8 @@ func (h *HelmReconciler) prune(all bool) error {
 
 func (h *HelmReconciler) pruneResources(gvks []schema.GroupVersionKind, all bool, namespace string) error {
 	allErrors := []error{}
-	ownerLabels := h.customizer.GetOwnerLabels()
-	ownerAnnotations := h.customizer.GetOwnerAnnotations()
+	ownerLabels := h.customizer.Markings().GetOwnerLabels()
+	ownerAnnotations := h.customizer.Markings().GetOwnerAnnotations()
 	for _, gvk := range gvks {
 		objects := &unstructured.UnstructuredList{}
 		objects.SetGroupVersionKind(gvk)
@@ -50,11 +50,11 @@ func (h *HelmReconciler) pruneResources(gvks []schema.GroupVersionKind, all bool
 			}
 			err = h.client.Delete(context.TODO(), &object, client.PropagationPolicy(metav1.DeletePropagationBackground))
 			if err == nil {
-				if listenerErr := h.customizer.ResourceDeleted(&object); listenerErr != nil {
+				if listenerErr := h.customizer.Listener().ResourceDeleted(&object); listenerErr != nil {
 					h.logger.Error(err, "error calling listener")
 				}
 			} else {
-				if listenerErr := h.customizer.ResourceError(&object, err); listenerErr != nil {
+				if listenerErr := h.customizer.Listener().ResourceError(&object, err); listenerErr != nil {
 					h.logger.Error(err, "error calling listener")
 				}
 				allErrors = append(allErrors, err)

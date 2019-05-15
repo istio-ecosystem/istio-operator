@@ -416,10 +416,16 @@ type markingsDecorator struct {
 // BeginResource applies owner labels and annotations to the object
 func (d *markingsDecorator) BeginResource(obj runtime.Object) (runtime.Object, error) {
 	for key, value := range d.markings.GetOwnerLabels() {
-		common.SetLabel(obj, key, value)
+		err := common.SetLabel(obj, key, value)
+		if err != nil {
+			return obj, err
+		}
 	}
 	for key, value := range d.markings.GetOwnerAnnotations() {
-		common.SetAnnotation(obj, key, value)
+		err := common.SetAnnotation(obj, key, value)
+		if err != nil {
+			return obj, err
+		}
 	}
 	return obj, nil
 }

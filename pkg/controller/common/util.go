@@ -15,13 +15,10 @@ func IndexOf(l []string, s string) int {
 	return -1
 }
 
-var accessor = meta.NewAccessor()
-
 // HasLabel is a helper function returning true if the specified object contains the specified label.
 func HasLabel(resource runtime.Object, label string) bool {
-	labels, err := accessor.Labels(resource)
+	labels, err := meta.NewAccessor().Labels(resource)
 	if err != nil {
-		// XXX: panic?
 		return false
 	}
 	if labels == nil {
@@ -33,37 +30,34 @@ func HasLabel(resource runtime.Object, label string) bool {
 
 // DeleteLabel is a helper function which deletes the specified label from the specified object.
 func DeleteLabel(resource runtime.Object, label string) {
-	labels, err := accessor.Labels(resource)
+	labels, err := meta.NewAccessor().Labels(resource)
 	if err != nil {
-		// XXX: panic?
 		return
 	}
 	if labels == nil {
 		return
 	}
 	delete(labels, label)
-	_ = accessor.SetLabels(resource, labels)
+	_ = meta.NewAccessor().SetLabels(resource, labels)
 }
 
 // SetLabel is a helper function which sets the specified label and value on the specified object.
-func SetLabel(resource runtime.Object, label, value string) {
-	labels, err := accessor.Labels(resource)
+func SetLabel(resource runtime.Object, label, value string) error {
+	labels, err := meta.NewAccessor().Labels(resource)
 	if err != nil {
-		// XXX: panic?
-		return
+		return err
 	}
 	if labels == nil {
 		labels = map[string]string{}
 	}
 	labels[label] = value
-	_ = accessor.SetLabels(resource, labels)
+	return meta.NewAccessor().SetLabels(resource, labels)
 }
 
 // HasAnnotation is a helper function returning true if the specified object contains the specified annotation.
 func HasAnnotation(resource runtime.Object, annotation string) bool {
-	annotations, err := accessor.Annotations(resource)
+	annotations, err := meta.NewAccessor().Annotations(resource)
 	if err != nil {
-		// XXX: panic?
 		return false
 	}
 	if annotations == nil {
@@ -75,24 +69,22 @@ func HasAnnotation(resource runtime.Object, annotation string) bool {
 
 // DeleteAnnotation is a helper function which deletes the specified annotation from the specified object.
 func DeleteAnnotation(resource runtime.Object, annotation string) {
-	annotations, err := accessor.Annotations(resource)
+	annotations, err := meta.NewAccessor().Annotations(resource)
 	if err != nil {
-		// XXX: panic?
 		return
 	}
 	if annotations == nil {
 		return
 	}
 	delete(annotations, annotation)
-	_ = accessor.SetAnnotations(resource, annotations)
+	_ = meta.NewAccessor().SetAnnotations(resource, annotations)
 }
 
 // GetAnnotation is a helper function which returns the value of the specified annotation on the specified object.
 // returns ok=false if the annotation was not found on the object.
 func GetAnnotation(resource runtime.Object, annotation string) (value string, ok bool) {
-	annotations, err := accessor.Annotations(resource)
+	annotations, err := meta.NewAccessor().Annotations(resource)
 	if err != nil {
-		// XXX: panic?
 		return
 	}
 	if annotations == nil {
@@ -103,15 +95,14 @@ func GetAnnotation(resource runtime.Object, annotation string) (value string, ok
 }
 
 // SetAnnotation is a helper function which sets the specified annotation and value on the specified object.
-func SetAnnotation(resource runtime.Object, annotation, value string) {
-	annotations, err := accessor.Annotations(resource)
+func SetAnnotation(resource runtime.Object, annotation, value string) error {
+	annotations, err := meta.NewAccessor().Annotations(resource)
 	if err != nil {
-		// XXX: panic?
-		return
+		return err
 	}
 	if annotations == nil {
 		annotations = map[string]string{}
 	}
 	annotations[annotation] = value
-	_ = accessor.SetAnnotations(resource, annotations)
+	return meta.NewAccessor().SetAnnotations(resource, annotations)
 }

@@ -9,10 +9,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// ResourceMarkingsFactory is an interface for a factory type that creates ResourceMarkings
-type ResourceMarkingsFactory interface {
-	// NewResourceMarkings returns a new ResourceMarkings instance that applies to the given object.
-	NewResourceMarkings(obj runtime.Object) (ResourceMarkings, error)
+type RenderingCustomizer interface {
+	Input() RenderingInput
+	Markings() ResourceMarkings
+	Listener() RenderingListener
+}
+
+type RenderingCustomizerFactory interface {
+	// NewCustomizer returns a new RenderingCustomizer for the specified object.
+	NewCustomizer(obj runtime.Object) (RenderingCustomizer, error)
 }
 
 // ResourceMarkings define the labels and annotations used to mark resources managed by the operator.
@@ -40,11 +45,9 @@ type ResourceMarkings interface {
 	GetResourceTypes() (namespaced []schema.GroupVersionKind, nonNamespaced []schema.GroupVersionKind)
 }
 
-// RenderingInputFactory is a factory for creating a RenderingInput for a specific object.
-type RenderingInputFactory interface {
-	// NewRenderingInput returns a new RenderingInput for the specified object.
-	NewRenderingInput(obj runtime.Object) (RenderingInput, error)
-}
+// ChartManifestsMap is a typedef representing a map of chart-name: []manifest, i.e. the manifests
+// associated with a specific chart
+type ChartManifestsMap map[string][]manifest.Manifest
 
 // RenderingInput specifies the details used for rendering charts.
 type RenderingInput interface {
@@ -59,13 +62,7 @@ type RenderingInput interface {
 	// should be applied.  manifests maps chart name to a list of manifests.  Examples of chart names:
 	// istio, istio/charts/security, istio/charts/galley, etc.  Subcharts will have the form:
 	// <main-chart-name>/charts/<subchart-name>
-	GetProcessingOrder(manifests map[string][]manifest.Manifest) ([]string, error)
-}
-
-// RenderingListenerFactory is a factory for creating RenderingListener objects.
-type RenderingListenerFactory interface {
-	// NewRenderingListener returns a new RenderingListener that applies to the specified object.
-	NewRenderingListener(obj runtime.Object) (RenderingListener, error)
+	GetProcessingOrder(manifests ChartManifestsMap) ([]string, error)
 }
 
 // RenderingListener is the main hook into the rendering process.  The methods represent each stage in the

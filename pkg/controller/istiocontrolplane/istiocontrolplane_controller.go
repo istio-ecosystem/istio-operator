@@ -50,13 +50,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	factory := &helmreconciler.Factory{
-		CustomizerFactory: &helmreconciler.CustomizerFactory{
-			InputFactory:    &IstioInputFactory{},
-			MarkingsFactory: &IstioMarkingsFactory{},
-			ListenerFactory: &IstioListenerFactory{},
-		},
-	}
+	factory := &helmreconciler.Factory{CustomizerFactory: &IstioRenderingCustomizerFactory{}}
 	return &ReconcileIstioControlPlane{client: mgr.GetClient(), scheme: mgr.GetScheme(), factory: factory}
 }
 

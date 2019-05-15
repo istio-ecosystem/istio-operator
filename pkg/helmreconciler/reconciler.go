@@ -10,10 +10,22 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// HelmReconciler reconciles resources rendered by a set of helm charts for a specific instances of a custom resource,
+// or deletes all resources associated with a specific instance of a custom resource.
+type HelmReconciler struct {
+	client     client.Client
+	logger     logr.Logger
+	customizer RenderingCustomizer
+	instance   runtime.Object
+}
+
+var _ LoggerProvider = &HelmReconciler{}
+var _ ClientProvider = &HelmReconciler{}
+
 // Factory is a factory for creating HelmReconciler objects using the specified CustomizerFactory.
 type Factory struct {
 	// CustomizerFactory is a factory for creating the Customizer object for the HelmReconciler.
-	CustomizerFactory *CustomizerFactory
+	CustomizerFactory RenderingCustomizerFactory
 }
 
 // New Returns a new HelmReconciler for the custom resource.
@@ -21,38 +33,56 @@ type Factory struct {
 // client is the kubernetes client
 // logger is the logger
 func (f *Factory) New(instance runtime.Object, client client.Client, logger logr.Logger) (*HelmReconciler, error) {
-	customizer, err := f.CustomizerFactory.NewCustomizer(instance)
+	delegate, err := f.CustomizerFactory.NewCustomizer(instance)
 	if err != nil {
 		return nil, err
 	}
-	return &HelmReconciler{client: client, logger: logger, customizer: customizer, instance: instance}, nil
+	wrappedcustomizer, err := wrapCustomizer(instance, delegate)
+	if err != nil {
+		return nil, err
+	}
+	reconciler := &HelmReconciler{client: client, logger: logger, customizer: wrappedcustomizer, instance: instance}
+	wrappedcustomizer.RegisterReconciler(reconciler)
+	return reconciler, nil
 }
 
-// HelmReconciler reconciles resources rendered by a set of helm charts for a specific instances of a custom resource,
-// or deletes all resources associated with a specific instance of a custom resource.
-type HelmReconciler struct {
-	client     client.Client
-	logger     logr.Logger
-	customizer *Customizer
-	instance   runtime.Object
+// wrapCustomizer creates a new internalCustomizer object wrapping the delegate, by inject a LoggingRenderingListener,
+// an OwnerReferenceDecorator, and a MarkingsDecorator into a CompositeRenderingListener that includes the listener
+// from the delegate.  This ensures the HelmReconciler can properly implement pruning, etc.
+// instance is the custom resource to be processed by the HelmReconciler
+// delegate is the delegate
+func wrapCustomizer(instance runtime.Object, delegate RenderingCustomizer) (*SimpleRenderingCustomizer, error) {
+	ownerReferenceDecorator, err := NewOwnerReferenceDecorator(instance)
+	if err != nil {
+		return nil, err
+	}
+	return &SimpleRenderingCustomizer{
+		InputValue:    delegate.Input(),
+		MarkingsValue: delegate.Markings(),
+		ListenerValue: &CompositeRenderingListener{
+			Listeners: []RenderingListener{
+				&LoggingRenderingListener{Level: 1},
+				ownerReferenceDecorator,
+				NewMarkingsDecorator(delegate.Markings()),
+				delegate.Listener(),
+			},
+		},
+	}, nil
 }
-
-var _ LoggerProvider = &HelmReconciler{}
-var _ ClientProvider = &HelmReconciler{}
 
 // Reconcile the resources associated with the custom resource instance.
 func (h *HelmReconciler) Reconcile() error {
 	// any processing required before processing the charts
-	err := h.customizer.BeginReconcile(h.instance)
+	err := h.customizer.Listener().BeginReconcile(h.instance)
 	if err != nil {
 		return err
 	}
 
 	// render charts
-	manifestMap, err := h.renderCharts(h.customizer)
+	manifestMap, err := h.renderCharts(h.customizer.Input())
 	if err != nil {
 		err = errors.Wrap(err, fmt.Sprintf("error rendering charts"))
-		listenerErr := h.customizer.EndReconcile(h.instance, err)
+		listenerErr := h.customizer.Listener().EndReconcile(h.instance, err)
 		if listenerErr != nil {
 			h.logger.Error(listenerErr, "unexpected error invoking EndReconcile")
 		}
@@ -60,10 +90,10 @@ func (h *HelmReconciler) Reconcile() error {
 	}
 
 	// determine processing order
-	chartOrder, err := h.customizer.GetProcessingOrder(manifestMap)
+	chartOrder, err := h.customizer.Input().GetProcessingOrder(manifestMap)
 	if err != nil {
 		err = errors.Wrap(err, fmt.Sprintf("error ordering charts"))
-		listenerErr := h.customizer.EndReconcile(h.instance, err)
+		listenerErr := h.customizer.Listener().EndReconcile(h.instance, err)
 		if listenerErr != nil {
 			h.logger.Error(listenerErr, "unexpected error invoking EndReconcile")
 		}
@@ -80,7 +110,7 @@ func (h *HelmReconciler) Reconcile() error {
 			// TODO: log warning about missing chart
 			continue
 		}
-		chartManifests, err := h.customizer.BeginChart(chartName, chartManifests)
+		chartManifests, err := h.customizer.Listener().BeginChart(chartName, chartManifests)
 		if err != nil {
 			allErrors = append(allErrors, err)
 		}
@@ -88,14 +118,14 @@ func (h *HelmReconciler) Reconcile() error {
 		if err != nil {
 			allErrors = append(allErrors, err)
 		}
-		err = h.customizer.EndChart(chartName)
+		err = h.customizer.Listener().EndChart(chartName)
 		if err != nil {
 			allErrors = append(allErrors, err)
 		}
 	}
 
 	// delete any obsolete resources
-	err = h.customizer.BeginPrune(false)
+	err = h.customizer.Listener().BeginPrune(false)
 	if err != nil {
 		allErrors = append(allErrors, err)
 	}
@@ -103,13 +133,13 @@ func (h *HelmReconciler) Reconcile() error {
 	if err != nil {
 		allErrors = append(allErrors, err)
 	}
-	err = h.customizer.EndPrune()
+	err = h.customizer.Listener().EndPrune()
 	if err != nil {
 		allErrors = append(allErrors, err)
 	}
 
 	// any post processing required after updating
-	err = h.customizer.EndReconcile(h.instance, utilerrors.NewAggregate(allErrors))
+	err = h.customizer.Listener().EndReconcile(h.instance, utilerrors.NewAggregate(allErrors))
 	if err != nil {
 		allErrors = append(allErrors, err)
 	}
@@ -123,12 +153,12 @@ func (h *HelmReconciler) Delete() error {
 	allErrors := []error{}
 
 	// any processing required before processing the charts
-	err := h.customizer.BeginDelete(h.instance)
+	err := h.customizer.Listener().BeginDelete(h.instance)
 	if err != nil {
 		allErrors = append(allErrors, err)
 	}
 
-	err = h.customizer.BeginPrune(true)
+	err = h.customizer.Listener().BeginPrune(true)
 	if err != nil {
 		allErrors = append(allErrors, err)
 	}
@@ -136,14 +166,14 @@ func (h *HelmReconciler) Delete() error {
 	if err != nil {
 		allErrors = append(allErrors, err)
 	}
-	err = h.customizer.EndPrune()
+	err = h.customizer.Listener().EndPrune()
 	if err != nil {
 		allErrors = append(allErrors, err)
 	}
 
 	// any post processing required after deleting
 	err = utilerrors.NewAggregate(allErrors)
-	if listenerErr := h.customizer.EndDelete(h.instance, err); listenerErr != nil {
+	if listenerErr := h.customizer.Listener().EndDelete(h.instance, err); listenerErr != nil {
 		h.logger.Error(listenerErr, "error calling listener")
 	}
 

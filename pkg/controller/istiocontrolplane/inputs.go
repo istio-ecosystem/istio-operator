@@ -1,12 +1,6 @@
 package istiocontrolplane
 
 import (
-	"fmt"
-	"path/filepath"
-
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/helm/pkg/manifest"
-
 	"istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/helmreconciler"
 )
@@ -26,36 +20,22 @@ var defaultProcessingOrder = []string{
 	"istio/charts/kiali",
 }
 
-// IstioInputFactory creates a RenderingInput specific to an IstioControlPlane instance.
-type IstioInputFactory struct{}
-
-var _ helmreconciler.RenderingInputFactory = &IstioInputFactory{}
-
 // IstioRenderingInput is a RenderingInput specific to an IstioControlPlane instance.
 type IstioRenderingInput struct {
-	instance *v1alpha1.IstioControlPlane
+	instance  *v1alpha1.IstioControlPlane
+	chartPath string
 }
 
 var _ helmreconciler.RenderingInput = &IstioRenderingInput{}
 
-// NewRenderingInput creates a new IstioRenderiongInput for the specified instance.
-func (f *IstioInputFactory) NewRenderingInput(instance runtime.Object) (helmreconciler.RenderingInput, error) {
-	istioControlPlane, ok := instance.(*v1alpha1.IstioControlPlane)
-	if !ok {
-		return nil, fmt.Errorf("object is not an IstioControlPlane resource")
-	}
-	return &IstioRenderingInput{instance: istioControlPlane}, nil
+// NewIstioRenderingInput creates a new IstioRenderiongInput for the specified instance.
+func NewIstioRenderingInput(instance *v1alpha1.IstioControlPlane) *IstioRenderingInput {
+	return &IstioRenderingInput{instance: instance, chartPath: calculateChartPath(instance.Spec.ChartPath)}
 }
 
 // GetChartPath returns the absolute path locating the charts to be rendered.
 func (i *IstioRenderingInput) GetChartPath() string {
-	path := i.instance.Spec.ChartPath
-	if len(path) == 0 {
-		return filepath.Join(controllerOptions.BaseChartPath, controllerOptions.DefaultChartPath)
-	} else if filepath.IsAbs(path) {
-		return i.instance.Spec.ChartPath
-	}
-	return filepath.Join(controllerOptions.BaseChartPath, path)
+	return i.chartPath
 }
 
 // GetValues returns the values that should be used when rendering the charts.
@@ -70,7 +50,7 @@ func (i *IstioRenderingInput) GetTargetNamespace() string {
 }
 
 // GetProcessingOrder returns the order in which the rendered charts should be processed.
-func (i *IstioRenderingInput) GetProcessingOrder(manifests map[string][]manifest.Manifest) ([]string, error) {
+func (i *IstioRenderingInput) GetProcessingOrder(manifests helmreconciler.ChartManifestsMap) ([]string, error) {
 	seen := map[string]struct{}{}
 	ordering := make([]string, 0, len(manifests))
 	// known ordering

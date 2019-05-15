@@ -3,8 +3,8 @@ package istiocontrolplane
 import (
 	"strconv"
 
-	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/runtime"
+	"istio.io/operator/pkg/apis/istio/v1alpha1"
+
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"istio.io/operator/pkg/helmreconciler"
@@ -26,13 +26,10 @@ const (
 )
 
 var (
-	// XXX: move this into a ConfigMap so users can override things if they add new types in customized charts
 	// ordered by which types should be deleted, first to last
 	namespacedResources = []schema.GroupVersionKind{
 		{Group: "autoscaling", Version: "v2beta1", Kind: "HorizontalPodAutoscaler"},
 		{Group: "policy", Version: "v1beta1", Kind: "PodDisruptionBudget"},
-		{Group: "route.openshift.io", Version: "v1", Kind: "Route"},
-		{Group: "apps.openshift.io", Version: "v1", Kind: "DeploymentConfig"},
 		{Group: "apps", Version: "v1beta1", Kind: "Deployment"},
 		{Group: "apps", Version: "v1beta1", Kind: "StatefulSet"},
 		{Group: "apps", Version: "v1", Kind: "Deployment"},
@@ -71,27 +68,17 @@ var (
 		{Group: "admissionregistration.k8s.io", Version: "v1beta1", Kind: "MutatingWebhookConfiguration"},
 		{Group: "admissionregistration.k8s.io", Version: "v1beta1", Kind: "ValidatingWebhookConfiguration"},
 		{Group: "certmanager.k8s.io", Version: "v1alpha1", Kind: "ClusterIssuer"},
-		{Group: "oauth.openshift.io", Version: "v1", Kind: "OAuthClient"},
 		{Group: "rbac.authorization.k8s.io", Version: "v1", Kind: "ClusterRole"},
 		{Group: "rbac.authorization.k8s.io", Version: "v1", Kind: "ClusterRoleBinding"},
 		{Group: "authentication.istio.io", Version: "v1alpha1", Kind: "MeshPolicy"},
 	}
 )
 
-// IstioMarkingsFactory is a ResourceMarkingsFactory specific to IstioControlPlane resources.
-type IstioMarkingsFactory struct{}
-
-var _ helmreconciler.ResourceMarkingsFactory = &IstioMarkingsFactory{}
-
 // NewResourceMarkings creates a new ResourceMarkings object specific to the instance.
-func (f *IstioMarkingsFactory) NewResourceMarkings(instance runtime.Object) (helmreconciler.ResourceMarkings, error) {
-	objectAccessor, err := meta.Accessor(instance)
-	if err != nil {
-		return nil, err
-	}
+func NewIstioResourceMarkings(instance *v1alpha1.IstioControlPlane) helmreconciler.ResourceMarkings {
 	gvk := instance.GetObjectKind().GroupVersionKind()
-	name := objectAccessor.GetName()
-	generation := strconv.FormatInt(objectAccessor.GetGeneration(), 10)
+	name := instance.GetName()
+	generation := strconv.FormatInt(instance.GetGeneration(), 10)
 	return &helmreconciler.SimpleResourceMarkings{
 		OwnerLabels: map[string]string{
 			OwnerNameKey:  name,
@@ -103,5 +90,5 @@ func (f *IstioMarkingsFactory) NewResourceMarkings(instance runtime.Object) (hel
 		},
 		NamespacedResources:    namespacedResources,
 		NonNamespacedResources: nonNamespacedResources,
-	}, nil
+	}
 }

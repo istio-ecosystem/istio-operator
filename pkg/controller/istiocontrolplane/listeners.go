@@ -22,30 +22,22 @@ const (
 	ChartOwnerKey = MetadataNamespace + "/chart-owner"
 )
 
-// IstioListenerFactory is the factory used to create the rendering listeners for IstioControlPlane resources
-type IstioListenerFactory struct{}
-
-var _ helmreconciler.RenderingListenerFactory = &IstioListenerFactory{}
-
 // IstioRenderingListener is a RenderingListener specific to IstioControlPlane resources
 type IstioRenderingListener struct {
 	*helmreconciler.CompositeRenderingListener
 }
 
-// NewRenderingListener returns a new IstioRenderingListener, which is a composite that includes IstioStatusUpdater
+// NewIstioRenderingListener returns a new IstioRenderingListener, which is a composite that includes IstioStatusUpdater
 // and IstioChartCustomizerListener.
-func (f *IstioListenerFactory) NewRenderingListener(instance runtime.Object) (helmreconciler.RenderingListener, error) {
-	if istioControlPlane, ok := instance.(*v1alpha1.IstioControlPlane); ok {
-		return &IstioRenderingListener{
-			CompositeRenderingListener: &helmreconciler.CompositeRenderingListener{
-				Listeners: []helmreconciler.RenderingListener{
-					NewChartCustomizerListener(),
-					NewIstioStatusUpdater(istioControlPlane),
-				},
+func NewIstioRenderingListener(instance *v1alpha1.IstioControlPlane) *IstioRenderingListener {
+	return &IstioRenderingListener{
+		CompositeRenderingListener: &helmreconciler.CompositeRenderingListener{
+			Listeners: []helmreconciler.RenderingListener{
+				NewChartCustomizerListener(),
+				NewIstioStatusUpdater(instance),
 			},
-		}, nil
+		},
 	}
-	return nil, fmt.Errorf("object is not an IstioControlPlane")
 }
 
 // IstioStatusUpdater is a RenderingListener that updates the status field on the IstioControlPlane
