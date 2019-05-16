@@ -38,7 +38,7 @@ a:
 	}{
 		{
 			desc: "ModifyListEntryValue",
-			path: `a.b.name:n1.value`,
+			path: `a.b.[name:n1].value`,
 			value: `v2`,
 			want: `
 apiVersion: extensions/v1beta1
@@ -59,7 +59,7 @@ a:
 		},
 		{
 			desc: "ModifyListEntry",
-			path: `a.b.name:n2.list.:v2`,
+			path: `a.b.[name:n2].list.[v2]`,
 			value: `v3`,
 			want: `
 apiVersion: extensions/v1beta1
@@ -80,7 +80,7 @@ a:
 		},
 		{
 			desc: "DeleteListEntry",
-			path: `a.b.name:n1`,
+			path: `a.b.[name:n1]`,
 			want: `
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -98,7 +98,7 @@ a:
 		},
 		{
 			desc: "DeleteListEntryValue",
-			path: `a.b.name:n2.list.:v2`,
+			path: `a.b.[name:n2].list.[v2]`,
 			want: `
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -117,7 +117,7 @@ a:
 		},
 		{
 			desc: "DeleteListEntryValueRegex",
-			path: `a.b.name:n2.list.:v3`,
+			path: `a.b.[name:n2].list.[v3]`,
 			want: `
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -187,7 +187,7 @@ spec:
 	}{
 		{
 			desc: "DeleteLeafListLeaf",
-			path: `spec.template.spec.containers.name:galley.command.:--validation-webhook-config-file`,
+			path: `spec.template.spec.containers.[name:galley].command.[--validation-webhook-config-file]`,
 			want: `
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -214,7 +214,7 @@ spec:
 		},
 		{
 			desc:  "UpdateListItem",
-			path:  `spec.template.spec.containers.name:galley.command.:--livenessProbeInterval`,
+			path:  `spec.template.spec.containers.[name:galley].command.[--livenessProbeInterval]`,
 			value: `--livenessProbeInterval=1111s`,
 			want: `
 apiVersion: extensions/v1beta1
@@ -243,7 +243,7 @@ spec:
 		},
 		{
 			desc:  "UpdateLeaf",
-			path:  `spec.template.spec.containers.name:galley.ports.containerPort:15014.containerPort`,
+			path:  `spec.template.spec.containers.[name:galley].ports.[containerPort:15014].containerPort`,
 			value: `22222`,
 			want: `
 apiVersion: extensions/v1beta1
@@ -272,7 +272,7 @@ spec:
 		},
 		{
 			desc: "DeleteLeafList",
-			path: `spec.template.spec.containers.name:galley.ports.containerPort:9901`,
+			path: `spec.template.spec.containers.[name:galley].ports.[containerPort:9901]`,
 			want: `
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -299,7 +299,7 @@ spec:
 		},
 		{
 			desc: "DeleteInternalNode",
-			path: `spec.template.spec.containers.name:deleteThis`,
+			path: `spec.template.spec.containers.[name:deleteThis]`,
 			want: `
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -325,7 +325,7 @@ spec:
 		},
 		{
 			desc: "DeleteLeafListentry",
-			path: `spec.template.spec.containers.name:galley.command.:--validation-webhook-config-file`,
+			path: `spec.template.spec.containers.[name:galley].command.[--validation-webhook-config-file]`,
 			want: `
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -352,7 +352,7 @@ spec:
 		},
 		{
 			desc: "UpdateInteriorNode",
-			path: `spec.template.spec.containers.name:galley.ports.containerPort:15014`,
+			path: `spec.template.spec.containers.[name:galley].ports.[containerPort:15014]`,
 			value: `
       fooPort: 15015`,
 			want: `

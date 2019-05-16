@@ -1,8 +1,8 @@
 /*
 Package patch implements a simple patching mechanism for k8s resources.
-Paths are specified in the form a.b.c.key:value.d.:list_entry_value, where:
- -  key:value selects a list entry in list c which contains an entry with key:value
- -  :list_entry_value selects a list entry in list d which is a regex match of list_entry_value.
+Paths are specified in the form a.b.c.[key:value].d.[list_entry_value], where:
+ -  [key:value] selects a list entry in list c which contains an entry with key:value
+ -  [list_entry_value] selects a list entry in list d which is a regex match of list_entry_value.
 
 Some examples are given below. Given a resource:
 
@@ -25,39 +25,39 @@ MODIFY
 
 1. set v1 to v1new
 
-  path: a.b.name:n1:value
+  path: a.b.[name:n1].value
   value: v1
 
 2. set vv1 to vv3
 
-  path: a.b.name:n2.list.:vv1
+  path: a.b.[name:n2].list.[vv1]
   value: vv3
 
 3. set vv2=foo to vv2=bar (using regex match)
 
-  path: a.b.name:n2.list.:vv2
+  path: a.b.[name:n2].list.[vv2]
   value: vv2=bar
 
 DELETE
 
 1. Delete container with name: n1
 
-  path: a.b.name:n1
+  path: a.b.[name:n1]
 
 2. Delete list value vv1
 
-  path: a.b.name:n2.list.:vv1
+  path: a.b.[name:n2].list.[vv1]
 
 ADD
 
 1. Add vv3 to list
 
-  path: a.b.name:n2.list
+  path: a.b.[name:n2].list
   value: vv3
 
 2. Add new key:value to container name: n1
 
-  path: a.b.name:n1
+  path: a.b.[name:n1]
   value:
     new_attr: v3
 
@@ -320,32 +320,48 @@ func isValidPathElement(pe string) bool {
 	return util.ValidKeyRegex.MatchString(pe)
 }
 
+func removeBrackets(pe string) (string, bool) {
+	if !strings.HasPrefix(pe,"[") || !strings.HasSuffix(pe,"]") {
+		return "", false
+	}
+	return pe[1:len(pe)-1], true
+}
+
 func isKVPathElement(pe string) bool {
-	if len(pe) < 3 {
+	pe, ok := removeBrackets(pe)
+	if !ok {
 		return false
 	}
+
 	kv := strings.Split(pe, ":")
-	if len(kv) != 2 {
+	if len(kv) != 2 || len(kv[0]) == 0 || len(kv[1]) == 0 {
 		return false
 	}
 	return isValidPathElement(kv[0])
 }
 
 func isVPathElement(pe string) bool {
-	return len(pe) > 1 && pe[0] == ':'
+	pe, ok := removeBrackets(pe)
+	if !ok {
+		return false
+	}
+
+	return len(pe) > 0
 }
 
 func pathV(pe string) (string, error) {
 	if !isVPathElement(pe) {
 		return "", fmt.Errorf("%s is not a valid value path element", pe)
 	}
-	return pe[1:], nil
+	v, _ := removeBrackets(pe)
+	return v, nil
 }
 
 func pathKV(pe string) (k, v string, err error) {
 	if !isKVPathElement(pe) {
 		return "", "", fmt.Errorf("%s is not a valid key:value path element", pe)
 	}
+	pe, _ = removeBrackets(pe)
 	kv := strings.Split(pe, ":")
 	return kv[0], kv[1], nil
 }
