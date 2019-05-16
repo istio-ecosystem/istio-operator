@@ -139,6 +139,7 @@ func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (recon
 		instance.SetFinalizers(finalizers)
 		finalizerError := r.client.Update(context.TODO(), instance)
 		for retryCount := 0; errors.IsConflict(finalizerError) && retryCount < 5; retryCount++ {
+			// workaround for https://github.com/kubernetes/kubernetes/issues/73098 for k8s < 1.14
 			reqLogger.Info("confilict during finalizer removal, retrying")
 			_ = r.client.Get(context.TODO(), request.NamespacedName, instance)
 			finalizers = instance.GetFinalizers()
