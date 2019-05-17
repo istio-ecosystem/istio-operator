@@ -29,8 +29,7 @@ func TestToString(t *testing.T) {
 }
 
 func TestNewErrs(t *testing.T) {
-	var errs Errors
-	errs = NewErrs(nil)
+	errs := NewErrs(nil)
 	if errs != nil {
 		t.Errorf("got: %s, want: nil", errs)
 	}
