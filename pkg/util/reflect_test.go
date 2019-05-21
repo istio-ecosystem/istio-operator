@@ -303,7 +303,7 @@ func TestInsertIntoMap(t *testing.T) {
 	}
 
 	badParent := struct{}{}
-	wantErr := `InsertIntoMap parent type is *struct {}, must be map`
+	wantErr := `insertIntoMap parent type is *struct {}, must be map`
 	if got, want := errToString(InsertIntoMap(&badParent, key, value)), wantErr; got != want {
 		t.Fatalf("got error: %s, want error: %s", got, want)
 	}
