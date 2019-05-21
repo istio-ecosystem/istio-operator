@@ -45,7 +45,7 @@ func TestIsValueNil(t *testing.T) {
 	if IsValueNil([]int{1, 2, 3}) {
 		t.Error("got IsValueNil(slice) true, want false")
 	}
-	if IsValueNil((interface{})(42)) {
+	if IsValueNil(interface{}(42)) {
 		t.Error("got IsValueNil(interface) true, want false")
 	}
 }
@@ -57,13 +57,13 @@ func TestIsValueNilOrDefault(t *testing.T) {
 	if !IsValueNilOrDefault((*int)(nil)) {
 		t.Error("got IsValueNilOrDefault(ptr) false, want true")
 	}
-	if !IsValueNilOrDefault((map[int]int)(nil)) {
+	if !IsValueNilOrDefault(map[int]int(nil)) {
 		t.Error("got IsValueNilOrDefault(map) false, want true")
 	}
-	if !IsValueNilOrDefault(([]int)(nil)) {
+	if !IsValueNilOrDefault([]int(nil)) {
 		t.Error("got IsValueNilOrDefault(slice) false, want true")
 	}
-	if !IsValueNilOrDefault((interface{})(nil)) {
+	if !IsValueNilOrDefault(interface{}(nil)) {
 		t.Error("got IsValueNilOrDefault(interface) false, want true")
 	}
 	if !IsValueNilOrDefault(int(0)) {
