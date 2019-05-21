@@ -131,12 +131,6 @@
   version = "v0.29.0"
 
 [[projects]]
-  name = "github.com/cpuguy83/go-md2man"
-  packages = ["md2man"]
-  revision = "7762f7e404f8416dfa1d9bb6a8c192aa9acb4d19"
-  version = "v1.0.10"
-
-[[projects]]
   name = "github.com/cyphar/filepath-securejoin"
   packages = ["."]
   revision = "a261ee33d7a517f054effbf451841abaafe3e0fd"
@@ -731,10 +725,7 @@
 
 [[projects]]
   name = "github.com/spf13/cobra"
-  packages = [
-    ".",
-    "doc"
-  ]
+  packages = ["."]
   revision = "ef82de70bb3f60c65fb8eebacbb2d122ef517385"
   version = "v0.0.3"
 
@@ -1030,9 +1021,6 @@
   branch = "master"
   name = "istio.io/pkg"
   packages = [
-    "annotations",
-    "collateral",
-    "env",
     "log",
     "version"
   ]
@@ -1567,6 +1555,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8f0fff313a651cf72642b92a9d54aae83a62a9c6d217f926a44f65233029aa0d"
+  inputs-digest = "dd3481ab0cd6e09742625768a34b6d5912e683aa2da88bee775a488f6b12950b"
   solver-name = "gps-cdcl"
   solver-version = 1
