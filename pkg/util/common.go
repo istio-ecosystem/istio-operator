@@ -1,9 +1,10 @@
 package util
 
 import (
-	"gopkg.in/yaml.v2"
 	"path/filepath"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
 const (
