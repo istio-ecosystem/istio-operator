@@ -2,8 +2,9 @@ package util
 
 import (
 	"fmt"
-	"github.com/kr/pretty"
 	"reflect"
+
+	"github.com/kr/pretty"
 )
 
 var (
@@ -20,6 +21,7 @@ func dbgPrint(v ...interface{}) {
 	fmt.Println(fmt.Sprintf(v[0].(string), v[1:]...))
 }
 
+// IsString reports whether value is a string type.
 func IsString(value interface{}) bool {
 	return reflect.TypeOf(value).Kind() == reflect.String
 }
@@ -202,7 +204,7 @@ func AppendToSlicePtr(parentSlice interface{}, value interface{}) error {
 	v := reflect.ValueOf(value)
 
 	if !IsSliceInterfacePtr(parentSlice) {
-		return fmt.Errorf("AppendToSlicePtr parent type is %T, must be *[]interface{}", parentSlice)
+		return fmt.Errorf("appendToSlicePtr parent type is %T, must be *[]interface{}", parentSlice)
 	}
 
 	pv.Elem().Set(reflect.Append(pv.Elem(), v))
@@ -210,12 +212,13 @@ func AppendToSlicePtr(parentSlice interface{}, value interface{}) error {
 	return nil
 }
 
+// DeleteFromSlicePtr deletes an entry at index from the parent, which must be a slice ptr.
 func DeleteFromSlicePtr(parentSlice interface{}, index int) error {
 	dbgPrint("DeleteFromSlicePtr index=%d, slice=\n%s", index, pretty.Sprint(parentSlice))
 	pv := reflect.ValueOf(parentSlice)
 
 	if !IsSliceInterfacePtr(parentSlice) {
-		return fmt.Errorf("DeleteFromSlicePtr parent type is %T, must be *[]interface{}", parentSlice)
+		return fmt.Errorf("deleteFromSlicePtr parent type is %T, must be *[]interface{}", parentSlice)
 	}
 
 	pvv := pv.Elem()
@@ -229,13 +232,14 @@ func DeleteFromSlicePtr(parentSlice interface{}, index int) error {
 	return nil
 }
 
+// UpdateSlicePtr updates an entry at index in the parent, which must be a slice ptr, with the given value.
 func UpdateSlicePtr(parentSlice interface{}, index int, value interface{}) error {
 	dbgPrint("UpdateSlicePtr parent=\n%s\n, index=%d, value=\n%v", pretty.Sprint(parentSlice), index, value)
 	pv := reflect.ValueOf(parentSlice)
 	v := reflect.ValueOf(value)
 
 	if !IsSliceInterfacePtr(parentSlice) {
-		return fmt.Errorf("UpdateSlicePtr parent type is %T, must be *[]interface{}", parentSlice)
+		return fmt.Errorf("updateSlicePtr parent type is %T, must be *[]interface{}", parentSlice)
 	}
 
 	pvv := pv.Elem()
@@ -264,7 +268,7 @@ func InsertIntoMap(parentMap interface{}, key interface{}, value interface{}) er
 
 	if v.Type().Kind() != reflect.Map {
 		dbgPrint("error %v", v.Type().Kind())
-		return fmt.Errorf("InsertIntoMap parent type is %T, must be map", parentMap)
+		return fmt.Errorf("insertIntoMap parent type is %T, must be map", parentMap)
 	}
 
 	v.SetMapIndex(kv, vv)

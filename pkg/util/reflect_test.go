@@ -17,9 +17,7 @@ func errToString(err error) string {
 }
 
 // to ptr conversion utility functions
-func toStringPtr(s string) *string { return &s }
-func toInt8Ptr(i int8) *int8       { return &i }
-func toInt32Ptr(i int32) *int32    { return &i }
+func toInt8Ptr(i int8) *int8 { return &i }
 
 func TestIsValueNil(t *testing.T) {
 	if !IsValueNil(nil) {
@@ -28,13 +26,13 @@ func TestIsValueNil(t *testing.T) {
 	if !IsValueNil((*int)(nil)) {
 		t.Error("got IsValueNil(ptr) false, want true")
 	}
-	if !IsValueNil((map[int]int)(nil)) {
+	if !IsValueNil(map[int]int(nil)) {
 		t.Error("got IsValueNil(map) false, want true")
 	}
-	if !IsValueNil(([]int)(nil)) {
+	if !IsValueNil([]int(nil)) {
 		t.Error("got IsValueNil(slice) false, want true")
 	}
-	if !IsValueNil((interface{})(nil)) {
+	if !IsValueNil(interface{}(nil)) {
 		t.Error("got IsValueNil(interface) false, want true")
 	}
 
