@@ -131,6 +131,12 @@
   version = "v0.29.0"
 
 [[projects]]
+  name = "github.com/cpuguy83/go-md2man"
+  packages = ["md2man"]
+  revision = "7762f7e404f8416dfa1d9bb6a8c192aa9acb4d19"
+  version = "v1.0.10"
+
+[[projects]]
   name = "github.com/cyphar/filepath-securejoin"
   packages = ["."]
   revision = "a261ee33d7a517f054effbf451841abaafe3e0fd"
@@ -528,6 +534,12 @@
   revision = "cca7078d478f8520f85629ad7c68962d31ed7682"
 
 [[projects]]
+  name = "github.com/natefinch/lumberjack"
+  packages = ["."]
+  revision = "a96e63847dc3c67d17befa69c303767e2f84e54f"
+  version = "v2.1"
+
+[[projects]]
   name = "github.com/opencontainers/go-digest"
   packages = ["."]
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
@@ -719,7 +731,10 @@
 
 [[projects]]
   name = "github.com/spf13/cobra"
-  packages = ["."]
+  packages = [
+    ".",
+    "doc"
+  ]
   revision = "ef82de70bb3f60c65fb8eebacbb2d122ef517385"
   version = "v0.0.3"
 
@@ -792,7 +807,8 @@
     "internal/bufferpool",
     "internal/color",
     "internal/exit",
-    "zapcore"
+    "zapcore",
+    "zapgrpc"
   ]
   revision = "ff33455a0e382e8a81d14dd7c922020b6b5e7982"
   version = "v1.9.1"
@@ -1009,6 +1025,18 @@
   packages = ["."]
   revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
   version = "v2.2.2"
+
+[[projects]]
+  branch = "master"
+  name = "istio.io/pkg"
+  packages = [
+    "annotations",
+    "collateral",
+    "env",
+    "log",
+    "version"
+  ]
+  revision = "1fcd6eb90ce184b1084430fdf7804d8a41b88370"
 
 [[projects]]
   name = "k8s.io/api"
@@ -1539,6 +1567,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d6f5186bd24c73f5d771acf42fb64b336d34269a36024fc9a677be6588a11b8c"
+  inputs-digest = "8f0fff313a651cf72642b92a9d54aae83a62a9c6d217f926a44f65233029aa0d"
   solver-name = "gps-cdcl"
   solver-version = 1
