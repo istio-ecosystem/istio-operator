@@ -2,10 +2,11 @@ package validate
 
 import (
 	"fmt"
-	"github.com/ostromart/istio-installer/pkg/apis/installer/v1alpha1"
-	"github.com/ostromart/istio-installer/pkg/util"
 	"net/url"
 	"reflect"
+
+	"istio.io/operator/pkg/apis/installer/v1alpha1"
+	"istio.io/operator/pkg/util"
 )
 
 var (
@@ -18,8 +19,7 @@ var (
 	}
 
 	// requiredValues lists all the values that must be non-empty.
-	requiredValues = map[string]bool{
-	}
+	requiredValues = map[string]bool{}
 )
 
 // ValidateInstallerSpec validates the values in the given Installer spec, using the field map defaultValidations to

@@ -2,12 +2,13 @@ package validate
 
 import (
 	"fmt"
-	"github.com/ostromart/istio-installer/pkg/util"
 	"net"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"istio.io/operator/pkg/util"
 )
 
 var (
@@ -92,7 +93,6 @@ var (
 
 	// ObjectNameRegexp is a legal name for a k8s object.
 	ObjectNameRegexp = match(`[a-z0-9.-]{1,254}`)
-
 )
 
 func validateWithRegex(path util.Path, val interface{}, r *regexp.Regexp) (errs util.Errors) {

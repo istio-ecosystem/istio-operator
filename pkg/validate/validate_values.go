@@ -14,8 +14,7 @@ var (
 	}
 
 	// requiredValues lists all the values that must be non-empty.
-	requiredSetValues = map[string]bool{
-	}
+	requiredSetValues = map[string]bool{}
 )
 
 // ValidateValues validates the values in the given tree, which follows the Istio values.yaml schema.
