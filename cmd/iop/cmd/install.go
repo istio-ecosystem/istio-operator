@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func installCmd(rootArgs *rootArgs, printf, fatalf FormatFn) *cobra.Command {
+func installCmd(_ *rootArgs, _, _ FormatFn) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "install",
 		Short: "Installs Istio to cluster.",

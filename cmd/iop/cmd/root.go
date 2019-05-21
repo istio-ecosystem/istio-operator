@@ -18,6 +18,7 @@ import (
 	"flag"
 
 	"github.com/spf13/cobra"
+
 	"istio.io/pkg/version"
 )
 
@@ -45,10 +46,13 @@ func GetRootCmd(args []string, printf, fatalf FormatFn) *cobra.Command {
 	rootArgs := &rootArgs{}
 
 	ic := installCmd(rootArgs, printf, fatalf)
+	mc := manifestCmd(rootArgs, printf, fatalf)
 
 	addFlags(ic, rootArgs)
+	addFlags(mc, rootArgs)
 
 	rootCmd.AddCommand(ic)
+	rootCmd.AddCommand(mc)
 	rootCmd.AddCommand(version.CobraCommand())
 
 	return rootCmd

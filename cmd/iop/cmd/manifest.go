@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func manifestCmdb(rootArgs *rootArgs, printf, fatalf FormatFn) *cobra.Command {
+func manifestCmd(rootArgs *rootArgs, printf, fatalf FormatFn) *cobra.Command {
 	return &cobra.Command{
 		Use:   "manifest",
 		Short: "Generates Istio install manifest.",
@@ -29,6 +29,6 @@ func manifestCmdb(rootArgs *rootArgs, printf, fatalf FormatFn) *cobra.Command {
 		}}
 }
 
-func genManifest(rootArgs *rootArgs, printf, fatalf FormatFn) {
+func genManifest(_ *rootArgs, _, _ FormatFn) {
 
 }
