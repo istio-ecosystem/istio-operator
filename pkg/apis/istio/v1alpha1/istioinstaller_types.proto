@@ -182,19 +182,6 @@ message TrafficManagementFeatureSpec {
     // Namespace that all traffic management components are installed into.
     string namespace = 2;
 
-    // Component specific config.
-    PilotComponentSpec pilot = 30;
-    ProxyComponentSpec proxy = 31;
-}
-
-// Configuration options for the policy feature.
-message PolicyFeatureSpec {
-    // Selects whether policy is installed.
-    // Must be enabled to enable any sub-component.
-    google.protobuf.BoolValue enabled = 1;
-    // Namespace that all policy components are installed into.
-    string namespace = 2;
-
     // Default behavior of the sidecar for handling outbound traffic from the application.
     enum OutboundPolicy {
         // Outbound traffic to unknown destinations will be allowed, in case there are no
@@ -209,6 +196,20 @@ message PolicyFeatureSpec {
     google.protobuf.BoolValue policy_check_fail_open = 10;
     // Selects the outbound traffic policy mode.
     OutboundPolicy outbound_traffic_policy_mode = 11;
+
+    // Component specific config.
+    PilotComponentSpec pilot = 30;
+    // Sidecar proxy config.
+    ProxyComponentSpec proxy = 31;
+}
+
+// Configuration options for the policy feature.
+message PolicyFeatureSpec {
+    // Selects whether policy is installed.
+    // Must be enabled to enable any sub-component.
+    google.protobuf.BoolValue enabled = 1;
+    // Namespace that all policy components are installed into.
+    string namespace = 2;
 
     PolicyComponentSpec policy = 50;
 }
