@@ -9,13 +9,12 @@ import (
 // Values is described in istio.io documentation.
 type Values struct {
 	CertManager     *CertManagerConfig     `json:"certmanager,omitempty"`
+	CNI             *CNIConfig             `json:"istio_cni,omitempty"`
+	CoreDNS         *CoreDNSConfig         `json:"istiocoredns,omitempty"`
 	Galley          *GalleyConfig          `json:"galley,omitempty"`
+	Gateways        *GatewaysConfig        `json:"gateways,omitempty"`
 	Global          *GlobalConfig          `json:"global,omitempty"`
 	Grafana         map[string]interface{} `json:"grafana,omitempty"`
-	Gateways        *GatewaysConfig        `json:"gateways,omitempty"`
-	CNI             *CNIConfig             `json:"cni,omitempty"`
-	CoreDNS         *CoreDNSConfig         `json:"istiocoredns,omitempty"`
-	Kiali           *KialiConfig           `json:"kiali,omitempty"`
 	Mixer           *MixerConfig           `json:"mixer,omitempty"`
 	NodeAgent       *NodeAgentConfig       `json:"nodeagent,omitempty"`
 	Pilot           *PilotConfig           `json:"pilot,omitempty"`
@@ -28,256 +27,186 @@ type Values struct {
 
 // CertManagerConfig is described in istio.io documentation.
 type CertManagerConfig struct {
-	Enabled   *bool            `json:"enabled,inline"`
-	Hub       *string          `json:"hub,omitempty"`
-	Tag       *string          `json:"tag,omitempty"`
-	Resources *ResourcesConfig `json:"resources,omitempty"`
+	Enabled      *bool                  `json:"enabled,omitempty"`
+	Hub          *string                `json:"hub,omitempty"`
+	NodeSelector map[string]interface{} `json:"nodeSelector"`
+	Resources    *ResourcesConfig       `json:"resources,omitempty"`
+	Tag          *string                `json:"tag,omitempty"`
+}
+
+// CNIConfig is described in istio.io documentation.
+type CNIConfig struct {
+	Enabled *bool `json:"enabled,omitempty"`
+}
+
+// CoreDNSConfig is described in istio.io documentation.
+type CoreDNSConfig struct {
+	CoreDNSImage       *string                `json:"coreDNSImage,omitempty"`
+	CoreDNSPluginImage *string                `json:"coreDNSPluginImage,omitempty"`
+	Enabled            *bool                  `json:"enabled,omitempty"`
+	NodeSelector       map[string]interface{} `json:"nodeSelector,omitempty"`
+	ReplicaCount       *uint8                 `json:"replicaCount,omitempty"`
 }
 
 // GalleyConfig is described in istio.io documentation.
 type GalleyConfig struct {
-	Enabled      *bool   `json:"enabled,inline"`
-	ReplicaCount *uint8  `json:"replicaCount,omitempty"`
-	Image        *string `json:"image,omitempty"`
+	Enabled                          *bool                    `json:"enabled,omitempty"`
+	Image                            *string                  `json:"image,omitempty"`
+	Mesh                             map[string]string        `json:"mesh,omitempty"`
+	PodAntiAffinityLabelSelector     []map[string]interface{} `json:"podAntiAffinityLabelSelector"`
+	PodAntiAffinityTermLabelSelector []map[string]interface{} `json:"podAntiAffinityTermLabelSelector"`
+	ReplicaCount                     *uint8                   `json:"replicaCount,omitempty"`
+	Resources                        *ResourcesConfig         `json:"resources,omitempty"`
 }
 
 // GatewaysConfig is described in istio.io documentation.
 type GatewaysConfig struct {
-	Enabled  *bool `json:"enabled,inline"`
-	Gateways map[string]*GatewaysOneOfConfig
-}
-
-// GatewaysOneOfConfig is described in istio.io documentation.
-type GatewaysOneOfConfig struct {
-	Enabled        *bool                 `json:"enabled,inline"`
-	IngressGateway *IngressGatewayConfig `json:"istio-ingressgateway,inline"`
-	EgressGateway  *EgressGatewayConfig  `json:"istio-egressgateway,inline"`
-	ILBGateway     *ILBGatewayConfig     `json:"istio-ilbgateway,inline"`
-	UserGateway    *UserGatewayConfig
-}
-
-// IngressGatewayConfig is described in istio.io documentation.
-type IngressGatewayConfig struct {
-	Enabled                  *bool                       `json:"enabled,inline"`
-	SDS                      *IngressGatewaySDSConfig    `json:"sds,omitempty"`
-	Labels                   *GatewayLabelsConfig        `json:"labels,omitempty"`
-	AutoscaleEnabled         *bool                       `json:"autoscaleEnabled,omitempty"`
-	AutoscaleMax             *uint8                      `json:"autoscaleMax,omitempty"`
-	AutoscaleMin             *uint8                      `json:"autoscaleMin,omitempty"`
-	Resources                map[string]interface{}      `json:"resources,omitempty"`
-	CPU                      *CPUTargetUtilizationConfig `json:"cpu,omitempty"`
-	LoadBalancerIP           *string                     `json:"loadBalancerIP,omitempty"`
-	LoadBalancerSourceRanges []string                    `json:"loadBalancerSourceRanges,omitempty"`
-	ExternalIPs              []string                    `json:"externalIPs,omitempty"`
-	ServiceAnnotations       map[string]interface{}      `json:"serviceAnnotations,omitempty"`
-	PodAnnotations           map[string]interface{}      `json:"podAnnotations,omitempty"`
-	Type                     corev1.ServiceType          `json:"type,omitempty"`
-	Ports                    []*PortsConfig              `json:"ports,omitempty"`
-	MeshExpansionPorts       []*PortsConfig              `json:"meshExpansionPorts,omitempty"`
-	SecretVolumes            []*SecretVolume             `json:"secretVolumes,omitempty"`
-	NodeSelector             map[string]interface{}      `json:"nodeSelector,omitempty"`
-}
-
-// IngressGatewaySDSConfig is described in istio.io documentation.
-type IngressGatewaySDSConfig struct {
-	Enabled *bool   `json:"enabled,inline"`
-	Image   *string `json:"image,omitempty"`
+	EgressGateway  *EgressGatewayConfig  `json:"istio-egressgateway,omitempty"`
+	Enabled        *bool                 `json:"enabled,omitempty"`
+	ILBGateway     *ILBGatewayConfig     `json:"istio-ilbgateway,omitempty"`
+	IngressGateway *IngressGatewayConfig `json:"istio-ingressgateway,omitempty"`
 }
 
 // EgressGatewayConfig is described in istio.io documentation.
 type EgressGatewayConfig struct {
-	Enabled            *bool                       `json:"enabled,inline"`
-	Labels             *GatewayLabelsConfig        `json:"labels,omitempty"`
-	AutoscaleEnabled   *bool                       `json:"autoscaleEnabled,omitempty"`
-	AutoscaleMax       *uint8                      `json:"autoscaleMax,omitempty"`
-	AutoscaleMin       *uint8                      `json:"autoscaleMin,omitempty"`
-	CPU                *CPUTargetUtilizationConfig `json:"cpu,omitempty"`
-	ServiceAnnotations map[string]interface{}      `json:"serviceAnnotations,omitempty"`
-	PodAnnotations     map[string]interface{}      `json:"podAnnotations,omitempty"`
-	Type               corev1.ServiceType          `json:"type,omitempty"`
-	Ports              []*PortsConfig              `json:"ports,omitempty"`
-	SecretVolumes      []*SecretVolume             `json:"secretVolumes,omitempty"`
-	NodeSelector       map[string]string           `json:"nodeSelector,omitempty"`
+	AutoscaleEnabled                 *bool                       `json:"autoscaleEnabled,omitempty"`
+	AutoscaleMax                     *uint8                      `json:"autoscaleMax,omitempty"`
+	AutoscaleMin                     *uint8                      `json:"autoscaleMin,omitempty"`
+	ConnectTimeout                   *string                     `json:"connectTimeout,omitempty"`
+	CPU                              *CPUTargetUtilizationConfig `json:"cpu,omitempty"`
+	DrainDuration                    *string                     `json:"drainDuration,omitempty"`
+	Enabled                          *bool                       `json:"enabled,omitempty"`
+	Env                              map[string]string           `json:"env,omitempty"`
+	Labels                           *GatewayLabelsConfig        `json:"labels,omitempty"`
+	NodeSelector                     map[string]string           `json:"nodeSelector,omitempty"`
+	PodAnnotations                   map[string]interface{}      `json:"podAnnotations,omitempty"`
+	PodAntiAffinityLabelSelector     []map[string]interface{}    `json:"podAntiAffinityLabelSelector"`
+	PodAntiAffinityTermLabelSelector []map[string]interface{}    `json:"podAntiAffinityTermLabelSelector"`
+	Ports                            []*PortsConfig              `json:"ports,omitempty"`
+	Resources                        *ResourcesConfig            `json:"resources,omitempty"`
+	SecretVolumes                    []*SecretVolume             `json:"secretVolumes,omitempty"`
+	ServiceAnnotations               map[string]interface{}      `json:"serviceAnnotations,omitempty"`
+	Type                             corev1.ServiceType          `json:"type,omitempty"`
+	ZeroVPN                          *ZeroVPNConfig              `json:"zvpn,omitempty"`
+}
+
+type ZeroVPNConfig struct {
+	Enabled *bool   `json:"enabled,omitempty"`
+	Suffix  *string `json:"suffix,omitempty"`
 }
 
 // ILBGatewayConfig is described in istio.io documentation.
 type ILBGatewayConfig struct {
-	Enabled            *bool                       `json:"enabled,inline"`
-	Labels             *GatewayLabelsConfig        `json:"labels,omitempty"`
 	AutoscaleEnabled   *bool                       `json:"autoscaleEnabled,omitempty"`
 	AutoscaleMax       *uint8                      `json:"autoscaleMax,omitempty"`
 	AutoscaleMin       *uint8                      `json:"autoscaleMin,omitempty"`
+	Enabled            *bool                       `json:"enabled,omitempty"`
 	CPU                *CPUTargetUtilizationConfig `json:"cpu,omitempty"`
-	Resources          *ResourcesConfig            `json:"resources,omitempty"`
+	Labels             *GatewayLabelsConfig        `json:"labels,omitempty"`
 	LoadBalancerIP     *string                     `json:"loadBalancerIP,omitempty"`
-	ServiceAnnotations map[string]interface{}      `json:"serviceAnnotations,omitempty"`
-	PodAnnotations     map[string]interface{}      `json:"podAnnotations,omitempty"`
-	Type               corev1.ServiceType          `json:"type,omitempty"`
-	Ports              []*PortsConfig              `json:"ports,omitempty"`
-	SecretVolumes      []*SecretVolume             `json:"secretVolumes,omitempty"`
 	NodeSelector       map[string]interface{}      `json:"nodeSelector,omitempty"`
+	PodAnnotations     map[string]interface{}      `json:"podAnnotations,omitempty"`
+	Ports              []*PortsConfig              `json:"ports,omitempty"`
+	Resources          *ResourcesConfig            `json:"resources,omitempty"`
+	SecretVolumes      []*SecretVolume             `json:"secretVolumes,omitempty"`
+	ServiceAnnotations map[string]interface{}      `json:"serviceAnnotations,omitempty"`
+	Type               corev1.ServiceType          `json:"type,omitempty"`
 }
 
-// UserGatewayConfig is described in istio.io documentation.
-type UserGatewayConfig struct {
-	Enabled                  *bool                       `json:"enabled,inline"`
-	Labels                   *GatewayLabelsConfig        `json:"labels,omitempty"`
-	AutoscaleEnabled         *bool                       `json:"autoscaleEnabled,omitempty"`
-	AutoscaleMax             *uint8                      `json:"autoscaleMax,omitempty"`
-	AutoscaleMin             *uint8                      `json:"autoscaleMin,omitempty"`
-	CPU                      *CPUTargetUtilizationConfig `json:"cpu,omitempty"`
-	Resources                *ResourcesConfig            `json:"resources,omitempty"`
-	LoadBalancerIP           *string                     `json:"loadBalancerIP,omitempty"`
-	LoadBalancerSourceRanges []string                    `json:"loadBalancerSourceRanges,omitempty"`
-	ServiceAnnotations       map[string]interface{}      `json:"serviceAnnotations,omitempty"`
-	PodAnnotations           map[string]interface{}      `json:"podAnnotations,omitempty"`
-	Type                     corev1.ServiceType          `json:"type,omitempty"`
-	ExternalTrafficPolicy    string                      `json:"externalTrafficPolicy,omitempty"`
-	Ports                    []*PortsConfig              `json:"ports,omitempty"`
-	SecretVolumes            []*SecretVolume             `json:"secretVolumes,omitempty"`
-	NodeSelector             map[string]string           `json:"nodeSelector,omitempty"`
+// IngressGatewayConfig is described in istio.io documentation.
+type IngressGatewayConfig struct {
+	AutoscaleEnabled                 *bool                       `json:"autoscaleEnabled,omitempty"`
+	AutoscaleMax                     *uint8                      `json:"autoscaleMax,omitempty"`
+	AutoscaleMin                     *uint8                      `json:"autoscaleMin,omitempty"`
+	ConnectTimeout                   *string                     `json:"connectTimeout,omitempty"`
+	CPU                              *CPUTargetUtilizationConfig `json:"cpu,omitempty"`
+	CustomService                    *bool                       `json:"customService,omitempty"`
+	Debug                            *string                     `json:"debug,omitempty"`
+	Domain                           *string                     `json:"domain,omitempty"`
+	DrainDuration                    *string                     `json:"drainDuration,omitempty"`
+	Enabled                          *bool                       `json:"enabled,omitempty"`
+	Env                              map[string]string           `json:"env,omitempty"`
+	ExternalIPs                      []string                    `json:"externalIPs,omitempty"`
+	K8sIngress                       *bool                       `json:"k8sIngress,omitempty"`
+	K8sIngressHttps                  *bool                       `json:"k8sIngressHttps,omitempty"`
+	Labels                           *GatewayLabelsConfig        `json:"labels,omitempty"`
+	LoadBalancerIP                   *string                     `json:"loadBalancerIP,omitempty"`
+	LoadBalancerSourceRanges         []string                    `json:"loadBalancerSourceRanges,omitempty"`
+	MeshExpansionPorts               []*PortsConfig              `json:"meshExpansionPorts,omitempty"`
+	NodeSelector                     map[string]interface{}      `json:"nodeSelector,omitempty"`
+	PodAnnotations                   map[string]interface{}      `json:"podAnnotations,omitempty"`
+	PodAntiAffinityLabelSelector     []map[string]interface{}    `json:"podAntiAffinityLabelSelector"`
+	PodAntiAffinityTermLabelSelector []map[string]interface{}    `json:"podAntiAffinityTermLabelSelector"`
+	Ports                            []*PortsConfig              `json:"ports,omitempty"`
+	ReplicaCount                     *uint8                      `json:"replicaCount,omitempty"`
+	Resources                        map[string]interface{}      `json:"resources,omitempty"`
+	Sds                              *IngressGatewaySdsConfig    `json:"sds,omitempty"`
+	SecretVolumes                    []*SecretVolume             `json:"secretVolumes,omitempty"`
+	ServiceAnnotations               map[string]interface{}      `json:"serviceAnnotations,omitempty"`
+	Type                             corev1.ServiceType          `json:"type,omitempty"`
+	Zvpn                             *IngressGatewayZvpnConfig   `json:"zvpn,omitempty"`
+}
+
+// IngressGatewaySdsConfig is described in istio.io documentation.
+type IngressGatewaySdsConfig struct {
+	Enabled *bool   `json:"enabled,omitempty"`
+	Image   *string `json:"image,omitempty"`
+}
+
+// IngressGatewayZvpnConfig is described in istio.io documentation.
+type IngressGatewayZvpnConfig struct {
+	Enabled *bool   `json:"enabled,omitempty"`
+	Suffix  *string `json:"suffix,omitempty"`
 }
 
 // GlobalConfig is described in istio.io documentation.
 type GlobalConfig struct {
+	Arch                        *ArchConfig                       `json:"arch,omitempty"`
+	ConfigNamespace             *string                           `json:"configNamespace,omitempty"`
+	ConfigValidation            *bool                             `json:"configValidation,omitempty"`
+	ControlPlaneSecurityEnabled *bool                             `json:"controlPlaneSecurityEnabled,omitempty"`
+	DefaultNodeSelector         map[string]interface{}            `json:"defaultNodeSelector,omitempty"`
+	DefaultPodDisruptionBudget  *DefaultPodDisruptionBudgetConfig `json:"defaultPodDisruptionBudget,omitempty"`
+	DisablePolicyChecks         *bool                             `json:"disablePolicyChecks,omitempty"`
+	DefaultResources            *DefaultResourcesConfig           `json:"defaultResources,omitempty"`
+	EnableHelmTest              *bool                             `json:"enableHelmTest,omitempty"`
+	EnableTracing               *bool                             `json:"enableTracing,omitempty"`
 	Hub                         *string                           `json:"hub,omitempty"`
-	Tag                         *string                           `json:"tag,omitempty"`
-	MonitoringPort              *uint16                           `json:"monitoringPort,omitempty"`
+	ImagePullPolicy             corev1.PullPolicy                 `json:"imagePullPolicy,omitempty"`
+	IstioNamespace              *string                           `json:"istioNamespace,omitempty"`
 	KubernetesIngress           *KubernetesIngressConfig          `json:"k8sIngress,omitempty"`
+	LocalityLbSetting           map[string]interface{}            `json:"localityLbSetting,omitempty"`
+	Logging                     *GlobalLoggingConfig              `json:"logging,omitempty"`
+	MeshExpansion               *MeshExpansionConfig              `json:"meshExpansion,omitempty"`
+	MeshNetworks                map[string]interface{}            `json:"meshNetworks,omitempty"`
+	MonitoringPort              *uint16                           `json:"monitoringPort,omitempty"`
+	MTLS                        *MTLSConfig                       `json:"mtls,omitempty"`
+	MultiCluster                *MultiClusterConfig               `json:"multiCluster,omitempty"`
+	OneNamespace                *bool                             `json:"oneNamespace,omitempty"`
+	OutboundTrafficPolicy       *OutboundTrafficPolicyConfig      `json:"outboundTrafficPolicy,omitempty"`
+	PolicyCheckFailOpen         *bool                             `json:"policyCheckFailOpen,omitempty"`
+	PolicyNamespace             *string                           `json:"policyNamespace,omitempty"`
+	PriorityClassName           *string                           `json:"priorityClassName,omitempty"`
 	Proxy                       *ProxyConfig                      `json:"proxy,omitempty"`
 	ProxyInit                   *ProxyInitConfig                  `json:"proxy_init,omitempty"`
-	ImagePullPolicy             corev1.PullPolicy                 `json:"imagePullPolicy,omitempty"`
-	ControlPlaneSecurityEnabled *bool                             `json:"controlPlaneSecurityEnabled,omitempty"`
-	DisablePolicyChecks         *bool                             `json:"disablePolicyChecks,omitempty"`
-	PolicyCheckFailOpen         *bool                             `json:"policyCheckFailOpen,omitempty"`
-	EnableTracing               *bool                             `json:"enableTracing,omitempty"`
-	Tracer                      *TracerConfig                     `json:"tracer,omitempty"`
-	MTLS                        *MTLSConfig                       `json:"mtls,omitempty"`
-	Arch                        *ArchConfig                       `json:"arch,omitempty"`
-	OneNamespace                *bool                             `json:"oneNamespace,omitempty"`
-	DefaultNodeSelector         map[string]interface{}            `json:"defaultNodeSelector,omitempty"`
-	ConfigValidation            *bool                             `json:"configValidation,omitempty"`
-	MeshExpansion               *MeshExpansionConfig              `json:"meshExpansion,omitempty"`
-	MultiCluster                *MultiClusterConfig               `json:"multiCluster,omitempty"`
-	DefaultResources            *DefaultResourcesConfig           `json:"defaultResources,omitempty"`
-	DefaultPodDisruptionBudget  *DefaultPodDisruptionBudgetConfig `json:"defaultPodDisruptionBudget,omitempty"`
-	PriorityClassName           *string                           `json:"priorityClassName,omitempty"`
-	UseMCP                      *bool                             `json:"useMCP,omitempty"`
-	TrustDomain                 *string                           `json:"trustDomain,omitempty"`
-	OutboundTrafficPolicy       *OutboundTrafficPolicyConfig      `json:"outboundTrafficPolicy,omitempty"`
 	SDS                         *SDSConfig                        `json:"sds,omitempty"`
-	// TODO: check this
-	MeshNetworks map[string]interface{} `json:"meshNetworks,omitempty"`
-}
-
-// KubernetesIngressConfig represents the configuration for Kubernetes Ingress.
-type KubernetesIngressConfig struct {
-	Enabled     *bool   `json:"enabled,inline"`
-	GatewayName *string `json:"gatewayName,omitempty"`
-	EnableHTTPS *bool   `json:"enableHttps,omitempty"`
-}
-
-// ProxyConfig specifies how proxies are configured within Istio.
-type ProxyConfig struct {
-	Image                        *string                       `json:"image,omitempty"`
-	ClusterDomain                *string                       `json:"clusterDomain,omitempty"`
-	Resources                    *ResourcesConfig              `json:"resources,omitempty"`
-	Concurrency                  *uint8                        `json:"concurrency,omitempty"`
-	AccessLogFile                *string                       `json:"accessLogFile,omitempty"`
-	AccessLogFormat              *string                       `json:"accessLogFormat,omitempty"`
-	AccessLogEncoding            ProxyConfig_AccessLogEncoding `json:"accessLogEncoding,omitempty"`
-	DNSRefreshRate               *string                       `json:"dnsRefreshRate,omitempty"`
-	Privileged                   *bool                         `json:"privileged,omitempty"`
-	EnableCoreDump               *bool                         `json:"enableCoreDump,omitempty"`
-	StatusPort                   *uint16                       `json:"statusPort,omitempty"`
-	ReadinessInitialDelaySeconds *uint16                       `json:"readinessInitialDelaySeconds,omitempty"`
-	ReadinessPeriodSeconds       *uint16                       `json:"readinessPeriodSeconds,omitempty"`
-	ReadinessFailureThreshold    *uint16                       `json:"readinessFailureThreshold,omitempty"`
-	IncludeIPRanges              *string                       `json:"includeIPRanges,omitempty"`
-	ExcludeIPRanges              *string                       `json:"excludeIPRanges,omitempty"`
-	KubevirtInterfaces           *string                       `json:"kubevirtInterfaces,omitempty"`
-	IncludeInboundPorts          *string                       `json:"includeInboundPorts,omitempty"`
-	ExcludeInboundPorts          *string                       `json:"excludeInboundPorts,omitempty"`
-	AutoInject                   *bool                         `json:"autoInject,omitempty"`
-	EnvoyStatsD                  *EnvoyMetricsConfig           `json:"envoyStatsd,omitempty"`
-	EnvoyMetricsService          *EnvoyMetricsConfig           `json:"envoyMetricsService,omitempty"`
-	Tracer                       *string                       `json:"tracer,omitempty"`
-}
-
-// ProxyConfig_AccessLogEncoding is described in istio.io documentation.
-type ProxyConfig_AccessLogEncoding int32
-
-const (
-	// ProxyConfig_JSON is described in istio.io documentation.
-	ProxyConfig_JSON ProxyConfig_AccessLogEncoding = 0
-	// ProxyConfig_TEXT is described in istio.io documentation.
-	ProxyConfig_TEXT ProxyConfig_AccessLogEncoding = 1
-)
-
-// ProxyConfig_AccessLogEncoding_name is described in istio.io documentation.
-var ProxyConfig_AccessLogEncoding_name = map[int32]string{
-	0: "JSON",
-	1: "TEXT",
-}
-
-// ProxyConfig_AccessLogEncoding_value is described in istio.io documentation.
-var ProxyConfig_AccessLogEncoding_value = map[string]int32{
-	"JSON": 0,
-	"TEXT": 1,
-}
-
-// EnvoyMetricsConfig is described in istio.io documentation.
-type EnvoyMetricsConfig struct {
-	Enabled *bool   `json:"enabled,inline"`
-	Host    *string `json:"host,omitempty"`
-	Port    *string `json:"port,omitempty"`
-}
-
-// ProxyInitConfig is described in istio.io documentation.
-type ProxyInitConfig struct {
-	Image *string `json:"image,omitempty"`
-}
-
-// TracerConfig is described in istio.io documentation.
-type TracerConfig struct {
-	LightStep *TracerLightStepConfig `json:"lightstep,omitempty"`
-	Zipkin    *TracerZipkinConfig    `json:"zipkin,omitempty"`
-}
-
-// TracerLightStepConfig is described in istio.io documentation.
-type TracerLightStepConfig struct {
-	Address     *string `json:"address,omitempty"`
-	AccessToken *string `json:"accessToken,omitempty"`
-	Secure      *bool   `json:"secure,omitempty"`
-	CACertPath  *string `json:"cacertPath,omitempty"`
-}
-
-// TracerZipkinConfig is described in istio.io documentation.
-type TracerZipkinConfig struct {
-	Address *string `json:"address,omitempty"`
-}
-
-// MTLSConfig is described in istio.io documentation.
-type MTLSConfig struct {
-	Enabled *bool `json:"enabled,inline"`
+	Tag                         *string                           `json:"tag,omitempty"`
+	TelemetryNamespace          *string                           `json:"telemetryNamespace,omitempty"`
+	Tracer                      *TracerConfig                     `json:"tracer,omitempty"`
+	TrustDomain                 *string                           `json:"trustDomain,omitempty"`
+	UseMCP                      *bool                             `json:"useMCP,omitempty"`
 }
 
 // ArchConfig is described in istio.io documentation.
 type ArchConfig struct {
 	Amd64   *uint8 `json:"amd64,omitempty"`
-	S390x   *uint8 `json:"s390x,omitempty"`
 	Ppc64le *uint8 `json:"ppc64le,omitempty"`
+	S390x   *uint8 `json:"s390x,omitempty"`
 }
 
-// MeshExpansionConfig is described in istio.io documentation.
-type MeshExpansionConfig struct {
-	Enabled *bool `json:"enabled,inline"`
-	UseILB  *bool `json:"useILB,omitempty"`
-}
-
-// MultiClusterConfig is described in istio.io documentation.
-type MultiClusterConfig struct {
-	Enabled *bool `json:"enabled,inline"`
+// DefaultPodDisruptionBudgetConfig is described in istio.io documentation.
+type DefaultPodDisruptionBudgetConfig struct {
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 // DefaultResourcesConfig is described in istio.io documentation.
@@ -285,9 +214,73 @@ type DefaultResourcesConfig struct {
 	Requests *ResourcesRequestsConfig `json:"requests,omitempty"`
 }
 
-// DefaultPodDisruptionBudgetConfig is described in istio.io documentation.
-type DefaultPodDisruptionBudgetConfig struct {
-	Enabled *bool `json:"enabled,inline"`
+// KubernetesIngressConfig represents the configuration for Kubernetes Ingress.
+type KubernetesIngressConfig struct {
+	Enabled     *bool   `json:"enabled,omitempty"`
+	EnableHTTPS *bool   `json:"enableHttps,omitempty"`
+	GatewayName *string `json:"gatewayName,omitempty"`
+}
+
+// GlobalLoggingConfig is described in istio.io documentation.
+type GlobalLoggingConfig struct {
+	Level *string `json:"level,omitempty"`
+}
+
+// MeshExpansionConfig is described in istio.io documentation.
+type MeshExpansionConfig struct {
+	Enabled *bool `json:"enabled,omitempty"`
+	UseILB  *bool `json:"useILB,omitempty"`
+}
+
+// MTLSConfig is described in istio.io documentation.
+type MTLSConfig struct {
+	Enabled *bool `json:"enabled,omitempty"`
+}
+
+// MultiClusterConfig is described in istio.io documentation.
+type MultiClusterConfig struct {
+	Enabled *bool `json:"enabled,omitempty"`
+}
+
+// ProxyConfig specifies how proxies are configured within Istio.
+type ProxyConfig struct {
+	AccessLogFile                *string             `json:"accessLogFile,omitempty"`
+	AccessLogFormat              *string             `json:"accessLogFormat,omitempty"`
+	AccessLogEncoding            *string             `json:"accessLogEncoding,omitempty"`
+	AutoInject                   *string             `json:"autoInject,omitempty"`
+	ClusterDomain                *string             `json:"clusterDomain,omitempty"`
+	ComponentLogLevel            *string             `json:"componentLogLevel,omitempty"`
+	Concurrency                  *uint8              `json:"concurrency,omitempty"`
+	DNSRefreshRate               *string             `json:"dnsRefreshRate,omitempty"`
+	EnableCoreDump               *bool               `json:"enableCoreDump,omitempty"`
+	EnvoyMetricsService          *EnvoyMetricsConfig `json:"envoyMetricsService,omitempty"`
+	EnvoyStatsD                  *EnvoyMetricsConfig `json:"envoyStatsd,omitempty"`
+	ExcludeInboundPorts          *string             `json:"excludeInboundPorts,omitempty"`
+	ExcludeIPRanges              *string             `json:"excludeIPRanges,omitempty"`
+	Image                        *string             `json:"image,omitempty"`
+	IncludeInboundPorts          *string             `json:"includeInboundPorts,omitempty"`
+	IncludeIPRanges              *string             `json:"includeIPRanges,omitempty"`
+	KubevirtInterfaces           *string             `json:"kubevirtInterfaces,omitempty"`
+	LogLevel                     *string             `json:"logLevel,omitempty"`
+	Privileged                   *bool               `json:"privileged,omitempty"`
+	ReadinessInitialDelaySeconds *uint16             `json:"readinessInitialDelaySeconds,omitempty"`
+	ReadinessPeriodSeconds       *uint16             `json:"readinessPeriodSeconds,omitempty"`
+	ReadinessFailureThreshold    *uint16             `json:"readinessFailureThreshold,omitempty"`
+	StatusPort                   *uint16             `json:"statusPort,omitempty"`
+	Resources                    *ResourcesConfig    `json:"resources,omitempty"`
+	Tracer                       *string             `json:"tracer,omitempty"`
+}
+
+// EnvoyMetricsConfig is described in istio.io documentation.
+type EnvoyMetricsConfig struct {
+	Enabled *bool   `json:"enabled,omitempty"`
+	Host    *string `json:"host,omitempty"`
+	Port    *int16  `json:"port,omitempty"`
+}
+
+// ProxyInitConfig is described in istio.io documentation.
+type ProxyInitConfig struct {
+	Image *string `json:"image,omitempty"`
 }
 
 // OutboundTrafficPolicyConfig is described in istio.io documentation.
@@ -297,155 +290,174 @@ type OutboundTrafficPolicyConfig struct {
 
 // SDSConfig is described in istio.io documentation.
 type SDSConfig struct {
-	Enabled           *bool   `json:"enabled,inline"`
+	Enabled           *bool   `json:"enabled,omitempty"`
 	UDSPath           *string `json:"udsPath,omitempty"`
-	UseTrustworthyJWT *bool   `json:"useTrustworthyJwt,omitempty"`
 	UseNormalJWT      *bool   `json:"useNormalJwt,omitempty"`
+	UseTrustworthyJWT *bool   `json:"useTrustworthyJwt,omitempty"`
 }
 
-// CNIConfig is described in istio.io documentation.
-type CNIConfig struct {
-	Enabled *bool `json:"enabled,inline"`
+// TracerConfig is described in istio.io documentation.
+type TracerConfig struct {
+	Datadog   *TracerDatadogConfig   `json:"datadog,omitempty"`
+	LightStep *TracerLightStepConfig `json:"lightstep,omitempty"`
+	Zipkin    *TracerZipkinConfig    `json:"zipkin,omitempty"`
 }
 
-// CoreDNSConfig is described in istio.io documentation.
-type CoreDNSConfig struct {
-	Enabled            *bool                  `json:"enabled,inline"`
-	CoreDNSImage       *string                `json:"coreDNSImage,omitempty"`
-	CoreDNSPluginImage *string                `json:"coreDNSPluginImage,omitempty"`
-	ReplicaCount       *uint8                 `json:"replicaCount,omitempty"`
-	NodeSelector       map[string]interface{} `json:"nodeSelector,omitempty"`
+// TracerDatadogConfig is described in istio.io documentation.
+type TracerDatadogConfig struct {
+	Address *string `json:"address,omitempty"`
 }
 
-// KialiConfig is described in istio.io documentation.
-type KialiConfig struct {
-	Enabled          *bool                  `json:"enabled,inline"`
-	ReplicaCount     *uint8                 `json:"replicaCount,omitempty"`
-	Hub              *string                `json:"hub,omitempty"`
-	Tag              *string                `json:"tag,omitempty"`
-	ContextPath      *string                `json:"contextPath,omitempty"`
-	NodeSelector     map[string]interface{} `json:"nodeSelector,omitempty"`
-	Ingress          *AddonIngressConfig    `json:"ingress,omitempty"`
-	Dashboard        *KialiDashboardConfig  `json:"dashboard,omitempty"`
-	PrometheusAddr   *string                `json:"prometheusAddr,omitempty"`
-	CreateDemoSecret *bool                  `json:"createDemoSecret,omitempty"`
+// TracerLightStepConfig is described in istio.io documentation.
+type TracerLightStepConfig struct {
+	Address     *string `json:"address,omitempty"`
+	AccessToken *string `json:"accessToken,omitempty"`
+	CACertPath  *string `json:"cacertPath,omitempty"`
+	Secure      *bool   `json:"secure,omitempty"`
 }
 
-// KialiDashboardConfig is described in istio.io documentation.
-type KialiDashboardConfig struct {
-	SecretName       *string `json:"secretName,omitempty"`
-	UsernameKey      *string `json:"usernameKey,omitempty"`
-	PassphraseKey    *string `json:"passphraseKey,omitempty"`
-	GrafanaURL       *string `json:"grafanaURL,omitempty"`
-	JaegerURL        *string `json:"jaegerURL,omitempty"`
-	PrometheusAddr   *string `json:"prometheusAddr,omitempty"`
-	CreateDemoSecret *string `json:"createDemoSecret,omitempty"`
+// TracerZipkinConfig is described in istio.io documentation.
+type TracerZipkinConfig struct {
+	Address *string `json:"address,omitempty"`
 }
 
 // MixerConfig is described in istio.io documentation.
 type MixerConfig struct {
-	Enabled   *bool                 `json:"enabled,inline"`
+	Adapters  *MixerAdaptersConfig  `json:"adapters,omitempty"`
+	Enabled   *bool                 `json:"enabled,omitempty"`
+	Env       map[string]string     `json:"env,omitempty"`
 	Image     *string               `json:"image,omitempty"`
 	Policy    *MixerPolicyConfig    `json:"policy,omitempty"`
 	Telemetry *MixerTelemetryConfig `json:"telemetry,omitempty"`
-	Adapters  *MixerAdaptersConfig  `json:"adapters,omitempty"`
-	// TODO: env
-}
-
-// MixerPolicyConfig is described in istio.io documentation.
-type MixerPolicyConfig struct {
-	Enabled          *bool                       `json:"enabled,inline"`
-	ReplicaCount     *uint8                      `json:"replicaCount,omitempty"`
-	AutoscaleEnabled *bool                       `json:"autoscaleEnabled,omitempty"`
-	AutoscaleMax     *uint8                      `json:"autoscaleMax,omitempty"`
-	AutoscaleMin     *uint8                      `json:"autoscaleMin,omitempty"`
-	CPU              *CPUTargetUtilizationConfig `json:"cpu,omitempty"`
-}
-
-// MixerTelemetryConfig is described in istio.io documentation.
-type MixerTelemetryConfig struct {
-	Enabled                *bool                      `json:"enabled,inline"`
-	ReplicaCount           *uint8                     `json:"replicaCount,omitempty"`
-	AutoscaleEnabled       *bool                      `json:"autoscaleEnabled,omitempty"`
-	AutoscaleMax           *uint8                     `json:"autoscaleMax,omitempty"`
-	AutoscaleMin           *uint8                     `json:"autoscaleMin,omitempty"`
-	CPU                    CPUTargetUtilizationConfig `json:"cpu,omitempty"`
-	SessionAffinityEnabled *bool                      `json:"sessionAffinityEnabled,omitempty"`
-	LoadShedding           *LoadSheddingConfig        `json:"loadshedding,omitempty"`
-	Resources              *ResourcesConfig           `json:"resources,omitempty"`
-	PodAnnotations         map[string]interface{}     `json:"podAnnotations,omitempty"`
-	NodeSelector           map[string]interface{}     `json:"nodeSelector,omitempty"`
-	Adapters               *MixerAdaptersConfig       `json:"adapters,omitempty"`
-}
-
-// LoadSheddingConfig is described in istio.io documentation.
-type LoadSheddingConfig struct {
-	Mode             *string `json:"mode,omitempty"`
-	LatencyThreshold *string `json:"latencyThreshold,omitempty"`
 }
 
 // MixerAdaptersConfig is described in istio.io documentation.
 type MixerAdaptersConfig struct {
 	KubernetesEnv  *KubernetesEnvMixerAdapterConfig `json:"kubernetesenv,omitempty"`
-	Stdio          *StdioMixerAdapterConfig         `json:"stdio,omitempty"`
 	Prometheus     *PrometheusMixerAdapterConfig    `json:"prometheus,omitempty"`
+	Stdio          *StdioMixerAdapterConfig         `json:"stdio,omitempty"`
 	UseAdapterCRDs *bool                            `json:"useAdapterCRDs,omitempty"`
 }
 
 // KubernetesEnvMixerAdapterConfig is described in istio.io documentation.
 type KubernetesEnvMixerAdapterConfig struct {
-	Enabled *bool `json:"enabled,inline"`
-}
-
-// StdioMixerAdapterConfig is described in istio.io documentation.
-type StdioMixerAdapterConfig struct {
-	Enabled      *bool `json:"enabled,inline"`
-	OutputAsJSON *bool
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 // PrometheusMixerAdapterConfig is described in istio.io documentation.
 type PrometheusMixerAdapterConfig struct {
-	Enabled              *bool `json:"enabled,inline"`
-	MetricExpiryDuration string
+	Enabled               *bool   `json:"enabled,omitempty"`
+	MetricsExpiryDuration *string `json:"metricsExpiryDuration,omitempty"`
+}
+
+// StdioMixerAdapterConfig is described in istio.io documentation.
+type StdioMixerAdapterConfig struct {
+	Enabled      *bool `json:"enabled,omitempty"`
+	OutputAsJson *bool `json:"outputAsJson,omitempty"`
+}
+
+// MixerPolicyConfig is described in istio.io documentation.
+type MixerPolicyConfig struct {
+	AutoscaleEnabled *bool                       `json:"autoscaleEnabled,omitempty"`
+	AutoscaleMax     *uint8                      `json:"autoscaleMax,omitempty"`
+	AutoscaleMin     *uint8                      `json:"autoscaleMin,omitempty"`
+	CPU              *CPUTargetUtilizationConfig `json:"cpu,omitempty"`
+	Enabled          *bool                       `json:"enabled,omitempty"`
+	Image            *string                     `json:"image,omitempty"`
+	PodAnnotations   map[string]interface{}      `json:"podAnnotations,omitempty"`
+	ReplicaCount     *uint8                      `json:"replicaCount,omitempty"`
+}
+
+// MixerTelemetryConfig is described in istio.io documentation.
+type MixerTelemetryConfig struct {
+	Adapters               *MixerAdaptersConfig       `json:"adapters,omitempty"`
+	AutoscaleEnabled       *bool                      `json:"autoscaleEnabled,omitempty"`
+	AutoscaleMax           *uint8                     `json:"autoscaleMax,omitempty"`
+	AutoscaleMin           *uint8                     `json:"autoscaleMin,omitempty"`
+	CPU                    CPUTargetUtilizationConfig `json:"cpu,omitempty"`
+	Enabled                *bool                      `json:"enabled,omitempty"`
+	Env                    map[string]string          `json:"env,omitempty"`
+	Image                  *string                    `json:"image,omitempty"`
+	LoadShedding           *LoadSheddingConfig        `json:"loadshedding,omitempty"`
+	NodeSelector           map[string]interface{}     `json:"nodeSelector,omitempty"`
+	PodAnnotations         map[string]interface{}     `json:"podAnnotations,omitempty"`
+	ReplicaCount           *uint8                     `json:"replicaCount,omitempty"`
+	Resources              *ResourcesConfig           `json:"resources,omitempty"`
+	SessionAffinityEnabled *bool                      `json:"sessionAffinityEnabled,omitempty"`
+}
+
+// LoadSheddingConfig is described in istio.io documentation.
+type LoadSheddingConfig struct {
+	LatencyThreshold *string `json:"latencyThreshold,omitempty"`
+	Mode             *string `json:"mode,omitempty"`
 }
 
 // NodeAgentConfig is described in istio.io documentation.
 type NodeAgentConfig struct {
-	Enabled      *bool                  `json:"enabled,inline"`
+	Enabled      *bool                  `json:"enabled,omitempty"`
+	Env          map[string]interface{} `json:"env,omitempty"`
 	Image        *string                `json:"image,omitempty"`
 	NodeSelector map[string]interface{} `json:"nodeSelector,omitempty"`
-	// TODO: env, Plugins
 }
 
 // PilotConfig is described in istio.io documentation.
 type PilotConfig struct {
-	Enabled                         *bool                       `json:"enabled,inline"`
-	AutoscaleEnabled                *bool                       `json:"autoscaleEnabled,omitempty"`
-	AutoscaleMax                    *uint8                      `json:"autoscaleMax,omitempty"`
-	AutoscaleMin                    *uint8                      `json:"autoscaleMin,omitempty"`
-	Image                           *string                     `json:"image,omitempty"`
-	Sidecar                         *bool                       `json:"sidecar,omitempty"`
-	TraceSampling                   *float64                    `json:"traceSampling,omitempty"`
-	Resources                       *ResourcesConfig            `json:"resources,omitempty"`
-	CPU                             *CPUTargetUtilizationConfig `json:"cpu,omitempty"`
-	NodeSelector                    map[string]interface{}      `json:"nodeSelector,omitempty"`
-	KeepaliveMaxServerConnectionAge *string                     `json:"keepaliveMaxServerConnectionAge,omitempty"`
-	// TODO: env
+	Enabled                          *bool                       `json:"enabled,omitempty"`
+	AutoscaleEnabled                 *bool                       `json:"autoscaleEnabled,omitempty"`
+	AutoscaleMin                     *uint8                      `json:"autoscaleMin,omitempty"`
+	AutoscaleMax                     *uint8                      `json:"autoscaleMax,omitempty"`
+	ReplicaCount                     *uint8                      `json:"replicaCount,omitempty"`
+	Image                            *string                     `json:"image,omitempty"`
+	Sidecar                          *bool                       `json:"sidecar,omitempty"`
+	TraceSampling                    *float64                    `json:"traceSampling,omitempty"`
+	Resources                        *ResourcesConfig            `json:"resources,omitempty"`
+	ConfigNamespace                  *string                     `json:"configNamespace,omitempty"`
+	CPU                              *CPUTargetUtilizationConfig `json:"cpu,omitempty"`
+	NodeSelector                     map[string]interface{}      `json:"nodeSelector,omitempty"`
+	KeepaliveMaxServerConnectionAge  *string                     `json:"keepaliveMaxServerConnectionAge,omitempty"`
+	DeploymentLabels                 map[string]string           `json:"deploymentLabels,omitempty"`
+	MeshNetworks                     map[string]interface{}      `json:"meshNetworks,omitempty"`
+	PodAntiAffinityLabelSelector     []map[string]interface{}    `json:"podAntiAffinityLabelSelector"`
+	PodAntiAffinityTermLabelSelector []map[string]interface{}    `json:"podAntiAffinityTermLabelSelector"`
+	ConfigMap                        *bool                       `json:"configMap,omitempty"`
+	Ingress                          *PilotIngressConfig         `json:"ingress,omitempty"`
+	UseMCP                           *bool                       `json:"useMCP,omitempty"`
+	Env                              map[string]string           `json:"env,omitempty"`
+	Policy                           *PilotPolicyConfig          `json:"policy,omitempty"`
+	Telemetry                        *PilotTelemetryConfig       `json:"telemetry,omitempty"`
+}
+
+// PilotIngressConfig is described in istio.io documentation.
+type PilotIngressConfig struct {
+	IngressService        string `json:"ingressService,omitempty"`
+	IngressControllerMode string `json:"ingressControllerMode,omitempty"`
+	IngressClass          string `json:"ingressClass,omitempty"`
+}
+
+// PilotPolicyConfig is described in istio.io documentation.
+type PilotPolicyConfig struct {
+	Enabled *bool `json:"enabled,omitempty"`
+}
+
+// PilotTelemetryConfig is described in istio.io documentation.
+type PilotTelemetryConfig struct {
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 // PrometheusConfig is described in istio.io documentation.
 type PrometheusConfig struct {
-	Enabled        *bool                     `json:"enabled,inline"`
-	ReplicaCount   *uint8                    `json:"replicaCount,omitempty"`
-	Hub            *string                   `json:"hub,omitempty"`
-	Tag            *string                   `json:"tag,omitempty"`
-	Retention      *string                   `json:"retention,omitempty"`
-	NodeSelector   map[string]interface{}    `json:"nodeSelector,omitempty"`
-	ScrapeInterval *string                   `json:"scrapeInterval,omitempty"`
-	ContextPath    *string                   `json:"contextPath,omitempty"`
-	Ingress        *AddonIngressConfig       `json:"ingress,omitempty"`
-	Service        *PrometheusServiceConfig  `json:"service,omitempty"`
-	Security       *PrometheusSecurityConfig `json:"security,omitempty"`
+	CreatePrometheusResource *bool                     `json:"createPrometheusResource,omitempty"`
+	Enabled                  *bool                     `json:"enabled,omitempty"`
+	ReplicaCount             *uint8                    `json:"replicaCount,omitempty"`
+	Hub                      *string                   `json:"hub,omitempty"`
+	Tag                      *string                   `json:"tag,omitempty"`
+	Retention                *string                   `json:"retention,omitempty"`
+	NodeSelector             map[string]interface{}    `json:"nodeSelector,omitempty"`
+	ScrapeInterval           *string                   `json:"scrapeInterval,omitempty"`
+	ContextPath              *string                   `json:"contextPath,omitempty"`
+	Ingress                  *AddonIngressConfig       `json:"ingress,omitempty"`
+	Service                  *PrometheusServiceConfig  `json:"service,omitempty"`
+	Security                 *PrometheusSecurityConfig `json:"security,omitempty"`
 }
 
 // PrometheusServiceConfig is described in istio.io documentation.
@@ -456,28 +468,30 @@ type PrometheusServiceConfig struct {
 
 // PrometheusServiceNodePortConfig is described in istio.io documentation.
 type PrometheusServiceNodePortConfig struct {
-	Enabled *bool   `json:"enabled,inline"`
+	Enabled *bool   `json:"enabled,omitempty"`
 	Port    *uint16 `json:"port,omitempty"`
 }
 
 // PrometheusSecurityConfig is described in istio.io documentation.
 type PrometheusSecurityConfig struct {
-	Enabled *bool `json:"enabled,inline"`
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 // SecurityConfig is described in istio.io documentation.
 type SecurityConfig struct {
-	Enabled          *bool                  `json:"enabled,inline"`
+	Enabled          *bool                  `json:"enabled,omitempty"`
 	ReplicaCount     *uint8                 `json:"replicaCount,omitempty"`
 	Image            *string                `json:"image,omitempty"`
 	SelfSigned       *bool                  `json:"selfSigned,omitempty"`
+	TrustDomain      *string                `json:"trustDomain,omitempty"`
+	DNSCerts         map[string]string      `json:"dnsCerts,omitempty"`
 	CreateMeshPolicy *bool                  `json:"createMeshPolicy,omitempty"`
 	NodeSelector     map[string]interface{} `json:"nodeSelector,omitempty"`
 }
 
 // ServiceGraphConfig is described in istio.io documentation.
 type ServiceGraphConfig struct {
-	Enabled        *bool                  `json:"enabled,inline"`
+	Enabled        *bool                  `json:"enabled,omitempty"`
 	ReplicaCount   *uint8                 `json:"replicaCount,omitempty"`
 	Image          *string                `json:"image,omitempty"`
 	NodeSelector   map[string]interface{} `json:"nodeSelector,omitempty"`
@@ -489,23 +503,33 @@ type ServiceGraphConfig struct {
 
 // SidecarInjectorConfig is described in istio.io documentation.
 type SidecarInjectorConfig struct {
-	Enabled                   *bool                  `json:"enabled,inline"`
-	ReplicaCount              *uint8                 `json:"replicaCount,omitempty"`
-	Image                     *string                `json:"image,omitempty"`
-	EnableNamespacesByDefault *bool                  `json:"enableNamespacesByDefault,omitempty"`
-	NodeSelector              map[string]interface{} `json:"nodeSelector,omitempty"`
-	RewriteAppHTTPProbe       *bool                  `json:"rewriteAppHTTPProbe,inline"`
+	AlwaysInjectSelector             []map[string]interface{} `json:"alwaysInjectSelector,omitempty"`
+	Enabled                          *bool                    `json:"enabled,omitempty"`
+	EnableNamespacesByDefault        *bool                    `json:"enableNamespacesByDefault,omitempty"`
+	Image                            *string                  `json:"image,omitempty"`
+	NodeSelector                     map[string]interface{}   `json:"nodeSelector,omitempty"`
+	NeverInjectSelector              []map[string]interface{} `json:"neverInjectSelector,omitempty"`
+	PodAntiAffinityLabelSelector     []map[string]interface{} `json:"podAntiAffinityLabelSelector"`
+	PodAntiAffinityTermLabelSelector []map[string]interface{} `json:"podAntiAffinityTermLabelSelector"`
+	ReplicaCount                     *uint8                   `json:"replicaCount,omitempty"`
+	RewriteAppHTTPProbe              *bool                    `json:"rewriteAppHTTPProbe,inline"`
+	SelfSigned                       *bool                    `json:"selfSigned,omitempty"`
 }
 
 // TracingConfig is described in istio.io documentation.
 type TracingConfig struct {
-	Enabled      *bool                  `json:"enabled,inline"`
-	Provider     *string                `json:"provider,omitempty"`
-	NodeSelector map[string]interface{} `json:"nodeSelector,omitempty"`
-	Jaeger       *TracingJaegerConfig   `json:"jaeger,omitempty"`
-	Zipkin       *TracingZipkinConfig   `json:"zipkin,omitempty"`
-	Service      *ServiceConfig         `json:"service,omitempty"`
+	Enabled      *bool                  `json:"enabled,omitempty"`
 	Ingress      *TracingIngressConfig  `json:"ingress,omitempty"`
+	Jaeger       *TracingJaegerConfig   `json:"jaeger,omitempty"`
+	NodeSelector map[string]interface{} `json:"nodeSelector,omitempty"`
+	Provider     *string                `json:"provider,omitempty"`
+	Service      *ServiceConfig         `json:"service,omitempty"`
+	Zipkin       *TracingZipkinConfig   `json:"zipkin,omitempty"`
+}
+
+// TracingIngressConfig is described in istio.io documentation.
+type TracingIngressConfig struct {
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 // TracingJaegerConfig is described in istio.io documentation.
@@ -537,11 +561,6 @@ type TracingZipkinNodeConfig struct {
 	CPUs *uint8 `json:"cpus,omitempty"`
 }
 
-// TracingIngressConfig is described in istio.io documentation.
-type TracingIngressConfig struct {
-	Enabled *bool `json:"enabled,inline"`
-}
-
 // Shared types
 
 // ResourcesConfig is described in istio.io documentation.
@@ -559,8 +578,8 @@ type ResourcesRequestsConfig struct {
 // ServiceConfig is described in istio.io documentation.
 type ServiceConfig struct {
 	Annotations  map[string]interface{} `json:"annotations,omitempty"`
-	Name         *string                `json:"name,omitempty"`
 	ExternalPort *uint16                `json:"externalPort,omitempty"`
+	Name         *string                `json:"name,omitempty"`
 	Type         corev1.ServiceType     `json:"type,omitempty"`
 }
 
@@ -572,13 +591,15 @@ type CPUTargetUtilizationConfig struct {
 // PortsConfig is described in istio.io documentation.
 type PortsConfig struct {
 	Name       *string `json:"name,omitempty"`
-	TargetPort *string `json:"targetPort,omitempty"`
-	NodePort   *string `json:"nodePort,omitempty"`
+	Port       *int16  `json:"port,omitempty"`
+	NodePort   *int16  `json:"nodePort,omitempty"`
+	TargetPort *int16  `json:"targetPort,omitempty"`
 }
 
 // SecretVolume is described in istio.io documentation.
 type SecretVolume struct {
 	MountPath  *string `json:"mountPath,omitempty"`
+	Name       *string `json:"name,omitempty"`
 	SecretName *string `json:"secretName,omitempty"`
 }
 
@@ -590,6 +611,6 @@ type GatewayLabelsConfig struct {
 
 // AddonIngressConfig is described in istio.io documentation.
 type AddonIngressConfig struct {
-	Enabled *bool    `json:"enabled,inline"`
+	Enabled *bool    `json:"enabled,omitempty"`
 	Hosts   []string `json:"hosts,omitempty"`
 }
