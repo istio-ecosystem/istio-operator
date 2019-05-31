@@ -1,3 +1,17 @@
+// Copyright 2017 Istio Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package values
 
 import (
@@ -16,37 +30,6 @@ import (
 const (
 	valuesFilesDir = "testdata/values"
 )
-
-/*
-func TestUnmarshalValues(t *testing.T) {
-	tests := []struct {
-		desc    string
-		yamlStr string
-		want    string
-	}{}
-
-	for _, tt := range tests {
-		t.Run(tt.desc, func(t *testing.T) {
-			tk := &v1alpha1.Values{}
-			err := yaml.Unmarshal([]byte(tt.yamlStr), tk)
-			if err != nil {
-				t.Fatalf("yaml.Unmarshal(%s): got error %s", tt.desc, err)
-			}
-			s, err := yaml.Marshal(tk)
-			if err != nil {
-				t.Fatalf("yaml.Marshal(%s): got error %s", tt.desc, err)
-			}
-			got, want := stripNL(string(s)), stripNL(tt.want)
-			if want == "" {
-				want = stripNL(tt.yamlStr)
-			}
-			if !IsYAMLEqual(got, want) {
-				t.Errorf("%s: got:\n%s\nwant:\n%s\n(-got, +want)\n%s\n", tt.desc, got, want, diff.Diff(got, want))
-			}
-		})
-	}
-}
-*/
 
 func TestUnmarshalRealValues(t *testing.T) {
 	files, err := getFilesInDir(valuesFilesDir)
