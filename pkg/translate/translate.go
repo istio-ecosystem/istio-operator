@@ -1,14 +1,29 @@
+// Copyright 2017 Istio Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 // Package translate defines translations from installer proto to values.yaml.
 package translate
 
 import (
 	"fmt"
-	"github.com/ostromart/istio-installer/pkg/apis/installer/v1alpha1"
-	"github.com/ostromart/istio-installer/pkg/util"
-	"gopkg.in/yaml.v2"
 	"path/filepath"
 	"reflect"
 	"strings"
+
+	"gopkg.in/yaml.v2"
+	"istio.io/operator/pkg/apis/istio/v1alpha1"
+	"istio.io/operator/pkg/util"
 )
 
 // TranslationFunc maps a yamlStr API path into a YAML values tree.
@@ -216,8 +231,7 @@ func setYAML(root util.Tree, path util.Path, value interface{}) error {
 	if root[path[0]] == nil {
 		root[path[0]] = make(util.Tree)
 	}
-	setYAML(root[path[0]].(util.Tree), path[1:], value)
-	return nil
+	return setYAML(root[path[0]].(util.Tree), path[1:], value)
 }
 
 func dbgPrint(v ...interface{}) {
