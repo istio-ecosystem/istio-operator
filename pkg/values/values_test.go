@@ -81,15 +81,6 @@ func readFile(path string) (string, error) {
 	return string(b), err
 }
 
-// errToString returns the string representation of err and the empty string if
-// err is nil.
-func errToString(err error) string {
-	if err == nil {
-		return ""
-	}
-	return err.Error()
-}
-
 func stripNL(s string) string {
 	return strings.Trim(s, "\n")
 }
