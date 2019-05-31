@@ -148,10 +148,6 @@ message InstallSpec {
     repeated IngressGatewaySpec ingress_gateway = 30;
     repeated EgressGatewaySpec egress_gateway = 31;
 
-    // List of external operators that will be installed (but not managed)
-    // by the IstioInstaller e.g. prometheus, grafana, kiali.
-    repeated OperatorSpec external_operators = 50;
-
     // Global k8s defaults. Can be overridden per component.
     KubernetesResourcesSpec k8s_defaults = 80;
 
@@ -264,6 +260,9 @@ message AutoInjectionFeatureSpec {
     // Namespace that auto injections components are installed into.
     string namespace = 2;
 
+    // Selects whether auto-injection is enabled in namespaces by default.
+    google.protobuf.BoolValue enable_namespaces_by_default = 10;
+
     SidecarInjectorComponentSpec injector = 20;
 }
 
@@ -283,8 +282,6 @@ message ProxyComponentSpec {
 // Configuration options for the sidecar injector component.
 message SidecarInjectorComponentSpec {
     CommonComponentSpec common = 1;
-    // Selects whether auto-injection is enabled in namespaces by default.
-    google.protobuf.BoolValue enable_namespaces_by_default = 10;
 }
 
 // Configuration options for the policy enforcement component.
@@ -342,6 +339,9 @@ message CommonComponentSpec {
 
     // Kustomize style overrides for default values.yaml.
     // ValuesOverrides map[string]interface{} `protobuf:"bytes,6,opt,name=data" json:"valuesOverrides,omitempty"`
+    // Kustomize style overrides for default values.yaml, without validation i.e. items here do not have to conform to
+    // built-in values schema. Used for cases where forked templates are used with added parameters.
+    // UnvalidatedValuesOverrides map[string]interface{} `protobuf:"bytes,6,opt,name=data" json:"unvalidatedValuesOverrides,omitempty"`
 }
 
 // KubernetesResourcesConfig is a common set of k8s resource configs for components.
@@ -495,20 +495,6 @@ message LoadBalancerConfig {
     // another node, but should have good overall load-spreading.
     // +optional
     string externalTrafficPolicy = 11;
-}
-
-// ExternalOperatorSpec defines a config used to install an external operator. It is used for installation only, after
-// the component installed by the external operator is present, it should be managed directly using the external
-// operator. Istio operator does not react to chanages in ExternalOperatorSpec after it is installed.
-message ExternalOperatorSpec {
-    // manifest_path is the URL for the operator install manifest.
-    string manifest_path = 1;
-
-    // namespace is the namespace the operator manifest and CR are installed into.
-    string namespace = 2;
-
-    // spec is the initial CR for the operator.
-    // Spec map[string]interface{} `protobuf:"bytes,6,opt,name=data" json:"spec,omitempty"`
 }
 
 // Patch for an existing k8s resource.
