@@ -7,7 +7,7 @@
 # common-files repo, make the change there and check it in. Then come back to this repo and run the
 # scripts/updatecommonfiles.sh script.
 
-# Copyright 2019 Istio Authors
+# Copyright 2018 Istio Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,29 +21,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -ex
+# Applies requisite code formatters to the source tree
+
+set -e
 
 SCRIPTPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOTDIR=$(dirname "${SCRIPTPATH}")
-
 cd "${ROOTDIR}"
 
-if [[ "$1" == "--fix" ]]
-then
-    FIX="--fix"
+# Go format tool to use
+# While 'goimports' is preferred we temporarily use 'gofmt' until https://github.com/golang/go/issues/28200 is resolved
+GO_FMT_TOOL=goimportsdocker
+
+PKGS=${PKGS:-"."}
+if [[ -z ${GO_FILES} ]];then
+  GO_FILES=$(find "${PKGS}" -type f -name '*.go' ! -name '*.gen.go' ! -name '*.pb.go' ! -name '*mock*.go' | grep -v ./vendor)
 fi
 
-# run any specialized per-repo linters
-if test -f "${ROOTDIR}/repolinters.sh"
-then
-    source "${ROOTDIR}/repolinters.sh"
+# need to pin goimports to align with golangci-lint. SHA is from x/tools repo
+if [ $GO_FMT_TOOL = "goimportsdocker" ]; then
+  GO_IMPORTS_DOCKER="gcr.io/istio-testing/goimports:379209517ffe"
+  tool="docker run -i --rm -v ${ROOTDIR}:${ROOTDIR} -w ${ROOTDIR} ${GO_IMPORTS_DOCKER} /goimports"
+  fmt_args="-w -local istio.io"
 fi
 
-# if you want to update this version, also change the version number in .golangci.yml
-GOLANGCI_VERSION="v1.16.0"
-curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b "$GOPATH"/bin "$GOLANGCI_VERSION"
-golangci-lint --version
+if [ $GO_FMT_TOOL = "gofmt" ]; then
+  tool=gofmt
+  fmt_args="-w"
+fi
 
-echo 'Running golangci-lint ...'
-env GOGC=25 golangci-lint run ${FIX} -j 1 -v ./...
-
+echo "Formatting the source files"
+# shellcheck disable=SC2086
+$tool ${fmt_args} ${GO_FILES}
+exit $?
