@@ -34,6 +34,10 @@ import (
 const (
 	// ChartOwnerKey is the annotation key used to store the name of the chart that created the resource
 	ChartOwnerKey = MetadataNamespace + "/chart-owner"
+
+	finalizerRemovalBackoffSteps    = 10
+	finalizerRemovalBackoffDuration = 6 * time.Second
+	finalizerRemovalBackoffFactor   = 1.1
 )
 
 // IstioRenderingListener is a RenderingListener specific to IstioControlPlane resources
@@ -206,7 +210,11 @@ func (c *IstioDefaultChartCustomizer) waitForDeployment(object runtime.Object) {
 	deployment.SetGroupVersionKind(gvk)
 	// wait for deployment replicas >= 1
 	logger.Info("waiting for deployment to become ready", gvk.Kind, name)
-	err = wait.ExponentialBackoff(wait.Backoff{Duration: 6 * time.Second, Steps: 10, Factor: 1.1}, func() (bool, error) {
+	err = wait.ExponentialBackoff(wait.Backoff{
+		Duration: finalizerRemovalBackoffDuration,
+		Steps:    finalizerRemovalBackoffSteps,
+		Factor:   finalizerRemovalBackoffFactor,
+	}, func() (bool, error) {
 		err := c.Reconciler.GetClient().Get(context.TODO(), client.ObjectKey{Namespace: namespace, Name: name}, deployment)
 		if err == nil {
 			val, _, _ := unstructured.NestedInt64(deployment.UnstructuredContent(), "status", "readyReplicas")
