@@ -22,7 +22,7 @@ import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "github.com/gogo/protobuf/protobuf/google/protobuf/wrappers.proto";
 
 /*
-IstioInstall is a schema for both defining and overlaying Istio control plane installations.
+IstioControlPlane is a schema for both defining and overlaying Istio control plane installations.
 The Istio operator uses a compiled-in InstallSpec as default installation values, along with compiled-in install charts.
 Running the operator with an empty user defined InstallSpec results in an installation with default values, using the
 default charts.
@@ -136,17 +136,17 @@ spec:
 */
 
 
-message IstioInstall {
-    InstallSpec spec = 3;
+message IstioControlPlane {
+    IstioControlPlaneSpec spec = 3;
     InstallStatus status = 4;
 }
 
-// InstallSpec defines the desired state of IstioInstaller.
+// IstioControlPlaneSpec defines the desired state of IstioControlPlane.
 // The spec is a used to define a customization of the default values that are supplied with an Istio charts release.
 // It is grouped at the top level by feature, where behavior of Istio functional areas is specified.
 // Each feature contains components, where k8s resource level defaults can be overridden.
 // Because the spec is a customization API, specifying an empty InstallSpec results in a default Istio installation.
-message InstallSpec {
+message IstioControlPlaneSpec {
     // Prefix added to all namespaces for any installed component.
     string default_namespace_prefix = 5;
 
@@ -538,7 +538,7 @@ message k8sObjectOverlay {
     repeated PathValue patches = 4;
 }
 
-// Observed state of IstioInstall.
+// Observed state of IstioControlPlane.
 message InstallStatus {
     enum Status {
         NONE = 0;
