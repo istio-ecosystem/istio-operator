@@ -47,7 +47,7 @@ func (l *CompositeRenderingListener) RegisterReconciler(reconciler *HelmReconcil
 
 // BeginReconcile delegates BeginReconcile to the Listeners in first to last order.
 func (l *CompositeRenderingListener) BeginReconcile(instance runtime.Object) error {
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	for _, listener := range l.Listeners {
 		if err := listener.BeginReconcile(instance); err != nil {
 			allErrors = append(allErrors, err)
@@ -58,7 +58,7 @@ func (l *CompositeRenderingListener) BeginReconcile(instance runtime.Object) err
 
 // BeginDelete delegates BeginDelete to the Listeners in first to last order.
 func (l *CompositeRenderingListener) BeginDelete(instance runtime.Object) error {
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	for _, listener := range l.Listeners {
 		if err := listener.BeginDelete(instance); err != nil {
 			allErrors = append(allErrors, err)
@@ -69,7 +69,7 @@ func (l *CompositeRenderingListener) BeginDelete(instance runtime.Object) error 
 
 // BeginChart delegates BeginChart to the Listeners in first to last order.
 func (l *CompositeRenderingListener) BeginChart(chart string, manifests []manifest.Manifest) ([]manifest.Manifest, error) {
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	var err error
 	for _, listener := range l.Listeners {
 		if manifests, err = listener.BeginChart(chart, manifests); err != nil {
@@ -81,7 +81,7 @@ func (l *CompositeRenderingListener) BeginChart(chart string, manifests []manife
 
 // BeginResource delegates BeginResource to the Listeners in first to last order.
 func (l *CompositeRenderingListener) BeginResource(obj runtime.Object) (runtime.Object, error) {
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	var err error
 	for _, listener := range l.Listeners {
 		if obj, err = listener.BeginResource(obj); err != nil {
@@ -93,7 +93,7 @@ func (l *CompositeRenderingListener) BeginResource(obj runtime.Object) (runtime.
 
 // ResourceCreated delegates ResourceCreated to the Listeners in first to last order.
 func (l *CompositeRenderingListener) ResourceCreated(created runtime.Object) error {
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	for _, listener := range l.Listeners {
 		if err := listener.ResourceCreated(created); err != nil {
 			allErrors = append(allErrors, err)
@@ -104,7 +104,7 @@ func (l *CompositeRenderingListener) ResourceCreated(created runtime.Object) err
 
 // ResourceUpdated delegates ResourceUpdated to the Listeners in first to last order.
 func (l *CompositeRenderingListener) ResourceUpdated(updated runtime.Object, old runtime.Object) error {
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	for _, listener := range l.Listeners {
 		if err := listener.ResourceUpdated(updated, old); err != nil {
 			allErrors = append(allErrors, err)
@@ -115,7 +115,7 @@ func (l *CompositeRenderingListener) ResourceUpdated(updated runtime.Object, old
 
 // ResourceDeleted delegates ResourceDeleted to the Listeners in first to last order.
 func (l *CompositeRenderingListener) ResourceDeleted(deleted runtime.Object) error {
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	for _, listener := range l.Listeners {
 		if err := listener.ResourceDeleted(deleted); err != nil {
 			allErrors = append(allErrors, err)
@@ -127,7 +127,7 @@ func (l *CompositeRenderingListener) ResourceDeleted(deleted runtime.Object) err
 // ResourceError delegates ResourceError to the Listeners in first to last order.
 func (l *CompositeRenderingListener) ResourceError(obj runtime.Object, err error) error {
 	// reverse order for completions
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	for index := len(l.Listeners) - 1; index > -1; index-- {
 		if listenerErr := l.Listeners[index].ResourceError(obj, err); listenerErr != nil {
 			allErrors = append(allErrors, listenerErr)
@@ -139,7 +139,7 @@ func (l *CompositeRenderingListener) ResourceError(obj runtime.Object, err error
 // EndResource delegates EndResource to the Listeners in last to first order.
 func (l *CompositeRenderingListener) EndResource(obj runtime.Object) error {
 	// reverse order for completions
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	for index := len(l.Listeners) - 1; index > -1; index-- {
 		if listenerErr := l.Listeners[index].EndResource(obj); listenerErr != nil {
 			allErrors = append(allErrors, listenerErr)
@@ -151,7 +151,7 @@ func (l *CompositeRenderingListener) EndResource(obj runtime.Object) error {
 // EndChart delegates EndChart to the Listeners in last to first order.
 func (l *CompositeRenderingListener) EndChart(chart string) error {
 	// reverse order for completions
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	for index := len(l.Listeners) - 1; index > -1; index-- {
 		if listenerErr := l.Listeners[index].EndChart(chart); listenerErr != nil {
 			allErrors = append(allErrors, listenerErr)
@@ -162,7 +162,7 @@ func (l *CompositeRenderingListener) EndChart(chart string) error {
 
 // BeginPrune delegates BeginPrune to the Listeners in first to last order.
 func (l *CompositeRenderingListener) BeginPrune(all bool) error {
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	for _, listener := range l.Listeners {
 		if err := listener.BeginPrune(all); err != nil {
 			allErrors = append(allErrors, err)
@@ -174,7 +174,7 @@ func (l *CompositeRenderingListener) BeginPrune(all bool) error {
 // EndPrune delegates EndPrune to the Listeners in last to first order.
 func (l *CompositeRenderingListener) EndPrune() error {
 	// reverse order for completions
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	for index := len(l.Listeners) - 1; index > -1; index-- {
 		if listenerErr := l.Listeners[index].EndPrune(); listenerErr != nil {
 			allErrors = append(allErrors, listenerErr)
@@ -186,7 +186,7 @@ func (l *CompositeRenderingListener) EndPrune() error {
 // EndDelete delegates EndDelete to the Listeners in last to first order.
 func (l *CompositeRenderingListener) EndDelete(instance runtime.Object, err error) error {
 	// reverse order for completions
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	for index := len(l.Listeners) - 1; index > -1; index-- {
 		if listenerErr := l.Listeners[index].EndDelete(instance, err); listenerErr != nil {
 			allErrors = append(allErrors, listenerErr)
@@ -198,7 +198,7 @@ func (l *CompositeRenderingListener) EndDelete(instance runtime.Object, err erro
 // EndReconcile delegates EndReconcile to the Listeners in last to first order.
 func (l *CompositeRenderingListener) EndReconcile(instance runtime.Object, err error) error {
 	// reverse order for completions
-	allErrors := make([]error, 0, len(l.Listeners))
+	var allErrors []error
 	for index := len(l.Listeners) - 1; index > -1; index-- {
 		if listenerErr := l.Listeners[index].EndReconcile(instance, err); listenerErr != nil {
 			allErrors = append(allErrors, listenerErr)
