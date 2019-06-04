@@ -77,62 +77,70 @@ spec:
 
 spec:
   traffic_management:
-    namespace: istio-traffic-management
+    components:
+      namespace: istio-traffic-management
   policy:
-    namespace: istio-policy
+    components:
+      namespace: istio-policy
   telemetry:
-    namespace: istio-telemetry
+    components:
+      namespace: istio-telemetry
   config_management:
-    namespace: istio-config-management
+    components:
+      namespace: istio-config-management
   security:
-    citadel:
-      namespace: istio-citadel
-    cert_manager:
-      namespace: istio-cert-manager
-    node_agent:
-      namespace: istio-node-agent
+    components:
+      citadel:
+        namespace: istio-citadel
+      cert_manager:
+        namespace: istio-cert-manager
+      node_agent:
+        namespace: istio-node-agent
 
 5. Default install with specialized k8s settings for pilot
 
 spec:
   traffic_management:
-    pilot:
-        k8s:
-          resources:
-            limits:
-              cpu: 444m
-              memory: 333Mi
-            requests:
-              cpu: 222m
-              memory: 111Mi
-          readinessProbe:
-            failureThreshold: 44
-            initialDelaySeconds: 11
-            periodSeconds: 22
-            successThreshold: 33
+    components:
+      pilot:
+          k8s:
+            resources:
+              limits:
+                cpu: 444m
+                memory: 333Mi
+              requests:
+                cpu: 222m
+                memory: 111Mi
+            readinessProbe:
+              failureThreshold: 44
+              initialDelaySeconds: 11
+              periodSeconds: 22
+              successThreshold: 33
 
 6. Default install with values.yaml customizations for proxy
 
 spec:
   traffic_management:
-    proxy:
-      valuesOverrides:
-      - global.proxy.enableCoreDump: true
-      - global.proxy.dnsRefreshRate: 10s
+    components:
+      proxy:
+        valuesOverrides:
+        - global.proxy.enableCoreDump: true
+        - global.proxy.dnsRefreshRate: 10s
 
 7. Default install with modification to container flag in galley
 
 spec:
   configuration_management:
-    galley:
-      k8s:
-        overlays:
-        - apiVersion: extensions/v1beta1
-          kind: Deployment
-          name: istio-galley
-          patches:
-          - path: spec.template.spec.containers.[name:galley].command.[--livenessProbeInterval]
-            value: --livenessProbeInterval=123s
+    components:
+      galley:
+        k8s:
+          overlays:
+          - apiVersion: extensions/v1beta1
+            kind: Deployment
+            name: istio-galley
+            patches:
+            - path: spec.template.spec.containers.[name:galley].command.[--livenessProbeInterval]
+              value: --livenessProbeInterval=123s
 */
 
 
@@ -189,8 +197,24 @@ message TrafficManagementFeatureSpec {
     // Selects whether traffic management is installed.
     // Must be enabled to enable any sub-component.
     google.protobuf.BoolValue enabled = 1;
-    // Namespace that all traffic management components are installed into.
-    string namespace = 2;
+
+    // Component specific config.
+    message Components {
+        // Namespace that all traffic management components are installed into.
+        string namespace = 1;
+
+        PilotComponentSpec pilot = 20;
+        ProxyComponentSpec proxy = 21;
+    }
+
+    Components components = 50;
+}
+
+// Configuration options for the policy feature.
+message PolicyFeatureSpec {
+    // Selects whether policy is installed.
+    // Must be enabled to enable any sub-component.
+    google.protobuf.BoolValue enabled = 1;
 
     // Default behavior of the sidecar for handling outbound traffic from the application.
     enum OutboundPolicy {
@@ -208,20 +232,14 @@ message TrafficManagementFeatureSpec {
     OutboundPolicy outbound_traffic_policy_mode = 11;
 
     // Component specific config.
-    PilotComponentSpec pilot = 30;
-    // Sidecar proxy config.
-    ProxyComponentSpec proxy = 31;
-}
+    message Components {
+        // Namespace that all policy components are installed into.
+        string namespace = 1;
 
-// Configuration options for the policy feature.
-message PolicyFeatureSpec {
-    // Selects whether policy is installed.
-    // Must be enabled to enable any sub-component.
-    google.protobuf.BoolValue enabled = 1;
-    // Namespace that all policy components are installed into.
-    string namespace = 2;
+        PolicyComponentSpec policy = 20;
+    }
 
-    PolicyComponentSpec policy = 50;
+    Components components = 50;
 }
 
 // Configuration options for the telemetry feature.
@@ -229,19 +247,22 @@ message TelemetryFeatureSpec {
     // Selects whether telemetry is installed.
     // Must be enabled to enable any sub-component.
     google.protobuf.BoolValue enabled = 1;
-    // Namespace that all telemetry components are installed into.
-    string namespace = 2;
 
-    TelemetryComponentSpec telemetry = 51;
+    // Component specific config.
+    message Components {
+        // Namespace that all telemetry components are installed into.
+        string namespace = 1;
+
+        TelemetryComponentSpec telemetry = 20;
+    }
+
+    Components components = 50;
 }
 
 // Configuration options for security feature.
 message SecurityFeatureSpec {
     // Selects whether security feature is installed. Must be set for any sub-component to be installed.
     google.protobuf.BoolValue enabled = 1;
-
-    // Namespace that security components are installed into.
-    string namespace = 2;
 
     // Enables MTLS for control plane.
     // Will result in delays starting the pods while secrets are propagated, not recommended for tests.
@@ -250,9 +271,16 @@ message SecurityFeatureSpec {
     // Enables strict MTLS for service to service traffic, or permissive mode MTLS if unset.
     google.protobuf.BoolValue data_plane_mtls_strict = 14;
 
-    CitadelComponentSpec citadel = 20;
-    CertManagerComponentSpec cert_manager = 21;
-    NodeAgentComponentSpec node_agent = 22;
+    message Components {
+        // Namespace that security components are installed into.
+        string namespace = 1;
+
+        CitadelComponentSpec citadel = 20;
+        CertManagerComponentSpec cert_manager = 21;
+        NodeAgentComponentSpec node_agent = 22;
+    }
+
+    Components components = 50;
 }
 
 // Configuration options for configuration management feature.
@@ -260,10 +288,14 @@ message ConfigManagementFeatureSpec {
     // Selects whether config management feature is installed. Must be set for any sub-component to be installed.
     google.protobuf.BoolValue enabled = 1;
 
-    // Namespace that security components are installed into.
-    string namespace = 2;
+    message Components {
+        // Namespace that security components are installed into.
+        string namespace = 1;
 
-    GalleyComponentSpec galley = 20;
+        GalleyComponentSpec galley = 20;
+    }
+
+    Components components = 50;
 }
 
 // Configuration options for auto injection feature.
@@ -271,13 +303,14 @@ message AutoInjectionFeatureSpec {
     // Selects whether auto injection feature is installed. Must be set for any sub-component to be installed.
     google.protobuf.BoolValue enabled = 1;
 
-    // Namespace that auto injections components are installed into.
-    string namespace = 2;
+    message Components {
+        // Namespace that auto injections components are installed into.
+        string namespace = 1;
 
-    // Selects whether auto-injection is enabled in namespaces by default.
-    google.protobuf.BoolValue enable_namespaces_by_default = 10;
+        SidecarInjectorComponentSpec injector = 20;
+    }
 
-    SidecarInjectorComponentSpec injector = 20;
+    Components components = 50;
 }
 
 // Configuration options for the pilot component.
