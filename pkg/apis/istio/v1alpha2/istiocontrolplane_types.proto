@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package v1alpha1;
+package v1alpha2;
 
 import "k8s.io/api/core/v1/generated.proto";
 import "k8s.io/api/autoscaling/v1/generated.proto";
@@ -167,8 +167,8 @@ message IstioControlPlaneSpec {
     AutoInjectionFeatureSpec auto_injection = 30;
 
     // Ingress/egress gateway installation and configuration.
-    repeated IngressGatewaySpec ingress_gateway = 30;
-    repeated EgressGatewaySpec egress_gateway = 31;
+    repeated IngressGatewaySpec ingress_gateway = 31;
+    repeated EgressGatewaySpec egress_gateway = 32;
 
     // Global k8s defaults. Can be overridden per component.
     KubernetesResourcesSpec k8s_defaults = 80;
