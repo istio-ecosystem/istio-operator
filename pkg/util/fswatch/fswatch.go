@@ -2,6 +2,7 @@ package fswatch
 
 import (
 	"log"
+	"math"
 	"os"
 	"path/filepath"
 
@@ -34,7 +35,7 @@ func WatchDirRecursively(dir string) (<-chan struct{}, error) {
 	// Debounced notifies.
 	notify := make(chan struct{})
 	go func() {
-		var timer *time.Timer
+		timer := time.NewTimer(time.Duration(math.MaxInt64))
 		for {
 			select {
 			case <-notifyRaw:
