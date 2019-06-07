@@ -17,8 +17,8 @@ var (
 	requiredSetValues = map[string]bool{}
 )
 
-// ValidateValues validates the values in the given tree, which follows the Istio values.yaml schema.
-func ValidateValues(root util.Tree) util.Errors {
+// CheckValues validates the values in the given tree, which follows the Istio values.yaml schema.
+func CheckValues(root util.Tree) util.Errors {
 	return validateValues(defaultValuesValidations, root, nil)
 }
 
