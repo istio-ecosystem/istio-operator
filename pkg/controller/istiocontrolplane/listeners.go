@@ -27,7 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1alpha2 "istio.io/operator/pkg/apis/istio/v1alpha1"
+	"istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/helmreconciler"
 )
 
@@ -47,7 +47,7 @@ type IstioRenderingListener struct {
 
 // NewIstioRenderingListener returns a new IstioRenderingListener, which is a composite that includes IstioStatusUpdater
 // and IstioChartCustomizerListener.
-func NewIstioRenderingListener(instance *v1alpha2.IstioControlPlane) *IstioRenderingListener {
+func NewIstioRenderingListener(instance *v1alpha1.IstioControlPlane) *IstioRenderingListener {
 	return &IstioRenderingListener{
 		CompositeRenderingListener: &helmreconciler.CompositeRenderingListener{
 			Listeners: []helmreconciler.RenderingListener{
@@ -62,7 +62,7 @@ func NewIstioRenderingListener(instance *v1alpha2.IstioControlPlane) *IstioRende
 // instance based on the results of the Reconcile operation.
 type IstioStatusUpdater struct {
 	*helmreconciler.DefaultRenderingListener
-	instance   *v1alpha2.IstioControlPlane
+	instance   *v1alpha1.IstioControlPlane
 	reconciler *helmreconciler.HelmReconciler
 }
 
@@ -70,7 +70,7 @@ var _ helmreconciler.RenderingListener = &IstioStatusUpdater{}
 var _ helmreconciler.ReconcilerListener = &IstioStatusUpdater{}
 
 // NewIstioStatusUpdater returns a new IstioStatusUpdater instance for the specified IstioControlPlane
-func NewIstioStatusUpdater(instance *v1alpha2.IstioControlPlane) helmreconciler.RenderingListener {
+func NewIstioStatusUpdater(instance *v1alpha1.IstioControlPlane) helmreconciler.RenderingListener {
 	return &IstioStatusUpdater{
 		DefaultRenderingListener: &helmreconciler.DefaultRenderingListener{},
 		instance:                 instance,
@@ -81,42 +81,42 @@ func NewIstioStatusUpdater(instance *v1alpha2.IstioControlPlane) helmreconciler.
 func (u *IstioStatusUpdater) EndReconcile(_ runtime.Object, err error) error {
 	status := u.instance.Status
 	if err == nil {
-		if condition := status.GetCondition(v1alpha2.ConditionTypeInstalled); condition.Status != v1alpha2.ConditionStatusTrue {
-			status.SetCondition(v1alpha2.Condition{
-				Type:   v1alpha2.ConditionTypeInstalled,
-				Reason: v1alpha2.ConditionReasonInstallSuccessful,
-				Status: v1alpha2.ConditionStatusTrue,
+		if condition := status.GetCondition(v1alpha1.ConditionTypeInstalled); condition.Status != v1alpha1.ConditionStatusTrue {
+			status.SetCondition(v1alpha1.Condition{
+				Type:   v1alpha1.ConditionTypeInstalled,
+				Reason: v1alpha1.ConditionReasonInstallSuccessful,
+				Status: v1alpha1.ConditionStatusTrue,
 			})
-			status.SetCondition(v1alpha2.Condition{
-				Type:   v1alpha2.ConditionTypeReconciled,
-				Reason: v1alpha2.ConditionReasonInstallSuccessful,
-				Status: v1alpha2.ConditionStatusTrue,
+			status.SetCondition(v1alpha1.Condition{
+				Type:   v1alpha1.ConditionTypeReconciled,
+				Reason: v1alpha1.ConditionReasonInstallSuccessful,
+				Status: v1alpha1.ConditionStatusTrue,
 			})
 		} else {
-			status.SetCondition(v1alpha2.Condition{
-				Type:   v1alpha2.ConditionTypeReconciled,
-				Reason: v1alpha2.ConditionReasonReconcileSuccessful,
-				Status: v1alpha2.ConditionStatusTrue,
+			status.SetCondition(v1alpha1.Condition{
+				Type:   v1alpha1.ConditionTypeReconciled,
+				Reason: v1alpha1.ConditionReasonReconcileSuccessful,
+				Status: v1alpha1.ConditionStatusTrue,
 			})
 		}
 	} else {
-		if condition := status.GetCondition(v1alpha2.ConditionTypeInstalled); condition.Status != v1alpha2.ConditionStatusTrue {
-			status.SetCondition(v1alpha2.Condition{
-				Type:    v1alpha2.ConditionTypeInstalled,
-				Reason:  v1alpha2.ConditionReasonInstallError,
-				Status:  v1alpha2.ConditionStatusFalse,
+		if condition := status.GetCondition(v1alpha1.ConditionTypeInstalled); condition.Status != v1alpha1.ConditionStatusTrue {
+			status.SetCondition(v1alpha1.Condition{
+				Type:    v1alpha1.ConditionTypeInstalled,
+				Reason:  v1alpha1.ConditionReasonInstallError,
+				Status:  v1alpha1.ConditionStatusFalse,
 				Message: fmt.Sprintf("errors occurred during installation: %s", err),
 			})
-			status.SetCondition(v1alpha2.Condition{
-				Type:   v1alpha2.ConditionTypeReconciled,
-				Reason: v1alpha2.ConditionReasonInstallError,
-				Status: v1alpha2.ConditionStatusFalse,
+			status.SetCondition(v1alpha1.Condition{
+				Type:   v1alpha1.ConditionTypeReconciled,
+				Reason: v1alpha1.ConditionReasonInstallError,
+				Status: v1alpha1.ConditionStatusFalse,
 			})
 		} else {
-			status.SetCondition(v1alpha2.Condition{
-				Type:    v1alpha2.ConditionTypeReconciled,
-				Reason:  v1alpha2.ConditionReasonReconcileError,
-				Status:  v1alpha2.ConditionStatusFalse,
+			status.SetCondition(v1alpha1.Condition{
+				Type:    v1alpha1.ConditionTypeReconciled,
+				Reason:  v1alpha1.ConditionReasonReconcileError,
+				Status:  v1alpha1.ConditionStatusFalse,
 				Message: fmt.Sprintf("errors occurred during reconciliation: %s", err),
 			})
 		}

@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"reflect"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/util"
 )
 
@@ -24,7 +24,7 @@ var (
 
 // ValidateIstioControlPlaneSpec validates the values in the given Installer spec, using the field map defaultValidations to
 // call the appropriate validation function.
-func ValidateIstioControlPlaneSpec(is *v1alpha2.IstioControlPlaneSpec) util.Errors {
+func ValidateIstioControlPlaneSpec(is *v1alpha1.IstioControlPlaneSpec) util.Errors {
 	return validate(defaultValidations, is, nil)
 }
 

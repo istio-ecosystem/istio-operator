@@ -10,8 +10,6 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/kylelemons/godebug/diff"
 	"github.com/ostromart/istio-installer/pkg/util"
-
-	v1alpha2 "istio.io/operator/pkg/apis/istio/v1alpha2"
 )
 
 func TestUnmarshalKubernetes(t *testing.T) {
@@ -111,7 +109,7 @@ overlays:
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			tk := &v1alpha2.TestKube{}
+			tk := &v1alpha1.TestKube{}
 			err := unmarshalWithJSONPB(tt.yamlStr, tk)
 			if err != nil {
 				t.Fatalf("unmarshalWithJSONPB(%s): got error %s", tt.desc, err)
@@ -231,7 +229,7 @@ customPackagePath: bad_schema://local/file/path
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			ispec := &v1alpha2.InstallerSpec{}
+			ispec := &v1alpha1.InstallerSpec{}
 			err := unmarshalWithJSONPB(tt.yamlStr, ispec)
 			if err != nil {
 				t.Fatalf("unmarshalWithJSONPB(%s): got error %s", tt.desc, err)
@@ -258,7 +256,7 @@ func unmarshalWithJSONPB(y string, out proto.Message) error {
 	return nil
 }
 
-func marshalWithJSONPB(in *v1alpha2.TestKube) (string, error) {
+func marshalWithJSONPB(in *v1alpha1.TestKube) (string, error) {
 	m := jsonpb.Marshaler{}
 	js, err := m.MarshalToString(in)
 	if err != nil {

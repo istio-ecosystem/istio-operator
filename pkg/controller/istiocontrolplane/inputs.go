@@ -15,7 +15,7 @@
 package istiocontrolplane
 
 import (
-	v1alpha2 "istio.io/operator/pkg/apis/istio/v1alpha1"
+	"istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/helmreconciler"
 )
 
@@ -36,14 +36,14 @@ var defaultProcessingOrder = []string{
 
 // IstioRenderingInput is a RenderingInput specific to an IstioControlPlane instance.
 type IstioRenderingInput struct {
-	instance  *v1alpha2.IstioControlPlane
+	instance  *v1alpha1.IstioControlPlane
 	chartPath string
 }
 
 var _ helmreconciler.RenderingInput = &IstioRenderingInput{}
 
 // NewIstioRenderingInput creates a new IstioRenderiongInput for the specified instance.
-func NewIstioRenderingInput(instance *v1alpha2.IstioControlPlane) *IstioRenderingInput {
+func NewIstioRenderingInput(instance *v1alpha1.IstioControlPlane) *IstioRenderingInput {
 	return &IstioRenderingInput{instance: instance, chartPath: calculateChartPath(instance.Spec.ChartPath)}
 }
 
