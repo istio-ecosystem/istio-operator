@@ -2,10 +2,11 @@ package validate
 
 import (
 	"fmt"
-	"github.com/ostromart/istio-installer/pkg/util"
 	"testing"
 
 	"github.com/ghodss/yaml"
+
+	"istio.io/operator/pkg/util"
 )
 
 func TestValidateValues(t *testing.T) {

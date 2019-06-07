@@ -19,7 +19,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha1"
+	v1alpha2 "istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/helmreconciler"
 )
 
@@ -29,7 +29,7 @@ var _ helmreconciler.RenderingCustomizerFactory
 
 // NewCustomizer returns a RenderingCustomizer for Istio
 func (f *IstioRenderingCustomizerFactory) NewCustomizer(instance runtime.Object) (helmreconciler.RenderingCustomizer, error) {
-	istioControlPlane, ok := instance.(*v1alpha1.IstioControlPlane)
+	istioControlPlane, ok := instance.(*v1alpha2.IstioControlPlane)
 	if !ok {
 		return nil, fmt.Errorf("object is not an IstioControlPlane resource")
 	}

@@ -109,7 +109,7 @@ func validateWithRegex(path util.Path, val interface{}, r *regexp.Regexp) (errs 
 	return errs
 }
 
-func validateStringList(vf ValidateFunc) ValidateFunc {
+func validateStringList(vf ValidatorFunc) ValidatorFunc {
 	return func(path util.Path, val interface{}) util.Errors {
 		dbgPrintC("validateStringList(")
 		if reflect.TypeOf(val).Kind() != reflect.String {
@@ -279,5 +279,5 @@ func anchored(res ...*regexp.Regexp) *regexp.Regexp {
 	return match(`^` + expression(res...).String() + `$`)
 }
 
-// ValidateFunc validates a value.
-type ValidateFunc func(path util.Path, i interface{}) util.Errors
+// ValidatorFunc validates a value.
+type ValidatorFunc func(path util.Path, i interface{}) util.Errors

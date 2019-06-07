@@ -5,13 +5,13 @@ import (
 	"net/url"
 	"reflect"
 
-	"istio.io/operator/pkg/apis/installer/v1alpha1"
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
 )
 
 var (
 	// defaultValidations maps a data path to a validation function.
-	defaultValidations = map[string]ValidateFunc{
+	defaultValidations = map[string]ValidatorFunc{
 		"Hub":                    validateHub,
 		"Tag":                    validateTag,
 		"CustomPackagePath":      validateInstallPackagePath,
@@ -22,13 +22,13 @@ var (
 	requiredValues = map[string]bool{}
 )
 
-// ValidateInstallerSpec validates the values in the given Installer spec, using the field map defaultValidations to
+// ValidateIstioControlPlaneSpec validates the values in the given Installer spec, using the field map defaultValidations to
 // call the appropriate validation function.
-func ValidateInstallerSpec(is *v1alpha1.InstallerSpec) util.Errors {
+func ValidateIstioControlPlaneSpec(is *v1alpha2.IstioControlPlaneSpec) util.Errors {
 	return validate(defaultValidations, is, nil)
 }
 
-func validate(validations map[string]ValidateFunc, structPtr interface{}, path util.Path) (errs util.Errors) {
+func validate(validations map[string]ValidatorFunc, structPtr interface{}, path util.Path) (errs util.Errors) {
 	dbgPrint("validate with path %s, %v (%T)", path, structPtr, structPtr)
 	if structPtr == nil {
 		return nil
@@ -86,7 +86,7 @@ func validate(validations map[string]ValidateFunc, structPtr interface{}, path u
 	return errs
 }
 
-func validateLeaf(validations map[string]ValidateFunc, path util.Path, val interface{}) util.Errors {
+func validateLeaf(validations map[string]ValidatorFunc, path util.Path, val interface{}) util.Errors {
 	pstr := path.String()
 	dbgPrintC("validate %s:%v(%T) ", pstr, val, val)
 	if !requiredValues[pstr] && (util.IsValueNil(val) || util.IsEmptyString(val)) {

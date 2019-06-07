@@ -1,12 +1,12 @@
 package validate
 
 import (
-	"github.com/ostromart/istio-installer/pkg/util"
+	"istio.io/operator/pkg/util"
 )
 
 var (
 	// defaultValidations maps a data path to a validation function.
-	defaultValuesValidations = map[string]ValidateFunc{
+	defaultValuesValidations = map[string]ValidatorFunc{
 		"global.proxy.includeIpRanges":     validateStringList(validateCIDR),
 		"global.proxy.excludeIpRanges":     validateStringList(validateCIDR),
 		"global.proxy.includeInboundPorts": validateStringList(validatePortNumberString),
@@ -22,7 +22,7 @@ func ValidateValues(root util.Tree) util.Errors {
 	return validateValues(defaultValuesValidations, root, nil)
 }
 
-func validateValues(validations map[string]ValidateFunc, node interface{}, path util.Path) (errs util.Errors) {
+func validateValues(validations map[string]ValidatorFunc, node interface{}, path util.Path) (errs util.Errors) {
 	pstr := path.String()
 	dbgPrint("validateValues %s", pstr)
 	vf := defaultValuesValidations[pstr]
