@@ -81,7 +81,6 @@ ADD
 that way in the object being patched.
 - [key:value] treats ':' as a special separator character. Any ':' in the key or value string must be escaped as \:.
 */
-
 package patch
 
 import (
@@ -131,10 +130,10 @@ func makeNodeContext(obj interface{}) *pathContext {
 	}
 }
 
-// PatchYAMLManifest patches a base YAML in the given namespace with a list of overlays.
+// YAMLManifestPatch patches a base YAML in the given namespace with a list of overlays.
 // Each overlay has the format described in the K8SObjectOverlay definition.
 // It returns the patched manifest YAML.
-func PatchYAMLManifest(baseYAML string, namespace string, overlays []*v1alpha1.K8SObjectOverlay) (string, error) {
+func YAMLManifestPatch(baseYAML string, namespace string, overlays []*v1alpha1.K8SObjectOverlay) (string, error) {
 	baseObjs, err := manifest.ParseObjectsFromYAMLManifest(context.TODO(), baseYAML)
 	if err != nil {
 		return "", err
@@ -159,8 +158,13 @@ func PatchYAMLManifest(baseYAML string, namespace string, overlays []*v1alpha1.K
 			log.Errorf("patch error: %s", err)
 			continue
 		}
-		ret.Write(patched)
-		ret.WriteString("\n---\n")
+		if _, err := ret.Write(patched); err != nil {
+			log.Errorf("write: %s", err)
+		}
+		if _, err := ret.WriteString("\n---\n"); err != nil {
+			log.Errorf("patch WriteString error: %s", err)
+			continue
+		}
 	}
 	// Render the remaining objects with no overlays.
 	for k, oo := range bom {
@@ -173,8 +177,12 @@ func PatchYAMLManifest(baseYAML string, namespace string, overlays []*v1alpha1.K
 			log.Errorf("Object to YAML error (%s) for base object: \n%v", err, oo)
 			continue
 		}
-		ret.Write(oy)
-		ret.WriteString("\n---\n")
+		if _, err := ret.Write(oy); err != nil {
+			log.Errorf("write: %s", err)
+		}
+		if _, err := ret.WriteString("\n---\n"); err != nil {
+			log.Errorf("writeString: %s", err)
+		}
 	}
 	return ret.String(), nil
 }
