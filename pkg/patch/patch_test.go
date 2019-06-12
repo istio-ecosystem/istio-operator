@@ -3,13 +3,15 @@ package patch
 import (
 	"bytes"
 	"fmt"
-	"github.com/ostromart/istio-installer/pkg/util"
 	"testing"
 
 	"github.com/ghodss/yaml"
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/ostromart/istio-installer/pkg/apis/installer/v1alpha1"
+
+	"istio.io/operator/pkg/apis/installer/v1alpha1"
+	"istio.io/operator/pkg/util"
+
 )
 
 func TestPatchYAMLManifestSuccess(t *testing.T) {
@@ -37,8 +39,8 @@ a:
 		wantErr string
 	}{
 		{
-			desc: "ModifyListEntryValue",
-			path: `a.b.[name:n1].value`,
+			desc:  "ModifyListEntryValue",
+			path:  `a.b.[name:n1].value`,
 			value: `v2`,
 			want: `
 apiVersion: extensions/v1beta1
@@ -58,8 +60,29 @@ a:
 `,
 		},
 		{
-			desc: "ModifyListEntry",
-			path: `a.b.[name:n2].list.[v2]`,
+			desc:  "ModifyListEntryValueQuoted",
+			path:  `a.b.[name:n1].value`,
+			value: `v2`,
+			want: `
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: istio-citadel
+  namespace: istio-system
+a:
+  b:
+  - name: "n1"
+    value: v2
+  - list:
+    - v1
+    - v2
+    - v3_regex
+    name: n2
+`,
+		},
+		{
+			desc:  "ModifyListEntry",
+			path:  `a.b.[name:n2].list.[v2]`,
 			value: `v3`,
 			want: `
 apiVersion: extensions/v1beta1
@@ -133,11 +156,11 @@ a:
     - v2
     name: n2
 `,
-		},	}
+		}}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
 			rc := &v1alpha1.KubernetesResourcesSpec{}
-			err := unmarshalWithJSONPB(makeOverlay(tt.path, tt.value), rc)
+			err := unmarshalWithJSONPB(makeOverlayHeader(tt.path, tt.value), rc)
 			if err != nil {
 				t.Fatalf("unmarshalWithJSONPB(%s): got error %s", tt.desc, err)
 			}
@@ -386,7 +409,7 @@ spec:
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
 			rc := &v1alpha1.KubernetesResourcesSpec{}
-			err := unmarshalWithJSONPB(makeOverlay(tt.path, tt.value), rc)
+			err := unmarshalWithJSONPB(makeOverlayHeader(tt.path, tt.value), rc)
 			if err != nil {
 				t.Fatalf("unmarshalWithJSONPB(%s): got error %s", tt.desc, err)
 			}
@@ -401,13 +424,62 @@ spec:
 	}
 }
 
-func makeOverlay(path, value string) string {
+func TestSplitEscaped(t *testing.T) {
+	tests := []struct {
+		desc string
+		in   string
+		want []string
+	}{
+		{
+			desc: "empty",
+			in:   "",
+			want: nil,
+		},
+		{
+			desc: "no match",
+			in:   "foo",
+			want: []string{"foo"},
+		},
+		{
+			desc: "multiple",
+			in:   "foo:bar:baz",
+			want: []string{"foo", "bar", "baz"},
+		},
+		{
+			desc: "multiple with escapes",
+			in:   `foo\:bar:baz\:qux`,
+			want: []string{`foo\:bar`, `baz\:qux`},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			if got, want := splitEscaped(tt.in), tt.want; stringSlicesEqual(got, want) {
+				fmt.Errorf("%s: got:%v, want:%v", tt.desc, got, want)
+			}
+		})
+	}
+}
+
+func stringSlicesEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, aa := range a {
+		if aa != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func makeOverlayHeader(path, value string) string {
 	const (
 		patchCommon = `
 overlays:
 - kind: Deployment
   name: istio-citadel
   patches:
+  - path: 
 `
 		pathStr  = `  - path: `
 		valueStr = `    value: `
@@ -421,6 +493,7 @@ overlays:
 	return ret
 }
 
+// unmarshalWithJSONPB unmarshals y into out using jsonpb (required for many proto defined structs).
 func unmarshalWithJSONPB(y string, out proto.Message) error {
 	jb, err := yaml.YAMLToJSON([]byte(y))
 	if err != nil {

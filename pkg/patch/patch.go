@@ -16,7 +16,7 @@ a:
     value: v1
   - name: n2
     list:
-    - vv1
+    - "vv1"
     - vv2=foo
 
 values and list entries can be added, modifed or deleted.
@@ -30,6 +30,7 @@ MODIFY
 
 2. set vv1 to vv3
 
+  // Note the lack of quotes around vv1 (see NOTES below).
   path: a.b.[name:n2].list.[vv1]
   value: vv3
 
@@ -61,7 +62,11 @@ ADD
   value:
     new_attr: v3
 
- */
+*NOTES*
+- Due to loss of string quoting during unmarshaling, keys and values should not be string quoted, even if they appear
+that way in the object being patched.
+- [key:value] treats ':' as a special separator character. Any ':' in the key or value string must be escaped as \:.
+*/
 
 package patch
 
@@ -174,7 +179,8 @@ func applyPatches(base *manifest.Object, patches []*v1alpha1.K8SObjectOverlay_Pa
 	}
 	for _, p := range patches {
 		dbgPrint("applying path=%s, value=%s\n", p.Path, p.Value)
-		inc, err := getNode(makeNodeContext(bo), util.PathFromString(p.Path))
+		path := util.PathFromString(p.Path)
+		inc, err := getNode(makeNodeContext(bo), path, path)
 		if err != nil {
 			errs = util.AppendErr(errs, err)
 			continue
@@ -190,13 +196,13 @@ func applyPatches(base *manifest.Object, patches []*v1alpha1.K8SObjectOverlay_Pa
 
 // getNode returns the node which has the given patch from the source node given by nc.
 // It creates a tree of nodeContexts during the traversal so that parent structures can be updated if required.
-func getNode(nc *pathContext, path util.Path) (*pathContext, error) {
-	dbgPrint("getNode path=%s, node=%s", path, pretty.Sprint(nc.node))
-	if len(path) == 0 {
+func getNode(nc *pathContext, fullPath, remainPath util.Path) (*pathContext, error) {
+	dbgPrint("getNode remainPath=%s, node=%s", remainPath, pretty.Sprint(nc.node))
+	if len(remainPath) == 0 {
 		dbgPrint("terminate with nc=%s", nc)
 		return nc, nil
 	}
-	pe := path[0]
+	pe := remainPath[0]
 
 	v := reflect.ValueOf(nc.node)
 	if v.Kind() == reflect.Ptr {
@@ -215,7 +221,7 @@ func getNode(nc *pathContext, path util.Path) (*pathContext, error) {
 			if lm, ok := le.(map[interface{}]interface{}); ok {
 				k, v, err := pathKV(pe)
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("path %s: %s", fullPath, err)
 				}
 				if stringsEqual(lm[k], v) {
 					dbgPrint("found matching kv %v:%v", k, v)
@@ -225,18 +231,18 @@ func getNode(nc *pathContext, path util.Path) (*pathContext, error) {
 					}
 					nc.keyToChild = idx
 					nn.keyToChild = k
-					if len(path) == 1 {
+					if len(remainPath) == 1 {
 						dbgPrint("KV terminate")
 						return nn, nil
 					}
-					return getNode(nn, path[1:])
+					return getNode(nn, fullPath, remainPath[1:])
 				}
 				continue
 			}
 			// leaf list, match based on value.
 			v, err := pathV(pe)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("path %s: %s", fullPath, err)
 			}
 			if matchesRegex(v, le) {
 				dbgPrint("found matching key %v, index %d", le, idx)
@@ -245,10 +251,10 @@ func getNode(nc *pathContext, path util.Path) (*pathContext, error) {
 					node:   le,
 				}
 				nc.keyToChild = idx
-				return getNode(nn, path[1:])
+				return getNode(nn, fullPath, remainPath[1:])
 			}
 		}
-		return nil, fmt.Errorf("path element %s not found", pe)
+		return nil, fmt.Errorf("path %s: element %s not found", fullPath, pe)
 	}
 
 	dbgPrint("interior node")
@@ -265,10 +271,10 @@ func getNode(nc *pathContext, path util.Path) (*pathContext, error) {
 			nnc.node = &nn
 		}
 		nc.keyToChild = pe
-		return getNode(nnc, path[1:])
+		return getNode(nnc, fullPath, remainPath[1:])
 	}
 
-	return nil, fmt.Errorf("leaf type %T in non-leaf node %s", nc.node, path)
+	return nil, fmt.Errorf("leaf type %T in non-leaf node %s", nc.node, remainPath)
 }
 
 // writeNode writes the given value to the node in the given pathContext.
@@ -279,12 +285,12 @@ func writeNode(nc *pathContext, value interface{}) error {
 	case value == nil:
 		dbgPrint("delete")
 		switch {
-		case isSlice(nc.parent.node):
+		case nc.parent != nil && isSliceOrPtrInterface(nc.parent.node):
 			if err := util.DeleteFromSlicePtr(nc.parent.node, nc.parent.keyToChild.(int)); err != nil {
 				return err
 			}
 			// FIXME
-			if isMap(nc.parent.parent.node) {
+			if isMapOrInterface(nc.parent.parent.node) {
 				if err := util.InsertIntoMap(nc.parent.parent.node, nc.parent.parent.keyToChild, nc.parent.node); err != nil {
 					return err
 				}
@@ -292,7 +298,7 @@ func writeNode(nc *pathContext, value interface{}) error {
 		}
 	default:
 		switch {
-		case isSlice(nc.parent.node):
+		case isSliceOrPtrInterface(nc.parent.node):
 			idx := nc.parent.keyToChild.(int)
 			if idx == -1 {
 				dbgPrint("insert")
@@ -305,7 +311,7 @@ func writeNode(nc *pathContext, value interface{}) error {
 			}
 		default:
 			dbgPrint("leaf update")
-			if isMap(nc.parent.node) {
+			if isMapOrInterface(nc.parent.node) {
 				if err := util.InsertIntoMap(nc.parent.node, nc.parent.keyToChild, value); err != nil {
 					return err
 				}
@@ -321,10 +327,10 @@ func isValidPathElement(pe string) bool {
 }
 
 func removeBrackets(pe string) (string, bool) {
-	if !strings.HasPrefix(pe,"[") || !strings.HasSuffix(pe,"]") {
+	if !strings.HasPrefix(pe, "[") || !strings.HasSuffix(pe, "]") {
 		return "", false
 	}
-	return pe[1:len(pe)-1], true
+	return pe[1 : len(pe)-1], true
 }
 
 func isKVPathElement(pe string) bool {
@@ -366,6 +372,20 @@ func pathKV(pe string) (k, v string, err error) {
 	return kv[0], kv[1], nil
 }
 
+func splitEscaped(s string) []string {
+	var prev rune
+	prevIdx := 0
+	var out []string
+	for i, c := range s {
+		if c == ':' && i > 0 && prev != 0 {
+			out = append(out, s[prevIdx:i])
+		}
+	}
+	return out
+}
+
+// objectOverrideMap converts oos, a slice of object overlays, into a map of the same overlays where the key is the
+// object manifest.Hash.
 func objectOverrideMap(oos []*v1alpha1.K8SObjectOverlay, namespace string) (map[string][]*v1alpha1.K8SObjectOverlay_PathValue, error) {
 	ret := make(map[string][]*v1alpha1.K8SObjectOverlay_PathValue)
 	for _, o := range oos {
@@ -378,6 +398,7 @@ func stringsEqual(a, b interface{}) bool {
 	return fmt.Sprint(a) == fmt.Sprint(b)
 }
 
+// matchesRegex reports whether str regex matches pattern.
 func matchesRegex(pattern, str interface{}) bool {
 	match, err := regexp.MatchString(fmt.Sprint(pattern), fmt.Sprint(str))
 	if err != nil {
@@ -388,7 +409,8 @@ func matchesRegex(pattern, str interface{}) bool {
 	return match
 }
 
-func isSlice(v interface{}) bool {
+// isSliceOrPtrInterface reports whether v is a slice, a ptr to slice or interface to slice.
+func isSliceOrPtrInterface(v interface{}) bool {
 	vv := reflect.ValueOf(v)
 	if vv.Kind() == reflect.Ptr {
 		vv = vv.Elem()
@@ -399,7 +421,8 @@ func isSlice(v interface{}) bool {
 	return vv.Kind() == reflect.Slice
 }
 
-func isMap(v interface{}) bool {
+// isMapOrInterface reports whether v is a map, or interface to a map.
+func isMapOrInterface(v interface{}) bool {
 	vv := reflect.ValueOf(v)
 	if vv.Kind() == reflect.Interface {
 		vv = vv.Elem()
