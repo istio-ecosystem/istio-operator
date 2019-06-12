@@ -23,7 +23,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/jsonpb"
 
-	"istio.io/operator/pkg/apis/installer/v1alpha1"
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
 )
 
@@ -172,7 +172,7 @@ a:
 		}}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			rc := &v1alpha1.KubernetesResourcesSpec{}
+			rc := &v1alpha2.KubernetesResourcesSpec{}
 			err := unmarshalWithJSONPB(makeOverlayHeader(tt.path, tt.value), rc)
 			if err != nil {
 				t.Fatalf("unmarshalWithJSONPB(%s): got error %s", tt.desc, err)
@@ -421,7 +421,7 @@ spec:
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			rc := &v1alpha1.KubernetesResourcesSpec{}
+			rc := &v1alpha2.KubernetesResourcesSpec{}
 			err := unmarshalWithJSONPB(makeOverlayHeader(tt.path, tt.value), rc)
 			if err != nil {
 				t.Fatalf("unmarshalWithJSONPB(%s): got error %s", tt.desc, err)
