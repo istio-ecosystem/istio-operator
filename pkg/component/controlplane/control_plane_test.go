@@ -44,19 +44,19 @@ func TestRenderInstallationSuccess(t *testing.T) {
 		{
 			desc: "all_off",
 			installSpec: `
-				trafficManagement:
-				  enabled: false
-				policy:
-				  enabled: false
-				telemetry:
-				  enabled: false
-				security:
-				  enabled: false
-				configManagement:
-				  enabled: false
-				autoInjection:
-				  enabled: false
-				`,
+trafficManagement:
+  enabled: false
+policy:
+  enabled: false
+telemetry:
+  enabled: false
+security:
+  enabled: false
+configManagement:
+  enabled: false
+autoInjection:
+  enabled: false
+`,
 		},
 		{
 			desc: "pilot_default",
@@ -67,6 +67,54 @@ trafficManagement:
     proxy:
       common:
         enabled: false
+`,
+		},
+		{
+			desc: "pilot_override_values",
+			installSpec: `
+trafficManagement:
+  enabled: true
+  components:
+    proxy:
+      common:
+        enabled: false
+    pilot:
+      common:
+        valuesOverrides:
+          replicaCount: 5
+          resources:
+            requests:
+              cpu: 111m
+              memory: 222Mi
+        unvalidatedValuesOverrides:
+          myCustomKey: someValue
+`,
+		},
+		{
+			desc: "pilot_override_kubernetes",
+			installSpec: `
+trafficManagement:
+  enabled: true
+  components:
+    proxy:
+      common:
+        enabled: false
+    pilot:
+      common:
+        k8s:
+          overlays:
+          - kind: Deployment
+            name: istio-pilot
+            patches:
+            - path: spec.template.spec.containers.[name:discovery].args.[30m]
+              value: "60m" # OVERRIDDEN
+            - path: spec.template.spec.containers.[name:discovery].ports.[containerPort:8080].containerPort
+              value: 1234 # OVERRIDDEN
+          - kind: Service
+            name: istio-pilot
+            patches:
+            - path: spec.ports.[name:grpc-xds].port
+              value: 11111 # OVERRIDDEN
 `,
 		},
 	}
