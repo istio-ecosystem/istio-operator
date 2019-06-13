@@ -140,12 +140,12 @@ trafficManagement:
 			if err != nil {
 				t.Fatal(err)
 			}
-			diff, err := ManifestDiff(got, want)
+			diff, err := manifestDiff(got, want)
 			if err != nil {
 				t.Fatal(err)
 			}
 			if diff != "" {
-				//t.Errorf("got objects:\n%s\nwant objects:\n%s\n", ObjectsInManifest(got), ObjectsInManifest(want))
+				//t.Errorf("got objects:\n%s\nwant objects:\n%s\n", objectsInManifest(got), objectsInManifest(want))
 				t.Errorf("%s: got:\n%s\nwant:\n%s\n(-got, +want)\n%s\n", tt.desc, "", "", diff)
 			}
 
@@ -172,7 +172,7 @@ func readFile(path string) (string, error) {
 	return string(b), err
 }
 
-func YAMLDiff(a, b string) string {
+func yamlDiff(a, b string) string {
 	ao, bo := make(map[string]interface{}), make(map[string]interface{})
 	if err := yaml.Unmarshal([]byte(a), &ao); err != nil {
 		return err.Error()
@@ -193,7 +193,7 @@ func YAMLDiff(a, b string) string {
 	return diff.Diff(string(ay), string(by))
 }
 
-func ManifestDiff(a, b string) (string, error) {
+func manifestDiff(a, b string) (string, error) {
 	ao, err := manifest.ParseObjectsFromYAMLManifest(context.TODO(), a)
 	if err != nil {
 		return "", err
@@ -213,7 +213,7 @@ func ManifestDiff(a, b string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		diff := YAMLDiff(string(ay), string(by))
+		diff := yamlDiff(string(ay), string(by))
 		if diff != "" {
 			sb.WriteString("\n\nObject " + ak + " has diffs:\n\n")
 			sb.WriteString(diff)
@@ -225,7 +225,7 @@ func ManifestDiff(a, b string) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			diff := YAMLDiff(string(by), "")
+			diff := yamlDiff(string(by), "")
 			if diff != "" {
 				sb.WriteString("\n\nObject " + bk + " is missing:\n\n")
 				sb.WriteString(diff)
@@ -235,7 +235,7 @@ func ManifestDiff(a, b string) (string, error) {
 	return sb.String(), err
 }
 
-func ObjectsInManifest(mstr string) string {
+func objectsInManifest(mstr string) string {
 	ao, err := manifest.ParseObjectsFromYAMLManifest(context.TODO(), mstr)
 	if err != nil {
 		return err.Error()
