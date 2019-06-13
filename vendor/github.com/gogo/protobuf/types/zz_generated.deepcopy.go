@@ -750,7 +750,7 @@ func (in *UInt64Value) DeepCopy() *UInt64Value {
 func (in *Value) DeepCopyInto(out *Value) {
 	*out = *in
 	if in.Kind != nil {
-		out.Kind = in.Kind.DeepCopyisValue_Kind()
+		out.Kind = in.Kind
 	}
 	out.XXX_NoUnkeyedLiteral = in.XXX_NoUnkeyedLiteral
 	if in.XXX_unrecognized != nil {
