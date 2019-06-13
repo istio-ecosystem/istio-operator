@@ -29,7 +29,9 @@ func WatchDirRecursively(dir string) (<-chan struct{}, error) {
 	// Raw notifies that must be debounced.
 	notifyRaw := make(chan struct{})
 	for _, d := range subdirs {
-		watchDir(d, notifyRaw)
+		if err := watchDir(d, notifyRaw); err != nil {
+			return nil, err
+		}
 	}
 
 	// Debounced notifies.
@@ -59,7 +61,8 @@ func watchDir(dir string, notify chan<- struct{}) error {
 	go func() {
 		for {
 			// All errors are likely to be same reason here, just pick one.
-			watcher, err := fsnotify.NewWatcher()
+			var watcher *fsnotify.Watcher
+			watcher, err = fsnotify.NewWatcher()
 			if err != nil {
 				log.Print(err)
 				return
@@ -89,7 +92,7 @@ func watchDir(dir string, notify chan<- struct{}) error {
 							done <- struct{}{}
 							return
 						}
-						log.Printf("error for watcher on %s:", dir, err)
+						log.Printf("error for watcher on %s:%s", dir, err)
 					}
 				}
 			}()
