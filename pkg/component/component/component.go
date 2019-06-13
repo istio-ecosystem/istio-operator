@@ -1,3 +1,22 @@
+// Copyright 2017 Istio Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/*
+Package component defines an in-memory representation of IstioControlPlane.<Feature>.<Component>. It provides functions
+for manipulating the component and rendering a manifest from it.
+See ../README.md for an architecture overview.
+*/
 package component
 
 import (
@@ -16,23 +35,23 @@ import (
 	"istio.io/pkg/log"
 )
 
-// ComponentName is a component name string, typed to constrain allowed values.
-type ComponentName string
+// Name is a component name string, typed to constrain allowed values.
+type Name string
 
 const (
 	// IstioComponent names corresponding to the IstioControlPlane proto component names. Must be the same, since these
 	// are used for struct traversal.
-	IstioBaseComponentName       ComponentName = "crds"
-	PilotComponentName           ComponentName = "Pilot"
-	GalleyComponentName          ComponentName = "Galley"
-	SidecarInjectorComponentName ComponentName = "SidecarInjector"
-	PolicyComponentName          ComponentName = "Policy"
-	TelemetryComponentName       ComponentName = "Telemetry"
-	CitadelComponentName         ComponentName = "Citadel"
-	CertManagerComponentName     ComponentName = "CertManager"
-	NodeAgentComponentName       ComponentName = "NodeAgent"
-	IngressComponentName         ComponentName = "Ingress"
-	EgressComponentName          ComponentName = "Egress"
+	IstioBaseComponentName       Name = "crds"
+	PilotComponentName           Name = "Pilot"
+	GalleyComponentName          Name = "Galley"
+	SidecarInjectorComponentName Name = "SidecarInjector"
+	PolicyComponentName          Name = "Policy"
+	TelemetryComponentName       Name = "Telemetry"
+	CitadelComponentName         Name = "Citadel"
+	CertManagerComponentName     Name = "CertManager"
+	NodeAgentComponentName       Name = "NodeAgent"
+	IngressComponentName         Name = "Ingress"
+	EgressComponentName          Name = "Egress"
 
 	// String to emit for any component which is disabled.
 	componentDisabledStr = " component is disabled."
@@ -42,12 +61,12 @@ const (
 	localFilePrefix = "file://"
 )
 
-// ComponentDirLayout is a mapping between a component name and a subdir path to its chart from the helm charts root.
-type ComponentDirLayout map[ComponentName]string
+// DirLayout is a mapping between a component name and a subdir path to its chart from the helm charts root.
+type DirLayout map[Name]string
 
 var (
-	// V12DirLayout is a ComponentDirLayout for Istio v1.2.
-	V12DirLayout = ComponentDirLayout{
+	// V12DirLayout is a DirLayout for Istio v1.2.
+	V12DirLayout = DirLayout{
 		PilotComponentName:           "istio-control/istio-discovery",
 		GalleyComponentName:          "istio-control/istio-config",
 		SidecarInjectorComponentName: "istio-control/istio-autoinject",
@@ -60,7 +79,7 @@ var (
 		EgressComponentName:          "gateways/istio-egress",
 	}
 	// componentToHelmValuesName is the root component name used in values YAML files in component charts.
-	componentToHelmValuesName = map[ComponentName]string{
+	componentToHelmValuesName = map[Name]string{
 		PilotComponentName:           "pilot",
 		GalleyComponentName:          "galley",
 		SidecarInjectorComponentName: "sidecarInjectorWebhook",
@@ -74,11 +93,11 @@ var (
 	}
 )
 
-// ComponentOptions defines options for a component.
-type ComponentOptions struct {
+// Options defines options for a component.
+type Options struct {
 	FeatureName string
 	InstallSpec *v1alpha1.IstioControlPlaneSpec
-	Dirs        ComponentDirLayout
+	Dirs        DirLayout
 }
 
 // IstioComponent defines the interface for a component.
@@ -91,10 +110,10 @@ type IstioComponent interface {
 
 // CommonComponentFields is a struct common to all components.
 type CommonComponentFields struct {
-	*ComponentOptions
+	*Options
 	enabled   bool
 	namespace string
-	name      ComponentName
+	name      Name
 	renderer  helm.TemplateRenderer
 	started   bool
 }
@@ -105,11 +124,11 @@ type PilotComponent struct {
 }
 
 // NewPilotComponent creates a new PilotComponent and returns a pointer to it.
-func NewPilotComponent(opts *ComponentOptions) *PilotComponent {
+func NewPilotComponent(opts *Options) *PilotComponent {
 	ret := &PilotComponent{
 		&CommonComponentFields{
-			ComponentOptions: opts,
-			name:             PilotComponentName,
+			Options: opts,
+			name:    PilotComponentName,
 		},
 	}
 	return ret
@@ -149,11 +168,11 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 	}
 
 	vals, valsUnvalidated := make(map[string]interface{}), make(map[string]interface{})
-	validatedExist, err := SetFromPath(c.ComponentOptions.InstallSpec, "TrafficManagement.Components."+string(c.name)+".Common.ValuesOverrides", &vals)
+	validatedExist, err := SetFromPath(c.Options.InstallSpec, "TrafficManagement.Components."+string(c.name)+".Common.ValuesOverrides", &vals)
 	if err != nil {
 		return "", err
 	}
-	unvalidatedExist, err := SetFromPath(c.ComponentOptions.InstallSpec, "TrafficManagement.Components."+string(c.name)+".Common.UnvalidatedValuesOverrides", &valsUnvalidated)
+	unvalidatedExist, err := SetFromPath(c.Options.InstallSpec, "TrafficManagement.Components."+string(c.name)+".Common.UnvalidatedValuesOverrides", &valsUnvalidated)
 	if err != nil {
 		return "", err
 	}
@@ -182,8 +201,8 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 	if !found {
 		return my, nil
 	}
-	kyo, _ := yaml.Marshal(overlays)
-	log.Infof("kubernetes overlay: \n%s\n", kyo)
+
+	log.Infof("kubernetes overlay: \n%s\n", marshalYAMLDebug(overlays))
 	return patch.PatchYAMLManifest(my, c.namespace, overlays)
 }
 
@@ -195,7 +214,7 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 // 4. if the component disabled, it is reported disabled, else
 // 5. the component is enabled.
 // This follows the logic description in IstioControlPlane proto.
-func isComponentEnabled(featureName string, componentName ComponentName, installSpec *v1alpha1.IstioControlPlaneSpec) bool {
+func isComponentEnabled(featureName string, componentName Name, installSpec *v1alpha1.IstioControlPlaneSpec) bool {
 	featureNodeI, found, err := GetFromStructPath(installSpec, featureName+".Enabled")
 	if err != nil {
 		log.Error(err.Error())
@@ -241,7 +260,7 @@ func isComponentEnabled(featureName string, componentName ComponentName, install
 }
 
 // disabledYAMLStr returns the YAML comment string that the given component is disabled.
-func disabledYAMLStr(componentName ComponentName) string {
+func disabledYAMLStr(componentName Name) string {
 	return yamlCommentStr + string(componentName) + componentDisabledStr
 }
 
@@ -260,7 +279,7 @@ func patchTree(base, patch map[string]interface{}) (string, error) {
 	return helm.OverlayYAML(string(by), string(py))
 }
 
-func valuesOverlaysToHelmValues(in map[string]interface{}, cname ComponentName) map[string]interface{} {
+func valuesOverlaysToHelmValues(in map[string]interface{}, cname Name) map[string]interface{} {
 	out := make(map[string]interface{})
 	toPath, ok := componentToHelmValuesName[cname]
 	if !ok {
@@ -411,7 +430,7 @@ func getFromStructPath(node interface{}, path util.Path) (interface{}, bool, err
 type ProxyComponent struct {
 }
 
-func NewProxyComponent(opts *ComponentOptions) *ProxyComponent {
+func NewProxyComponent(opts *Options) *ProxyComponent {
 	return nil
 }
 
@@ -426,7 +445,7 @@ func (c *ProxyComponent) RenderManifest() (string, error) {
 type CitadelComponent struct {
 }
 
-func NewCitadelComponent(opts *ComponentOptions) *CitadelComponent {
+func NewCitadelComponent(opts *Options) *CitadelComponent {
 	return nil
 }
 
@@ -441,7 +460,7 @@ func (c *CitadelComponent) RenderManifest() (string, error) {
 type CertManagerComponent struct {
 }
 
-func NewCertManagerComponent(opts *ComponentOptions) *CertManagerComponent {
+func NewCertManagerComponent(opts *Options) *CertManagerComponent {
 	return nil
 }
 
@@ -456,7 +475,7 @@ func (c *CertManagerComponent) RenderManifest() (string, error) {
 type NodeAgentComponent struct {
 }
 
-func NewNodeAgentComponent(opts *ComponentOptions) *NodeAgentComponent {
+func NewNodeAgentComponent(opts *Options) *NodeAgentComponent {
 	return nil
 }
 
@@ -471,7 +490,7 @@ func (c *NodeAgentComponent) RenderManifest() (string, error) {
 type PolicyComponent struct {
 }
 
-func NewPolicyComponent(opts *ComponentOptions) *PolicyComponent {
+func NewPolicyComponent(opts *Options) *PolicyComponent {
 	return nil
 }
 
@@ -486,7 +505,7 @@ func (c *PolicyComponent) RenderManifest() (string, error) {
 type TelemetryComponent struct {
 }
 
-func NewTelemetryComponent(opts *ComponentOptions) *TelemetryComponent {
+func NewTelemetryComponent(opts *Options) *TelemetryComponent {
 	return nil
 }
 
@@ -501,7 +520,7 @@ func (c *TelemetryComponent) RenderManifest() (string, error) {
 type GalleyComponent struct {
 }
 
-func NewGalleyComponent(opts *ComponentOptions) *GalleyComponent {
+func NewGalleyComponent(opts *Options) *GalleyComponent {
 	return nil
 }
 
@@ -516,7 +535,7 @@ func (c *GalleyComponent) RenderManifest() (string, error) {
 type SidecarInjectorComponent struct {
 }
 
-func NewSidecarInjectorComponent(opts *ComponentOptions) *SidecarInjectorComponent {
+func NewSidecarInjectorComponent(opts *Options) *SidecarInjectorComponent {
 	return nil
 }
 
@@ -526,4 +545,13 @@ func (c *SidecarInjectorComponent) Run() error {
 
 func (c *SidecarInjectorComponent) RenderManifest() (string, error) {
 	return "", nil
+}
+
+// marshalYAMLDebug returns either the YAML string for i, or the error message string if marshaling fails.
+func marshalYAMLDebug(i interface{}) string {
+	y, err := yaml.Marshal(i)
+	if err != nil {
+		return err.Error()
+	}
+	return y
 }
