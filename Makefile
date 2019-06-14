@@ -20,3 +20,8 @@ gen_patch:
 	diff -u pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go.orig pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go > pkg/apis/istio/v1alpha2/fixup_go_structs.patch || true
 
 include Makefile.common.mk
+
+
+# Coverage tests
+coverage:
+	scripts/codecov.sh
