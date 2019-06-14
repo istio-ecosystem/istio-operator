@@ -314,6 +314,8 @@ message AutoInjectionFeatureSpec {
 }
 
 // Configuration options for the pilot component.
+// TODO: add custom deepcopy if needed.
+// +k8s:deepcopy-gen=false
 message PilotComponentSpec {
     CommonComponentSpec common = 1;
 
@@ -322,26 +324,31 @@ message PilotComponentSpec {
 }
 
 // Configuration options for the proxy.
+// +k8s:deepcopy-gen=false
 message ProxyComponentSpec {
     CommonComponentSpec common = 1;
 }
 
 // Configuration options for the sidecar injector component.
+// +k8s:deepcopy-gen=false
 message SidecarInjectorComponentSpec {
     CommonComponentSpec common = 1;
 }
 
 // Configuration options for the policy enforcement component.
+// +k8s:deepcopy-gen=false
 message PolicyComponentSpec {
     CommonComponentSpec common = 1;
 }
 
 // Configuration options for the telemetry component.
+// +k8s:deepcopy-gen=false
 message TelemetryComponentSpec {
     CommonComponentSpec common = 1;
 }
 
 // Configuration options for Citadel component.
+// +k8s:deepcopy-gen=false
 message CitadelComponentSpec {
     CommonComponentSpec common = 1;
 
@@ -350,21 +357,25 @@ message CitadelComponentSpec {
 }
 
 // Configuration options for certificate manager component.
+// +k8s:deepcopy-gen=false
 message CertManagerComponentSpec {
     CommonComponentSpec common = 1;
 }
 
 // Configuration options for node agent component.
+// +k8s:deepcopy-gen=false
 message NodeAgentComponentSpec {
     CommonComponentSpec common = 1;
 }
 
 // Configuration options for node agent component.
+// +k8s:deepcopy-gen=false
 message GalleyComponentSpec {
     CommonComponentSpec common = 1;
 }
 
 // Configuration common to all components.
+// +k8s:deepcopy-gen=false
 message CommonComponentSpec {
     // Selects whether this component is installed.
     google.protobuf.BoolValue enabled = 1;

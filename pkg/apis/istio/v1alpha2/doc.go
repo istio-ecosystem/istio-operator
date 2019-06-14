@@ -13,6 +13,4 @@
 // limitations under the License.
 
 // Package v1alpha2 contains API Schema definitions for the istio v1alpha2 API group
-// +k8s:deepcopy-gen=package,register
-// +groupName=istio.io
 package v1alpha2

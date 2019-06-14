@@ -1155,6 +1155,8 @@ func (m *AutoInjectionFeatureSpec_Components) GetInjector() *SidecarInjectorComp
 }
 
 // Configuration options for the pilot component.
+// TODO: add custom deepcopy if needed.
+// +k8s:deepcopy-gen=false
 type PilotComponentSpec struct {
 	Common *CommonComponentSpec `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
 	// Enables sidecar in the pilot pod.
@@ -1212,6 +1214,7 @@ func (m *PilotComponentSpec) GetSidecar() *protobuf.BoolValue {
 }
 
 // Configuration options for the proxy.
+// +k8s:deepcopy-gen=false
 type ProxyComponentSpec struct {
 	Common               *CommonComponentSpec `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
@@ -1260,6 +1263,7 @@ func (m *ProxyComponentSpec) GetCommon() *CommonComponentSpec {
 }
 
 // Configuration options for the sidecar injector component.
+// +k8s:deepcopy-gen=false
 type SidecarInjectorComponentSpec struct {
 	Common               *CommonComponentSpec `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
@@ -1308,6 +1312,7 @@ func (m *SidecarInjectorComponentSpec) GetCommon() *CommonComponentSpec {
 }
 
 // Configuration options for the policy enforcement component.
+// +k8s:deepcopy-gen=false
 type PolicyComponentSpec struct {
 	Common               *CommonComponentSpec `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
@@ -1356,6 +1361,7 @@ func (m *PolicyComponentSpec) GetCommon() *CommonComponentSpec {
 }
 
 // Configuration options for the telemetry component.
+// +k8s:deepcopy-gen=false
 type TelemetryComponentSpec struct {
 	Common               *CommonComponentSpec `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
@@ -1404,6 +1410,7 @@ func (m *TelemetryComponentSpec) GetCommon() *CommonComponentSpec {
 }
 
 // Configuration options for Citadel component.
+// +k8s:deepcopy-gen=false
 type CitadelComponentSpec struct {
 	Common               *CommonComponentSpec `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
 	SelfSigned           bool                 `protobuf:"varint,11,opt,name=self_signed,json=selfSigned,proto3" json:"self_signed,omitempty"`
@@ -1468,6 +1475,7 @@ func (m *CitadelComponentSpec) GetCreateMeshPolicy() bool {
 }
 
 // Configuration options for certificate manager component.
+// +k8s:deepcopy-gen=false
 type CertManagerComponentSpec struct {
 	Common               *CommonComponentSpec `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
@@ -1516,6 +1524,7 @@ func (m *CertManagerComponentSpec) GetCommon() *CommonComponentSpec {
 }
 
 // Configuration options for node agent component.
+// +k8s:deepcopy-gen=false
 type NodeAgentComponentSpec struct {
 	Common               *CommonComponentSpec `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
@@ -1564,6 +1573,7 @@ func (m *NodeAgentComponentSpec) GetCommon() *CommonComponentSpec {
 }
 
 // Configuration options for node agent component.
+// +k8s:deepcopy-gen=false
 type GalleyComponentSpec struct {
 	Common               *CommonComponentSpec `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
@@ -1612,6 +1622,7 @@ func (m *GalleyComponentSpec) GetCommon() *CommonComponentSpec {
 }
 
 // Configuration common to all components.
+// +k8s:deepcopy-gen=false
 type CommonComponentSpec struct {
 	// Selects whether this component is installed.
 	Enabled *protobuf.BoolValue `protobuf:"bytes,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
@@ -1620,8 +1631,6 @@ type CommonComponentSpec struct {
 	Debug     CommonComponentSpec_LogLevel `protobuf:"varint,3,opt,name=debug,proto3,enum=v1alpha2.CommonComponentSpec_LogLevel" json:"debug,omitempty"`
 	// Kubernetes resource spec.
 	K8S                  *KubernetesResourcesSpec `protobuf:"bytes,80,opt,name=k8s,proto3" json:"k8s,omitempty"`
-	ValuesOverrides      map[string]interface{}   `protobuf:"bytes,6,opt,name=data" json:"valuesOverrides,omitempty"`
-	UnvalidatedValuesOverrides map[string]interface{} `protobuf:"bytes,6,opt,name=data" json:"unvalidatedValuesOverrides,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
 	XXX_unrecognized     []byte                   `json:"-"`
 	XXX_sizecache        int32                    `json:"-"`
@@ -2324,7 +2333,6 @@ type K8SObjectOverlay_PathValue struct {
 	// Where b:c is a list element selector of the form key:value and :f is a list selector of the form :value.
 	// All path intermediate nodes must exist.
 	Path                 string   `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
-	Value                interface{} `protobuf:"bytes,4,opt,name=value,proto3" json:"value,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`

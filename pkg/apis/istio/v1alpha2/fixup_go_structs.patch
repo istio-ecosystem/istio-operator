@@ -1,5 +1,5 @@
---- pkg/apis/installer/v1alpha1/istioinstaller_types.pb.go.orig	2019-06-04 09:31:40.265237125 -0700
-+++ pkg/apis/installer/v1alpha1/istioinstaller_types.pb.go	2019-06-04 09:32:51.312887859 -0700
+--- pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go.orig	2019-06-04 09:31:40.265237125 -0700
++++ pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go	2019-06-04 09:32:51.312887859 -0700
 @@ -1620,6 +1620,8 @@
  	Debug     CommonComponentSpec_LogLevel `protobuf:"varint,3,opt,name=debug,proto3,enum=v1alpha1.CommonComponentSpec_LogLevel" json:"debug,omitempty"`
  	// Kubernetes resource spec.
