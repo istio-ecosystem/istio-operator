@@ -1,0 +1,8 @@
+baseProfilePath: file:///usr/local/google/home/mostrowski/go/src/github.com/ostromart/istio-installer/profiles/default.yaml
+customPackagePath: file:///usr/local/google/home/mostrowski/go/src/github.com/ostromart/istio-installer/pkg/component/controlplane/testdata/charts/ 
+trafficManagement:
+  enabled: true
+  components:
+    proxy:
+      common:
+        enabled: false
