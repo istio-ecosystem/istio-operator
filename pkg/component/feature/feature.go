@@ -4,20 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha1"
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/component/component"
+	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/util"
-)
-
-const (
-	// IstioFeature names, must be the same as feature names defined in the IstioControlPlane proto, since these are
-	// used to reference structure paths.
-	TrafficManagementFeatureName = "TrafficManagement"
-	PolicyFeatureName            = "Policy"
-	TelemetryFeatureName         = "Telemetry"
-	SecurityFeatureName          = "Security"
-	ConfigManagementFeatureName  = "ConfigManagement"
-	AutoInjectionFeatureName     = "AutoInjection"
 )
 
 // IstioFeature is a feature corresponding to Istio features defined in the IstioControlPlane proto.
@@ -31,7 +21,7 @@ type IstioFeature interface {
 // FeatureOptions are options for IstioFeature.
 type FeatureOptions struct {
 	// InstallSpec is the installation spec for the control plane.
-	InstallSpec *v1alpha1.IstioControlPlaneSpec
+	InstallSpec *v1alpha2.IstioControlPlaneSpec
 	// Dirs is a directory layout that maps component names to chart subdirectories.
 	Dirs component.ComponentDirLayout
 }
@@ -56,8 +46,8 @@ func NewTrafficManagementFeature(opts *FeatureOptions) *TrafficManagementFeature
 		FeatureOptions: *opts,
 	}
 	cff.components = []component.IstioComponent{
-		component.NewPilotComponent(newComponentOptions(cff, TrafficManagementFeatureName)),
-		component.NewSidecarInjectorComponent(newComponentOptions(cff, TrafficManagementFeatureName)),
+		component.NewPilotComponent(newComponentOptions(cff, name.TrafficManagementFeatureName)),
+		component.NewSidecarInjectorComponent(newComponentOptions(cff, name.TrafficManagementFeatureName)),
 	}
 
 	return &TrafficManagementFeature{
@@ -87,9 +77,9 @@ func NewSecurityFeature(opts *FeatureOptions) *SecurityFeature {
 		FeatureOptions: *opts,
 	}
 	cff.components = []component.IstioComponent{
-		component.NewCitadelComponent(newComponentOptions(cff, SecurityFeatureName)),
-		component.NewCertManagerComponent(newComponentOptions(cff, SecurityFeatureName)),
-		component.NewNodeAgentComponent(newComponentOptions(cff, SecurityFeatureName)),
+		component.NewCitadelComponent(newComponentOptions(cff, name.SecurityFeatureName)),
+		component.NewCertManagerComponent(newComponentOptions(cff, name.SecurityFeatureName)),
+		component.NewNodeAgentComponent(newComponentOptions(cff, name.SecurityFeatureName)),
 	}
 	return &SecurityFeature{
 		CommonFeatureFields: *cff,
@@ -117,7 +107,7 @@ func NewPolicyFeature(opts *FeatureOptions) *PolicyFeature {
 		FeatureOptions: *opts,
 	}
 	cff.components = []component.IstioComponent{
-		component.NewPolicyComponent(newComponentOptions(cff, PolicyFeatureName)),
+		component.NewPolicyComponent(newComponentOptions(cff, name.PolicyFeatureName)),
 	}
 	return &PolicyFeature{
 		CommonFeatureFields: *cff,
@@ -150,7 +140,7 @@ func NewTelemetryFeature(opts *FeatureOptions) *TelemetryFeature {
 		FeatureOptions: *opts,
 	}
 	cff.components = []component.IstioComponent{
-		component.NewTelemetryComponent(newComponentOptions(cff, TelemetryFeatureName)),
+		component.NewTelemetryComponent(newComponentOptions(cff, name.TelemetryFeatureName)),
 	}
 	return &TelemetryFeature{
 		CommonFeatureFields: *cff,
@@ -173,7 +163,7 @@ func NewConfigManagementFeature(opts *FeatureOptions) *ConfigManagementFeature {
 		FeatureOptions: *opts,
 	}
 	cff.components = []component.IstioComponent{
-		component.NewGalleyComponent(newComponentOptions(cff, ConfigManagementFeatureName)),
+		component.NewGalleyComponent(newComponentOptions(cff, name.ConfigManagementFeatureName)),
 	}
 	return &ConfigManagementFeature{
 		CommonFeatureFields: *cff,
@@ -201,7 +191,7 @@ func NewAutoInjectionFeature(opts *FeatureOptions) *AutoInjectionFeature {
 		FeatureOptions: *opts,
 	}
 	cff.components = []component.IstioComponent{
-		component.NewSidecarInjectorComponent(newComponentOptions(cff, AutoInjectionFeatureName)),
+		component.NewSidecarInjectorComponent(newComponentOptions(cff, name.AutoInjectionFeatureName)),
 	}
 	return &AutoInjectionFeature{
 		CommonFeatureFields: *cff,
@@ -219,10 +209,10 @@ func (f *AutoInjectionFeature) RenderManifest() (string, util.Errors) {
 }
 
 // newComponentOptions creates a component.ComponentOptions ptr from the given parameters.
-func newComponentOptions(cff *CommonFeatureFields, featureName string) *component.ComponentOptions {
+func newComponentOptions(cff *CommonFeatureFields, featureName name.FeatureName) *component.ComponentOptions {
 	return &component.ComponentOptions{
 		InstallSpec: cff.InstallSpec,
-		FeatureName: featureName,
+		FeatureName: string(featureName),
 		Dirs:        cff.Dirs,
 	}
 }
