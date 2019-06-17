@@ -1,11 +1,26 @@
+// Copyright 2019 Istio Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package validate
 
 import (
 	"fmt"
 	"net/url"
 	"reflect"
+	"strings"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha1"
+	"github.com/ostromart/istio-installer/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
 )
 
@@ -14,6 +29,7 @@ var (
 	defaultValidations = map[string]ValidatorFunc{
 		"Hub":                    validateHub,
 		"Tag":                    validateTag,
+		"BaseSpecPath":           validateInstallPackagePath,
 		"CustomPackagePath":      validateInstallPackagePath,
 		"DefaultNamespacePrefix": validateDefaultNamespacePrefix,
 	}
@@ -22,9 +38,9 @@ var (
 	requiredValues = map[string]bool{}
 )
 
-// ValidateIstioControlPlaneSpec validates the values in the given Installer spec, using the field map defaultValidations to
+// CheckIstioControlPlaneSpec validates the values in the given Installer spec, using the field map defaultValidations to
 // call the appropriate validation function.
-func ValidateIstioControlPlaneSpec(is *v1alpha1.IstioControlPlaneSpec) util.Errors {
+func CheckIstioControlPlaneSpec(is *v1alpha2.IstioControlPlaneSpec) util.Errors {
 	return validate(defaultValidations, is, nil)
 }
 
@@ -117,13 +133,34 @@ func validateDefaultNamespacePrefix(path util.Path, val interface{}) util.Errors
 }
 
 func validateInstallPackagePath(path util.Path, val interface{}) util.Errors {
-	if !isString(val) {
-		return util.NewErrs(fmt.Errorf("validateDefaultNamespacePrefix(%s) bad type %T, want string", path, val))
+	valStr, ok := val.(string)
+	if !ok {
+		return util.NewErrs(fmt.Errorf("validateInstallPackagePath(%s) bad type %T, want string", path, val))
+	}
+
+	if valStr == "" {
+		// compiled-in charts
+		return nil
 	}
 
 	if _, err := url.ParseRequestURI(val.(string)); err != nil {
-		return util.NewErrs(fmt.Errorf("invalid value %s:%s", path, val))
+		return util.NewErrs(fmt.Errorf("invalid value %s:%s", path, valStr))
 	}
 
-	return nil
+	validPrefixes := []string{util.LocalFilePrefix}
+	validPrefixDesc := map[string]string{
+		util.LocalFilePrefix: "RFC 8089 absolute path to file e.g. file:///var/istio/config.yaml",
+	}
+
+	for _, vp := range validPrefixes {
+		if strings.HasPrefix(valStr, vp) {
+			return nil
+		}
+	}
+
+	errStr := fmt.Sprintf("Invalid path prefix for %s: %s. \nMust be one of the following:\n", path, valStr)
+	for _, vp := range validPrefixes {
+		errStr += fmt.Sprintf("%-15s %s", vp, validPrefixDesc[vp])
+	}
+	return util.NewErrs(fmt.Errorf(errStr))
 }
