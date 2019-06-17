@@ -12,20 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package main
 
 import (
-	"github.com/spf13/cobra"
+	"os"
+
+	"github.com/ostromart/istio-installer/cmd/iop"
 )
 
-func installCmd(_ *rootArgs, _, _ FormatFn) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "install",
-		Short: "Installs Istio to cluster.",
-		Long:  "The install subcommand is used to install Istio into a cluster, given a CR path. ",
-		Args:  cobra.ExactArgs(0),
-		Run: func(cmd *cobra.Command, args []string) {
-		}}
-
-	return cmd
+func main() {
+	rootCmd := iop.GetRootCmd(os.Args[1:], iop.Printf, iop.Fatalf)
+	if err := rootCmd.Execute(); err != nil {
+		os.Exit(1)
+	}
 }

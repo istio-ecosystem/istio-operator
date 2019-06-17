@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package iop
 
 import (
 	"flag"
@@ -23,12 +23,12 @@ import (
 )
 
 type rootArgs struct {
-	// cRPath is the path to the input IstioIstall CR.
-	cRPath string
+	// crPath is the path to the input IstioIstall CR.
+	crPath string
 }
 
 func addFlags(cmd *cobra.Command, rootArgs *rootArgs) {
-	cmd.PersistentFlags().StringVarP(&rootArgs.cRPath, "crpath", "p", "localhost:9091",
+	cmd.PersistentFlags().StringVarP(&rootArgs.crPath, "crpath", "p", "",
 		"The path to the input IstioIstall CR. Uses in cluster value with kubectl if unset.")
 }
 

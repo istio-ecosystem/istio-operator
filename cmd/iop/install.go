@@ -1,4 +1,4 @@
-// Copyright 2017 Istio Authors
+// Copyright 2019 Istio Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,23 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package iop
 
 import (
 	"github.com/spf13/cobra"
 )
 
-func manifestCmd(rootArgs *rootArgs, printf, fatalf FormatFn) *cobra.Command {
-	return &cobra.Command{
-		Use:   "manifest",
-		Short: "Generates Istio install manifest.",
-		Long:  "The manifest subcommand is used to generate an Istio install manifest based on the input CR.",
+func installCmd(_ *rootArgs, _, _ FormatFn) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "install",
+		Short: "Installs Istio to cluster.",
+		Long:  "The install subcommand is used to install Istio into a cluster, given a CR path. ",
 		Args:  cobra.ExactArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
-			genManifest(rootArgs, printf, fatalf)
 		}}
-}
 
-func genManifest(_ *rootArgs, _, _ FormatFn) {
-
+	return cmd
 }

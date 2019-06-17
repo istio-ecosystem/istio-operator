@@ -14,7 +14,7 @@
 
 // Package shared contains types and functions that are used across the full
 // set of mixer commands.
-package cmd
+package iop
 
 import (
 	"fmt"
