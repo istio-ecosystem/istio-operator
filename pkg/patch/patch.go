@@ -84,7 +84,6 @@ that way in the object being patched.
 package patch
 
 import (
-	"context"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -92,6 +91,7 @@ import (
 
 	"github.com/kr/pretty"
 	"gopkg.in/yaml.v2"
+
 	"istio.io/istio/pkg/log"
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/manifest"
