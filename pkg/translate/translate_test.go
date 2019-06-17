@@ -1,4 +1,4 @@
-// Copyright 2017 Istio Authors
+// Copyright 2019 Istio Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/kr/pretty"
 	"github.com/kylelemons/godebug/diff"
-	"github.com/ostromart/istio-installer/pkg/apis/installer/v1alpha1"
 	"github.com/ostromart/istio-installer/pkg/util"
 )
 
@@ -95,7 +94,7 @@ func TestSetYAML(t *testing.T) {
 				root = make(util.Tree)
 			}
 			p := util.PathFromString(tt.path)
-			err := setYAML(root, p, tt.value)
+			err := setTree(root, p, tt.value)
 			fmt.Println(err)
 			if gotErr, wantErr := errToString(err), tt.wantErr; gotErr != wantErr {
 				t.Errorf("TestSetYAML()%s: gotErr:%s, wantErr:%s", tt.desc, gotErr, wantErr)
@@ -111,7 +110,7 @@ func TestSetYAML(t *testing.T) {
 func TestProtoToValues(t *testing.T) {
 	tests := []struct {
 		desc string
-		// mappings defaults to defaultMappings
+		// mappings defaults to V12Mappings
 		mappings map[string]*Translation
 		yamlStr  string
 		want     string
@@ -173,9 +172,9 @@ sidecarInjectorWebhook:
 		t.Run(tt.desc, func(t *testing.T) {
 			mappings := tt.mappings
 			if mappings == nil {
-				mappings = defaultMappings
+				mappings = V12Mappings
 			}
-			ispec := &v1alpha1.InstallerSpec{}
+			ispec := &v1alpha2.InstallerSpec{}
 			err := unmarshalWithJSONPB(tt.yamlStr, ispec)
 			if err != nil {
 				t.Fatalf("unmarshalWithJSONPB(%s): got error %s", tt.desc, err)

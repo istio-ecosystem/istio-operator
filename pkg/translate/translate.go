@@ -1,4 +1,4 @@
-// Copyright 2017 Istio Authors
+// Copyright 2019 Istio Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/ostromart/istio-installer/pkg/apis/istio/v1alpha2"
 	"gopkg.in/yaml.v2"
-	"istio.io/operator/pkg/apis/istio/v1alpha1"
+	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/util"
 )
 
@@ -36,59 +37,91 @@ type Translation struct {
 	translationFunc TranslationFunc
 }
 
+type componentValuePaths struct {
+	enabled   string
+	namespace string
+}
+
 var (
-	// defaultMappings is a mapping between an API path and the corresponding values.yaml path using longest prefix
+	// V12Mappings is a mapping between an API path and the corresponding values.yaml path using longest prefix
 	// match. If the path is a non-leaf node, the output path is the matching portion of the path, plus any remaining
 	// output path.
-	defaultMappings = map[string]*Translation{
-		"Hub":                                {"global.hub", "", nil},
-		"Tag":                                {"global.tag", "", nil},
-		"K8SDefaults.Resources.Requests.cpu": {"global.defaultResources.requests.cpu", "", nil},
-
-		"TrafficManagement.ClusterDomain":                                   {"global.clusterDomain", "", nil},
-		"TrafficManagement.SidecarInjector.EnableNamespacesByDefault.Value": {"sidecarInjectorWebhook.enableNamespacesByDefault", "", nil},
-		"TrafficManagement.Proxy.Common.Resources.Requests.cpu":             {"global.proxy.resources.requests.cpu", "", nil},
-		"TrafficManagement.Proxy.Common.Resources.Requests.memory":          {"global.proxy.resources.requests.memory", "", nil},
-		"TrafficManagement.Proxy.Common.Resources.Limits.cpu":               {"global.proxy.resources.limits.cpu", "", nil},
-		"TrafficManagement.Proxy.Common.Resources.Limits.memory":            {"global.proxy.resources.limits.memory", "", nil},
+	V12Mappings = map[string]*Translation{
+		"Hub": {"global.hub", "", nil},
+		"Tag": {"global.tag", "", nil},
 
 		"PolicyTelemetry.PolicyCheckFailOpen":       {"global.policyCheckFailOpen", "", nil},
 		"PolicyTelemetry.OutboundTrafficPolicyMode": {"global.outboundTrafficPolicy.mode", "", nil},
 
 		"Security.ControlPlaneMtls.Value":    {"global.controlPlaneSecurityEnabled", "", nil},
 		"Security.DataPlaneMtlsStrict.Value": {"global.mtls.enabled", "", nil},
-		"Security.TrustDomain":               {"global.trustDomain", "", nil},
-		"Security.SelfSigned.Value":          {"security.selfSigned", "", nil},
-		"Security.CreateMeshPolicy.Value":    {"security.createMeshPolicy", "", nil},
+	}
+
+	// ComponentToHelmValuesName is the root component name used in values YAML files in component charts.
+	ComponentToHelmValuesName = map[name.ComponentName]string{
+		name.IstioBaseComponentName:       "global",
+		name.PilotComponentName:           "pilot",
+		name.GalleyComponentName:          "galley",
+		name.SidecarInjectorComponentName: "sidecarInjectorWebhook",
+		name.PolicyComponentName:          "mixer.policy",
+		name.TelemetryComponentName:       "mixer.telemetry",
+		name.CitadelComponentName:         "citadel",
+		name.NodeAgentComponentName:       "nodeAgent",
+		name.CertManagerComponentName:     "certManager",
+		name.IngressComponentName:         "gateways.istio-ingressgateway",
+		name.EgressComponentName:          "gateways.istio-ingressgateway",
+	}
+
+	FeatureComponentToValues = map[name.FeatureName]map[name.ComponentName]componentValuePaths{
+		name.TrafficManagementFeatureName: {
+			name.PilotComponentName: {
+				enabled:   "pilot.enabled",
+				namespace: "global.istioNamespace",
+			},
+		},
+		name.PolicyFeatureName: {
+			name.PolicyComponentName: {
+				enabled:   "mixer.policy.enabled",
+				namespace: "global.policyNamespace",
+			},
+		},
+		name.TelemetryFeatureName: {
+			name.TelemetryComponentName: {
+				enabled:   "mixer.telemetry.enabled",
+				namespace: "global.telemetryNamespace",
+			},
+		},
+		// TODO: check if these really should be settable.
+		name.SecurityFeatureName: {
+			name.NodeAgentComponentName: {
+				enabled:   "nodeagent.enabled",
+				namespace: "global.istioNamespace",
+			},
+			name.CertManagerComponentName: {
+				enabled:   "certmanager.enabled",
+				namespace: "global.istioNamespace",
+			},
+			name.CitadelComponentName: {
+				enabled:   "security.enabled",
+				namespace: "global.istioNamespace",
+			},
+		},
 	}
 )
 
-// defaultTranslationFunc is the default translation to values. It maps a Go data path into a YAML path.
-func defaultTranslationFunc(m *Translation, root util.Tree, valuesPath string, value interface{}) error {
-	var path []string
-
-	if util.IsEmptyString(value) {
-		dbgPrint("Skip empty string value for path %s", m.k8sPath)
-		return nil
-	}
-	if valuesPath == "" {
-		dbgPrint("Not mapping to values, resources path is %s", m.k8sPath)
-		return nil
-	}
-
-	for _, p := range util.PathFromString(valuesPath) {
-		path = append(path, firstCharToLower(p))
-	}
-
-	return setYAML(root, path, value)
-}
-
 // ProtoToValues traverses the supplied InstallerSpec and returns a values.yaml translation from it. Mappings defines
 // a mapping set of translations.
-func ProtoToValues(mappings map[string]*Translation, ii *v1alpha1.InstallerSpec) (string, error) {
+func ProtoToValues(mappings map[string]*Translation, ii *v1alpha2.IstioControlPlaneSpec) (string, error) {
 	root := make(util.Tree)
 
 	errs := protoToValues(mappings, ii, root, nil)
+	if len(errs) != 0 {
+		return "", errs.ToError()
+	}
+
+	if err := setEnablementAndNamespaces(root, ii); err != nil {
+		return "", err
+	}
 
 	if len(root) == 0 {
 		return "", nil
@@ -100,6 +133,22 @@ func ProtoToValues(mappings map[string]*Translation, ii *v1alpha1.InstallerSpec)
 	}
 
 	return string(y), errs.ToError()
+}
+
+// setEnablementAndNamespaces translates the enablement and namespace value of each component in the root values tree,
+// based on feature/component inheritance relationship.
+func setEnablementAndNamespaces(root util.Tree, ii *v1alpha2.IstioControlPlaneSpec) error {
+	for fn, f := range FeatureComponentToValues {
+		for cn, c := range f {
+			if err := setTree(root, util.PathFromString(c.enabled), name.IsComponentEnabled(string(fn), cn, ii)); err != nil {
+				return err
+			}
+			if err := setTree(root, util.PathFromString(c.namespace), name.Namespace(string(fn), cn, ii)); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // protoToValues takes an interface which must be a struct ptr and recursively iterates through all its fields.
@@ -218,9 +267,9 @@ func getValuesPathMapping(mappings map[string]*Translation, path util.Path) (str
 	return out, m
 }
 
-// setYAML sets the YAML path in the given Tree to the given value, creating any required intermediate nodes.
-func setYAML(root util.Tree, path util.Path, value interface{}) error {
-	dbgPrint("setYAML %s:%v", path, value)
+// setTree sets the YAML path in the given Tree to the given value, creating any required intermediate nodes.
+func setTree(root util.Tree, path util.Path, value interface{}) error {
+	dbgPrint("setTree %s:%v", path, value)
 	if len(path) == 0 {
 		return fmt.Errorf("path cannot be empty")
 	}
@@ -231,7 +280,28 @@ func setYAML(root util.Tree, path util.Path, value interface{}) error {
 	if root[path[0]] == nil {
 		root[path[0]] = make(util.Tree)
 	}
-	return setYAML(root[path[0]].(util.Tree), path[1:], value)
+	setTree(root[path[0]].(util.Tree), path[1:], value)
+	return nil
+}
+
+// defaultTranslationFunc is the default translation to values. It maps a Go data path into a YAML path.
+func defaultTranslationFunc(m *Translation, root util.Tree, valuesPath string, value interface{}) error {
+	var path []string
+
+	if util.IsEmptyString(value) {
+		dbgPrint("Skip empty string value for path %s", m.k8sPath)
+		return nil
+	}
+	if valuesPath == "" {
+		dbgPrint("Not mapping to values, resources path is %s", m.k8sPath)
+		return nil
+	}
+
+	for _, p := range util.PathFromString(valuesPath) {
+		path = append(path, firstCharToLower(p))
+	}
+
+	return setTree(root, path, value)
 }
 
 func dbgPrint(v ...interface{}) {
