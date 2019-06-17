@@ -25,10 +25,11 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
-	"istio.io/pkg/log"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+
+	"istio.io/pkg/log"
 )
 
 // Object is an in-memory representation of a k8s object, used for moving between different representations
@@ -150,7 +151,7 @@ func (o *Object) YAML() ([]byte, error) {
 	return y, nil
 }
 
-// YAMLDebugString returns a YAML representation of o, or an error string if the object cannot be rendered to YAML.
+// YAML returns a YAML representation of o, or an error string if the object cannot be rendered to YAML.
 func (o *Object) YAMLDebugString() string {
 	y, err := o.YAML()
 	if err != nil {
