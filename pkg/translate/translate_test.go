@@ -110,7 +110,7 @@ func TestSetYAML(t *testing.T) {
 func TestProtoToValues(t *testing.T) {
 	tests := []struct {
 		desc string
-		// mappings defaults to V12Mappings
+		// mappings defaults to V12APIMappings
 		mappings map[string]*Translation
 		yamlStr  string
 		want     string
@@ -172,7 +172,7 @@ sidecarInjectorWebhook:
 		t.Run(tt.desc, func(t *testing.T) {
 			mappings := tt.mappings
 			if mappings == nil {
-				mappings = V12Mappings
+				mappings = V12APIMappings
 			}
 			ispec := &v1alpha2.InstallerSpec{}
 			err := unmarshalWithJSONPB(tt.yamlStr, ispec)

@@ -21,105 +21,185 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ostromart/istio-installer/pkg/apis/istio/v1alpha2"
-	"gopkg.in/yaml.v2"
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/operator/pkg/helm"
+	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/util"
+	"istio.io/operator/pkg/version"
+	"gopkg.in/yaml.v2"
+
+	istio.io/pkg/log"
 )
+
+// Translator is a set of mappings to translate between API paths, charts, values.yaml and k8s paths.
+type Translator struct {
+	Version version.MinorVersion
+	// APIMapping is a mapping between an API path and the corresponding values.yaml path using longest prefix
+	// match. If the path is a non-leaf node, the output path is the matching portion of the path, plus any remaining
+	// output path.
+	APIMapping map[string]*Translation
+	// KubernetesMapping defines mappings from an IstioControlPlane API paths to k8s resource paths.
+	KubernetesMapping map[string]*Translation
+	// ComponentToHelmValuesName is the root component name used in values YAML files in component charts.
+	ComponentToHelmValuesName map[name.ComponentName]string
+	// FeatureComponentToValues maps from feature and component names to value paths in values.yaml schema.
+	FeatureComponentToValues map[name.FeatureName]map[name.ComponentName]componentValuePaths
+	// ComponentDirLayout is a mapping between a component name and the subdirectory of the component Chart.
+	ComponentDirLayout map[name.ComponentName]string
+}
 
 // TranslationFunc maps a yamlStr API path into a YAML values tree.
 type TranslationFunc func(t *Translation, root util.Tree, valuesPath string, value interface{}) error
 
-// Translation is a mapping between a yamlStr data path and a YAML values path.
+// Translation is a mapping between paths.
 type Translation struct {
-	yAMLPath        string
-	k8sPath         string
+	inPath          string
+	outPath         string
 	translationFunc TranslationFunc
 }
 
+// componentValuePaths is a group of paths that exists in both IstioControlPlane and values.yaml.
 type componentValuePaths struct {
 	enabled   string
 	namespace string
 }
 
 var (
-	// V12Mappings is a mapping between an API path and the corresponding values.yaml path using longest prefix
-	// match. If the path is a non-leaf node, the output path is the matching portion of the path, plus any remaining
-	// output path.
-	V12Mappings = map[string]*Translation{
-		"Hub": {"global.hub", "", nil},
-		"Tag": {"global.tag", "", nil},
+	Mappings = map[version.MinorVersion]*Translator{
+		version.MinorVersion{1, 2}: {
+			APIMapping: map[string]*Translation{
+				"Hub": {"global.hub", "", nil},
+				"Tag": {"global.tag", "", nil},
 
-		"PolicyTelemetry.PolicyCheckFailOpen":       {"global.policyCheckFailOpen", "", nil},
-		"PolicyTelemetry.OutboundTrafficPolicyMode": {"global.outboundTrafficPolicy.mode", "", nil},
+				"TrafficManagement.Components.Proxy.Common.Values": {"global.proxy", "", nil},
 
-		"Security.ControlPlaneMtls.Value":    {"global.controlPlaneSecurityEnabled", "", nil},
-		"Security.DataPlaneMtlsStrict.Value": {"global.mtls.enabled", "", nil},
-	}
+				"PolicyTelemetry.PolicyCheckFailOpen":       {"global.policyCheckFailOpen", "", nil},
+				"PolicyTelemetry.OutboundTrafficPolicyMode": {"global.outboundTrafficPolicy.mode", "", nil},
 
-	// ComponentToHelmValuesName is the root component name used in values YAML files in component charts.
-	ComponentToHelmValuesName = map[name.ComponentName]string{
-		name.IstioBaseComponentName:       "global",
-		name.PilotComponentName:           "pilot",
-		name.GalleyComponentName:          "galley",
-		name.SidecarInjectorComponentName: "sidecarInjectorWebhook",
-		name.PolicyComponentName:          "mixer.policy",
-		name.TelemetryComponentName:       "mixer.telemetry",
-		name.CitadelComponentName:         "citadel",
-		name.NodeAgentComponentName:       "nodeAgent",
-		name.CertManagerComponentName:     "certManager",
-		name.IngressComponentName:         "gateways.istio-ingressgateway",
-		name.EgressComponentName:          "gateways.istio-ingressgateway",
-	}
-
-	FeatureComponentToValues = map[name.FeatureName]map[name.ComponentName]componentValuePaths{
-		name.TrafficManagementFeatureName: {
-			name.PilotComponentName: {
-				enabled:   "pilot.enabled",
-				namespace: "global.istioNamespace",
+				"Security.ControlPlaneMtls.Value":    {"global.controlPlaneSecurityEnabled", "", nil},
+				"Security.DataPlaneMtlsStrict.Value": {"global.mtls.enabled", "", nil},
 			},
-		},
-		name.PolicyFeatureName: {
-			name.PolicyComponentName: {
-				enabled:   "mixer.policy.enabled",
-				namespace: "global.policyNamespace",
+			KubernetesMapping: map[string]*Translation{
+				"TrafficManagement.Components.Pilot.Common.K8S.Resources": {"[Deployment:istio-pilot].spec.template.spec.resources", "", nil},
 			},
-		},
-		name.TelemetryFeatureName: {
-			name.TelemetryComponentName: {
-				enabled:   "mixer.telemetry.enabled",
-				namespace: "global.telemetryNamespace",
+			ComponentToHelmValuesName: map[name.ComponentName]string{
+				name.IstioBaseComponentName:       "global",
+				name.PilotComponentName:           "pilot",
+				name.GalleyComponentName:          "galley",
+				name.SidecarInjectorComponentName: "sidecarInjectorWebhook",
+				name.PolicyComponentName:          "mixer.policy",
+				name.TelemetryComponentName:       "mixer.telemetry",
+				name.CitadelComponentName:         "citadel",
+				name.NodeAgentComponentName:       "nodeAgent",
+				name.CertManagerComponentName:     "certManager",
+				name.IngressComponentName:         "gateways.istio-ingressgateway",
+				name.EgressComponentName:          "gateways.istio-ingressgateway",
 			},
-		},
-		// TODO: check if these really should be settable.
-		name.SecurityFeatureName: {
-			name.NodeAgentComponentName: {
-				enabled:   "nodeagent.enabled",
-				namespace: "global.istioNamespace",
+			FeatureComponentToValues: map[name.FeatureName]map[name.ComponentName]componentValuePaths{
+				name.TrafficManagementFeatureName: {
+					name.PilotComponentName: {
+						enabled:   "pilot.enabled",
+						namespace: "global.istioNamespace",
+					},
+				},
+				name.PolicyFeatureName: {
+					name.PolicyComponentName: {
+						enabled:   "mixer.policy.enabled",
+						namespace: "global.policyNamespace",
+					},
+				},
+				name.TelemetryFeatureName: {
+					name.TelemetryComponentName: {
+						enabled:   "mixer.telemetry.enabled",
+						namespace: "global.telemetryNamespace",
+					},
+				},
+				// TODO: check if these really should be settable.
+				name.SecurityFeatureName: {
+					name.NodeAgentComponentName: {
+						enabled:   "nodeagent.enabled",
+						namespace: "global.istioNamespace",
+					},
+					name.CertManagerComponentName: {
+						enabled:   "certmanager.enabled",
+						namespace: "global.istioNamespace",
+					},
+					name.CitadelComponentName: {
+						enabled:   "security.enabled",
+						namespace: "global.istioNamespace",
+					},
+				},
 			},
-			name.CertManagerComponentName: {
-				enabled:   "certmanager.enabled",
-				namespace: "global.istioNamespace",
-			},
-			name.CitadelComponentName: {
-				enabled:   "security.enabled",
-				namespace: "global.istioNamespace",
+			ComponentDirLayout: map[name.ComponentName]string{
+				name.PilotComponentName:           "istio-control/istio-discovery",
+				name.GalleyComponentName:          "istio-control/istio-config",
+				name.SidecarInjectorComponentName: "istio-control/istio-autoinject",
+				name.PolicyComponentName:          "istio-policy",
+				name.TelemetryComponentName:       "istio-telemetry",
+				name.CitadelComponentName:         "security/citadel",
+				name.NodeAgentComponentName:       "security/nodeagent",
+				name.CertManagerComponentName:     "security/certmanager",
+				name.IngressComponentName:         "gateways/istio-ingress",
+				name.EgressComponentName:          "gateways/istio-egress",
 			},
 		},
 	}
 )
 
-// ProtoToValues traverses the supplied InstallerSpec and returns a values.yaml translation from it. Mappings defines
-// a mapping set of translations.
-func ProtoToValues(mappings map[string]*Translation, ii *v1alpha2.IstioControlPlaneSpec) (string, error) {
+// OverlayK8sSettings overlays k8s settings from icp over the manifest objects, based on t's translation mappings.
+func (t *Translator) OverlayK8sSettings(objects *manifest.Objects, icp *v1alpha2.IstioControlPlaneSpec) error {
+	om := objects.ToNameKindMap()
+	for _, v := range t.KubernetesMapping {
+		m := make(map[string]interface{})
+		found, err := name.SetFromPath(icp, v.inPath, &m)
+		if err != nil {
+			return err
+		}
+		if !found {
+			log.Printf("inPath %s not found in IstioControlPlaneSpec, skip map to output", v.inPath)
+			continue
+		}
+		path := util.PathFromString(v.outPath)
+		pe := path[0]
+		if !util.IsKVPathElement(pe) {
+			return fmt.Errorf("path %s has an unexpected first element %s in OverlayK8sSettings", path, pe)
+		}
+		oo, ok := om[pe]
+		if !ok {
+			return fmt.Errorf("resource Kind:Name %s doesn't exist in output manifest", pe)
+		}
+		baseYAML, err := oo.YAML()
+		if err != nil {
+			return err
+		}
+		overlayYAML, err := yaml.Marshal(m)
+		if err != nil {
+			return err
+		}
+		mergedYAML, err := helm.OverlayYAML(string(baseYAML), string(overlayYAML))
+		if err != nil {
+			return err
+		}
+		mergedObj, err := manifest.ParseJSONToObject([]byte(mergedYAML))
+		if err != nil {
+			return err
+		}
+		om[pe] = mergedObj
+	}
+	return nil
+}
+
+// ProtoToValues traverses the supplied InstallerSpec and returns a values.yaml translation from it.
+func (t *Translator) ProtoToValues(ii *v1alpha2.IstioControlPlaneSpec) (string, error) {
 	root := make(util.Tree)
 
-	errs := protoToValues(mappings, ii, root, nil)
+	errs := t.protoToValues(ii, root, nil)
 	if len(errs) != 0 {
 		return "", errs.ToError()
 	}
 
-	if err := setEnablementAndNamespaces(root, ii); err != nil {
+	if err := t.setEnablementAndNamespaces(root, ii); err != nil {
 		return "", err
 	}
 
@@ -135,10 +215,29 @@ func ProtoToValues(mappings map[string]*Translation, ii *v1alpha2.IstioControlPl
 	return string(y), errs.ToError()
 }
 
+// ValuesOverlaysToHelmValues translates from component value overlays to helm value overlay paths.
+func (t *Translator) ValuesOverlaysToHelmValues(in map[string]interface{}, cname name.ComponentName) map[string]interface{} {
+	out := make(map[string]interface{})
+	toPath, ok := t.ComponentToHelmValuesName[cname]
+	if !ok {
+		log2.Errorf("missing translation path for %s in ValuesOverlaysToHelmValues", cname)
+		return nil
+	}
+	pv := strings.Split(toPath, ".")
+	cur := out
+	for len(pv) > 1 {
+		cur[pv[0]] = make(map[string]interface{})
+		cur = cur[pv[0]].(map[string]interface{})
+		pv = pv[1:]
+	}
+	cur[pv[0]] = in
+	return out
+}
+
 // setEnablementAndNamespaces translates the enablement and namespace value of each component in the root values tree,
 // based on feature/component inheritance relationship.
-func setEnablementAndNamespaces(root util.Tree, ii *v1alpha2.IstioControlPlaneSpec) error {
-	for fn, f := range FeatureComponentToValues {
+func (t *Translator) setEnablementAndNamespaces(root util.Tree, ii *v1alpha2.IstioControlPlaneSpec) error {
+	for fn, f := range t.FeatureComponentToValues {
 		for cn, c := range f {
 			if err := setTree(root, util.PathFromString(c.enabled), name.IsComponentEnabled(string(fn), cn, ii)); err != nil {
 				return err
@@ -155,7 +254,7 @@ func setEnablementAndNamespaces(root util.Tree, ii *v1alpha2.IstioControlPlaneSp
 // For each leaf, if looks for a mapping from the struct data path to the corresponding YAML path and if one is
 // found, it calls the associated mapping function if one is defined to populate the values YAML path.
 // If no mapping function is defined, it uses the default mapping function.
-func protoToValues(mappings map[string]*Translation, structPtr interface{}, root util.Tree, path util.Path) (errs util.Errors) {
+func (t *Translator) protoToValues(structPtr interface{}, root util.Tree, path util.Path) (errs util.Errors) {
 	dbgPrint("protoToValues with path %s, %v (%T)", path, structPtr, structPtr)
 	if structPtr == nil {
 		return nil
@@ -184,18 +283,18 @@ func protoToValues(mappings map[string]*Translation, structPtr interface{}, root
 		switch kind {
 		case reflect.Struct:
 			dbgPrint("Struct")
-			errs = util.AppendErrs(errs, protoToValues(mappings, fieldValue.Addr().Interface(), root, append(path, fieldName)))
+			errs = util.AppendErrs(errs, t.protoToValues(fieldValue.Addr().Interface(), root, append(path, fieldName)))
 		case reflect.Map:
 			dbgPrint("Map")
 			newPath := append(path, fieldName)
 			for _, key := range fieldValue.MapKeys() {
 				nnp := append(newPath, key.String())
-				errs = util.AppendErrs(errs, insertLeaf(mappings, root, nnp, fieldValue.MapIndex(key)))
+				errs = util.AppendErrs(errs, t.insertLeaf(root, nnp, fieldValue.MapIndex(key)))
 			}
 		case reflect.Slice:
 			dbgPrint("Slice")
 			for i := 0; i < fieldValue.Len(); i++ {
-				errs = util.AppendErrs(errs, protoToValues(mappings, fieldValue.Index(i).Elem().Interface(), root, path))
+				errs = util.AppendErrs(errs, t.protoToValues(fieldValue.Index(i).Elem().Interface(), root, path))
 			}
 		case reflect.Ptr:
 			if util.IsNilOrInvalidValue(fieldValue.Elem()) {
@@ -204,24 +303,24 @@ func protoToValues(mappings map[string]*Translation, structPtr interface{}, root
 			newPath := append(path, fieldName)
 			if fieldValue.Elem().Kind() == reflect.Struct {
 				dbgPrint("Struct Ptr")
-				errs = util.AppendErrs(errs, protoToValues(mappings, fieldValue.Interface(), root, newPath))
+				errs = util.AppendErrs(errs, t.protoToValues(fieldValue.Interface(), root, newPath))
 			} else {
 				fmt.Println("Leaf Ptr")
-				errs = util.AppendErrs(errs, insertLeaf(mappings, root, newPath, fieldValue))
+				errs = util.AppendErrs(errs, t.insertLeaf(root, newPath, fieldValue))
 			}
 		default:
 			dbgPrint("field has kind %s", kind)
 			if structElems.Field(i).CanInterface() {
-				errs = util.AppendErrs(errs, insertLeaf(mappings, root, append(path, fieldName), fieldValue))
+				errs = util.AppendErrs(errs, t.insertLeaf(root, append(path, fieldName), fieldValue))
 			}
 		}
 	}
 	return errs
 }
 
-func insertLeaf(mappings map[string]*Translation, root util.Tree, newPath util.Path, fieldValue reflect.Value) (errs util.Errors) {
+func (t *Translator) insertLeaf(root util.Tree, newPath util.Path, fieldValue reflect.Value) (errs util.Errors) {
 	// Must be a scalar leaf. See if we have a mapping.
-	valuesPath, m := getValuesPathMapping(mappings, newPath)
+	valuesPath, m := getValuesPathMapping(t.APIMapping, newPath)
 	var v interface{}
 	if fieldValue.Kind() == reflect.Ptr {
 		v = fieldValue.Elem().Interface()
@@ -243,7 +342,7 @@ func insertLeaf(mappings map[string]*Translation, root util.Tree, newPath util.P
 
 // getValuesPathMapping tries to map path against the passed in mappings with a longest prefix match. If a matching prefix
 // is found, it returns the translated YAML path and the corresponding translation.
-// e.g. for mapping "a/b"  -> "1/2", the input path "a/b/c/d" would yield "1/2/c/d".
+// e.g. for mapping "a.b"  -> "1.2", the input path "a.b.c.d" would yield "1.2.c.d".
 func getValuesPathMapping(mappings map[string]*Translation, path util.Path) (string, *Translation) {
 	p := path
 	var m *Translation
@@ -257,12 +356,12 @@ func getValuesPathMapping(mappings map[string]*Translation, path util.Path) (str
 		return "", nil
 	}
 
-	if m.yAMLPath == "" {
+	if m.inPath == "" {
 		return "", m
 	}
 
 	d := len(path) - len(p)
-	out := filepath.Join(m.yAMLPath, path[len(path)-d:].String())
+	out := m.inPath + "." + path[len(path)-d:].String()
 	dbgPrint("translating %s to %s", path, out)
 	return out, m
 }
@@ -289,11 +388,11 @@ func defaultTranslationFunc(m *Translation, root util.Tree, valuesPath string, v
 	var path []string
 
 	if util.IsEmptyString(value) {
-		dbgPrint("Skip empty string value for path %s", m.k8sPath)
+		dbgPrint("Skip empty string value for path %s", m.outPath)
 		return nil
 	}
 	if valuesPath == "" {
-		dbgPrint("Not mapping to values, resources path is %s", m.k8sPath)
+		dbgPrint("Not mapping to values, resources path is %s", m.outPath)
 		return nil
 	}
 
