@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	"istio.io/operator/pkg/component/component"
 	"istio.io/operator/pkg/component/feature"
+	"istio.io/operator/pkg/translate"
 	"istio.io/operator/pkg/util"
 )
 
@@ -17,10 +17,10 @@ type IstioControlPlane struct {
 }
 
 // NewIstioControlPlane creates a new IstioControlPlane and returns a pointer to it.
-func NewIstioControlPlane(installSpec *v1alpha2.IstioControlPlaneSpec, dirs component.ComponentDirLayout) *IstioControlPlane {
+func NewIstioControlPlane(installSpec *installerv1alpha1.IstioControlPlaneSpec, translator *translate.Translator) *IstioControlPlane {
 	opts := &feature.FeatureOptions{
 		InstallSpec: installSpec,
-		Dirs:        dirs,
+		Traslator:   translator,
 	}
 	return &IstioControlPlane{
 		features: []feature.IstioFeature{
