@@ -1,7 +1,6 @@
 package feature
 
 import (
-	"fmt"
 	"strings"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
@@ -22,8 +21,7 @@ type IstioFeature interface {
 type FeatureOptions struct {
 	// InstallSpec is the installation spec for the control plane.
 	InstallSpec *v1alpha2.IstioControlPlaneSpec
-	// Dirs is a directory layout that maps component names to chart subdirectories.
-	Dirs component.ComponentDirLayout
+	Traslator   *translate.Translator
 }
 
 // CommonFeatureFields
@@ -62,7 +60,6 @@ func (f *TrafficManagementFeature) Run() error {
 
 // RenderManifest implements the IstioFeature interface.
 func (f *TrafficManagementFeature) RenderManifest() (string, util.Errors) {
-	fmt.Printf("RenderManifest TrafficManagementFeature\n")
 	return renderComponents(f.components)
 }
 
@@ -213,7 +210,7 @@ func newComponentOptions(cff *CommonFeatureFields, featureName name.FeatureName)
 	return &component.ComponentOptions{
 		InstallSpec: cff.InstallSpec,
 		FeatureName: string(featureName),
-		Dirs:        cff.Dirs,
+		Translator:  cff.Traslator,
 	}
 }
 
