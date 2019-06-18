@@ -3,6 +3,16 @@ customPackagePath: file:///usr/local/google/home/mostrowski/go/src/github.com/os
 trafficManagement:
   enabled: true
   components:
+    pilot:
+      common:
+        values:
+          image: my-custom-pilot
+        k8s:
+          resources:
+            requests:
+              cpu: 111m
+              memory: 2222Mi
+
     proxy:
       common:
         enabled: false
