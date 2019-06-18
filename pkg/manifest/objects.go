@@ -65,7 +65,12 @@ func NewObject(u *unstructured.Unstructured, json, yaml []byte) *Object {
 
 // Hash returns a unique, insecure hash based on kind, namespace and name.
 func Hash(kind, namespace, name string) string {
-	return strings.Join([]string{kind, namespace, name}, "/")
+	return strings.Join([]string{kind, namespace, name}, ":")
+}
+
+// Hash returns a unique, insecure hash based on kind and name.
+func HashNameKind(kind, name string) string {
+	return strings.Join([]string{kind, name}, ":")
 }
 
 // ObjectsFromUnstructuredSlice returns an Objects ptr type from a slice of Unstructured.
@@ -98,6 +103,19 @@ func ParseJSONToObject(json []byte) (*Object, error) {
 	}, nil
 }
 
+// ParseYAMLToObject parses YAML to an Object.
+func ParseYAMLToObject(yaml []byte) (*Object, error) {
+	r := bytes.NewReader([]byte(yaml))
+	decoder := k8syaml.NewYAMLOrJSONDecoder(r, 1024)
+
+	out := &unstructured.Unstructured{}
+	err := decoder.Decode(out)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding object: %v", err)
+	}
+	return NewObject(out, nil, []byte(yaml)), nil
+}
+
 // UnstructuredObject exposes the raw object, primarily for testing
 func (o *Object) UnstructuredObject() *unstructured.Unstructured {
 	return o.object
@@ -116,6 +134,11 @@ func (o *Object) GroupVersionKind() schema.GroupVersionKind {
 // Hash returns a unique hash for o.
 func (o *Object) Hash() string {
 	return Hash(o.Kind, o.Namespace, o.Name)
+}
+
+// Hash returns a hash for o based on name and kind only.
+func (o *Object) HashNameKind() string {
+	return HashNameKind(o.Kind, o.Name)
 }
 
 // JSON returns a JSON representation of o, using an internal cache.
@@ -289,6 +312,15 @@ func (os *Objects) ToMap() map[string]*Object {
 	ret := make(map[string]*Object)
 	for _, oo := range os.Items {
 		ret[oo.Hash()] = oo
+	}
+	return ret
+}
+
+// ToNameKindMap returns a map of Object name/kind hash to Object.
+func (os *Objects) ToNameKindMap() map[string]*Object {
+	ret := make(map[string]*Object)
+	for _, oo := range os.Items {
+		ret[oo.HashNameKind()] = oo
 	}
 	return ret
 }
