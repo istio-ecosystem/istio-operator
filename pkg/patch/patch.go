@@ -134,7 +134,7 @@ func makeNodeContext(obj interface{}) *pathContext {
 // Each overlay has the format described in the K8SObjectOverlay definition.
 // It returns the patched manifest YAML.
 func YAMLManifestPatch(baseYAML string, namespace string, overlays []*v1alpha2.K8SObjectOverlay) (string, error) {
-	baseObjs, err := manifest.ParseObjectsFromYAMLManifest(context.TODO(), baseYAML)
+	baseObjs, err := manifest.ParseObjectsFromYAMLManifest(baseYAML)
 	if err != nil {
 		return "", err
 	}
@@ -241,7 +241,7 @@ func getNode(nc *pathContext, fullPath, remainPath util.Path) (*pathContext, err
 		for idx, le := range lst {
 			// non-leaf list, expect to match item by key:value.
 			if lm, ok := le.(map[interface{}]interface{}); ok {
-				k, v, err := pathKV(pe)
+				k, v, err := util.PathKV(pe)
 				if err != nil {
 					return nil, fmt.Errorf("path %s: %s", fullPath, err)
 				}
@@ -262,7 +262,7 @@ func getNode(nc *pathContext, fullPath, remainPath util.Path) (*pathContext, err
 				continue
 			}
 			// leaf list, match based on value.
-			v, err := pathV(pe)
+			v, err := util.PathV(pe)
 			if err != nil {
 				return nil, fmt.Errorf("path %s: %s", fullPath, err)
 			}
@@ -342,68 +342,6 @@ func writeNode(nc *pathContext, value interface{}) error {
 	}
 
 	return nil
-}
-
-func isValidPathElement(pe string) bool {
-	return util.ValidKeyRegex.MatchString(pe)
-}
-
-func removeBrackets(pe string) (string, bool) {
-	if !strings.HasPrefix(pe, "[") || !strings.HasSuffix(pe, "]") {
-		return "", false
-	}
-	return pe[1 : len(pe)-1], true
-}
-
-func isKVPathElement(pe string) bool {
-	pe, ok := removeBrackets(pe)
-	if !ok {
-		return false
-	}
-
-	kv := strings.Split(pe, ":")
-	if len(kv) != 2 || len(kv[0]) == 0 || len(kv[1]) == 0 {
-		return false
-	}
-	return isValidPathElement(kv[0])
-}
-
-func isVPathElement(pe string) bool {
-	pe, ok := removeBrackets(pe)
-	if !ok {
-		return false
-	}
-
-	return len(pe) > 0
-}
-
-func pathV(pe string) (string, error) {
-	if !isVPathElement(pe) {
-		return "", fmt.Errorf("%s is not a valid value path element", pe)
-	}
-	v, _ := removeBrackets(pe)
-	return v, nil
-}
-
-func pathKV(pe string) (k, v string, err error) {
-	if !isKVPathElement(pe) {
-		return "", "", fmt.Errorf("%s is not a valid key:value path element", pe)
-	}
-	pe, _ = removeBrackets(pe)
-	kv := strings.Split(pe, ":")
-	return kv[0], kv[1], nil
-}
-
-func splitEscaped(s string) []string {
-	var prev rune
-	prevIdx := 0
-	var out []string
-	for i, c := range s {
-		if c == ':' && i > 0 && prev != 0 {
-			out = append(out, s[prevIdx:i])
-		}
-	}
-	return out
 }
 
 // objectOverrideMap converts oos, a slice of object overlays, into a map of the same overlays where the key is the
