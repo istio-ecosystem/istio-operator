@@ -65,7 +65,7 @@ type FileTemplateRenderer struct {
 // NewFileTemplateRenderer creates a TemplateRenderer with the given path to helm charts, k8s client config and
 // ConfigSet and returns a pointer to it.
 func NewFileTemplateRenderer(globalValuesFilePath, helmChartDirPath, componentName, namespace string) *FileTemplateRenderer {
-	fmt.Printf("NewFileTemplateRenderer with helmChart=%s, globalVals=%s\n", helmChartDirPath, globalValuesFilePath)
+	log.Infof("NewFileTemplateRenderer with helmChart=%s, globalVals=%s\n", helmChartDirPath, globalValuesFilePath)
 	return &FileTemplateRenderer{
 		namespace:            namespace,
 		componentName:        componentName,
@@ -77,6 +77,7 @@ func NewFileTemplateRenderer(globalValuesFilePath, helmChartDirPath, componentNa
 // Run implements the TemplateRenderer interface.
 func (h *FileTemplateRenderer) Run() error {
 	var err error
+	log.Infof("Run FileTemplateRenderer with %s, %s\n", h.globalValuesFilePath, h.helmChartDirPath)
 	if err := h.LoadChart(); err != nil {
 		return err
 	}
