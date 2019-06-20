@@ -20,7 +20,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ostromart/istio-installer/pkg/apis/istio/v1alpha2"
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
 )
 
