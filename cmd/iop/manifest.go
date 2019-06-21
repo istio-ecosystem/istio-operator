@@ -21,11 +21,12 @@ import (
 	"github.com/spf13/cobra"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	"istio.io/operator/pkg/component/component"
 	"istio.io/operator/pkg/component/controlplane"
 	"istio.io/operator/pkg/helm"
+	"istio.io/operator/pkg/translate"
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/validate"
+	"istio.io/operator/pkg/version"
 )
 
 func manifestCmd(rootArgs *rootArgs, printf, fatalf FormatFn) *cobra.Command {
@@ -80,10 +81,6 @@ func genManifest(args *rootArgs, printf, fatalf FormatFn) {
 		fatalf(err.Error())
 	}
 
-	log.Printf("Base YAML:\n%s", baseYAML)
-	log.Printf("Overlay YAML:\n%s", overlayYAML)
-	log.Printf("Merged YAML:\n%s", mergedYAML)
-
 	// Now unmarshal and validate the combined base profile and user CR overlay.
 	mergedcps := &v1alpha2.IstioControlPlaneSpec{}
 	if err := util.UnmarshalWithJSONPB(mergedYAML, mergedcps); err != nil {
@@ -98,7 +95,7 @@ func genManifest(args *rootArgs, printf, fatalf FormatFn) {
 	}
 
 	// TODO: remove version hard coding.
-	cp := controlplane.NewIstioControlPlane(mergedcps, translate.Mappings[version.MinorVersion{1, 2}])
+	cp := controlplane.NewIstioControlPlane(mergedcps, translate.Translators[version.MinorVersion{1, 2}])
 	if err := cp.Run(); err != nil {
 		fatalf(err.Error())
 	}
