@@ -6,6 +6,7 @@ import (
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/component/component"
 	"istio.io/operator/pkg/name"
+	"istio.io/operator/pkg/translate"
 	"istio.io/operator/pkg/util"
 )
 
@@ -209,7 +210,7 @@ func (f *AutoInjectionFeature) RenderManifest() (string, util.Errors) {
 func newComponentOptions(cff *CommonFeatureFields, featureName name.FeatureName) *component.ComponentOptions {
 	return &component.ComponentOptions{
 		InstallSpec: cff.InstallSpec,
-		FeatureName: string(featureName),
+		FeatureName: featureName,
 		Translator:  cff.Traslator,
 	}
 }
