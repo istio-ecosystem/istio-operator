@@ -17,7 +17,7 @@ type IstioControlPlane struct {
 }
 
 // NewIstioControlPlane creates a new IstioControlPlane and returns a pointer to it.
-func NewIstioControlPlane(installSpec *installerv1alpha1.IstioControlPlaneSpec, translator *translate.Translator) *IstioControlPlane {
+func NewIstioControlPlane(installSpec *v1alpha2.IstioControlPlaneSpec, translator *translate.Translator) *IstioControlPlane {
 	opts := &feature.FeatureOptions{
 		InstallSpec: installSpec,
 		Traslator:   translator,
