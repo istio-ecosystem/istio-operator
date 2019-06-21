@@ -64,7 +64,6 @@ trafficManagement:
         values:
           image: proxyv2
           clusterDomain: "cluster.local"
-          # Resources for the sidecar.
           resources:
             requests:
               cpu: 100m
