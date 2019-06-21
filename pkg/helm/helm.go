@@ -32,7 +32,7 @@ import (
 
 const (
 	// YAMLSeparator is a separator for multi-document YAML files.
-	YAMLSeparator = "\n---"
+	YAMLSeparator = "\n---\n"
 
 	// DefaultGlobalValuesFilename is the default name for a global values file if none is specified.
 	DefaultGlobalValuesFilename = "global.yaml"
