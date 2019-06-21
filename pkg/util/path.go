@@ -1,3 +1,17 @@
+// Copyright 2019 Istio Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package util
 
 import (
@@ -14,6 +28,9 @@ const (
 	PathSeparator = "."
 	// KVSeparator is the separator between the key and value in a key/value path element,
 	KVSeparator = string(kvSeparatorRune)
+
+	// LocalFilePrefix is a prefix for local files.
+	LocalFilePrefix = "file:///"
 )
 
 var (
@@ -102,6 +119,17 @@ func RemoveBrackets(pe string) (string, bool) {
 		return "", false
 	}
 	return pe[1 : len(pe)-1], true
+}
+
+// IsFilePath reports whether the given URL is a local file path.
+func IsFilePath(path string) bool {
+	return strings.HasPrefix(path, LocalFilePrefix)
+}
+
+// GetLocalFilePath returns the local file path string of the form /a/b/c, given a file URL of the form file:///a/b/c
+func GetLocalFilePath(path string) string {
+	// LocalFilePrefix always starts with file:/// but this includes the absolute path leading slash, preserve that.
+	return "/" + strings.TrimPrefix(path, LocalFilePrefix)
 }
 
 // splitEscaped splits a string using the rune r as a separator. It does not split on r if it's prefixed by \.

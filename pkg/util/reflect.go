@@ -21,20 +21,6 @@ import (
 	"github.com/kr/pretty"
 )
 
-var (
-	// debugPackage controls verbose debugging in this package. Used for offline debugging.
-	debugPackage = false
-)
-
-// dbgPrint prints v if the package global variable debugPackage is set.
-// v has the same format as Printf. A trailing newline is added to the output.
-func dbgPrint(v ...interface{}) {
-	if !debugPackage {
-		return
-	}
-	fmt.Println(fmt.Sprintf(v[0].(string), v[1:]...))
-}
-
 // IsString reports whether value is a string type.
 func IsString(value interface{}) bool {
 	return reflect.TypeOf(value).Kind() == reflect.String
@@ -45,9 +31,21 @@ func IsPtr(value interface{}) bool {
 	return reflect.TypeOf(value).Kind() == reflect.Ptr
 }
 
+// IsInterfacePtr reports whether v is a slice ptr type.
+func IsInterfacePtr(v interface{}) bool {
+	t := reflect.TypeOf(v)
+	return t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Interface
+}
+
 // IsMap reports whether value is a map type.
 func IsMap(value interface{}) bool {
 	return reflect.TypeOf(value).Kind() == reflect.Map
+}
+
+// IsMapPtr reports whether v is a map ptr type.
+func IsMapPtr(v interface{}) bool {
+	t := reflect.TypeOf(v)
+	return t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Map
 }
 
 // IsSlice reports whether value is a slice type.
