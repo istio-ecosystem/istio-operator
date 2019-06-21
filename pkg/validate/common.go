@@ -23,11 +23,13 @@ import (
 	"strings"
 
 	"istio.io/operator/pkg/util"
+
+	"istio.io/pkg/log"
 )
 
 var (
-	// debugPackage controls verbose debugging in this package. Used for offline debugging.
-	debugPackage = false
+	// DebugPackage controls verbose debugging in this package. Used for offline debugging.
+	DebugPackage = false
 
 	// alphaNumericRegexp defines the alpha numeric atom, typically a
 	// component of names. This only allows lower case characters and digits.
@@ -118,7 +120,6 @@ func validateWithRegex(path util.Path, val interface{}, r *regexp.Regexp) (errs 
 		errs = util.AppendErr(errs, fmt.Errorf("invalid value %s:%s", path, val))
 	}
 
-	//	fmt.Println("regex results:", r.FindString(val.(string)))
 	printError(errs.ToError())
 	return errs
 }
@@ -215,7 +216,7 @@ func isString(val interface{}) bool {
 }
 
 func printError(err error) {
-	if !debugPackage {
+	if !DebugPackage {
 		return
 	}
 	if err == nil {
@@ -226,18 +227,18 @@ func printError(err error) {
 }
 
 func dbgPrint(v ...interface{}) {
-	if !debugPackage {
+	if !DebugPackage {
 		return
 	}
 	dbgPrintC(v...)
-	fmt.Println("")
+	log.Infof("")
 }
 
 func dbgPrintC(v ...interface{}) {
-	if !debugPackage {
+	if !DebugPackage {
 		return
 	}
-	fmt.Print(fmt.Sprintf(v[0].(string), v[1:]...))
+	log.Infof(fmt.Sprintf(v[0].(string), v[1:]...))
 }
 
 // match compiles the string to a regular expression.

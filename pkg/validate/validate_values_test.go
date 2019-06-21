@@ -96,7 +96,6 @@ global:
 	}
 
 	for _, tt := range tests {
-		fmt.Println(tt.desc)
 		t.Run(tt.desc, func(t *testing.T) {
 			root := util.Tree{}
 			err := yaml.Unmarshal([]byte(tt.yamlStr), &root)
