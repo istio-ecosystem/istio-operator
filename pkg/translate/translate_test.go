@@ -16,176 +16,135 @@ package translate
 
 import (
 	"bytes"
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/ghodss/yaml"
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/kr/pretty"
-	"github.com/kylelemons/godebug/diff"
-	"github.com/ostromart/istio-installer/pkg/util"
+
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/operator/pkg/util"
+	"istio.io/operator/pkg/version"
 )
 
-func TestSetYAML(t *testing.T) {
+func TestProtoToValuesV12(t *testing.T) {
 	tests := []struct {
 		desc    string
-		root    util.Tree
-		path    string
-		value   string
+		yamlStr string
 		want    string
 		wantErr string
 	}{
 		{
-			desc:    "insert no path",
-			path:    "",
-			value:   "val1",
-			want:    `val1`,
-			wantErr: "path cannot be empty",
-		},
-		{
-			desc:  "insert empty",
-			path:  "a.b.c",
-			value: "val1",
-			want: `a:
-  b:
-    c: val1
-`,
-		},
-		{
-			desc: "overwrite",
-			root: util.Tree{
-				"a": util.Tree{
-					"b": util.Tree{
-						"c": "val1",
-					},
-				},
-			},
-			path:  "a.b.c",
-			value: "val2",
-			want: `a:
-  b:
-    c: val2
-`,
-		},
-		{
-			desc: "partial create",
-			root: util.Tree{
-				"a": util.Tree{
-					"b": util.Tree{
-						"c": "val1",
-					},
-				},
-			},
-			path:  "a.b.d",
-			value: "val2",
-			want: `a:
-  b:
-    c: val1
-    d: val2
-`,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.desc, func(t *testing.T) {
-			root := tt.root
-			if root == nil {
-				root = make(util.Tree)
-			}
-			p := util.PathFromString(tt.path)
-			err := setTree(root, p, tt.value)
-			fmt.Println(err)
-			if gotErr, wantErr := errToString(err), tt.wantErr; gotErr != wantErr {
-				t.Errorf("TestSetYAML()%s: gotErr:%s, wantErr:%s", tt.desc, gotErr, wantErr)
-				return
-			}
-			if got, want := root.String(), tt.want; err == nil && got != want {
-				t.Errorf("TestSetYAML(%s) got:\n%s\nwant:\n%s\ndiff:\n%s\n", tt.desc, got, want, diff.Diff(got, want))
-			}
-		})
-	}
-}
-
-func TestProtoToValues(t *testing.T) {
-	tests := []struct {
-		desc string
-		// mappings defaults to V12APIMappings
-		mappings map[string]*Translation
-		yamlStr  string
-		want     string
-		wantErr  string
-	}{
-		{
 			desc: "nil success",
-			want: "",
+			want: `
+certmanager:
+  enabled: false
+galley:
+  enabled: false
+global:
+  istioNamespace: ""
+  policyNamespace: ""
+  telemetryNamespace: ""
+mixer:
+  policy:
+    enabled: false
+  telemetry:
+    enabled: false
+nodeagent:
+  enabled: false
+pilot:
+  enabled: false
+security:
+  enabled: false
+`,
 		},
 		{
-			desc: "IstioInstaller",
+			desc: "global",
 			yamlStr: `
 hub: docker.io/istio
 tag: 1.2.3
-k8sDefaults:
-  resources:
-    requests:
-      cpu: "250m"
+defaultNamespacePrefix: istio-system
+security:
+  components:
+    namespace: istio-security
 `,
 			want: `
+certmanager:
+  enabled: false
+galley:
+  enabled: false
 global:
   hub: docker.io/istio
+  istioNamespace: istio-system
+  policyNamespace: istio-system
   tag: 1.2.3
-  defaultResources:
-    requests:
-      cpu: "250m"
+  telemetryNamespace: istio-system
+mixer:
+  policy:
+    enabled: false
+  telemetry:
+    enabled: false
+nodeagent:
+  enabled: false
+pilot:
+  enabled: false
+security:
+  enabled: false
+
 `,
 		},
 		{
-			desc: "Security",
+			desc: "security",
 			yamlStr: `
+defaultNamespacePrefix: istio-system
 security:
+  enabled: true
   controlPlaneMtls: true
   dataPlaneMtlsStrict: false
 `,
 			want: `
+certmanager:
+  enabled: true
+galley:
+  enabled: false
 global:
+  istioNamespace: istio-system
+  policyNamespace: istio-system
+  telemetryNamespace: istio-system
   controlPlaneSecurityEnabled: true
   mtls:
     enabled: false
-`,
-		},
-		{
-			desc: "SidecarInjector",
-			yamlStr: `
-trafficManagement:
-  sidecarInjector:
-    enableNamespacesByDefault: false
-`,
-			want: `
-sidecarInjectorWebhook:
-  enableNamespacesByDefault: false
+mixer:
+  policy:
+    enabled: false
+  telemetry:
+    enabled: false
+nodeagent:
+  enabled: true
+pilot:
+  enabled: false
+security:
+  enabled: true
 `,
 		},
 	}
 
+	tr := Translators[version.MinorVersion{1, 2}]
 	for _, tt := range tests {
-		fmt.Println(tt.desc)
 		t.Run(tt.desc, func(t *testing.T) {
-			mappings := tt.mappings
-			if mappings == nil {
-				mappings = V12APIMappings
-			}
-			ispec := &v1alpha2.InstallerSpec{}
+			ispec := &v1alpha2.IstioControlPlaneSpec{}
 			err := unmarshalWithJSONPB(tt.yamlStr, ispec)
 			if err != nil {
 				t.Fatalf("unmarshalWithJSONPB(%s): got error %s", tt.desc, err)
 			}
 			dbgPrint("ispec: \n%s\n", pretty.Sprint(ispec))
-			got, err := ProtoToValues(mappings, ispec)
+			got, err := tr.ProtoToValues(ispec)
 			if gotErr, wantErr := errToString(err), tt.wantErr; gotErr != wantErr {
 				t.Errorf("ProtoToValues(%s)(%v): gotErr:%s, wantErr:%s", tt.desc, tt.yamlStr, gotErr, wantErr)
 			}
-			if got, want := stripNL(got), stripNL(tt.want); err == nil && !util.IsYAMLEqual(got, want) {
-				t.Errorf("ProtoToValues(%s) got:\n%s\nwant:\n%s\n", tt.desc, got, want)
+			if want := tt.want; !util.IsYAMLEqual(got, want) {
+				t.Errorf("ProtoToValues(%s): got:\n%s\n\nwant:\n%s\nDiff:\n%s\n", tt.desc, got, want, util.YAMLDiff(got, want))
 			}
 		})
 	}
@@ -212,8 +171,4 @@ func errToString(err error) string {
 		return ""
 	}
 	return err.Error()
-}
-
-func stripNL(s string) string {
-	return strings.Trim(s, "\n")
 }
