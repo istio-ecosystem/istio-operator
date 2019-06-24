@@ -6,10 +6,9 @@ import (
 	"strings"
 
 	"k8s.io/helm/pkg/chartutil"
-
-	"github.com/ostromart/istio-installer/pkg/vfsgen"
-
 	"k8s.io/helm/pkg/proto/hapi/chart"
+
+	"istio.io/operator/pkg/vfsgen"
 
 	"istio.io/pkg/log"
 )

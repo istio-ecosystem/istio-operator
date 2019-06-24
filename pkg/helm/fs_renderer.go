@@ -3,10 +3,12 @@ package helm
 import (
 	"fmt"
 
-	"github.com/ostromart/istio-installer/pkg/util/fswatch"
-	"istio.io/pkg/log"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
+
+	"istio.io/operator/pkg/util/fswatch"
+
+	"istio.io/pkg/log"
 )
 
 // FileTemplateRenderer is a helm template renderer for a local filesystem.
@@ -14,7 +16,6 @@ type FileTemplateRenderer struct {
 	namespace        string
 	componentName    string
 	helmChartDirPath string
-	watcher          chan struct{}
 	chart            *chart.Chart
 	started          bool
 	globalValues     string
@@ -63,7 +64,7 @@ func (h *FileTemplateRenderer) Run() error {
 // RenderManifest renders the current helm templates with the current values and returns the resulting YAML manifest string.
 func (h *FileTemplateRenderer) RenderManifest(values string) (string, error) {
 	if !h.started {
-		return "", fmt.Errorf("FileTemplateRenderer for %s not started in renderChart", h.componentName)
+		return "", fmt.Errorf("fileTemplateRenderer for %s not started in renderChart", h.componentName)
 	}
 	return renderChart(h.namespace, h.globalValues, values, h.chart)
 }

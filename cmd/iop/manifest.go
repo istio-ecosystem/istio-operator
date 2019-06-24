@@ -20,13 +20,13 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ostromart/istio-installer/pkg/apis/istio/v1alpha2"
-	"github.com/ostromart/istio-installer/pkg/component/controlplane"
-	"github.com/ostromart/istio-installer/pkg/helm"
-	"github.com/ostromart/istio-installer/pkg/translate"
-	"github.com/ostromart/istio-installer/pkg/util"
-	"github.com/ostromart/istio-installer/pkg/validate"
-	"github.com/ostromart/istio-installer/pkg/version"
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/operator/pkg/component/controlplane"
+	"istio.io/operator/pkg/helm"
+	"istio.io/operator/pkg/translate"
+	"istio.io/operator/pkg/util"
+	"istio.io/operator/pkg/validate"
+	"istio.io/operator/pkg/version"
 )
 
 func manifestCmd(rootArgs *rootArgs, printf, fatalf FormatFn) *cobra.Command {
@@ -60,8 +60,8 @@ func genManifest(args *rootArgs, printf, fatalf FormatFn) {
 		fatalf(errs.ToError().Error())
 	}
 
-	// Now read the base profile specified in the user spec.
-	baseYAML, err := helm.ReadValuesYAML(overlayICPS.CustomPackagePath, overlayICPS.BaseProfilePath)
+	// Now read the base profile specified in the user spec. If nothing specified, use default.
+	baseYAML, err := helm.ReadValuesYAML(overlayICPS.BaseProfilePath)
 	if err != nil {
 		fatalf(err.Error())
 	}
@@ -93,7 +93,7 @@ func genManifest(args *rootArgs, printf, fatalf FormatFn) {
 	}
 
 	// TODO: remove version hard coding.
-	cp := controlplane.NewIstioControlPlane(mergedcps, translate.Translators[version.MinorVersion{1, 2}])
+	cp := controlplane.NewIstioControlPlane(mergedcps, translate.Translators[version.MinorVersion{Major: 1, Minor: 2}])
 	if err := cp.Run(); err != nil {
 		fatalf(err.Error())
 	}

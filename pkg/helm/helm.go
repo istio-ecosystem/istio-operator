@@ -60,7 +60,6 @@ func NewHelmRenderer(helmBaseDir, profile, componentName, namespace string) (Tem
 	default:
 		return NewVFSRenderer(helmBaseDir, globalValues, componentName, namespace), nil
 	}
-	return nil, fmt.Errorf("unsupported CustomPackagePath: %s", helmBaseDir)
 }
 
 // ReadValuesYAML reads the values YAML associated with the given profile. It uses an appropriate reader for the
@@ -126,22 +125,20 @@ func renderChart(namespace, baseValues, overlayValues string, chrt *chart.Chart)
 func OverlayYAML(base, overlay string) (string, error) {
 	bj, err := yaml.YAMLToJSON([]byte(base))
 	if err != nil {
-		return "", fmt.Errorf("yAMLToJSON error in base: %s\n%s\n", err, bj)
+		return "", fmt.Errorf("yamlToJSON error in base: %s\n%s\n", err, bj)
 	}
 	oj, err := yaml.YAMLToJSON([]byte(overlay))
 	if err != nil {
-		return "", fmt.Errorf("yAMLToJSON error in overlay: %s\n%s\n", err, oj)
+		return "", fmt.Errorf("yamlToJSON error in overlay: %s\n%s\n", err, oj)
 	}
-
-	fmt.Printf("HERE: base:\n%s\n\noverlay:\n%s\n", base, overlay)
 
 	merged, err := jsonpatch.MergePatch(bj, oj)
 	if err != nil {
-		return "", fmt.Errorf("jSON merge error (%s) for base object: \n%s\n override object: \n%s", err, bj, oj)
+		return "", fmt.Errorf("json merge error (%s) for base object: \n%s\n override object: \n%s", err, bj, oj)
 	}
 	my, err := yaml.JSONToYAML(merged)
 	if err != nil {
-		return "", fmt.Errorf("jSONToYAML error (%s) for merged object: \n%s", err, merged)
+		return "", fmt.Errorf("jsonToYAML error (%s) for merged object: \n%s", err, merged)
 	}
 
 	return string(my), nil
