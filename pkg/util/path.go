@@ -57,7 +57,6 @@ func IsKVPathElement(pe string) bool {
 	}
 
 	kv := splitEscaped(pe, kvSeparatorRune)
-	fmt.Printf("pe %s kv is %v\n", pe, kv)
 	if len(kv) != 2 || len(kv[0]) == 0 || len(kv[1]) == 0 {
 		return false
 	}
@@ -74,7 +73,7 @@ func IsVPathElement(pe string) bool {
 	return len(pe) > 0
 }
 
-// PathKVreturns the key and value string parts of the entire key/value path element.
+// PathKV the key and value string parts of the entire key/value path element.
 // It returns an error if pe is not a key/value path element.
 func PathKV(pe string) (k, v string, err error) {
 	if !IsKVPathElement(pe) {
@@ -95,7 +94,7 @@ func PathV(pe string) (string, error) {
 	return v, nil
 }
 
-// Remove brackets removes the [] around pe and returns the resulting string. It returns false if pe is not surrounded
+// RemoveBrackets removes the [] around pe and returns the resulting string. It returns false if pe is not surrounded
 // by [].
 func RemoveBrackets(pe string) (string, bool) {
 	if !strings.HasPrefix(pe, "[") || !strings.HasSuffix(pe, "]") {
