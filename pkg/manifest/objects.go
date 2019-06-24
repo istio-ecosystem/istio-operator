@@ -77,8 +77,8 @@ func HashNameKind(kind, name string) string {
 }
 
 // ObjectsFromUnstructuredSlice returns an Objects ptr type from a slice of Unstructured.
-func ObjectsFromUnstructuredSlice(objs []*unstructured.Unstructured) (*Objects, error) {
-	ret := &Objects{}
+func ObjectsFromUnstructuredSlice(objs []*unstructured.Unstructured) (Objects, error) {
+	var ret Objects
 	for _, o := range objs {
 		ret = append(ret, NewObject(o, nil, nil))
 	}
@@ -87,7 +87,7 @@ func ObjectsFromUnstructuredSlice(objs []*unstructured.Unstructured) (*Objects, 
 
 // ParseJSONToObject parses JSON to an Object.
 func ParseJSONToObject(json []byte) (*Object, error) {
-	o, gvk, err := unstructured.UnstructuredJSONScheme.Decode(json, nil, nil)
+	o, _, err := unstructured.UnstructuredJSONScheme.Decode(json, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing json into unstructured object: %v", err)
 	}
@@ -201,7 +201,7 @@ func (o *Object) AddLabels(labels map[string]string) {
 type Objects []*Object
 
 // ParseObjectsFromYAMLManifest returns an Objects represetation of manifest.
-func ParseObjectsFromYAMLManifest(manifest string) (*Objects, error) {
+func ParseObjectsFromYAMLManifest(manifest string) (Objects, error) {
 	var b bytes.Buffer
 
 	var yamls []string
@@ -223,7 +223,7 @@ func ParseObjectsFromYAMLManifest(manifest string) (*Objects, error) {
 	}
 	yamls = append(yamls, b.String())
 
-	objects := &Objects{}
+	var objects Objects
 
 	for _, yaml := range yamls {
 		// We need this so we don't error on a file that is commented out
@@ -262,7 +262,7 @@ func ParseObjectsFromYAMLManifest(manifest string) (*Objects, error) {
 }
 
 // JSONManifest returns a JSON representation of Objects os.
-func (os *Objects) JSONManifest() (string, error) {
+func (os Objects) JSONManifest() (string, error) {
 	var b bytes.Buffer
 
 	for i, item := range os {
@@ -287,7 +287,7 @@ func (os *Objects) JSONManifest() (string, error) {
 
 // Sort will order the items in Objects in order of score, group, kind, name.  The intent is to
 // have a deterministic ordering in which Objects are applied.
-func (os *Objects) Sort(score func(o *Object) int) {
+func (os Objects) Sort(score func(o *Object) int) {
 	sort.Slice(os, func(i, j int) bool {
 		iScore := score(os[i])
 		jScore := score(os[j])
@@ -305,7 +305,7 @@ func (os *Objects) Sort(score func(o *Object) int) {
 }
 
 // ToMap returns a map of Object hash to Object.
-func (os *Objects) ToMap() map[string]*Object {
+func (os Objects) ToMap() map[string]*Object {
 	ret := make(map[string]*Object)
 	for _, oo := range os {
 		ret[oo.Hash()] = oo
@@ -314,7 +314,7 @@ func (os *Objects) ToMap() map[string]*Object {
 }
 
 // ToNameKindMap returns a map of Object name/kind hash to Object.
-func (os *Objects) ToNameKindMap() map[string]*Object {
+func (os Objects) ToNameKindMap() map[string]*Object {
 	ret := make(map[string]*Object)
 	for _, oo := range os {
 		ret[oo.HashNameKind()] = oo
@@ -323,7 +323,7 @@ func (os *Objects) ToNameKindMap() map[string]*Object {
 }
 
 // YAML returns a YAML representation of o, using an internal cache.
-func (os *Objects) YAML() (string, error) {
+func (os Objects) YAML() (string, error) {
 	var sb strings.Builder
 	for _, o := range os {
 		oy, err := o.YAML()
