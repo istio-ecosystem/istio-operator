@@ -96,6 +96,7 @@ func watchDir(dir string, notify chan<- struct{}) error {
 						if event.Op&fsnotify.Write == fsnotify.Write {
 							log.Println("modified file:", event.Name)
 							select {
+							// Send non-blocking notification.
 							case notify <- struct{}{}:
 							default:
 							}
