@@ -19,6 +19,7 @@ or YAML representations.
 package manifest
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"sort"
@@ -70,7 +71,7 @@ func Hash(kind, namespace, name string) string {
 	return strings.Join([]string{kind, namespace, name}, ":")
 }
 
-// Hash returns a unique, insecure hash based on kind and name.
+// HashNameKind returns a unique, insecure hash based on kind and name.
 func HashNameKind(kind, name string) string {
 	return strings.Join([]string{kind, name}, ":")
 }
@@ -79,7 +80,7 @@ func HashNameKind(kind, name string) string {
 func ObjectsFromUnstructuredSlice(objs []*unstructured.Unstructured) (*Objects, error) {
 	ret := &Objects{}
 	for _, o := range objs {
-		ret.Items = append(ret.Items, NewObject(o, nil, nil))
+		ret = append(ret, NewObject(o, nil, nil))
 	}
 	return ret, nil
 }
@@ -96,18 +97,12 @@ func ParseJSONToObject(json []byte) (*Object, error) {
 		return nil, fmt.Errorf("parsed unexpected type %T", o)
 	}
 
-	return &Object{
-		object: u,
-		Group:  gvk.Group,
-		Kind:   gvk.Kind,
-		Name:   u.GetName(),
-		json:   json,
-	}, nil
+	return NewObject(u, json, nil), nil
 }
 
 // ParseYAMLToObject parses YAML to an Object.
 func ParseYAMLToObject(yaml []byte) (*Object, error) {
-	r := bytes.NewReader([]byte(yaml))
+	r := bytes.NewReader(yaml)
 	decoder := k8syaml.NewYAMLOrJSONDecoder(r, 1024)
 
 	out := &unstructured.Unstructured{}
@@ -115,7 +110,7 @@ func ParseYAMLToObject(yaml []byte) (*Object, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error decoding object: %v", err)
 	}
-	return NewObject(out, nil, []byte(yaml)), nil
+	return NewObject(out, nil, yaml), nil
 }
 
 // UnstructuredObject exposes the raw object, primarily for testing
@@ -138,7 +133,7 @@ func (o *Object) Hash() string {
 	return Hash(o.Kind, o.Namespace, o.Name)
 }
 
-// Hash returns a hash for o based on name and kind only.
+// HashNameKind returns a hash for o based on name and kind only.
 func (o *Object) HashNameKind() string {
 	return HashNameKind(o.Kind, o.Name)
 }
@@ -176,7 +171,7 @@ func (o *Object) YAML() ([]byte, error) {
 	return y, nil
 }
 
-// YAML returns a YAML representation of o, or an error string if the object cannot be rendered to YAML.
+// YAMLDebugString returns a YAML representation of o, or an error string if the object cannot be rendered to YAML.
 func (o *Object) YAMLDebugString() string {
 	y, err := o.YAML()
 	if err != nil {
@@ -203,16 +198,16 @@ func (o *Object) AddLabels(labels map[string]string) {
 }
 
 // Objects holds a collection of objects, so that we can filter / sequence them
-type Objects struct {
-	Items []*Object
-}
+type Objects []*Object
 
 // ParseObjectsFromYAMLManifest returns an Objects represetation of manifest.
 func ParseObjectsFromYAMLManifest(manifest string) (*Objects, error) {
 	var b bytes.Buffer
 
 	var yamls []string
-	for _, line := range strings.Split(manifest, "\n") {
+	scanner := bufio.NewScanner(strings.NewReader(manifest))
+	for scanner.Scan() {
+		line := scanner.Text()
 		if line == "---" {
 			// yaml separator
 			yamls = append(yamls, b.String())
@@ -260,7 +255,7 @@ func ParseObjectsFromYAMLManifest(manifest string) (*Objects, error) {
 		// We don't reuse the manifest because it's probably yaml, and we want to use json
 		// json = yaml
 		o := NewObject(out, json, []byte(yaml))
-		objects.Items = append(objects.Items, o)
+		objects = append(objects, o)
 	}
 
 	return objects, nil
@@ -270,7 +265,7 @@ func ParseObjectsFromYAMLManifest(manifest string) (*Objects, error) {
 func (os *Objects) JSONManifest() (string, error) {
 	var b bytes.Buffer
 
-	for i, item := range os.Items {
+	for i, item := range os {
 		if i != 0 {
 			if _, err := b.WriteString("\n\n"); err != nil {
 				return "", err
@@ -293,26 +288,26 @@ func (os *Objects) JSONManifest() (string, error) {
 // Sort will order the items in Objects in order of score, group, kind, name.  The intent is to
 // have a deterministic ordering in which Objects are applied.
 func (os *Objects) Sort(score func(o *Object) int) {
-	sort.Slice(os.Items, func(i, j int) bool {
-		iScore := score(os.Items[i])
-		jScore := score(os.Items[j])
+	sort.Slice(os, func(i, j int) bool {
+		iScore := score(os[i])
+		jScore := score(os[j])
 		return iScore < jScore ||
 			(iScore == jScore &&
-				os.Items[i].Group < os.Items[j].Group) ||
+				os[i].Group < os[j].Group) ||
 			(iScore == jScore &&
-				os.Items[i].Group == os.Items[j].Group &&
-				os.Items[i].Kind < os.Items[j].Kind) ||
+				os[i].Group == os[j].Group &&
+				os[i].Kind < os[j].Kind) ||
 			(iScore == jScore &&
-				os.Items[i].Group == os.Items[j].Group &&
-				os.Items[i].Kind == os.Items[j].Kind &&
-				os.Items[i].Name < os.Items[j].Name)
+				os[i].Group == os[j].Group &&
+				os[i].Kind == os[j].Kind &&
+				os[i].Name < os[j].Name)
 	})
 }
 
 // ToMap returns a map of Object hash to Object.
 func (os *Objects) ToMap() map[string]*Object {
 	ret := make(map[string]*Object)
-	for _, oo := range os.Items {
+	for _, oo := range os {
 		ret[oo.Hash()] = oo
 	}
 	return ret
@@ -321,7 +316,7 @@ func (os *Objects) ToMap() map[string]*Object {
 // ToNameKindMap returns a map of Object name/kind hash to Object.
 func (os *Objects) ToNameKindMap() map[string]*Object {
 	ret := make(map[string]*Object)
-	for _, oo := range os.Items {
+	for _, oo := range os {
 		ret[oo.HashNameKind()] = oo
 	}
 	return ret
@@ -330,7 +325,7 @@ func (os *Objects) ToNameKindMap() map[string]*Object {
 // YAML returns a YAML representation of o, using an internal cache.
 func (os *Objects) YAML() (string, error) {
 	var sb strings.Builder
-	for _, o := range os.Items {
+	for _, o := range os {
 		oy, err := o.YAML()
 		if err != nil {
 			return "", err
