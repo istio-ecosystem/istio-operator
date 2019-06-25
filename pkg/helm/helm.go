@@ -45,83 +45,48 @@ type TemplateRenderer interface {
 	// RenderManifest renders the associated helm charts with the given values YAML string and returns the resulting
 	// string.
 	RenderManifest(values string) (string, error)
-	// LoadChart loads the chart from the associated chart source.
-	LoadChart() error
 }
 
-// FileTemplateRenderer is a helm template renderer.
-type FileTemplateRenderer struct {
-	namespace            string
-	componentName        string
-	globalValuesFilePath string
-	helmChartDirPath     string
-	watcher              chan struct{}
-	chart                *chart.Chart
-	values               string
-	started              bool
-	globalValues         string
-}
-
-// NewFileTemplateRenderer creates a TemplateRenderer with the given path to helm charts, k8s client config and
-// ConfigSet and returns a pointer to it.
-func NewFileTemplateRenderer(globalValuesFilePath, helmChartDirPath, componentName, namespace string) *FileTemplateRenderer {
-	log.Infof("NewFileTemplateRenderer with helmChart=%s, globalVals=%s\n", helmChartDirPath, globalValuesFilePath)
-	return &FileTemplateRenderer{
-		namespace:            namespace,
-		componentName:        componentName,
-		globalValuesFilePath: globalValuesFilePath,
-		helmChartDirPath:     helmChartDirPath,
-	}
-}
-
-// Run implements the TemplateRenderer interface.
-func (h *FileTemplateRenderer) Run() error {
-	var err error
-	log.Infof("Run FileTemplateRenderer with %s, %s\n", h.globalValuesFilePath, h.helmChartDirPath)
-	if err := h.LoadChart(); err != nil {
-		return err
-	}
-
-	chartChanged, err := fswatch.WatchDirRecursively(h.helmChartDirPath)
+// NewHelmRenderer creates a new helm renderer with the given parameters and returns an interface to it.
+// The format of helmBaseDir and profile strings determines the type of helm renderer returned (compiled-in, file,
+// HTTP etc.)
+func NewHelmRenderer(helmBaseDir, profile, componentName, namespace string) (TemplateRenderer, error) {
+	globalValues, err := ReadValuesYAML(profile)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	switch {
+	case util.IsFilePath(helmBaseDir):
+		return NewFileTemplateRenderer(helmBaseDir, globalValues, componentName, namespace), nil
+	default:
+		return NewVFSRenderer(helmBaseDir, globalValues, componentName, namespace), nil
+	}
+}
 
-	go func() {
-		for {
-			select {
-			case <-chartChanged:
-				if err := h.LoadChart(); err != nil {
-					log.Error(err.Error())
-				}
-			}
+// ReadValuesYAML reads the values YAML associated with the given profile. It uses an appropriate reader for the
+// profile format (compiled-in, file, HTTP, etc.).
+func ReadValuesYAML(profile string) (string, error) {
+	var err error
+	var globalValues string
+	log.Infof("ReadValuesYAML for profile name: %s", profile)
+
+	// Get global values from profile.
+	switch {
+	case isBuiltinProfileName(profile):
+		if globalValues, err = LoadValuesVFS(profile); err != nil {
+			return "", err
 		}
-	}()
-
-	h.started = true
-	return nil
-}
-
-// LoadChart implements the TemplateRenderer interface.
-func (h *FileTemplateRenderer) LoadChart() error {
-	var err error
-	if h.chart, err = chartutil.Load(h.helmChartDirPath); err != nil {
-		return err
+	case util.IsFilePath(profile):
+		path := util.GetLocalFilePath(profile)
+		log.Infof("Loading values from local filesystem at path %s", path)
+		if globalValues, err = readFile(path); err != nil {
+			return "", err
+		}
+	default:
+		return "", fmt.Errorf("unsupported Profile type: %s", profile)
 	}
-	b, err := ioutil.ReadFile(h.globalValuesFilePath)
-	if err != nil {
-		return err
-	}
-	h.globalValues = string(b)
-	return nil
-}
 
-// RenderManifest renders the current helm templates with the current values and returns the resulting YAML manifest string.
-func (h *FileTemplateRenderer) RenderManifest(values string) (string, error) {
-	if !h.started {
-		return "", fmt.Errorf("FileTemplateRenderer for %s not started in renderChart", h.componentName)
-	}
-	return renderChart(h.namespace, h.globalValues, values, h.chart)
+	return globalValues, nil
 }
 
 // renderChart renders the given chart with the given values and returns the resulting YAML manifest string.
@@ -164,21 +129,26 @@ func renderChart(namespace, baseValues, overlayValues string, chrt *chart.Chart)
 func OverlayYAML(base, overlay string) (string, error) {
 	bj, err := yaml.YAMLToJSON([]byte(base))
 	if err != nil {
-		return "", fmt.Errorf("yAMLToJSON error in base: %s\n%s\n", err, bj)
+		return "", fmt.Errorf("yamlToJSON error in base: %s\n%s\n", err, bj)
 	}
 	oj, err := yaml.YAMLToJSON([]byte(overlay))
 	if err != nil {
-		return "", fmt.Errorf("yAMLToJSON error in overlay: %s\n%s\n", err, oj)
+		return "", fmt.Errorf("yamlToJSON error in overlay: %s\n%s\n", err, oj)
 	}
 
 	merged, err := jsonpatch.MergePatch(bj, oj)
 	if err != nil {
-		return "", fmt.Errorf("jSON merge error (%s) for base object: \n%s\n override object: \n%s", err, bj, oj)
+		return "", fmt.Errorf("json merge error (%s) for base object: \n%s\n override object: \n%s", err, bj, oj)
 	}
 	my, err := yaml.JSONToYAML(merged)
 	if err != nil {
-		return "", fmt.Errorf("jSONToYAML error (%s) for merged object: \n%s", err, merged)
+		return "", fmt.Errorf("jsonToYAML error (%s) for merged object: \n%s", err, merged)
 	}
 
 	return string(my), nil
+}
+
+func readFile(path string) (string, error) {
+	b, err := ioutil.ReadFile(path)
+	return string(b), err
 }
