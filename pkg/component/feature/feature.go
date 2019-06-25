@@ -22,7 +22,8 @@ type IstioFeature interface {
 type FeatureOptions struct {
 	// InstallSpec is the installation spec for the control plane.
 	InstallSpec *v1alpha2.IstioControlPlaneSpec
-	Traslator   *translate.Translator
+	// Translator is the translator for this feature.
+	Traslator *translate.Translator
 }
 
 // CommonFeatureFields
