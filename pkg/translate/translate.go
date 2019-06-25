@@ -147,7 +147,7 @@ var (
 				name.TelemetryComponentName: &ComponentMaps{
 					ResourceName:      "istio-telemetry",
 					ContainerName:     "mixer",
-					HelmSubdir:        "istio-telemetry",
+					HelmSubdir:        "istio-telemetry/mixer-telemetry",
 					ToHelmValuesNames: "mixer.telemetry",
 				},
 				name.CitadelComponentName: &ComponentMaps{
@@ -360,12 +360,13 @@ func (t *Translator) protoToValues(structPtr interface{}, root map[string]interf
 	if structPtr == nil {
 		return nil
 	}
-	if reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
-		return util.NewErrs(fmt.Errorf("protoToValues path %s, value: %v, expected ptr, got %T", path, structPtr, structPtr))
+
+	structElems := reflect.ValueOf(structPtr)
+	if reflect.TypeOf(structPtr).Kind() == reflect.Ptr {
+		structElems = structElems.Elem()
 	}
-	structElems := reflect.ValueOf(structPtr).Elem()
 	if reflect.TypeOf(structElems).Kind() != reflect.Struct {
-		return util.NewErrs(fmt.Errorf("protoToValues path %s, value: %v, expected struct, got %T", path, structElems, structElems))
+		return util.NewErrs(fmt.Errorf("protoToValues path %s, value: %v, expected struct or struct ptr, got %T", path, structPtr, structPtr))
 	}
 
 	if util.IsNilOrInvalidValue(structElems) {
