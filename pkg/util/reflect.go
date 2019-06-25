@@ -36,6 +36,12 @@ func IsMap(value interface{}) bool {
 	return reflect.TypeOf(value).Kind() == reflect.Map
 }
 
+// IsMapPtr reports whether v is a map ptr type.
+func IsMapPtr(v interface{}) bool {
+	t := reflect.TypeOf(v)
+	return t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Map
+}
+
 // IsSlice reports whether value is a slice type.
 func IsSlice(value interface{}) bool {
 	return reflect.TypeOf(value).Kind() == reflect.Slice
@@ -52,6 +58,12 @@ func IsSliceInterfacePtr(v interface{}) bool {
 	// Must use ValueOf because Elem().Elem() type resolves dynamically.
 	vv := reflect.ValueOf(v)
 	return vv.Kind() == reflect.Ptr && vv.Elem().Kind() == reflect.Interface && vv.Elem().Elem().Kind() == reflect.Slice
+}
+
+// IsInterfacePtr reports whether v is a slice ptr type.
+func IsInterfacePtr(v interface{}) bool {
+	t := reflect.TypeOf(v)
+	return t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Interface
 }
 
 // IsTypeStruct reports whether t is a struct type.
