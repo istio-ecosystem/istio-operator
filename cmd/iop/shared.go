@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package shared contains types and functions that are used across the full
+// Package iop contains types and functions that are used across the full
 // set of mixer commands.
 package iop
 

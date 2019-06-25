@@ -60,14 +60,12 @@ func genManifest(args *rootArgs, printf, fatalf FormatFn) {
 		fatalf(errs.ToError().Error())
 	}
 
-	// Now read the base profile specified in the user spec.
-	b, err = ioutil.ReadFile(util.GetLocalFilePath(overlayICPS.BaseProfilePath))
+	// Now read the base profile specified in the user spec. If nothing specified, use default.
+	baseYAML, err := helm.ReadValuesYAML(overlayICPS.BaseProfilePath)
 	if err != nil {
-		fmt.Printf("1")
 		fatalf(err.Error())
 	}
 	// Unmarshal and validate the base CR.
-	baseYAML := string(b)
 	baseICPS := &v1alpha2.IstioControlPlaneSpec{}
 	if err := util.UnmarshalWithJSONPB(baseYAML, baseICPS); err != nil {
 		fatalf(err.Error())
@@ -95,7 +93,7 @@ func genManifest(args *rootArgs, printf, fatalf FormatFn) {
 	}
 
 	// TODO: remove version hard coding.
-	cp := controlplane.NewIstioControlPlane(mergedcps, translate.Translators[version.MinorVersion{1, 2}])
+	cp := controlplane.NewIstioControlPlane(mergedcps, translate.Translators[version.MinorVersion{Major: 1, Minor: 2}])
 	if err := cp.Run(); err != nil {
 		fatalf(err.Error())
 	}

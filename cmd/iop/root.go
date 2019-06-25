@@ -47,12 +47,15 @@ func GetRootCmd(args []string, printf, fatalf FormatFn) *cobra.Command {
 
 	ic := installCmd(rootArgs, printf, fatalf)
 	mc := manifestCmd(rootArgs, printf, fatalf)
+	dpc := dumpProfileDefaultsCmd(rootArgs, printf, fatalf)
 
 	addFlags(ic, rootArgs)
 	addFlags(mc, rootArgs)
+	addFlags(dpc, rootArgs)
 
 	rootCmd.AddCommand(ic)
 	rootCmd.AddCommand(mc)
+	rootCmd.AddCommand(dpc)
 	rootCmd.AddCommand(version.CobraCommand())
 
 	return rootCmd
