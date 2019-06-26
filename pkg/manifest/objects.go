@@ -26,13 +26,11 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+	"istio.io/operator/pkg/helm"
+	"istio.io/pkg/log"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
-
-	"istio.io/operator/pkg/helm"
-
-	"istio.io/pkg/log"
 )
 
 // Object is an in-memory representation of a k8s object, used for moving between different representations
@@ -148,7 +146,6 @@ func (o *Object) JSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	o.json = b
 	return b, nil
 }
 
@@ -226,35 +223,16 @@ func ParseObjectsFromYAMLManifest(manifest string) (Objects, error) {
 	var objects Objects
 
 	for _, yaml := range yamls {
-		// We need this so we don't error on a file that is commented out
-		// TODO: How does apimachinery avoid this problem?
-		hasContent := false
-		for _, line := range strings.Split(yaml, "\n") {
-			l := strings.TrimSpace(line)
-			if l != "" && !strings.HasPrefix(l, "#") {
-				hasContent = true
-				break
-			}
-		}
-
-		if !hasContent {
+		o, err := ParseYAMLToObject([]byte(yaml))
+		if err != nil {
+			log.Infof("error decoding object: %s\n%s\n", err, yaml)
 			continue
 		}
 
-		r := bytes.NewReader([]byte(yaml))
-		decoder := k8syaml.NewYAMLOrJSONDecoder(r, 1024)
-
-		out := &unstructured.Unstructured{}
-		err := decoder.Decode(out)
-		if err != nil {
-			log.Infof("error decoding object: %s\n%s\n", err, yaml)
-			return nil, fmt.Errorf("error decoding object: %v", err)
+		if o.GroupKind().Group == "" {
+			continue
 		}
 
-		var json []byte
-		// We don't reuse the manifest because it's probably yaml, and we want to use json
-		// json = yaml
-		o := NewObject(out, json, []byte(yaml))
 		objects = append(objects, o)
 	}
 
