@@ -26,10 +26,11 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
-	"istio.io/pkg/log"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+
+	"istio.io/pkg/log"
 )
 
 const (
