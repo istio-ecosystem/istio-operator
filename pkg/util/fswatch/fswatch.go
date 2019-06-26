@@ -19,7 +19,6 @@ import (
 	"math"
 	"os"
 	"path/filepath"
-
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -93,7 +92,8 @@ func watchDir(dir string, notify chan<- struct{}) error {
 							done <- struct{}{}
 							return
 						}
-						if event.Op&fsnotify.Write == fsnotify.Write {
+						if event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Create == fsnotify.Create ||
+							event.Op&fsnotify.Remove == fsnotify.Remove {
 							log.Println("modified file:", event.Name)
 							select {
 							// Send non-blocking notification.
