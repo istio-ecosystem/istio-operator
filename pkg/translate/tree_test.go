@@ -4,7 +4,8 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	"github.com/ostromart/istio-installer/pkg/util"
+
+	"istio.io/operator/pkg/util"
 )
 
 func TestSetTree(t *testing.T) {

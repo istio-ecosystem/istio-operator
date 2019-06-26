@@ -8,7 +8,7 @@ package translate
 import (
 	"fmt"
 
-	"github.com/ostromart/istio-installer/pkg/util"
+	"istio.io/operator/pkg/util"
 )
 
 // setTree sets the YAML path in the given Tree to the given value, creating any required intermediate nodes.

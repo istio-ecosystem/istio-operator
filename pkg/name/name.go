@@ -19,8 +19,9 @@ import (
 	"reflect"
 
 	protobuf "github.com/gogo/protobuf/types"
-	"github.com/ostromart/istio-installer/pkg/apis/istio/v1alpha2"
-	"github.com/ostromart/istio-installer/pkg/util"
+
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/operator/pkg/util"
 	"istio.io/pkg/log"
 )
 
