@@ -23,13 +23,11 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
-
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/version"
-
 	"istio.io/pkg/log"
 )
 
@@ -178,7 +176,7 @@ var (
 					ResourceName:      "istio-egressgateway",
 					ContainerName:     "istio-proxy",
 					HelmSubdir:        "gateways/istio-egress",
-					ToHelmValuesNames: "gateways.istio-ingressgateway",
+					ToHelmValuesNames: "gateways.istio-egressgateway",
 				},
 			},
 			FeatureComponentToValues: map[name.FeatureName]map[name.ComponentName]componentValuePaths{
@@ -307,7 +305,7 @@ func overlayK8s(baseYAML, overlayYAML []byte, path util.Path) ([]byte, error) {
 	return yaml.Marshal(base)
 }
 
-// ProtoToValues traverses the supplied InstallerSpec and returns a values.yaml translation from it.
+// ProtoToValues traverses the supplied IstioControlPlaneSpec and returns a values.yaml translation from it.
 func (t *Translator) ProtoToValues(ii *v1alpha2.IstioControlPlaneSpec) (string, error) {
 	root := make(map[string]interface{})
 
@@ -484,8 +482,7 @@ func getValuesPathMapping(mappings map[string]*Translation, path util.Path) (str
 		return "", m
 	}
 
-	d := len(path) - len(p)
-	out := m.outPath + "." + path[len(path)-d:].String()
+	out := m.outPath + "." + path[len(p):].String()
 	dbgPrint("translating %s to %s", path, out)
 	return out, m
 }

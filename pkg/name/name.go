@@ -71,20 +71,14 @@ func IsComponentEnabled(featureName string, componentName ComponentName, install
 		log.Error(err.Error())
 		return false
 	}
-	if !found {
-		return false
-	}
-	if featureNodeI == nil {
+	if !found || featureNodeI == nil {
 		return false
 	}
 	featureNode, ok := featureNodeI.(*protobuf.BoolValue)
 	if !ok {
 		log.Errorf("feature %s enabled has bad type %T, expect *protobuf.BoolValue", featureName, featureNodeI)
 	}
-	if featureNode == nil {
-		return false
-	}
-	if featureNode.Value == false {
+	if featureNode == nil || featureNode.Value == false {
 		return false
 	}
 
@@ -93,10 +87,7 @@ func IsComponentEnabled(featureName string, componentName ComponentName, install
 		log.Error(err.Error())
 		return featureNode.Value
 	}
-	if !found {
-		return featureNode.Value
-	}
-	if componentNodeI == nil {
+	if !found || componentNodeI == nil {
 		return featureNode.Value
 	}
 	componentNode, ok := componentNodeI.(*protobuf.BoolValue)
@@ -115,8 +106,8 @@ func IsComponentEnabled(featureName string, componentName ComponentName, install
 // 2. If the feature and component namespaces are unset, return CustomPackagePath.
 // 3. If the feature namespace is set but component name is unset, return the feature namespace.
 // 4. Otherwise return the component namespace.
-func Namespace(featureName string, componentName ComponentName, installSpec *v1alpha2.IstioControlPlaneSpec) string {
-	defaultNamespaceI, found, err := GetFromStructPath(installSpec, "CustomPackagePath")
+func Namespace(featureName string, componentName ComponentName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) string {
+	defaultNamespaceI, found, err := GetFromStructPath(controlPlaneSpec, "CustomPackagePath")
 	if !found {
 		log.Error("can't find any default for CustomPackagePath")
 		return ""
@@ -133,7 +124,7 @@ func Namespace(featureName string, componentName ComponentName, installSpec *v1a
 	}
 
 	featureNamespace := defaultNamespace
-	featureNodeI, found, err := GetFromStructPath(installSpec, featureName+"Components.Namespace")
+	featureNodeI, found, err := GetFromStructPath(controlPlaneSpec, featureName+"Components.Namespace")
 	if err != nil {
 		log.Error(err.Error())
 		return featureNamespace
@@ -150,7 +141,7 @@ func Namespace(featureName string, componentName ComponentName, installSpec *v1a
 	}
 
 	componentNamespace := featureNamespace
-	componentNodeI, found, err := GetFromStructPath(installSpec, featureName+".Components."+string(componentName)+".Common.Namespace")
+	componentNodeI, found, err := GetFromStructPath(controlPlaneSpec, featureName+".Components."+string(componentName)+".Common.Namespace")
 	if err != nil {
 		log.Error(err.Error())
 		return featureNamespace
