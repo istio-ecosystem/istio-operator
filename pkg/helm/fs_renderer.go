@@ -21,7 +21,6 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
 	"istio.io/operator/pkg/util/fswatch"
-
 	"istio.io/pkg/log"
 )
 
@@ -61,12 +60,9 @@ func (h *FileTemplateRenderer) Run() error {
 	}
 
 	go func() {
-		for {
-			select {
-			case <-chartChanged:
-				if err := h.loadChart(); err != nil {
-					log.Error(err.Error())
-				}
+		for range chartChanged {
+			if err := h.loadChart(); err != nil {
+				log.Error(err.Error())
 			}
 		}
 	}()

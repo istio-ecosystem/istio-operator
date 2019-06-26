@@ -28,10 +28,10 @@ import (
 // ReadFile reads the content of compiled in files at path and returns a buffer with the data.
 func ReadFile(path string) ([]byte, error) {
 	f, err := Assets.Open(path)
-	defer f.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 	fi, err := f.Stat()
 	if err != nil {
 		return nil, err
@@ -47,10 +47,10 @@ func ReadFile(path string) ([]byte, error) {
 // Stat returns a FileInfo object for the given path.
 func Stat(path string) (os.FileInfo, error) {
 	f, err := Assets.Open(path)
-	defer f.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 	return f.Stat()
 }
 
@@ -66,10 +66,10 @@ func Size(path string) (int64, error) {
 // ReadDir non-recursively reads the directory at path and returns all the files contained in it.
 func ReadDir(path string) ([]string, error) {
 	dir, err := Assets.Open(path)
-	defer dir.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer dir.Close()
 	fs, err := dir.Readdir(-1)
 	if err != nil {
 		return nil, err
