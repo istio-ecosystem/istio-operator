@@ -211,13 +211,13 @@ func (c *IstioDefaultChartCustomizer) waitForResources() {
 	}
 }
 
-func (c *IstioDefaultChartCustomizer) serviceReady(svc corev1.Service) bool {
+func (c *IstioDefaultChartCustomizer) serviceReady(svc *corev1.Service) bool {
 	// ExternalName Services are external to cluster so they should not be checked
 	if svc.Spec.Type == corev1.ServiceTypeExternalName {
 		return true
 	}
 	// Check if services except the headless services have the IP set
-	if svc.Spec.ClusterIP != corev1.ClusterIPNone && !helper.IsServiceIPSet(&s) {
+	if svc.Spec.ClusterIP != corev1.ClusterIPNone && svc.Spec.ClusterIP == "" {
 		c.Reconciler.GetLogger().Info(fmt.Sprintf("Service is not ready: %s/%s", svc.GetNamespace(), svc.GetName()))
 		return false
 	}
@@ -229,7 +229,6 @@ func (c *IstioDefaultChartCustomizer) serviceReady(svc corev1.Service) bool {
 	return true
 }
 
-
 func (c *IstioDefaultChartCustomizer) waitForService(object runtime.Object) {
 	logger := c.Reconciler.GetLogger()
 	gvk := object.GetObjectKind().GroupVersionKind()
@@ -239,20 +238,19 @@ func (c *IstioDefaultChartCustomizer) waitForService(object runtime.Object) {
 		return
 	}
 	name := objectAccessor.GetName()
-	service, ok := object.(corev1.Service)
-	if !ok {
-		logger.Error(nil, "attempting to wait on non service", gvk.Kind, name)
-	}
-	logger.Info("waiting for service to become ready", name)
-	err = wait.ExponentialBackoff(wait.Backoff{
-		Duration: finalizerRemovalBackoffDuration,
-		Steps:    finalizerRemovalBackoffSteps,
-		Factor:   finalizerRemovalBackoffFactor,
-	}, func() (bool, error) {
-		c.serviceReady(service), nil
-	})
-	if err != nil {
-		logger.Error(nil, "service failed to become ready in a timely manner", name)
+	service, ok := object.(*corev1.Service)
+	if ok {
+		logger.Info("waiting for service to become ready", name)
+		err = wait.ExponentialBackoff(wait.Backoff{
+			Duration: finalizerRemovalBackoffDuration,
+			Steps:    finalizerRemovalBackoffSteps,
+			Factor:   finalizerRemovalBackoffFactor,
+		}, func() (bool, error) {
+			return c.serviceReady(service), nil
+		})
+		if err != nil {
+			logger.Error(nil, "service failed to become ready in a timely manner", name)
+		}
 	}
 }
 
