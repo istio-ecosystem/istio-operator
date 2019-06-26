@@ -26,9 +26,6 @@ var (
 		"global.proxy.includeInboundPorts": validateStringList(validatePortNumberString),
 		"global.proxy.excludeInboundPorts": validateStringList(validatePortNumberString),
 	}
-
-	// requiredValues lists all the values that must be non-empty.
-	requiredSetValues = map[string]bool{}
 )
 
 // CheckValues validates the values in the given tree, which follows the Istio values.yaml schema.

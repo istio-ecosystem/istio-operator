@@ -23,6 +23,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/kylelemons/godebug/diff"
+	
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
 )
@@ -277,7 +278,7 @@ func unmarshalWithJSONPB(y string, out proto.Message) error {
 	return nil
 }
 
-func marshalWithJSONPB(in *v1alpha2.TestKube) (string, error) {
+func marshalWithJSONPB(in proto.Message) (string, error) {
 	m := jsonpb.Marshaler{}
 	js, err := m.MarshalToString(in)
 	if err != nil {
@@ -288,15 +289,6 @@ func marshalWithJSONPB(in *v1alpha2.TestKube) (string, error) {
 		return "", err
 	}
 	return string(yb), nil
-}
-
-// errToString returns the string representation of err and the empty string if
-// err is nil.
-func errToString(err error) string {
-	if err == nil {
-		return ""
-	}
-	return err.Error()
 }
 
 func stripNL(s string) string {
