@@ -1,3 +1,17 @@
+// Copyright 2019 Istio Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package util
 
 import (
@@ -51,7 +65,7 @@ func IsValidPathElement(pe string) bool {
 
 // IsKVPathElement report whether pe is a key/value path element.
 func IsKVPathElement(pe string) bool {
-	pe, ok := removeBrackets(pe)
+	pe, ok := RemoveBrackets(pe)
 	if !ok {
 		return false
 	}
@@ -65,7 +79,7 @@ func IsKVPathElement(pe string) bool {
 
 // IsVPathElement report whether pe is a value path element.
 func IsVPathElement(pe string) bool {
-	pe, ok := removeBrackets(pe)
+	pe, ok := RemoveBrackets(pe)
 	if !ok {
 		return false
 	}
@@ -73,13 +87,13 @@ func IsVPathElement(pe string) bool {
 	return len(pe) > 0
 }
 
-// PathKVreturns the key and value string parts of the entire key/value path element.
+// Path KVreturns the key and value string parts of the entire key/value path element.
 // It returns an error if pe is not a key/value path element.
 func PathKV(pe string) (k, v string, err error) {
 	if !IsKVPathElement(pe) {
 		return "", "", fmt.Errorf("%s is not a valid key:value path element", pe)
 	}
-	pe, _ = removeBrackets(pe)
+	pe, _ = RemoveBrackets(pe)
 	kv := splitEscaped(pe, kvSeparatorRune)
 	return kv[0], kv[1], nil
 }
@@ -90,13 +104,13 @@ func PathV(pe string) (string, error) {
 	if !IsVPathElement(pe) {
 		return "", fmt.Errorf("%s is not a valid value path element", pe)
 	}
-	v, _ := removeBrackets(pe)
+	v, _ := RemoveBrackets(pe)
 	return v, nil
 }
 
-// Remove brackets removes the [] around pe and returns the resulting string. It returns false if pe is not surrounded
+// RemoveBrackets removes the [] around pe and returns the resulting string. It returns false if pe is not surrounded
 // by [].
-func removeBrackets(pe string) (string, bool) {
+func RemoveBrackets(pe string) (string, bool) {
 	if !strings.HasPrefix(pe, "[") || !strings.HasSuffix(pe, "]") {
 		return "", false
 	}
@@ -106,12 +120,18 @@ func removeBrackets(pe string) (string, bool) {
 // splitEscaped splits a string using the rune r as a separator. It does not split on r if it's prefixed by \.
 func splitEscaped(s string, r rune) []string {
 	var prev rune
+	if len(s) == 0 {
+		return []string{}
+	}
 	prevIdx := 0
 	var out []string
 	for i, c := range s {
-		if c == r && i > 0 && prev != 0 {
+		if c == r && (i == 0 || (i > 0 && prev != '\\')) {
 			out = append(out, s[prevIdx:i])
+			prevIdx = i + 1
 		}
+		prev = c
 	}
+	out = append(out, s[prevIdx:])
 	return out
 }
