@@ -96,7 +96,7 @@ import (
 	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/util"
 
-	"istio.io/istio/pkg/log"
+	"istio.io/pkg/log"
 )
 
 var (
