@@ -1,4 +1,4 @@
-// Copyright 2017 Istio Authors
+// Copyright 2019 Istio Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/kylelemons/godebug/diff"
-	"istio.io/operator/pkg/apis/istio/v1alpha1"
+
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
 )
 
 const (
@@ -42,7 +43,7 @@ func TestUnmarshalRealValues(t *testing.T) {
 			t.Fatalf("readFile: %v", err)
 		}
 		t.Logf("Testing file %s", f)
-		v := &v1alpha1.Values{}
+		v := &v1alpha2.Values{}
 		err = yaml.Unmarshal([]byte(fs), v)
 		if err != nil {
 			t.Fatalf("yaml.Unmarshal(%s): got error %s", f, err)
