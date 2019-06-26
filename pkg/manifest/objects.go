@@ -26,11 +26,15 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
-	"istio.io/operator/pkg/helm"
 	"istio.io/pkg/log"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
+)
+
+const (
+	// YAMLSeparator is a separator for multi-document YAML files.
+	YAMLSeparator = "\n---\n"
 )
 
 // Object is an in-memory representation of a k8s object, used for moving between different representations
@@ -312,7 +316,7 @@ func (os Objects) YAML() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		_, err = sb.WriteString(helm.YAMLSeparator)
+		_, err = sb.WriteString(YAMLSeparator)
 		if err != nil {
 			return "", err
 		}
