@@ -23,7 +23,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/kylelemons/godebug/diff"
-	
+
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
 )
@@ -111,17 +111,6 @@ affinity:
         topologyKey: failure-domain.beta.kubernetes.io/zone
 `,
 		},
-		{
-			desc: "k8sObjectOverlay",
-			yamlStr: `
-overlays:
-- kind: Deployment
-  name: istio-citadel
-  patches:
-  - path: spec.template.spec.containers.name:galley.ports.containerPort:15014
-    value: 12345
-`,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
@@ -185,6 +174,7 @@ autoInjection:
 		},
 		{
 			desc: "CommonConfig",
+			// TODO:        debug: INFO
 			yamlStr: `
 hub: docker.io/istio
 tag: v1.2.3
@@ -194,7 +184,6 @@ trafficManagement:
       common:
         enabled: true
         namespace: istio-control-system
-        debug: INFO
         k8s:
           resources:
             requests:
