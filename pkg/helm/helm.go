@@ -125,11 +125,11 @@ func renderChart(namespace, baseValues, overlayValues string, chrt *chart.Chart)
 func OverlayYAML(base, overlay string) (string, error) {
 	bj, err := yaml.YAMLToJSON([]byte(base))
 	if err != nil {
-		return "", fmt.Errorf("yamlToJSON error in base: %s\n%s\n", err, bj)
+		return "", fmt.Errorf("yamlToJSON error in base: %s\n%s", err, bj)
 	}
 	oj, err := yaml.YAMLToJSON([]byte(overlay))
 	if err != nil {
-		return "", fmt.Errorf("yamlToJSON error in overlay: %s\n%s\n", err, oj)
+		return "", fmt.Errorf("yamlToJSON error in overlay: %s\n%s", err, oj)
 	}
 
 	merged, err := jsonpatch.MergePatch(bj, oj)
