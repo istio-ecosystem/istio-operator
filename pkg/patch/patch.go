@@ -141,10 +141,8 @@ func YAMLManifestPatch(baseYAML string, namespace string, overlays []*v1alpha2.K
 	}
 
 	bom := baseObjs.ToMap()
-	oom, err := objectOverrideMap(overlays, namespace)
-	if err != nil {
-		return "", err
-	}
+	oom := objectOverrideMap(overlays, namespace)
+
 	var ret strings.Builder
 
 	// Try to apply the defined overlays.
@@ -283,8 +281,7 @@ func getNode(nc *pathContext, fullPath, remainPath util.Path) (*pathContext, err
 	dbgPrint("interior node")
 	// non-list node.
 	if nnt, ok := nc.node.(map[interface{}]interface{}); ok {
-		var nn interface{}
-		nn = nnt[pe]
+		nn := nnt[pe]
 		nnc := &pathContext{
 			parent: nc,
 			node:   nn,
@@ -347,12 +344,12 @@ func writeNode(nc *pathContext, value interface{}) error {
 
 // objectOverrideMap converts oos, a slice of object overlays, into a map of the same overlays where the key is the
 // object manifest.Hash.
-func objectOverrideMap(oos []*v1alpha2.K8SObjectOverlay, namespace string) (map[string][]*v1alpha2.K8SObjectOverlay_PathValue, error) {
+func objectOverrideMap(oos []*v1alpha2.K8SObjectOverlay, namespace string) map[string][]*v1alpha2.K8SObjectOverlay_PathValue {
 	ret := make(map[string][]*v1alpha2.K8SObjectOverlay_PathValue)
 	for _, o := range oos {
 		ret[manifest.Hash(o.Kind, namespace, o.Name)] = o.Patches
 	}
-	return ret, nil
+	return ret
 }
 
 func stringsEqual(a, b interface{}) bool {
