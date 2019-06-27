@@ -18,10 +18,10 @@ import "testing"
 
 func TestHash(t *testing.T) {
 	hashTests := []struct {
-		kind		string
-		namespace	string
-		name		string
-		want		string
+		kind      string
+		namespace string
+		name      string
+		want      string
 	}{
 		{"aaa", "nnn", "mmm", "aaa:nnn:mmm"},
 		{"a_", "n_", "m_", "a_:n_:m_"},
@@ -39,9 +39,9 @@ func TestHash(t *testing.T) {
 
 func TestHashNameKind(t *testing.T) {
 	hashNameKindTests := []struct {
-		kind		string
-		name		string
-		want		string
+		kind string
+		name string
+		want string
 	}{
 		{"aaa", "nnn", "aaa:nnn"},
 		{"a_", "n_", "a_:n_"},
@@ -143,11 +143,11 @@ func TestParseJSONToK8sObject(t *testing.T) {
 }`
 
 	parseJSONToK8sObjectTests := []struct {
-		objString		string
-		wantGroup		string
-		wantKind		string
-		wantName		string
-		wantNamespace	string	
+		objString     string
+		wantGroup     string
+		wantKind      string
+		wantName      string
+		wantNamespace string
 	}{
 		{testDeployment, "apps", "Deployment", "nginx-deployment", "test-apps"},
 		{testPod, "", "Pod", "myapp-pod", "test-apps"},
@@ -226,8 +226,8 @@ spec:
     targetPort: 9376`
 
 	parseK8sObjectsFromYAMLManifestTests := []struct {
-		objString		string
-		hashes			[]string
+		objString string
+		hashes    []string
 	}{
 		{testManifest, []string{"Deployment:test-apps:nginx-deployment", "Pod:test-apps:myapp-pod", "Service:test-apps:my-service"}},
 	}
