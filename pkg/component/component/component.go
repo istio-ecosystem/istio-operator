@@ -64,10 +64,9 @@ type IstioComponent interface {
 // CommonComponentFields is a struct common to all components.
 type CommonComponentFields struct {
 	*Options
-	namespace string
-	name      name.ComponentName
-	started   bool
-	renderer  helm.TemplateRenderer
+	name     name.ComponentName
+	started  bool
+	renderer helm.TemplateRenderer
 }
 
 // CRDComponent is the pilot component.
@@ -93,7 +92,7 @@ func (c *CRDComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *CRDComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
 	}
 	return renderManifest(c.CommonComponentFields)
 }
@@ -126,7 +125,7 @@ func (c *PilotComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *PilotComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
 	}
 	return renderManifest(c.CommonComponentFields)
 }
@@ -159,7 +158,7 @@ func (c *CitadelComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *CitadelComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
 	}
 	return renderManifest(c.CommonComponentFields)
 }
@@ -192,7 +191,7 @@ func (c *CertManagerComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *CertManagerComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
 	}
 	return renderManifest(c.CommonComponentFields)
 }
@@ -225,7 +224,7 @@ func (c *NodeAgentComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *NodeAgentComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
 	}
 	return renderManifest(c.CommonComponentFields)
 }
@@ -258,7 +257,7 @@ func (c *PolicyComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *PolicyComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
 	}
 	return renderManifest(c.CommonComponentFields)
 }
@@ -291,7 +290,7 @@ func (c *TelemetryComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *TelemetryComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
 	}
 	return renderManifest(c.CommonComponentFields)
 }
@@ -324,7 +323,7 @@ func (c *GalleyComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *GalleyComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
 	}
 	return renderManifest(c.CommonComponentFields)
 }
@@ -357,7 +356,7 @@ func (c *SidecarInjectorComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *SidecarInjectorComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
 	}
 	return renderManifest(c.CommonComponentFields)
 }
