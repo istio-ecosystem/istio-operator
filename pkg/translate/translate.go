@@ -85,7 +85,7 @@ var (
 	// Translators is a map of minor versions to Translator for that version.
 	// TODO: this should probably be moved out to a config file that's versioned.
 	Translators = map[version.MinorVersion]*Translator{
-		version.MinorVersion{Major: 1, Minor: 2}: {
+		version.NewMinorVersion(1, 2): {
 			APIMapping: map[string]*Translation{
 				"Hub":         {"global.hub", nil},
 				"Tag":         {"global.tag", nil},
@@ -115,6 +115,7 @@ var (
 			ComponentMaps: map[name.ComponentName]*ComponentMaps{
 				name.IstioBaseComponentName: &ComponentMaps{
 					ToHelmValuesNames: "global",
+					HelmSubdir:        "crds",
 					AlwaysEnabled:     true,
 				},
 				name.PilotComponentName: &ComponentMaps{
@@ -229,6 +230,10 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 	if err != nil {
 		return "", err
 	}
+	log.Infof("Manifest contains the following objects:")
+	for _, o := range objects {
+		log.Infof("%s", o.HashNameKind())
+	}
 	// om is a map of kind:name string to Object ptr.
 	om := objects.ToNameKindMap()
 	for inPath, v := range t.KubernetesMapping {
@@ -262,7 +267,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 		pe, _ = util.RemoveBrackets(pe)
 		oo, ok := om[pe]
 		if !ok {
-			return "", fmt.Errorf("resource Kind:Name %s doesn't exist in output manifest", pe)
+			return "", fmt.Errorf("resource Kind:name %s doesn't exist in the output manifest:\n%s\n", pe, yml)
 		}
 
 		baseYAML, err := oo.YAML()
@@ -430,7 +435,7 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, ii 
 				}
 			}
 			if c.namespace != "" {
-				if err := setTree(root, util.PathFromString(c.namespace), name.Namespace(string(fn), cn, ii)); err != nil {
+				if err := setTree(root, util.PathFromString(c.namespace), name.Namespace(fn, cn, ii)); err != nil {
 					return err
 				}
 			}

@@ -22,7 +22,12 @@ import (
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
+
 	"istio.io/pkg/log"
+)
+
+var (
+	DebugPackage = false
 )
 
 // FeatureName is a feature name string, typed to constrain allowed values.
@@ -31,6 +36,7 @@ type FeatureName string
 const (
 	// IstioFeature names, must be the same as feature names defined in the IstioControlPlane proto, since these are
 	// used to reference structure paths.
+	IstioBaseFeatureName         FeatureName = "Base"
 	TrafficManagementFeatureName FeatureName = "TrafficManagement"
 	PolicyFeatureName            FeatureName = "Policy"
 	TelemetryFeatureName         FeatureName = "Telemetry"
@@ -58,6 +64,9 @@ const (
 	EgressComponentName          ComponentName = "Egress"
 )
 
+// ManifestMap is a map of ComponentName to its manifest string.
+type ManifestMap map[ComponentName]string
+
 // IsComponentEnabled reports whether the given feature and component are enabled in the given spec. The logic is, in
 // order of evaluation:
 // 1. if the feature is not defined, the component is disabled, else
@@ -66,8 +75,8 @@ const (
 // 4. if the component disabled, it is reported disabled, else
 // 5. the component is enabled.
 // This follows the logic description in IstioControlPlane proto.
-func IsComponentEnabled(featureName string, componentName ComponentName, installSpec *v1alpha2.IstioControlPlaneSpec) bool {
-	featureNodeI, found, err := GetFromStructPath(installSpec, featureName+".Enabled")
+func IsComponentEnabled(featureName FeatureName, componentName ComponentName, installSpec *v1alpha2.IstioControlPlaneSpec) bool {
+	featureNodeI, found, err := GetFromStructPath(installSpec, string(featureName)+".Enabled")
 	if err != nil {
 		log.Error(err.Error())
 		return false
@@ -83,7 +92,7 @@ func IsComponentEnabled(featureName string, componentName ComponentName, install
 		return false
 	}
 
-	componentNodeI, found, err := GetFromStructPath(installSpec, featureName+".Components."+string(componentName)+".Common.Enabled")
+	componentNodeI, found, err := GetFromStructPath(installSpec, string(featureName)+".Components."+string(componentName)+".Common.Enabled")
 	if err != nil {
 		log.Error(err.Error())
 		return featureNode.Value
@@ -107,7 +116,7 @@ func IsComponentEnabled(featureName string, componentName ComponentName, install
 // 2. If the feature and component namespaces are unset, return CustomPackagePath.
 // 3. If the feature namespace is set but component name is unset, return the feature namespace.
 // 4. Otherwise return the component namespace.
-func Namespace(featureName string, componentName ComponentName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) string {
+func Namespace(featureName FeatureName, componentName ComponentName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) string {
 	defaultNamespaceI, found, err := GetFromStructPath(controlPlaneSpec, "CustomPackagePath")
 	if !found {
 		log.Error("can't find any default for CustomPackagePath")
@@ -125,7 +134,7 @@ func Namespace(featureName string, componentName ComponentName, controlPlaneSpec
 	}
 
 	featureNamespace := defaultNamespace
-	featureNodeI, found, err := GetFromStructPath(controlPlaneSpec, featureName+"Components.Namespace")
+	featureNodeI, found, err := GetFromStructPath(controlPlaneSpec, string(featureName)+"Components.Namespace")
 	if err != nil {
 		log.Error(err.Error())
 		return featureNamespace
@@ -142,7 +151,7 @@ func Namespace(featureName string, componentName ComponentName, controlPlaneSpec
 	}
 
 	componentNamespace := featureNamespace
-	componentNodeI, found, err := GetFromStructPath(controlPlaneSpec, featureName+".Components."+string(componentName)+".Common.Namespace")
+	componentNodeI, found, err := GetFromStructPath(controlPlaneSpec, string(featureName)+".Components."+string(componentName)+".Common.Namespace")
 	if err != nil {
 		log.Error(err.Error())
 		return featureNamespace
@@ -173,6 +182,11 @@ func GetFromStructPath(node interface{}, path string) (interface{}, bool, error)
 // getFromStructPath is the internal implementation of GetFromStructPath which recurses through a tree of Go structs
 // given a path. It terminates when the end of the path is reached or a path element does not exist.
 func getFromStructPath(node interface{}, path util.Path) (interface{}, bool, error) {
+	dbgPrint("getFromStructPath path=%s, node(%T)", path, node)
+	if len(path) == 0 {
+		dbgPrint("getFromStructPath returning node(%T)%v", node, node)
+		return node, !util.IsValueNil(node), nil
+	}
 	kind := reflect.TypeOf(node).Kind()
 	var structElems reflect.Value
 	switch kind {
@@ -188,9 +202,6 @@ func getFromStructPath(node interface{}, path util.Path) (interface{}, bool, err
 	default:
 		return nil, false, fmt.Errorf("GetFromStructPath path %s, unsupported type %T", path, node)
 	}
-	if len(path) == 0 {
-		return node, true, nil
-	}
 
 	if util.IsNilOrInvalidValue(structElems) {
 		return nil, false, nil
@@ -205,9 +216,6 @@ func getFromStructPath(node interface{}, path util.Path) (interface{}, bool, err
 
 		fv := structElems.Field(i)
 		kind = structElems.Type().Field(i).Type.Kind()
-		if kind != reflect.Ptr && kind != reflect.Map && kind != reflect.Slice {
-			return nil, false, fmt.Errorf("struct field %s is %T, expect struct ptr, map or slice", fieldName, fv.Interface())
-		}
 
 		return getFromStructPath(fv.Interface(), path[1:])
 	}
@@ -254,4 +262,11 @@ func Set(val, out interface{}) error {
 	}
 	reflect.ValueOf(out).Set(reflect.ValueOf(val))
 	return nil
+}
+
+func dbgPrint(v ...interface{}) {
+	if !DebugPackage {
+		return
+	}
+	log.Infof(fmt.Sprintf(v[0].(string), v[1:]...))
 }
