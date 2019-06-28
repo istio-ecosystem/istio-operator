@@ -16,34 +16,31 @@ package iop
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/spf13/cobra"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	"istio.io/operator/pkg/component/controlplane"
-	"istio.io/operator/pkg/helm"
-	"istio.io/operator/pkg/translate"
-	"istio.io/operator/pkg/util"
-	"istio.io/operator/pkg/validate"
-	"istio.io/operator/pkg/version"
+	"istio.io/operator/pkg/manifest"
+
+	"istio.io/pkg/log"
 )
 
-func manifestCmd(rootArgs *rootArgs, printf, fatalf FormatFn) *cobra.Command {
+func manifestCmd(rootArgs *rootArgs) *cobra.Command {
 	return &cobra.Command{
 		Use:   "manifest",
 		Short: "Generates Istio install manifest.",
 		Long:  "The manifest subcommand is used to generate an Istio install manifest based on the input CR.",
 		Args:  cobra.ExactArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
-			genManifest(rootArgs, printf, fatalf)
+			writeManifests(rootArgs)
 		}}
 
 }
 
-func genManifest(args *rootArgs, printf, fatalf FormatFn) {
-	if args.crPath == "" {
-		fatalf("Must set crpath")
+func writeManifests(args *rootArgs) {
+	if err := configLogs(args); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Could not configure logs: %s", err)
+		os.Exit(1)
 	}
 	b, err := ioutil.ReadFile(args.crPath)
 	if err != nil {
@@ -51,32 +48,22 @@ func genManifest(args *rootArgs, printf, fatalf FormatFn) {
 	}
 	overlayYAML := string(b)
 
-	// Start with unmarshaling and validating the user CR (which is an overlay on the base profile).
-	overlayICPS := &v1alpha2.IstioControlPlaneSpec{}
-	if err := util.UnmarshalWithJSONPB(overlayYAML, overlayICPS); err != nil {
-		fatalf(err.Error())
-	}
-	if errs := validate.CheckIstioControlPlaneSpec(overlayICPS); len(errs) != 0 {
-		fatalf(errs.ToError().Error())
+	manifests, err := genManifests(args)
+	if err != nil {
+		log.Fatalf(err.Error())
 	}
 
-	// Now read the base profile specified in the user spec. If nothing specified, use default.
-	baseYAML, err := helm.ReadValuesYAML(overlayICPS.BaseProfilePath)
-	if err != nil {
-		fatalf(err.Error())
-	}
-	// Unmarshal and validate the base CR.
-	baseICPS := &v1alpha2.IstioControlPlaneSpec{}
-	if err := util.UnmarshalWithJSONPB(baseYAML, baseICPS); err != nil {
-		fatalf(err.Error())
-	}
-	if errs := validate.CheckIstioControlPlaneSpec(baseICPS); len(errs) != 0 {
-		fatalf(errs.ToError().Error())
-	}
-
-	mergedYAML, err := helm.OverlayYAML(baseYAML, overlayYAML)
-	if err != nil {
-		fatalf(err.Error())
+	if args.outFilename == "" {
+		for _, m := range manifests {
+			fmt.Println(m)
+		}
+	} else {
+		if err := os.MkdirAll(args.outFilename, os.ModePerm); err != nil {
+			log.Fatalf(err.Error())
+		}
+		if err := manifest.RenderToDir(manifests, args.outFilename, args.dryRun, args.verbose); err != nil {
+			log.Errorf(err.Error())
+		}
 	}
 
 	// Now unmarshal and validate the combined base profile and user CR overlay.

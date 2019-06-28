@@ -17,22 +17,105 @@
 package iop
 
 import (
-	"fmt"
+	"io/ioutil"
 	"os"
+
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/operator/pkg/component/controlplane"
+	"istio.io/operator/pkg/helm"
+	"istio.io/operator/pkg/name"
+	"istio.io/operator/pkg/translate"
+	"istio.io/operator/pkg/util"
+	"istio.io/operator/pkg/validate"
+	"istio.io/operator/pkg/version"
+
+	"istio.io/pkg/log"
 )
 
-// FormatFn formats the supplied arguments according to the format string
-// provided and executes some set of operations with the result.
-type FormatFn func(format string, args ...interface{})
+const (
+	logFilePath = "./iop.log"
+)
 
-// Fatalf is a FormatFn that prints the formatted string to os.Stderr and then
-// calls os.Exit().
-var Fatalf = func(format string, args ...interface{}) {
-	_, _ = fmt.Fprintf(os.Stderr, format+"\n", args...) // #nosec
-	os.Exit(-1)
+func getWriter(args *rootArgs) (*os.File, error) {
+	writer := os.Stdout
+	if args.outFilename != "" {
+		file, err := os.Create(args.outFilename)
+		if err != nil {
+			log.Fatalf("Could not open output file: %s", err)
+		}
+
+		writer = file
+	}
+	return writer, nil
 }
 
-// Printf is a FormatFn that prints the formatted string to os.Stdout.
-var Printf = func(format string, args ...interface{}) {
-	fmt.Printf(format+"\n", args...)
+func configLogs(args *rootArgs) error {
+	opt := log.DefaultOptions()
+	if !args.logToStdErr {
+		opt.ErrorOutputPaths = []string{logFilePath}
+		opt.OutputPaths = []string{logFilePath}
+	}
+	return log.Configure(opt)
+}
+
+func genManifests(args *rootArgs) (name.ManifestMap, error) {
+	overlayYAML := ""
+	if args.inFilename != "" {
+		b, err := ioutil.ReadFile(args.inFilename)
+		if err != nil {
+			log.Fatalf("Could not open input file: %s", err)
+		}
+		overlayYAML = string(b)
+	}
+
+	// Start with unmarshaling and validating the user CR (which is an overlay on the base profile).
+	overlayICPS := &v1alpha2.IstioControlPlaneSpec{}
+	if err := util.UnmarshalWithJSONPB(overlayYAML, overlayICPS); err != nil {
+		log.Fatalf(err.Error())
+	}
+	if errs := validate.CheckIstioControlPlaneSpec(overlayICPS); len(errs) != 0 {
+		log.Fatalf(errs.ToError().Error())
+	}
+
+	// Now read the base profile specified in the user spec. If nothing specified, use default.
+	baseYAML, err := helm.ReadValuesYAML(overlayICPS.Profile)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	// Unmarshal and validate the base CR.
+	baseICPS := &v1alpha2.IstioControlPlaneSpec{}
+	if err := util.UnmarshalWithJSONPB(baseYAML, baseICPS); err != nil {
+		log.Fatalf(err.Error())
+	}
+	if errs := validate.CheckIstioControlPlaneSpec(baseICPS); len(errs) != 0 {
+		log.Fatalf(errs.ToError().Error())
+	}
+
+	mergedYAML, err := helm.OverlayYAML(baseYAML, overlayYAML)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	// Now unmarshal and validate the combined base profile and user CR overlay.
+	mergedcps := &v1alpha2.IstioControlPlaneSpec{}
+	if err := util.UnmarshalWithJSONPB(mergedYAML, mergedcps); err != nil {
+		log.Fatalf(err.Error())
+	}
+	if errs := validate.CheckIstioControlPlaneSpec(mergedcps); len(errs) != 0 {
+		log.Fatalf(errs.ToError().Error())
+	}
+
+	if yd := util.YAMLDiff(mergedYAML, util.ToYAMLWithJSONPB(mergedcps)); yd != "" {
+		log.Fatalf("Validated YAML differs from input: \n%s", yd)
+	}
+
+	// TODO: remove version hard coding.
+	cp := controlplane.NewIstioControlPlane(mergedcps, translate.Translators[version.NewMinorVersion(1, 2)])
+	if err := cp.Run(); err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	manifests, errs := cp.RenderManifest()
+
+	return manifests, errs.ToError()
 }

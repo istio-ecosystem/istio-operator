@@ -280,7 +280,8 @@
   name = "github.com/gogo/protobuf"
   packages = [
     "proto",
-    "sortkeys"
+    "sortkeys",
+    "types"
   ]
   revision = "ba06b47c162d49f2af050fb4c75bcbc86a159d5c"
   version = "v1.2.1"
@@ -739,6 +740,18 @@
   version = "v1.0.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/shurcooL/httpfs"
+  packages = ["vfsutil"]
+  revision = "6a4d4a70508bfeac7afc814c5e4345e1c640b6b2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/shurcooL/vfsgen"
+  packages = ["."]
+  revision = "6a9ea43bcacdf716a5c1b38efff722c07adf0069"
+
+[[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   revision = "8bdbc7bcc01dcbb8ec23dc8a28e332258d25251f"
@@ -1055,6 +1068,15 @@
   packages = ["."]
   revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
   version = "v2.2.2"
+
+[[projects]]
+  name = "istio.io/istio"
+  packages = [
+    "pkg/kube",
+    "pkg/log"
+  ]
+  revision = "0cf9ca07c7425fd49db431c0644b4e6b2fb9e63b"
+  version = "1.1.11"
 
 [[projects]]
   name = "istio.io/pkg"
@@ -1618,6 +1640,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d6f5186bd24c73f5d771acf42fb64b336d34269a36024fc9a677be6588a11b8c"
+  inputs-digest = "d7e522214349dcfbbd6451af05fcc5f6a20eddb280da236350492a6cf0b0f9ed"
   solver-name = "gps-cdcl"
   solver-version = 1

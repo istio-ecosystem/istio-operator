@@ -15,17 +15,42 @@
 package iop
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/spf13/cobra"
+
+	"istio.io/operator/pkg/version"
+	"istio.io/operator/pkg/manifest"
+
+	"istio.io/pkg/log"
 )
 
-func installCmd(_ *rootArgs, _, _ FormatFn) *cobra.Command {
+func installCmd(rootArgs *rootArgs) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "install",
 		Short: "Installs Istio to cluster.",
 		Long:  "The install subcommand is used to install Istio into a cluster, given a CR path. ",
 		Args:  cobra.ExactArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
+			installManifests(rootArgs)
 		}}
 
 	return cmd
+}
+
+func installManifests(args *rootArgs) {
+	if err := configLogs(args); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Could not configure logs: %s", err)
+		os.Exit(1)
+	}
+
+	manifests, err := genManifests(args)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	if err := manifest.ApplyAll(manifests, version.NewVersion("", 1, 2, 0, ""), args.dryRun, args.verbose); err != nil {
+		log.Fatalf(err.Error())
+	}
 }
