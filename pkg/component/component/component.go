@@ -502,8 +502,8 @@ func mergeTrees(apiValues string, globalVals, values, unvalidatedValues map[stri
 func createHelmRenderer(c *CommonComponentFields) (helm.TemplateRenderer, error) {
 	icp := c.InstallSpec
 	return helm.NewHelmRenderer(filepath.Join(icp.CustomPackagePath,
-		c.Translator.ComponentMaps[c.name].HelmSubdir), icp.Profile, string(c.name),
-		name.Namespace(string(c.FeatureName), c.name, c.InstallSpec))
+		c.Translator.ComponentMaps[c.name].HelmSubdir), icp.BaseProfilePath, string(c.name),
+		name.Namespace(c.FeatureName, c.name, c.InstallSpec))
 }
 
 // disabledYAMLStr returns the YAML comment string that the given component is disabled.
