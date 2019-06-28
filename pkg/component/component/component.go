@@ -41,8 +41,8 @@ const (
 	yamlCommentStr       = "# "
 )
 
-// ComponentOptions defines options for a component.
-type ComponentOptions struct {
+// Options defines options for a component.
+type Options struct {
 	// FeatureName is the name of the feature this component belongs to.
 	FeatureName name.FeatureName
 	// InstallSpec is the global IstioControlPlaneSpec.
@@ -53,6 +53,8 @@ type ComponentOptions struct {
 
 // IstioComponent defines the interface for a component.
 type IstioComponent interface {
+	// name returns the name of the component.
+	Name() name.ComponentName
 	// Run starts the component. Must me called before the component is used.
 	Run() error
 	// RenderManifest returns a string with the rendered manifest for the component.
@@ -61,12 +63,44 @@ type IstioComponent interface {
 
 // CommonComponentFields is a struct common to all components.
 type CommonComponentFields struct {
-	*ComponentOptions
-	enabled   bool
+	*Options
 	namespace string
 	name      name.ComponentName
-	renderer  helm.TemplateRenderer
 	started   bool
+	renderer  helm.TemplateRenderer
+}
+
+// CRDComponent is the pilot component.
+type CRDComponent struct {
+	*CommonComponentFields
+}
+
+// NewCRDComponent creates a new CRDComponent and returns a pointer to it.
+func NewCRDComponent(opts *Options) *CRDComponent {
+	return &CRDComponent{
+		&CommonComponentFields{
+			Options: opts,
+			name:    name.IstioBaseComponentName,
+		},
+	}
+}
+
+// Run implements the IstioComponent interface.
+func (c *CRDComponent) Run() error {
+	return runComponent(c.CommonComponentFields)
+}
+
+// RenderManifest implements the IstioComponent interface.
+func (c *CRDComponent) RenderManifest() (string, error) {
+	if !c.started {
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
+	}
+	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *CRDComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
 }
 
 // PilotComponent is the pilot component.
@@ -75,11 +109,11 @@ type PilotComponent struct {
 }
 
 // NewPilotComponent creates a new PilotComponent and returns a pointer to it.
-func NewPilotComponent(opts *ComponentOptions) *PilotComponent {
+func NewPilotComponent(opts *Options) *PilotComponent {
 	return &PilotComponent{
 		&CommonComponentFields{
-			ComponentOptions: opts,
-			name:             name.PilotComponentName,
+			Options: opts,
+			name:    name.PilotComponentName,
 		},
 	}
 }
@@ -92,9 +126,14 @@ func (c *PilotComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *PilotComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
 	}
 	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *PilotComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
 }
 
 // CitadelComponent is the pilot component.
@@ -103,11 +142,11 @@ type CitadelComponent struct {
 }
 
 // NewCitadelComponent creates a new PilotComponent and returns a pointer to it.
-func NewCitadelComponent(opts *ComponentOptions) *CitadelComponent {
+func NewCitadelComponent(opts *Options) *CitadelComponent {
 	return &CitadelComponent{
 		&CommonComponentFields{
-			ComponentOptions: opts,
-			name:             name.CitadelComponentName,
+			Options: opts,
+			name:    name.CitadelComponentName,
 		},
 	}
 }
@@ -120,9 +159,14 @@ func (c *CitadelComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *CitadelComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
 	}
 	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *CitadelComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
 }
 
 // CertManagerComponent is the pilot component.
@@ -131,11 +175,11 @@ type CertManagerComponent struct {
 }
 
 // NewCertManagerComponent creates a new PilotComponent and returns a pointer to it.
-func NewCertManagerComponent(opts *ComponentOptions) *CertManagerComponent {
+func NewCertManagerComponent(opts *Options) *CertManagerComponent {
 	return &CertManagerComponent{
 		&CommonComponentFields{
-			ComponentOptions: opts,
-			name:             name.CertManagerComponentName,
+			Options: opts,
+			name:    name.CertManagerComponentName,
 		},
 	}
 }
@@ -148,9 +192,14 @@ func (c *CertManagerComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *CertManagerComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
 	}
 	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *CertManagerComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
 }
 
 // NodeAgentComponent is the pilot component.
@@ -159,11 +208,11 @@ type NodeAgentComponent struct {
 }
 
 // NewNodeAgentComponent creates a new PilotComponent and returns a pointer to it.
-func NewNodeAgentComponent(opts *ComponentOptions) *NodeAgentComponent {
+func NewNodeAgentComponent(opts *Options) *NodeAgentComponent {
 	return &NodeAgentComponent{
 		&CommonComponentFields{
-			ComponentOptions: opts,
-			name:             name.NodeAgentComponentName,
+			Options: opts,
+			name:    name.NodeAgentComponentName,
 		},
 	}
 }
@@ -176,9 +225,14 @@ func (c *NodeAgentComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *NodeAgentComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
 	}
 	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *NodeAgentComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
 }
 
 // PolicyComponent is the pilot component.
@@ -187,11 +241,11 @@ type PolicyComponent struct {
 }
 
 // NewPolicyComponent creates a new PilotComponent and returns a pointer to it.
-func NewPolicyComponent(opts *ComponentOptions) *PolicyComponent {
+func NewPolicyComponent(opts *Options) *PolicyComponent {
 	return &PolicyComponent{
 		&CommonComponentFields{
-			ComponentOptions: opts,
-			name:             name.PolicyComponentName,
+			Options: opts,
+			name:    name.PolicyComponentName,
 		},
 	}
 }
@@ -204,9 +258,14 @@ func (c *PolicyComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *PolicyComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
 	}
 	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *PolicyComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
 }
 
 // TelemetryComponent is the pilot component.
@@ -215,11 +274,11 @@ type TelemetryComponent struct {
 }
 
 // NewTelemetryComponent creates a new PilotComponent and returns a pointer to it.
-func NewTelemetryComponent(opts *ComponentOptions) *TelemetryComponent {
+func NewTelemetryComponent(opts *Options) *TelemetryComponent {
 	return &TelemetryComponent{
 		&CommonComponentFields{
-			ComponentOptions: opts,
-			name:             name.TelemetryComponentName,
+			Options: opts,
+			name:    name.TelemetryComponentName,
 		},
 	}
 }
@@ -232,9 +291,14 @@ func (c *TelemetryComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *TelemetryComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
 	}
 	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *TelemetryComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
 }
 
 // GalleyComponent is the pilot component.
@@ -243,11 +307,11 @@ type GalleyComponent struct {
 }
 
 // NewGalleyComponent creates a new PilotComponent and returns a pointer to it.
-func NewGalleyComponent(opts *ComponentOptions) *GalleyComponent {
+func NewGalleyComponent(opts *Options) *GalleyComponent {
 	return &GalleyComponent{
 		&CommonComponentFields{
-			ComponentOptions: opts,
-			name:             name.GalleyComponentName,
+			Options: opts,
+			name:    name.GalleyComponentName,
 		},
 	}
 }
@@ -260,9 +324,14 @@ func (c *GalleyComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *GalleyComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
 	}
 	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *GalleyComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
 }
 
 // SidecarInjectorComponent is the pilot component.
@@ -271,11 +340,11 @@ type SidecarInjectorComponent struct {
 }
 
 // NewSidecarInjectorComponent creates a new PilotComponent and returns a pointer to it.
-func NewSidecarInjectorComponent(opts *ComponentOptions) *SidecarInjectorComponent {
+func NewSidecarInjectorComponent(opts *Options) *SidecarInjectorComponent {
 	return &SidecarInjectorComponent{
 		&CommonComponentFields{
-			ComponentOptions: opts,
-			name:             name.SidecarInjectorComponentName,
+			Options: opts,
+			name:    name.SidecarInjectorComponentName,
 		},
 	}
 }
@@ -288,9 +357,14 @@ func (c *SidecarInjectorComponent) Run() error {
 // RenderManifest implements the IstioComponent interface.
 func (c *SidecarInjectorComponent) RenderManifest() (string, error) {
 	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.name)
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name)
 	}
 	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *SidecarInjectorComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
 }
 
 // runComponent performs startup tasks for the component defined by the given CommonComponentFields.
@@ -322,21 +396,21 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 	}
 
 	// Add global overlay from IstioControlPlaneSpec.Values.
-	_, err = name.SetFromPath(c.ComponentOptions.InstallSpec, "Values", &globalVals)
+	_, err = name.SetFromPath(c.Options.InstallSpec, "Values", &globalVals)
 	if err != nil {
 		return "", err
 	}
 
 	// Add overlay from IstioControlPlaneSpec.<Feature>.Components.<Component>.Common.ValuesOverrides.
 	pathToValues := fmt.Sprintf("%s.Components.%s.Common.Values", c.FeatureName, c.name)
-	_, err = name.SetFromPath(c.ComponentOptions.InstallSpec, pathToValues, &vals)
+	_, err = name.SetFromPath(c.Options.InstallSpec, pathToValues, &vals)
 	if err != nil {
 		return "", err
 	}
 
 	// Add overlay from IstioControlPlaneSpec.<Feature>.Components.<Component>.Common.UnvalidatedValuesOverrides.
 	pathToUnvalidatedValues := fmt.Sprintf("%s.Components.%s.Common.UnvalidatedValues", c.FeatureName, c.name)
-	_, err = name.SetFromPath(c.ComponentOptions.InstallSpec, pathToUnvalidatedValues, &valsUnvalidated)
+	_, err = name.SetFromPath(c.Options.InstallSpec, pathToUnvalidatedValues, &valsUnvalidated)
 	if err != nil {
 		return "", err
 	}
@@ -364,6 +438,7 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 
 	my, err := c.renderer.RenderManifest(mergedYAML)
 	if err != nil {
+		log.Errorf("Error rendering the manifest: %s", err)
 		return "", err
 	}
 	my += helm.YAMLSeparator + "\n"
@@ -371,9 +446,10 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 	// Add the k8s resources from IstioControlPlaneSpec.
 	my, err = c.Translator.OverlayK8sSettings(my, c.InstallSpec, c.FeatureName, c.name)
 	if err != nil {
+		log.Errorf("Error in OverlayK8sSettings: %s", err)
 		return "", err
 	}
-	log.Infof("manifest after k8s API settings:\n%s\n", my)
+	log.Infof("Manifest after k8s API settings:\n%s\n", my)
 
 	// Add the k8s resource overlays from IstioControlPlaneSpec.
 	pathToK8sOverlay := fmt.Sprintf("%s.Components.%s.Common.K8S.Overlays", c.FeatureName, c.name)
@@ -387,8 +463,8 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 		return my, nil
 	}
 	kyo, _ := yaml.Marshal(overlays)
-	log.Infof("kubernetes overlay: \n%s\n", kyo)
-	return patch.YAMLManifestPatch(my, c.namespace, overlays)
+	log.Infof("Applying kubernetes overlay: \n%s\n", kyo)
+	return patch.YAMLManifestPatch(my, name.Namespace(string(c.FeatureName), c.name, c.InstallSpec), overlays)
 }
 
 // mergeTrees overlays global values, component values and unvalidatedValues (in that order) over the YAML tree in
@@ -425,15 +501,9 @@ func mergeTrees(apiValues string, globalVals, values, unvalidatedValues map[stri
 // createHelmRenderer creates a helm renderer for the component defined by c and returns a ptr to it.
 func createHelmRenderer(c *CommonComponentFields) (helm.TemplateRenderer, error) {
 	icp := c.InstallSpec
-	return helm.NewHelmRenderer(filepath.Join(icp.CustomPackagePath, c.Translator.ComponentMaps[c.name].HelmSubdir), icp.BaseProfilePath, string(c.name), c.namespace)
-}
-
-// getValuesFilename returns the global values filename, given an IstioControlPlaneSpec.
-func getValuesFilename(i *v1alpha2.IstioControlPlaneSpec) string {
-	if i.BaseProfilePath == "" {
-		return helm.DefaultGlobalValuesFilename
-	}
-	return i.BaseProfilePath
+	return helm.NewHelmRenderer(filepath.Join(icp.CustomPackagePath,
+		c.Translator.ComponentMaps[c.name].HelmSubdir), icp.Profile, string(c.name),
+		name.Namespace(string(c.FeatureName), c.name, c.InstallSpec))
 }
 
 // disabledYAMLStr returns the YAML comment string that the given component is disabled.
