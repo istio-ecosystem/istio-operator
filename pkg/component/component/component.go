@@ -464,7 +464,7 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 	}
 	kyo, _ := yaml.Marshal(overlays)
 	log.Infof("Applying kubernetes overlay: \n%s\n", kyo)
-	return patch.YAMLManifestPatch(my, name.Namespace(string(c.FeatureName), c.name, c.InstallSpec), overlays)
+	return patch.YAMLManifestPatch(my, name.Namespace(c.FeatureName, c.name, c.InstallSpec), overlays)
 }
 
 // mergeTrees overlays global values, component values and unvalidatedValues (in that order) over the YAML tree in
