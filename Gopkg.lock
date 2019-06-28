@@ -131,6 +131,12 @@
   version = "v0.29.0"
 
 [[projects]]
+  name = "github.com/cpuguy83/go-md2man"
+  packages = ["md2man"]
+  revision = "7762f7e404f8416dfa1d9bb6a8c192aa9acb4d19"
+  version = "v1.0.10"
+
+[[projects]]
   name = "github.com/cyphar/filepath-securejoin"
   packages = ["."]
   revision = "a261ee33d7a517f054effbf451841abaafe3e0fd"
@@ -194,6 +200,12 @@
   name = "github.com/exponent-io/jsonpath"
   packages = ["."]
   revision = "d6023ce2651d8eafb5c75bb0c7167536102ec9f5"
+
+[[projects]]
+  name = "github.com/fatih/camelcase"
+  packages = ["."]
+  revision = "44e46d280b43ec1531bb25252440e34f1b800b65"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -353,6 +365,12 @@
   revision = "b9b92a82580638d091517faa0a8a9655657ed263"
 
 [[projects]]
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  revision = "ed099d42384823742bba0bf9a72b53b55c9e2e38"
+  version = "v1.7.2"
+
+[[projects]]
   branch = "master"
   name = "github.com/gregjones/httpcache"
   packages = [
@@ -402,6 +420,12 @@
   ]
   revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/howeyc/fsnotify"
+  packages = ["."]
+  revision = "441bbc86b167f3c1f4786afae9931403b99fdacf"
+  version = "v0.9.0"
 
 [[projects]]
   name = "github.com/huandu/xstrings"
@@ -456,6 +480,12 @@
   packages = ["."]
   revision = "e2ffdb16a802fe2bb95e2e35ff34f0e53aeef34f"
   version = "v0.1.0"
+
+[[projects]]
+  name = "github.com/kylelemons/godebug"
+  packages = ["diff"]
+  revision = "9ff306d4fbead574800b66369df5b6144732d58e"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/magiconair/properties"
@@ -681,6 +711,12 @@
   revision = "87a4384529e0652f5035fb5cc8095faf73ea9b0b"
 
 [[projects]]
+  name = "github.com/prometheus/prom2json"
+  packages = ["."]
+  revision = "63d8d642831b6d75c46715acc8722965dadb46a1"
+  version = "v1.2.1"
+
+[[projects]]
   name = "github.com/rogpeppe/go-internal"
   packages = [
     "modfile",
@@ -725,7 +761,10 @@
 
 [[projects]]
   name = "github.com/spf13/cobra"
-  packages = ["."]
+  packages = [
+    ".",
+    "doc"
+  ]
   revision = "ef82de70bb3f60c65fb8eebacbb2d122ef517385"
   version = "v0.0.3"
 
@@ -1018,13 +1057,21 @@
   version = "v2.2.2"
 
 [[projects]]
-  branch = "master"
   name = "istio.io/pkg"
   packages = [
+    "annotations",
+    "appsignals",
+    "collateral",
+    "ctrlz",
+    "ctrlz/assets",
+    "ctrlz/fw",
+    "ctrlz/topics",
+    "ctrlz/topics/assets",
+    "env",
     "log",
     "version"
   ]
-  revision = "1fcd6eb90ce184b1084430fdf7804d8a41b88370"
+  revision = "9332430ad747c06f4e0c5e090d75db327bf9ca80"
 
 [[projects]]
   name = "k8s.io/api"
@@ -1118,6 +1165,7 @@
     "pkg/util/httpstream/spdy",
     "pkg/util/intstr",
     "pkg/util/json",
+    "pkg/util/jsonmergepatch",
     "pkg/util/mergepatch",
     "pkg/util/naming",
     "pkg/util/net",
@@ -1324,6 +1372,7 @@
     "pkg/provenance",
     "pkg/releasetesting",
     "pkg/releaseutil",
+    "pkg/renderutil",
     "pkg/repo",
     "pkg/resolver",
     "pkg/rudder",
@@ -1449,14 +1498,29 @@
     "pkg/controller/deployment/util",
     "pkg/features",
     "pkg/fieldpath",
+    "pkg/kubectl",
+    "pkg/kubectl/apps",
     "pkg/kubectl/cmd/get",
     "pkg/kubectl/cmd/util",
     "pkg/kubectl/cmd/util/openapi",
     "pkg/kubectl/cmd/util/openapi/validation",
+    "pkg/kubectl/describe",
+    "pkg/kubectl/describe/versioned",
     "pkg/kubectl/generated",
     "pkg/kubectl/scheme",
+    "pkg/kubectl/util",
+    "pkg/kubectl/util/certificate",
+    "pkg/kubectl/util/deployment",
+    "pkg/kubectl/util/event",
+    "pkg/kubectl/util/fieldpath",
     "pkg/kubectl/util/i18n",
+    "pkg/kubectl/util/podutils",
     "pkg/kubectl/util/printers",
+    "pkg/kubectl/util/qos",
+    "pkg/kubectl/util/rbac",
+    "pkg/kubectl/util/resource",
+    "pkg/kubectl/util/slice",
+    "pkg/kubectl/util/storage",
     "pkg/kubectl/util/templates",
     "pkg/kubectl/util/term",
     "pkg/kubectl/validation",
@@ -1500,7 +1564,6 @@
     "pkg/client/apiutil",
     "pkg/client/config",
     "pkg/controller",
-    "pkg/controller/controllerutil",
     "pkg/event",
     "pkg/handler",
     "pkg/internal/controller",
@@ -1555,6 +1618,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dd3481ab0cd6e09742625768a34b6d5912e683aa2da88bee775a488f6b12950b"
+  inputs-digest = "d6f5186bd24c73f5d771acf42fb64b336d34269a36024fc9a677be6588a11b8c"
   solver-name = "gps-cdcl"
   solver-version = 1

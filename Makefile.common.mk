@@ -2,8 +2,8 @@
 #
 # The original version of this file is located in the https://github.com/istio/common-files repo.
 # If you're looking at this file in a different repo and want to make a change, please go to the
-# common-files repo, make the change there and check it in. Then come back to this repo and run the
-# scripts/updatecommonfiles.sh script.
+# common-files repo, make the change there and check it in. Then come back to this repo and run
+# "make updatecommon".
 
 # Copyright 2018 Istio Authors
 #
@@ -19,17 +19,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-lint:
-	@scripts/linters.sh
-
-fixlint:
-	@scripts/linters.sh --fix
-
-format:
-	@scripts/fmt.sh
-
-fmt:
-	@scripts/fmt.sh
-
 updatecommon:
-	@scripts/updatecommonfiles.sh
+	@git clone https://github.com/istio/common-files
+	@cd common-files
+	@git rev-parse HEAD >.commonfiles.sha
+	@cp -r common-files/files/* common-files/files/.[^.]* .
+	@rm -fr common-files
