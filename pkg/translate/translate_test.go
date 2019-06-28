@@ -130,7 +130,7 @@ security:
 		},
 	}
 
-	tr := Translators[version.MinorVersion{1, 2}]
+	tr := Translators[version.NewMinorVersion(1, 2)]
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
 			ispec := &v1alpha2.IstioControlPlaneSpec{}

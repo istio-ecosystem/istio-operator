@@ -117,9 +117,9 @@ func IsComponentEnabled(featureName FeatureName, componentName ComponentName, in
 // 3. If the feature namespace is set but component name is unset, return the feature namespace.
 // 4. Otherwise return the component namespace.
 func Namespace(featureName FeatureName, componentName ComponentName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) string {
-	defaultNamespaceI, found, err := GetFromStructPath(controlPlaneSpec, "CustomPackagePath")
+	defaultNamespaceI, found, err := GetFromStructPath(controlPlaneSpec, "DefaultNamespacePrefix")
 	if !found {
-		log.Error("can't find any default for CustomPackagePath")
+		log.Error("can't find any default for DefaultNamespacePrefix")
 		return ""
 	}
 	if err != nil {
