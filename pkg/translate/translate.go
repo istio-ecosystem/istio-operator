@@ -528,6 +528,9 @@ func (t *Translator) resourceContainerString(tmpl string, componentName name.Com
 		ResourceName:  t.ComponentMaps[componentName].ResourceName,
 		ContainerName: t.ComponentMaps[componentName].ContainerName,
 	}
+	// TODO: address comment
+	// Can extract the template execution part to a common method, so for each
+	// rendering method just need to create a template struct and call this common method
 	tm, err := template.New("").Parse(tmpl)
 	if err != nil {
 		return err.Error()
