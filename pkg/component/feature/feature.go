@@ -32,18 +32,18 @@ type IstioFeature interface {
 	RenderManifest() (string, util.Errors)
 }
 
-// FeatureOptions are options for IstioFeature.
-type FeatureOptions struct {
+// Options are options for IstioFeature.
+type Options struct {
 	// InstallSpec is the installation spec for the control plane.
 	InstallSpec *v1alpha2.IstioControlPlaneSpec
 	// Translator is the translator for this feature.
 	Traslator *translate.Translator
 }
 
-// CommonFeatureFields
+// CommonFeatureFields are fields common to all features.
 type CommonFeatureFields struct {
-	// FeatureOptions is an embedded struct.
-	FeatureOptions
+	// Options is an embedded struct.
+	Options
 	// components is a slice of components that are part of the feature.
 	components []component.IstioComponent
 }
@@ -55,9 +55,9 @@ type TrafficManagementFeature struct {
 }
 
 // NewTrafficManagementFeature creates a new TrafficManagementFeature and returns a pointer to it.
-func NewTrafficManagementFeature(opts *FeatureOptions) *TrafficManagementFeature {
+func NewTrafficManagementFeature(opts *Options) *TrafficManagementFeature {
 	cff := &CommonFeatureFields{
-		FeatureOptions: *opts,
+		Options: *opts,
 	}
 	cff.components = []component.IstioComponent{
 		component.NewPilotComponent(newComponentOptions(cff, name.TrafficManagementFeatureName)),
@@ -85,9 +85,9 @@ type SecurityFeature struct {
 }
 
 // NewSecurityFeature creates a new SecurityFeature and returns a pointer to it.
-func NewSecurityFeature(opts *FeatureOptions) *SecurityFeature {
+func NewSecurityFeature(opts *Options) *SecurityFeature {
 	cff := &CommonFeatureFields{
-		FeatureOptions: *opts,
+		Options: *opts,
 	}
 	cff.components = []component.IstioComponent{
 		component.NewCitadelComponent(newComponentOptions(cff, name.SecurityFeatureName)),
@@ -115,9 +115,9 @@ type PolicyFeature struct {
 }
 
 // NewPolicyFeature creates a new PolicyFeature and returns a pointer to it.
-func NewPolicyFeature(opts *FeatureOptions) *PolicyFeature {
+func NewPolicyFeature(opts *Options) *PolicyFeature {
 	cff := &CommonFeatureFields{
-		FeatureOptions: *opts,
+		Options: *opts,
 	}
 	cff.components = []component.IstioComponent{
 		component.NewPolicyComponent(newComponentOptions(cff, name.PolicyFeatureName)),
@@ -148,9 +148,9 @@ func (f *TelemetryFeature) Run() error {
 }
 
 // NewTelemetryFeature creates a new TelemetryFeature and returns a pointer to it.
-func NewTelemetryFeature(opts *FeatureOptions) *TelemetryFeature {
+func NewTelemetryFeature(opts *Options) *TelemetryFeature {
 	cff := &CommonFeatureFields{
-		FeatureOptions: *opts,
+		Options: *opts,
 	}
 	cff.components = []component.IstioComponent{
 		component.NewTelemetryComponent(newComponentOptions(cff, name.TelemetryFeatureName)),
@@ -171,9 +171,9 @@ type ConfigManagementFeature struct {
 }
 
 // NewConfigManagementFeature creates a new ConfigManagementFeature and returns a pointer to it.
-func NewConfigManagementFeature(opts *FeatureOptions) *ConfigManagementFeature {
+func NewConfigManagementFeature(opts *Options) *ConfigManagementFeature {
 	cff := &CommonFeatureFields{
-		FeatureOptions: *opts,
+		Options: *opts,
 	}
 	cff.components = []component.IstioComponent{
 		component.NewGalleyComponent(newComponentOptions(cff, name.ConfigManagementFeatureName)),
@@ -199,9 +199,9 @@ type AutoInjectionFeature struct {
 }
 
 // NewAutoInjectionFeature creates a new AutoInjectionFeature and returns a pointer to it.
-func NewAutoInjectionFeature(opts *FeatureOptions) *AutoInjectionFeature {
+func NewAutoInjectionFeature(opts *Options) *AutoInjectionFeature {
 	cff := &CommonFeatureFields{
-		FeatureOptions: *opts,
+		Options: *opts,
 	}
 	cff.components = []component.IstioComponent{
 		component.NewSidecarInjectorComponent(newComponentOptions(cff, name.AutoInjectionFeatureName)),
