@@ -88,7 +88,7 @@ func IsComponentEnabled(featureName FeatureName, componentName ComponentName, in
 	if !ok {
 		log.Errorf("feature %s enabled has bad type %T, expect *protobuf.BoolValue", featureName, featureNodeI)
 	}
-	if featureNode == nil || featureNode.Value == false {
+	if featureNode == nil || !featureNode.Value {
 		return false
 	}
 
@@ -150,7 +150,6 @@ func Namespace(featureName FeatureName, componentName ComponentName, controlPlan
 		}
 	}
 
-	componentNamespace := featureNamespace
 	componentNodeI, found, err := GetFromStructPath(controlPlaneSpec, string(featureName)+".Components."+string(componentName)+".Common.Namespace")
 	if err != nil {
 		log.Error(err.Error())
@@ -162,7 +161,7 @@ func Namespace(featureName FeatureName, componentName ComponentName, controlPlan
 	if componentNodeI == nil {
 		return featureNamespace
 	}
-	componentNamespace, ok = componentNodeI.(string)
+	componentNamespace, ok := componentNodeI.(string)
 	if !ok {
 		log.Errorf("component %s enabled has bad type %T, expect string", componentName, componentNodeI)
 		return featureNamespace
@@ -192,15 +191,15 @@ func getFromStructPath(node interface{}, path util.Path) (interface{}, bool, err
 	switch kind {
 	case reflect.Map, reflect.Slice:
 		if len(path) != 0 {
-			return nil, false, fmt.Errorf("GetFromStructPath path %s, unsupported leaf type %T", path, node)
+			return nil, false, fmt.Errorf("getFromStructPath path %s, unsupported leaf type %T", path, node)
 		}
 	case reflect.Ptr:
 		structElems = reflect.ValueOf(node).Elem()
 		if reflect.TypeOf(structElems).Kind() != reflect.Struct {
-			return nil, false, fmt.Errorf("GetFromStructPath path %s, expected struct ptr, got %T", path, node)
+			return nil, false, fmt.Errorf("getFromStructPath path %s, expected struct ptr, got %T", path, node)
 		}
 	default:
-		return nil, false, fmt.Errorf("GetFromStructPath path %s, unsupported type %T", path, node)
+		return nil, false, fmt.Errorf("getFromStructPath path %s, unsupported type %T", path, node)
 	}
 
 	if util.IsNilOrInvalidValue(structElems) {
@@ -215,8 +214,6 @@ func getFromStructPath(node interface{}, path util.Path) (interface{}, bool, err
 		}
 
 		fv := structElems.Field(i)
-		kind = structElems.Type().Field(i).Type.Kind()
-
 		return getFromStructPath(fv.Interface(), path[1:])
 	}
 
@@ -254,7 +251,7 @@ func Set(val, out interface{}) error {
 	}
 
 	if reflect.TypeOf(val) != reflect.TypeOf(out) {
-		return fmt.Errorf("SetFromPath from type %T != to type %T, %v", val, out, util.IsSlicePtr(out))
+		return fmt.Errorf("setFromPath from type %T != to type %T, %v", val, out, util.IsSlicePtr(out))
 	}
 
 	if !reflect.ValueOf(out).CanSet() {

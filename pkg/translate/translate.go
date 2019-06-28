@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/name"
@@ -113,67 +114,67 @@ var (
 				"{{.FeatureName}}.Components.{{.ComponentName}}.Common.K8S.Resources":           {"[Deployment:{{.ResourceName}}].spec.template.spec.containers.[name:{{.ContainerName}}].resources", nil},
 			},
 			ComponentMaps: map[name.ComponentName]*ComponentMaps{
-				name.IstioBaseComponentName: &ComponentMaps{
+				name.IstioBaseComponentName: {
 					ToHelmValuesNames: "global",
 					HelmSubdir:        "crds",
 					AlwaysEnabled:     true,
 				},
-				name.PilotComponentName: &ComponentMaps{
+				name.PilotComponentName: {
 					ResourceName:      "istio-pilot",
 					ContainerName:     "discovery",
 					HelmSubdir:        "istio-control/istio-discovery",
 					ToHelmValuesNames: "pilot",
 				},
 
-				name.GalleyComponentName: &ComponentMaps{
+				name.GalleyComponentName: {
 					ResourceName:      "istio-galley",
 					ContainerName:     "galley",
 					HelmSubdir:        "istio-control/istio-config",
 					ToHelmValuesNames: "galley",
 				},
-				name.SidecarInjectorComponentName: &ComponentMaps{
+				name.SidecarInjectorComponentName: {
 					ResourceName:      "istio-sidecar-injector",
 					ContainerName:     "sidecar-injector-webhook",
 					HelmSubdir:        "istio-control/istio-autoinject",
 					ToHelmValuesNames: "sidecarInjectorWebhook",
 				},
-				name.PolicyComponentName: &ComponentMaps{
+				name.PolicyComponentName: {
 					ResourceName:      "istio-policy",
 					ContainerName:     "mixer",
 					HelmSubdir:        "istio-policy",
 					ToHelmValuesNames: "mixer.policy",
 				},
-				name.TelemetryComponentName: &ComponentMaps{
+				name.TelemetryComponentName: {
 					ResourceName:      "istio-telemetry",
 					ContainerName:     "mixer",
 					HelmSubdir:        "istio-telemetry/mixer-telemetry",
 					ToHelmValuesNames: "mixer.telemetry",
 				},
-				name.CitadelComponentName: &ComponentMaps{
+				name.CitadelComponentName: {
 					ResourceName:      "istio-citadel",
 					ContainerName:     "citadel",
 					HelmSubdir:        "security/citadel",
 					ToHelmValuesNames: "citadel",
 				},
-				name.NodeAgentComponentName: &ComponentMaps{
+				name.NodeAgentComponentName: {
 					ResourceName:      "istio-nodeagent",
 					ContainerName:     "nodeagent",
 					HelmSubdir:        "security/nodeagent",
 					ToHelmValuesNames: "nodeAgent",
 				},
-				name.CertManagerComponentName: &ComponentMaps{
+				name.CertManagerComponentName: {
 					ResourceName:      "certmanager",
 					ContainerName:     "certmanager",
 					HelmSubdir:        "security/certmanager",
 					ToHelmValuesNames: "certManager",
 				},
-				name.IngressComponentName: &ComponentMaps{
+				name.IngressComponentName: {
 					ResourceName:      "istio-ingressgateway",
 					ContainerName:     "istio-proxy",
 					HelmSubdir:        "gateways/istio-ingress",
 					ToHelmValuesNames: "gateways.istio-ingressgateway",
 				},
-				name.EgressComponentName: &ComponentMaps{
+				name.EgressComponentName: {
 					ResourceName:      "istio-egressgateway",
 					ContainerName:     "istio-proxy",
 					HelmSubdir:        "gateways/istio-egress",
@@ -280,7 +281,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 		}
 		dbgPrint("baseYAML:\n%s\n, overlayYAML:\n%s\n, mergedYAML:\n%s\n", string(baseYAML), string(overlayYAML), string(mergedYAML))
 
-		mergedObj, err := manifest.ParseYAMLToObject([]byte(mergedYAML))
+		mergedObj, err := manifest.ParseYAMLToObject(mergedYAML)
 		if err != nil {
 			return "", err
 		}
