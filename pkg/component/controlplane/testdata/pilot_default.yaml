@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: istio-pilot
-  namespace:
+  namespace: istio-system
   labels:
     app: pilot
     release: istio
@@ -26,7 +26,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: "api-server"
-  namespace:
+  namespace: istio-system
   labels:
     release: istio
 spec:
@@ -42,7 +42,7 @@ apiVersion: "authentication.istio.io/v1alpha1"
 kind: "MeshPolicy"
 metadata:
   name: "default"
-  namespace:
+  namespace: istio-system
   labels:
     release: istio
 spec:
@@ -55,7 +55,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: "default"
-  namespace:
+  namespace: istio-system
   labels:
     release: istio
 spec:
@@ -68,7 +68,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace:
+  namespace: istio-system
   name: pilot-envoy-config
   labels:
     release: istio
@@ -238,7 +238,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: istio
-  namespace:
+  namespace: istio-system
   labels:
     release: istio
 data:
@@ -257,6 +257,7 @@ data:
     cpu:
       targetAverageUtilization: 80
     deploymentLabels: null
+    enabled: true
     env:
       GODEBUG: gctrace=1
     image: pilot
@@ -267,6 +268,7 @@ data:
     keepaliveMaxServerConnectionAge: 30m
     meshNetworks:
       networks: {}
+    namespace: istio-system
     nodeSelector: {}
     podAntiAffinityLabelSelector: []
     podAntiAffinityTermLabelSelector: []
@@ -287,23 +289,23 @@ data:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: istio-pilot-
+  name: istio-pilot-istio-system
   labels:
     app: pilot
     release: istio
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: istio-pilot-
+  name: istio-pilot-istio-system
 subjects:
   - kind: ServiceAccount
     name: istio-pilot-service-account
-    namespace:
+    namespace: istio-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: istio-pilot-
+  name: istio-pilot-istio-system
   labels:
     app: pilot
     release: istio
@@ -337,7 +339,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: istio-pilot-service-account
-  namespace:
+  namespace: istio-system
   labels:
     app: pilot
     release: istio
@@ -347,7 +349,7 @@ apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
   name: istio-pilot
-  namespace:
+  namespace: istio-system
   labels:
     app: pilot
     release: istio
@@ -364,7 +366,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: istio-pilot
-  namespace:
+  namespace: istio-system
   # TODO: default template doesn't have this, which one is right ?
   labels:
     app: pilot
@@ -381,11 +383,14 @@ spec:
       istio: pilot
   template:
     metadata:
-      labels:
-        app: pilot
-        istio: pilot
       annotations:
         sidecar.istio.io/inject: "false"
+      labels:
+        app: pilot
+        chart: pilot
+        heritage: Tiller
+        istio: pilot
+        release: istio
     spec:
       serviceAccountName: istio-pilot-service-account
       containers:
@@ -535,7 +540,7 @@ apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   name: istio-pilot
-  namespace:
+  namespace: istio-system
   labels:
     app: pilot
     release: istio

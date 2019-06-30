@@ -1,3 +1,17 @@
+// Copyright 2019 Istio Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package controlplane
 
 import (
@@ -12,10 +26,10 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/kylelemons/godebug/diff"
-
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	"istio.io/operator/pkg/component/component"
 	"istio.io/operator/pkg/manifest"
+	"istio.io/operator/pkg/translate"
+	"istio.io/operator/pkg/version"
 )
 
 var (
@@ -60,6 +74,17 @@ autoInjection:
 		{
 			desc: "pilot_default",
 			installSpec: `
+defaultNamespacePrefix: istio-system
+policy:
+  enabled: false
+telemetry:
+  enabled: false
+security:
+  enabled: false
+configManagement:
+  enabled: false
+autoInjection:
+  enabled: false
 trafficManagement:
   enabled: true
   components:
@@ -71,27 +96,50 @@ trafficManagement:
 		{
 			desc: "pilot_override_values",
 			installSpec: `
+defaultNamespacePrefix: istio-system
+policy:
+  enabled: false
+telemetry:
+  enabled: false
+security:
+  enabled: false
+configManagement:
+  enabled: false
+autoInjection:
+  enabled: false
 trafficManagement:
   enabled: true
   components:
+    namespace: istio-system
     proxy:
       common:
         enabled: false
     pilot:
       common:
-        valuesOverrides:
+        values:
           replicaCount: 5
           resources:
             requests:
               cpu: 111m
               memory: 222Mi
-        unvalidatedValuesOverrides:
+        unvalidatedValues:
           myCustomKey: someValue
 `,
 		},
 		{
 			desc: "pilot_override_kubernetes",
 			installSpec: `
+defaultNamespacePrefix: istio-system
+policy:
+  enabled: false
+telemetry:
+  enabled: false
+security:
+  enabled: false
+configManagement:
+  enabled: false
+autoInjection:
+  enabled: false
 trafficManagement:
   enabled: true
   components:
@@ -120,13 +168,15 @@ trafficManagement:
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
 			var is v1alpha2.IstioControlPlaneSpec
-			spec := `customPackagePath: "file://` + helmChartTestDir + `"` + "\n" + tt.installSpec
+			spec := `customPackagePath: "file://` + helmChartTestDir + `"` + "\n"
+			spec += `baseProfilePath: "file://` + helmChartTestDir + `/global.yaml"` + "\n"
+			spec += tt.installSpec
 			err := unmarshalWithJSONPB(spec, &is)
 			if err != nil {
 				t.Fatalf("yaml.Unmarshal(%s): got error %s", tt.desc, err)
 			}
 
-			ins := NewIstioControlPlane(&is, component.V12DirLayout)
+			ins := NewIstioControlPlane(&is, translate.Translators[version.NewMinorVersion(1, 2)])
 			if err = ins.Run(); err != nil {
 				t.Fatal(err)
 			}
@@ -239,7 +289,7 @@ func ObjectsInManifest(mstr string) string {
 		return err.Error()
 	}
 	var out []string
-	for _, v := range ao.Items {
+	for _, v := range ao {
 		out = append(out, v.Hash())
 	}
 	return strings.Join(out, "\n")

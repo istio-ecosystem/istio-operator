@@ -14,3 +14,4 @@ subjects:
   - kind: ServiceAccount
     name: istio-sidecar-injector-service-account
     namespace: {{ .Release.Namespace }}
+---
