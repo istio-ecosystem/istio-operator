@@ -1070,15 +1070,6 @@
   version = "v2.2.2"
 
 [[projects]]
-  name = "istio.io/istio"
-  packages = [
-    "pkg/kube",
-    "pkg/log"
-  ]
-  revision = "0cf9ca07c7425fd49db431c0644b4e6b2fb9e63b"
-  version = "1.1.11"
-
-[[projects]]
   name = "istio.io/pkg"
   packages = [
     "annotations",
@@ -1640,6 +1631,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d7e522214349dcfbbd6451af05fcc5f6a20eddb280da236350492a6cf0b0f9ed"
+  inputs-digest = "212e62681eb7486ea8b24c86a3f2399b3096bb954462f28c24aeb48bb5ccf299"
   solver-name = "gps-cdcl"
   solver-version = 1
