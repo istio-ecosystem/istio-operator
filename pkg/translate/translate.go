@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/name"
@@ -88,14 +89,18 @@ var (
 	Translators = map[version.MinorVersion]*Translator{
 		version.NewMinorVersion(1, 2): {
 			APIMapping: map[string]*Translation{
-				"Hub":         {"global.hub", nil},
-				"Tag":         {"global.tag", nil},
-				"K8SDefaults": {"global.resources", nil},
+				"Hub":                    {"global.hub", nil},
+				"Tag":                    {"global.tag", nil},
+				"K8SDefaults":            {"global.resources", nil},
+				"DefaultNamespacePrefix": {"global.istioNamespace", nil},
 
 				"TrafficManagement.Components.Proxy.Common.Values": {"global.proxy", nil},
 
-				"PolicyTelemetry.PolicyCheckFailOpen":       {"global.policyCheckFailOpen", nil},
-				"PolicyTelemetry.OutboundTrafficPolicyMode": {"global.outboundTrafficPolicy.mode", nil},
+				"Policy.PolicyCheckFailOpen":       {"global.policyCheckFailOpen", nil},
+				"Policy.OutboundTrafficPolicyMode": {"global.outboundTrafficPolicy.mode", nil},
+				"Policy.Components.Namespace":      {"global.policyNamespace", nil},
+
+				"Telemetry.Components.Namespace": {"global.telemetryNamespace", nil},
 
 				"Security.ControlPlaneMtls.Value":    {"global.controlPlaneSecurityEnabled", nil},
 				"Security.DataPlaneMtlsStrict.Value": {"global.mtls.enabled", nil},
@@ -173,13 +178,13 @@ var (
 					ResourceName:         "istio-nodeagent",
 					ContainerName:        "nodeagent",
 					HelmSubdir:           "security/nodeagent",
-					ToHelmValuesTreeRoot: "nodeAgent",
+					ToHelmValuesTreeRoot: "nodeagent",
 				},
 				name.CertManagerComponentName: {
 					ResourceName:         "certmanager",
 					ContainerName:        "certmanager",
 					HelmSubdir:           "security/certmanager",
-					ToHelmValuesTreeRoot: "certManager",
+					ToHelmValuesTreeRoot: "certmanager",
 				},
 				name.IngressComponentName: {
 					ResourceName:         "istio-ingressgateway",

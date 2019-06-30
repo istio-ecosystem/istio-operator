@@ -91,6 +91,7 @@ import (
 
 	"github.com/kr/pretty"
 	"gopkg.in/yaml.v2"
+
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/util"

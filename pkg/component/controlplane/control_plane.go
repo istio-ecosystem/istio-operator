@@ -62,7 +62,7 @@ func (i *IstioControlPlane) Run() error {
 // RenderManifest returns a manifest rendered against
 func (i *IstioControlPlane) RenderManifest() (manifest string, errsOut util.Errors) {
 	if !i.started {
-		return "", util.NewErrs(fmt.Errorf("IstioControlPlane must be Run before calling RenderManifest"))
+		return "", util.NewErrs(fmt.Errorf("istioControlPlane must be Run before calling RenderManifest"))
 	}
 	var sb strings.Builder
 	for _, f := range i.features {

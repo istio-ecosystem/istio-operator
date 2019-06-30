@@ -26,6 +26,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/kylelemons/godebug/diff"
+
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/translate"
@@ -52,7 +53,6 @@ func TestRenderInstallationSuccess(t *testing.T) {
 	tests := []struct {
 		desc        string
 		installSpec string
-		wantFile    string
 	}{
 		{
 			desc: "all_off",
@@ -283,7 +283,7 @@ func ManifestDiff(a, b string) (string, error) {
 	return sb.String(), err
 }
 
-func ObjectsInManifest(mstr string) string {
+/*func ObjectsInManifest(mstr string) string {
 	ao, err := manifest.ParseObjectsFromYAMLManifest(mstr)
 	if err != nil {
 		return err.Error()
@@ -293,4 +293,4 @@ func ObjectsInManifest(mstr string) string {
 		out = append(out, v.Hash())
 	}
 	return strings.Join(out, "\n")
-}
+}*/
