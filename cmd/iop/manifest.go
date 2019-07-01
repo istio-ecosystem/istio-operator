@@ -42,11 +42,6 @@ func writeManifests(args *rootArgs) {
 		_, _ = fmt.Fprintf(os.Stderr, "Could not configure logs: %s", err)
 		os.Exit(1)
 	}
-	b, err := ioutil.ReadFile(args.crPath)
-	if err != nil {
-		fatalf(err.Error())
-	}
-	overlayYAML := string(b)
 
 	manifests, err := genManifests(args)
 	if err != nil {
@@ -65,30 +60,4 @@ func writeManifests(args *rootArgs) {
 			log.Errorf(err.Error())
 		}
 	}
-
-	// Now unmarshal and validate the combined base profile and user CR overlay.
-	mergedcps := &v1alpha2.IstioControlPlaneSpec{}
-	if err := util.UnmarshalWithJSONPB(mergedYAML, mergedcps); err != nil {
-		fatalf(err.Error())
-	}
-	if errs := validate.CheckIstioControlPlaneSpec(mergedcps); len(errs) != 0 {
-		fatalf(errs.ToError().Error())
-	}
-
-	if yd := util.YAMLDiff(mergedYAML, util.ToYAMLWithJSONPB(mergedcps)); yd != "" {
-		fatalf("Validated YAML differs from input: \n%s", yd)
-	}
-
-	// TODO: remove version hard coding.
-	cp := controlplane.NewIstioControlPlane(mergedcps, translate.Translators[version.MinorVersion{Major: 1, Minor: 2}])
-	if err := cp.Run(); err != nil {
-		fatalf(err.Error())
-	}
-
-	y, errs := cp.RenderManifest()
-	err = errs.ToError()
-	if err != nil {
-		fatalf(err.Error())
-	}
-	fmt.Println(y)
 }
