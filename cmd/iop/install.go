@@ -20,9 +20,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"istio.io/operator/pkg/version"
 	"istio.io/operator/pkg/manifest"
-
+	"istio.io/operator/pkg/version"
 	"istio.io/pkg/log"
 )
 

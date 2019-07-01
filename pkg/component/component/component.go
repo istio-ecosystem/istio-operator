@@ -62,10 +62,9 @@ type IstioComponent interface {
 // CommonComponentFields is a struct common to all components.
 type CommonComponentFields struct {
 	*Options
-	namespace string
-	name      name.ComponentName
-	started   bool
-	renderer  helm.TemplateRenderer
+	name     name.ComponentName
+	started  bool
+	renderer helm.TemplateRenderer
 }
 
 // CRDComponent is the pilot component.

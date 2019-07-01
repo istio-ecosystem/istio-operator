@@ -15,7 +15,6 @@
 package kubectlcmd
 
 import (
-	"context"
 	"errors"
 	"io/ioutil"
 	"os/exec"
@@ -73,7 +72,7 @@ func TestKubectlApply(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			cs := collector{Error: test.err}
 			kubectl := &Client{cmdSite: &cs}
-			err := kubectl.Apply(false, false, context.Background(), test.namespace, test.manifest, test.args...)
+			err := kubectl.Apply(false, false, test.namespace, test.manifest, test.args...)
 
 			if test.err != nil && err == nil {
 				t.Error("expected error to occur")
@@ -91,6 +90,9 @@ func TestKubectlApply(t *testing.T) {
 			}
 
 			stdinBytes, err := ioutil.ReadAll(cmd.Stdin)
+			if err != nil {
+				t.Fatal(err)
+			}
 			if stdin := string(stdinBytes); stdin != test.manifest {
 				t.Errorf("manifest mismatch, expected: %v, got: %v", test.manifest, stdin)
 			}

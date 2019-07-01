@@ -18,7 +18,6 @@ package kubectlcmd
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -26,7 +25,7 @@ import (
 	"istio.io/pkg/log"
 )
 
-// New creates a Client that runs kubectl avaliable on the path with default authentication
+// New creates a Client that runs kubectl available on the path with default authentication
 func New() *Client {
 	return &Client{cmdSite: &console{}}
 }
@@ -48,7 +47,7 @@ func (console) Run(c *exec.Cmd) error {
 }
 
 // Apply runs the kubectl apply with the provided manifest argument
-func (c *Client) Apply(dryRun, verbose bool, ctx context.Context, namespace string, manifest string, extraArgs ...string) error {
+func (c *Client) Apply(dryRun, verbose bool, namespace string, manifest string, extraArgs ...string) error {
 	args := []string{"apply"}
 	if namespace != "" {
 		args = append(args, "-n", namespace)
@@ -64,7 +63,7 @@ func (c *Client) Apply(dryRun, verbose bool, ctx context.Context, namespace stri
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	cmdStr := fmt.Sprintf("%s", strings.Join(cmd.Args, " "))
+	cmdStr := strings.Join(cmd.Args, " ")
 	if verbose {
 		cmdStr += "\n" + manifest
 	} else {

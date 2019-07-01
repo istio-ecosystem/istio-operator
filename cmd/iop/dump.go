@@ -82,7 +82,7 @@ func dumpProfile(args *rootArgs) {
 
 	baseYAML, err := helm.ReadValuesYAML(overlayICPS.Profile)
 	if err != nil {
-		log.Fatalf("Could not read the profile values for %s: %s", fname)
+		log.Fatalf("Could not read the profile values for %s: %s", fname, err)
 	}
 
 	if _, err := writer.WriteString(baseYAML); err != nil {

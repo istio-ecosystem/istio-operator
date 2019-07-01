@@ -15,8 +15,8 @@
 package manifest
 
 import (
-	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -80,7 +80,6 @@ var (
 	kubectl          = kubectlcmd.New()
 
 	k8sRESTConfig *rest.Config
-	k8sRESTClient *rest.RESTClient
 )
 
 func init() {
@@ -151,6 +150,7 @@ func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun,
 	var wg sync.WaitGroup
 	for c, m := range manifests {
 		c := c
+		m := m
 		wg.Add(1)
 		go func() {
 			if s := dependencyWaitCh[c]; s != nil {
@@ -206,8 +206,8 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 	if err != nil {
 		return err
 	}
-	ctx := context.Background()
-	if err := kubectl.Apply(dryRun, verbose, ctx, namespace, mcrd, extraArgs...); err != nil {
+
+	if err := kubectl.Apply(dryRun, verbose, namespace, mcrd, extraArgs...); err != nil {
 		return err
 	}
 	// Not all Istio components are robust to not yet created CRDs.
@@ -219,7 +219,7 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 	if err != nil {
 		return err
 	}
-	if err := kubectl.Apply(dryRun, verbose, ctx, namespace, m, extraArgs...); err != nil {
+	if err := kubectl.Apply(dryRun, verbose, namespace, m, extraArgs...); err != nil {
 		return err
 	}
 
@@ -343,7 +343,7 @@ func installTreeString() string {
 	return sb.String()
 }
 
-func buildInstallTreeString(componentName name.ComponentName, prefix string, sb *strings.Builder) {
+func buildInstallTreeString(componentName name.ComponentName, prefix string, sb io.StringWriter) {
 	_, _ = sb.WriteString(prefix + string(componentName) + "\n")
 	if _, ok := installTree[componentName].(componentTree); !ok {
 		return

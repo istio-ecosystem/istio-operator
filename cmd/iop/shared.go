@@ -28,7 +28,6 @@ import (
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/validate"
 	"istio.io/operator/pkg/version"
-
 	"istio.io/pkg/log"
 )
 
@@ -41,7 +40,7 @@ func getWriter(args *rootArgs) (*os.File, error) {
 	if args.outFilename != "" {
 		file, err := os.Create(args.outFilename)
 		if err != nil {
-			log.Fatalf("Could not open output file: %s", err)
+			return nil, err
 		}
 
 		writer = file

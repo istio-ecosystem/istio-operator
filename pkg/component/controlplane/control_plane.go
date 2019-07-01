@@ -63,7 +63,7 @@ func (i *IstioControlPlane) Run() error {
 // RenderManifest returns a manifest rendered against
 func (i *IstioControlPlane) RenderManifest() (manifests name.ManifestMap, errsOut util.Errors) {
 	if !i.started {
-		return nil, util.NewErrs(fmt.Errorf("IstioControlPlane must be Run before calling RenderManifest"))
+		return nil, util.NewErrs(fmt.Errorf("istioControlPlane must be Run before calling RenderManifest"))
 	}
 
 	manifests = make(name.ManifestMap)
