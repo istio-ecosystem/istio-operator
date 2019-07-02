@@ -19,9 +19,14 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
+var (
+	// resourceAccessor is a common resource accessor
+	accessor = meta.NewAccessor()
+)
+
 // HasLabel is a helper function returning true if the specified object contains the specified label.
 func HasLabel(resource runtime.Object, label string) bool {
-	labels, err := meta.NewAccessor().Labels(resource)
+	labels, err := accessor.Labels(resource)
 	if err != nil {
 		// if we can't access labels, then it doesn't have this label
 		return false
@@ -40,26 +45,21 @@ func DeleteLabel(resource runtime.Object, label string) {
 		// if we can't access labels, then it doesn't have this label, so nothing to delete
 		return
 	}
-	labels := resourceAccessor.GetLabels()
-	if labels == nil {
-		return
+
+	if HasLabel(resource, label) {
+		labels, _ := accessor.Labels(resource)
+		delete(labels, label)
+		resourceAccessor.SetLabels(labels)
 	}
-	delete(labels, label)
-	resourceAccessor.SetLabels(labels)
 }
 
 // GetLabel is a helper function which returns the value of the specified label on the specified object.
 // returns ok=false if the label was not found on the object.
 func GetLabel(resource runtime.Object, label string) (value string, ok bool) {
-	labels, err := meta.NewAccessor().Labels(resource)
-	if err != nil {
-		// if we can't access labels, then it doesn't have this label
-		return
+	if HasLabel(resource, label) {
+		labels, _ := accessor.Labels(resource)
+		value, ok = labels[label]
 	}
-	if labels == nil {
-		labels = map[string]string{}
-	}
-	value, ok = labels[label]
 	return
 }
 
