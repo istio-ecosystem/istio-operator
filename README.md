@@ -16,9 +16,9 @@ meeting to share your ideas.
 
 This repo reorganizes the current [Helm installation parameters](https://istio.io/docs/reference/config/installation-options/) into two groups:
 
-+ The new [platform level installation API](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto), for managing
+- The new [platform level installation API](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto), for managing
 K8s settings like resources, auto scaling, pod disruption budgets etc.
-+ The configuration API that currently uses the
+- The configuration API that currently uses the
 [Helm installation parameters](https://istio.io/docs/reference/config/installation-options/) for backwards
 compatibility. This API is for managing This API the Istio control plane configuration settings.
 
@@ -76,16 +76,16 @@ The quick start describes how to install and use the operator `iop` CLI command.
 ```bash
 git clone https://istio.io/operator.git
 cd operator
-go build -o <your bin path> ./cmd/iop.go
+go build -o $GOPATH/bin ./cmd/iop.go
 ```
 
 #### Flags
 
 The `iop` command supports the following flags:
 
-+ `logtostderr`: log to console (by default logs go to ./iop.go).
-+ `dry-run`: console output only, nothing applied to cluster or written to files (default is true for now).
-+ `verbose`: display entire manifest contents and other debug info (default is false).
+- `logtostderr`: log to console (by default logs go to ./iop.go).
+- `dry-run`: console output only, nothing applied to cluster or written to files (default is true for now).
+- `verbose`: display entire manifest contents and other debug info (default is false).
 
 #### Basic default manifest
 
@@ -107,8 +107,9 @@ levels representing a child dependency, use the following command:
 iop manifest -o istio_manifests
 ```
 
-Use depth first search to traverse the created directory hierarchy when applying your YAML files. Child manifest
-directories must wait for the parent, but not sibling manifest directories.
+Use depth first search to traverse the created directory hierarchy when applying your YAML files. This is needed for
+correct sequencing of dependencies. Child manifest directories must wait for their parent directory to be fully applied,
+but not their sibling manifest directories.
 
 #### Just apply it for me
 
@@ -157,7 +158,8 @@ profile: file:///usr/home/bob/go/src/github.com/ostromart/istio-installer/data/p
 customPackagePath: file:///usr/home/bob/go/src/github.com/ostromart/istio-installer/data/charts/
 ```
 
-These can be mixed and matched e.g. use a compiled in profile with local filesystem charts.
+You can mix and match these approaches. For example, you can use a compiled-in configuration profile with charts in your
+local file system.
 
 #### New API customization
 
@@ -204,17 +206,17 @@ The K8s settings are defined in detail in the
 The settings are the same for all components, so a user can configure pilot K8s settings in exactly the same, consistent
 way as galley settings. Supported K8s settings currently include:
 
-+ [resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container)
-+ [readiness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/)
-+ [replica count](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
-+ [HoriizontalPodAutoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
-+ [PodDisruptionBudget](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/#how-disruption-budgets-work)
-+ [pod annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
-+ [service annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
-+ [ImagePullPolicy](https://kubernetes.io/docs/concepts/containers/images/)
-+ [priority calss name](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass)
-+ [node selector](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector)
-+ [affinity and anti-affinity](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity)
+- [resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container)
+- [readiness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/)
+- [replica count](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+- [HoriizontalPodAutoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+- [PodDisruptionBudget](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/#how-disruption-budgets-work)
+- [pod annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+- [service annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+- [ImagePullPolicy](https://kubernetes.io/docs/concepts/containers/images/)
+- [priority calss name](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass)
+- [node selector](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector)
+- [affinity and anti-affinity](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity)
 
 All of these K8s settings use the K8s API definitions, so [K8s documentation](https://kubernetes.io/docs/concepts/) can
 be used for reference. All K8s overlay values are also validated in the operator.
