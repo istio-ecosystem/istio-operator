@@ -53,7 +53,7 @@ spec:
   profile: sds
 ```
 
-CRs are used when running the operator as a controller in a pod in the cluster. When using operator CLI mode and passing the
+CRs are used when running the operator as a controller in a pod in the cluster.
 If you use the operator CLI mode and pass the configuration as a file, you only require the spec portion, for example:
 
 ```yaml
@@ -61,6 +61,8 @@ If you use the operator CLI mode and pass the configuration as a file, you only 
 
 profile: sds
 ```
+
+See [Select a profile](#select-a-profile) for more information.
 
 If you don't specify a configuration profile, Istio is installed using the `default` configuration profile. All
 profiles listed in istio.io are available compiled in, or `profile:` can point to a local file path to reference a custom
@@ -119,7 +121,7 @@ dependencies to have the needed CRDs available:
 iop install
 ```
 
-Note: right now the configuration that would be applied is only displayed, since `dry-run` is true by default. Set
+The default `dry-run=true` displays the manifest only. Set `dry-run=false` to apply the Istio configuration to Kubernetes.
 `--dry-run=false` to actually apply the generated configuration to the cluster.
 
 #### Review the values of the current configuration profile
@@ -150,7 +152,7 @@ After running the command, the Helm charts are rendered using `data/profiles/sds
 
 #### Install from file path
 
-The compiled in charts and profiles are used by default, but a file path can be specified, e.g.
+The compiled in charts and profiles are used by default, but you can specify a file path, for example:
 
 ```yaml
 profile: file:///usr/home/bob/go/src/github.com/ostromart/istio-installer/data/profiles/default.yaml
