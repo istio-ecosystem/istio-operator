@@ -5,12 +5,12 @@
 
 # Istio Operator
 
-The Istio operator CLI is now suitable for developers to evaluate and experiment with. We welcome your
-[contributions](https://github.com/istio/operator/blob/master/CONTRIBUTING.md) - pick an
+The Istio operator CLI is now suitable for developers to evaluate and experiment with. You can
+[contribute](https://github.com/istio/operator/blob/master/CONTRIBUTING.md) by picking an
 [unassigned open issue](https://github.com/istio/istio/issues?q=is%3Aissue+is%3Aopen+label%3Aarea%2Fenvironments%2Foperator+no%3Aassignee),
-create a [bug or feature requests](https://github.com/istio/operator/blob/master/BUGS-AND-FEATURE-REQUESTS.md),
-or come to the weekly [Environments Working Group](https://github.com/istio/community/blob/master/WORKING-GROUPS.md)
-meeting if you have ideas.
+creating a [bug or feature request](https://github.com/istio/operator/blob/master/BUGS-AND-FEATURE-REQUESTS.md),
+or just coming to the weekly [Environments Working Group](https://github.com/istio/community/blob/master/WORKING-GROUPS.md)
+meeting to share your ideas.
 
 ## Introduction
 
@@ -95,8 +95,8 @@ The following command generates a manifest with the compiled in default profile 
 iop manifest
 ```
 
-You can see these sources for the compiled in profiles in the repo under data/profiles, while the compiled in Helm
-charts are under data/charts.
+You can see these sources for the compiled in profiles in the repo under `data/profiles`, while the compiled in Helm
+charts are under `data/charts`.
 
 #### Output to dirs
 
