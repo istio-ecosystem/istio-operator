@@ -54,7 +54,7 @@ spec:
 ```
 
 CRs are used when running the operator as a controller in a pod in the cluster. When using operator CLI mode and passing the
-configuration as a file (see [Select a profile](#Select_a_profile)), only the spec portion is required.
+If you use the operator CLI mode and pass the configuration as a file, you only require the spec portion, for example:
 
 ```yaml
 # sds-install.yaml
