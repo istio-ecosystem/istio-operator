@@ -73,7 +73,7 @@ for details.
 
 The quick start describes how to install and use the operator `iop` CLI command.
 
-#### Installation
+### Installation
 
 ```bash
 git clone https://istio.io/operator.git
@@ -81,13 +81,15 @@ cd operator
 go build -o $GOPATH/bin ./cmd/iop.go
 ```
 
-#### Flags
+### Flags
 
 The `iop` command supports the following flags:
 
 - `logtostderr`: log to console (by default logs go to ./iop.go).
 - `dry-run`: console output only, nothing applied to cluster or written to files (default is true for now).
 - `verbose`: display entire manifest contents and other debug info (default is false).
+
+### Quick tour of CLI commands 
 
 #### Basic default manifest
 
@@ -163,7 +165,7 @@ customPackagePath: file:///usr/home/bob/go/src/github.com/ostromart/istio-instal
 You can mix and match these approaches. For example, you can use a compiled-in configuration profile with charts in your
 local file system.
 
-#### New API customization
+### New API customization
 
 The [new platform level installation API](https://github.com/istio/operator/blob/95e89c4fb838b0b374f70d7c5814329e25a64819/pkg/apis/istio/v1alpha1/istioinstaller_types.proto#L25)
 defines install time parameters like feature/component enablement and namespace, and K8s settings like resources, HPA spec etc. in a structured way.
@@ -223,7 +225,7 @@ way as galley settings. Supported K8s settings currently include:
 All of these K8s settings use the K8s API definitions, so [K8s documentation](https://kubernetes.io/docs/concepts/) can
 be used for reference. All K8s overlay values are also validated in the operator.
 
-#### Customizing the old values.yaml API
+### Customizing the old values.yaml API
 
 The new platform install API above deals with K8s level settings. The remaining values.yaml parameters deal with Istio
 control plane operation rather than installation. For the time being, the operator just passes these through to the Helm
@@ -250,7 +252,7 @@ trafficManagement:
         traceSampling: 0.1 # override from 1.0
 ```
 
-#### Advanced K8s resource overlays
+### Advanced K8s resource overlays
 
 Advanced users may occasionally have the need to customize parameters (like container command line flags) which are not
 exposed through either of the installation or configuration APIs described in this document. For such cases, it's
@@ -287,7 +289,7 @@ the container with the key-value "name: discovery" is selected from the list of 
 parameter with value "30m" is selected to be modified. The advanced overlay capability is described in more detail in
 the spec.
 
-#### Try the demo customization
+### Try the demo customization
 
 This customization contains overlays at all three levels: the new API, values.yaml legacy API and the K8s output overlay.
 
