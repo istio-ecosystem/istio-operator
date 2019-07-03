@@ -106,7 +106,7 @@ func genManifests(args *rootArgs) (name.ManifestMap, error) {
 	}
 
 	if yd := util.YAMLDiff(mergedYAML, util.ToYAMLWithJSONPB(mergedcps)); yd != "" {
-		return nil, fmt.Errorf("Validated YAML differs from input: \n%s", yd)
+		return nil, fmt.Errorf("validated YAML differs from input: \n%s", yd)
 	}
 
 	// TODO: remove version hard coding.

@@ -24,6 +24,9 @@ import (
 	"sync"
 	"time"
 
+	// For kubeclient GCP auth
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+
 	v1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -31,7 +34,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes/scheme"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -112,6 +114,7 @@ func init() {
 
 }
 
+// RenderToDir writes manifests to a local filesystem directory tree.
 func RenderToDir(manifests name.ManifestMap, outputDir string, dryRun, verbose bool) error {
 	logAndPrint("Component dependencies tree: \n%s", installTreeString())
 	logAndPrint("Rendering manifests to output dir %s", outputDir)
@@ -153,6 +156,7 @@ func renderRecursive(manifests name.ManifestMap, installTree componentTree, outp
 	return nil
 }
 
+// ApplyAll applies all given manifests using kubectl client.
 func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbose bool) (*CompositeOutput, error) {
 	logAndPrint("Applying manifests for these components:")
 	for c := range manifests {

@@ -20,9 +20,9 @@ import (
 	"reflect"
 	"strings"
 
-	"istio.io/fortio/log"
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
+	"istio.io/pkg/log"
 )
 
 var (

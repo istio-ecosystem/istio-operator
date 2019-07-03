@@ -124,7 +124,7 @@ func Namespace(featureName FeatureName, componentName ComponentName, controlPlan
 	}
 	defaultNamespace, ok := defaultNamespaceI.(string)
 	if !ok {
-		return "", fmt.Errorf("DefaultNamespacePrefix has bad type %T, expect string", defaultNamespaceI)
+		return "", fmt.Errorf("defaultNamespacePrefix has bad type %T, expect string", defaultNamespaceI)
 	}
 	if defaultNamespace == "" {
 		return "", fmt.Errorf("defaultNamespacePrefix must be set")
