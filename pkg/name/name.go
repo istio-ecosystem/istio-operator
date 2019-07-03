@@ -67,7 +67,7 @@ const (
 // ManifestMap is a map of ComponentName to its manifest string.
 type ManifestMap map[ComponentName]string
 
-// IsComponentEnabled reports whether the given feature and component are enabled in the given spec. The logic is, in
+// IsComponentEnabledInSpec reports whether the given feature and component are enabled in the given spec. The logic is, in
 // order of evaluation:
 // 1. if the feature is not defined, the component is disabled, else
 // 2. if the feature is disabled, the component is disabled, else
@@ -75,40 +75,37 @@ type ManifestMap map[ComponentName]string
 // 4. if the component disabled, it is reported disabled, else
 // 5. the component is enabled.
 // This follows the logic description in IstioControlPlane proto.
-func IsComponentEnabled(featureName FeatureName, componentName ComponentName, installSpec *v1alpha2.IstioControlPlaneSpec) bool {
+func IsComponentEnabledInSpec(featureName FeatureName, componentName ComponentName, installSpec *v1alpha2.IstioControlPlaneSpec) (bool, error) {
 	featureNodeI, found, err := GetFromStructPath(installSpec, string(featureName)+".Enabled")
 	if err != nil {
-		log.Error(err.Error())
-		return false
+		return false, fmt.Errorf("error in IsComponentEnabledInSpec GetFromStructPath featureEnabled for feature=%s, component=%s: %s", featureName, componentName, err)
 	}
 	if !found || featureNodeI == nil {
-		return false
+		return false, nil
 	}
 	featureNode, ok := featureNodeI.(*protobuf.BoolValue)
 	if !ok {
-		log.Errorf("feature %s enabled has bad type %T, expect *protobuf.BoolValue", featureName, featureNodeI)
+		return false, fmt.Errorf("feature %s enabled has bad type %T, expect *protobuf.BoolValue", featureName, featureNodeI)
 	}
 	if featureNode == nil || !featureNode.Value {
-		return false
+		return false, nil
 	}
 
 	componentNodeI, found, err := GetFromStructPath(installSpec, string(featureName)+".Components."+string(componentName)+".Common.Enabled")
 	if err != nil {
-		log.Error(err.Error())
-		return featureNode.Value
+		return false, fmt.Errorf("error in IsComponentEnabledInSpec GetFromStructPath componentEnabled for feature=%s, component=%s: %s", featureName, componentName, err)
 	}
 	if !found || componentNodeI == nil {
-		return featureNode.Value
+		return featureNode.Value, nil
 	}
 	componentNode, ok := componentNodeI.(*protobuf.BoolValue)
 	if !ok {
-		log.Errorf("component %s enabled has bad type %T, expect *protobuf.BoolValue", componentName, componentNodeI)
-		return featureNode.Value
+		return false, fmt.Errorf("component %s enabled has bad type %T, expect *protobuf.BoolValue", componentName, componentNodeI)
 	}
 	if componentNode == nil {
-		return featureNode.Value
+		return featureNode.Value, nil
 	}
-	return componentNode.Value
+	return componentNode.Value, nil
 }
 
 // Namespace returns the namespace for the component. It follows these rules:
@@ -116,38 +113,32 @@ func IsComponentEnabled(featureName FeatureName, componentName ComponentName, in
 // 2. If the feature and component namespaces are unset, return CustomPackagePath.
 // 3. If the feature namespace is set but component name is unset, return the feature namespace.
 // 4. Otherwise return the component namespace.
-func Namespace(featureName FeatureName, componentName ComponentName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) string {
+func Namespace(featureName FeatureName, componentName ComponentName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) (string, error) {
 	defaultNamespaceI, found, err := GetFromStructPath(controlPlaneSpec, "DefaultNamespacePrefix")
 	if !found {
-		log.Error("can't find any default for DefaultNamespacePrefix")
-		return ""
+		return "", fmt.Errorf("can't find any setting for defaultNamespacePrefix for feature=%s, component=%s", featureName, componentName)
 	}
 	if err != nil {
-		log.Error(err.Error())
-		return ""
+		return "", fmt.Errorf("error in Namepsace for feature=%s, component=%s: %s", featureName, componentName, err)
 
 	}
 	defaultNamespace, ok := defaultNamespaceI.(string)
 	if !ok {
-		log.Errorf("CustomPackagePath has bad type %T, expect string", defaultNamespaceI)
-		return ""
+		return "", fmt.Errorf("DefaultNamespacePrefix has bad type %T, expect string", defaultNamespaceI)
 	}
 	if defaultNamespace == "" {
-		log.Error("can't find any default for DefaultNamespacePrefix")
-		return ""
+		return "", fmt.Errorf("defaultNamespacePrefix must be set")
 	}
 
 	featureNamespace := defaultNamespace
 	featureNodeI, found, err := GetFromStructPath(controlPlaneSpec, string(featureName)+"Components.Namespace")
 	if err != nil {
-		log.Error(err.Error())
-		return featureNamespace
+		return "", fmt.Errorf("error in Namepsace GetFromStructPath featureNamespace for feature=%s, component=%s: %s", featureName, componentName, err)
 	}
 	if found && featureNodeI != nil {
 		featureNamespace, ok = featureNodeI.(string)
 		if !ok {
-			log.Errorf("feature %s namespace has bad type %T, expect string", featureName, featureNodeI)
-			return defaultNamespace
+			return "", fmt.Errorf("feature %s namespace has bad type %T, expect string", featureName, featureNodeI)
 		}
 		if featureNamespace == "" {
 			featureNamespace = defaultNamespace
@@ -156,24 +147,22 @@ func Namespace(featureName FeatureName, componentName ComponentName, controlPlan
 
 	componentNodeI, found, err := GetFromStructPath(controlPlaneSpec, string(featureName)+".Components."+string(componentName)+".Common.Namespace")
 	if err != nil {
-		log.Error(err.Error())
-		return featureNamespace
+		return "", fmt.Errorf("error in Namepsace GetFromStructPath componentNamespace for feature=%s, component=%s: %s", featureName, componentName, err)
 	}
 	if !found {
-		return featureNamespace
+		return featureNamespace, nil
 	}
 	if componentNodeI == nil {
-		return featureNamespace
+		return featureNamespace, nil
 	}
 	componentNamespace, ok := componentNodeI.(string)
 	if !ok {
-		log.Errorf("component %s enabled has bad type %T, expect string", componentName, componentNodeI)
-		return featureNamespace
+		return "", fmt.Errorf("component %s enabled has bad type %T, expect string", componentName, componentNodeI)
 	}
 	if componentNamespace == "" {
-		return featureNamespace
+		return featureNamespace, nil
 	}
-	return componentNamespace
+	return componentNamespace, nil
 }
 
 // GetFromStructPath returns the value at path from the given node, or false if the path does not exist.
