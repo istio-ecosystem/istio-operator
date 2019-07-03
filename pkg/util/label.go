@@ -54,11 +54,12 @@ func DeleteLabel(resource runtime.Object, label string) {
 }
 
 // GetLabel is a helper function which returns the value of the specified label on the specified object.
-// returns "" and false if the label was not found on the object.
+// returns "", false if the label was not found on the object.
 func GetLabel(resource runtime.Object, label string) (string, bool) {
 	if HasLabel(resource, label) {
 		labels, _ := accessor.Labels(resource)
-		return labels[label]
+		value, ok := labels[label]
+		return value, ok
 	}
 	return "", false
 }
