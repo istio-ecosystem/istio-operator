@@ -16,6 +16,7 @@ package name
 
 import (
 	"fmt"
+	"path/filepath"
 	"reflect"
 
 	protobuf "github.com/gogo/protobuf/types"
@@ -31,6 +32,12 @@ var (
 
 // FeatureName is a feature name string, typed to constrain allowed values.
 type FeatureName string
+
+const (
+	// OperatorAPINamespace is the API namespace for operator config.
+	// TODO: move this to a base definitions file when one is created.
+	OperatorAPINamespace = "operator.istio.io"
+)
 
 const (
 	// IstioFeature names, must be the same as feature names defined in the IstioControlPlane proto, since these are
@@ -75,8 +82,10 @@ type ManifestMap map[ComponentName]string
 // 4. if the component disabled, it is reported disabled, else
 // 5. the component is enabled.
 // This follows the logic description in IstioControlPlane proto.
-func IsComponentEnabledInSpec(featureName FeatureName, componentName ComponentName, installSpec *v1alpha2.IstioControlPlaneSpec) (bool, error) {
-	featureNodeI, found, err := GetFromStructPath(installSpec, string(featureName)+".Enabled")
+// IsComponentEnabledInSpec assumes that controlPlaneSpec has been validated.
+// TODO: remove extra validations when comfort level is high enough.
+func IsComponentEnabledInSpec(featureName FeatureName, componentName ComponentName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) (bool, error) {
+	featureNodeI, found, err := GetFromStructPath(controlPlaneSpec, string(featureName)+".Enabled")
 	if err != nil {
 		return false, fmt.Errorf("error in IsComponentEnabledInSpec GetFromStructPath featureEnabled for feature=%s, component=%s: %s", featureName, componentName, err)
 	}
@@ -91,7 +100,7 @@ func IsComponentEnabledInSpec(featureName FeatureName, componentName ComponentNa
 		return false, nil
 	}
 
-	componentNodeI, found, err := GetFromStructPath(installSpec, string(featureName)+".Components."+string(componentName)+".Common.Enabled")
+	componentNodeI, found, err := GetFromStructPath(controlPlaneSpec, string(featureName)+".Components."+string(componentName)+".Common.Enabled")
 	if err != nil {
 		return false, fmt.Errorf("error in IsComponentEnabledInSpec GetFromStructPath componentEnabled for feature=%s, component=%s: %s", featureName, componentName, err)
 	}
@@ -113,6 +122,8 @@ func IsComponentEnabledInSpec(featureName FeatureName, componentName ComponentNa
 // 2. If the feature and component namespaces are unset, return CustomPackagePath.
 // 3. If the feature namespace is set but component name is unset, return the feature namespace.
 // 4. Otherwise return the component namespace.
+// Namespace assumes that controlPlaneSpec has been validated.
+// TODO: remove extra validations when comfort level is high enough.
 func Namespace(featureName FeatureName, componentName ComponentName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) (string, error) {
 	defaultNamespaceI, found, err := GetFromStructPath(controlPlaneSpec, "DefaultNamespacePrefix")
 	if !found {
@@ -252,6 +263,11 @@ func Set(val, out interface{}) error {
 	}
 	reflect.ValueOf(out).Set(reflect.ValueOf(val))
 	return nil
+}
+
+// ToOperatorNamespace returns s with the Istio operator namespace prefixed.
+func ToOperatorNamespace(s string) string {
+	return filepath.Join(OperatorAPINamespace, s)
 }
 
 func dbgPrint(v ...interface{}) {

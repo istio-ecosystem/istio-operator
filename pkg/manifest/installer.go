@@ -49,14 +49,17 @@ const (
 	// cRDPollTimeout is the maximum wait time for all CRDs to be created.
 	cRDPollTimeout = 60 * time.Second
 
-	// operatorLabelStr indicates Istio operator is managing this resource.
-	operatorLabelStr = "istio-operator-managed"
 	// operatorReconcileStr indicates that the operator will reconcile the resource.
 	operatorReconcileStr = "Reconcile"
+)
+
+var (
+	// operatorLabelStr indicates Istio operator is managing this resource.
+	operatorLabelStr = name.ToOperatorNamespace("istio-operator-managed")
 	// istioComponentLabelStr indicates which Istio component a resource belongs to.
-	istioComponentLabelStr = "istio-component"
+	istioComponentLabelStr = name.ToOperatorNamespace("istio-component")
 	// istioVersionLabelStr indicates which Istio version
-	istioVersionLabelStr = "istio-version"
+	istioVersionLabelStr = name.ToOperatorNamespace("istio-version")
 )
 
 // CompositeOutput is used to capture errors and stdout/stderr outputs for a command, per component.

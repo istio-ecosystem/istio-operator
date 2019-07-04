@@ -59,7 +59,7 @@ func installManifests(args *rootArgs) {
 	for cn := range manifests {
 
 		cs := fmt.Sprintf("CompositeOutput for component %s:", cn)
-		logAndPrintf(args, "\n%s\n%s", cs, underline(cs, "="))
+		logAndPrintf(args, "\n%s\n%s", cs, strings.Repeat("=", len(cs)))
 		if out.Err[cn] != nil {
 			logAndPrintf(args, "Errors: %s\n", out.Err[cn])
 		}
@@ -70,9 +70,4 @@ func installManifests(args *rootArgs) {
 			logAndPrintf(args, "Command output:\n%s\n", out.Stdout[cn])
 		}
 	}
-}
-
-// underline generates an underline with the underlineChar of length s.
-func underline(s, underlineChar string) string {
-	return strings.Repeat(underlineChar, len(s))
 }
