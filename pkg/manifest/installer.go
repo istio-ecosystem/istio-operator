@@ -55,11 +55,11 @@ const (
 
 var (
 	// operatorLabelStr indicates Istio operator is managing this resource.
-	operatorLabelStr = name.ToOperatorNamespace("istio-operator-managed")
+	operatorLabelStr = name.OperatorAPINamespace + "/managed"
 	// istioComponentLabelStr indicates which Istio component a resource belongs to.
-	istioComponentLabelStr = name.ToOperatorNamespace("istio-component")
-	// istioVersionLabelStr indicates which Istio version
-	istioVersionLabelStr = name.ToOperatorNamespace("istio-version")
+	istioComponentLabelStr = name.OperatorAPINamespace + "/component"
+	// istioVersionLabelStr indicates the Istio version of the installation.
+	istioVersionLabelStr = name.OperatorAPINamespace + "/version"
 )
 
 // CompositeOutput is used to capture errors and stdout/stderr outputs for a command, per component.

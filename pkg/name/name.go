@@ -16,7 +16,6 @@ package name
 
 import (
 	"fmt"
-	"path/filepath"
 	"reflect"
 
 	protobuf "github.com/gogo/protobuf/types"
@@ -263,11 +262,6 @@ func Set(val, out interface{}) error {
 	}
 	reflect.ValueOf(out).Set(reflect.ValueOf(val))
 	return nil
-}
-
-// ToOperatorNamespace returns s with the Istio operator namespace prefixed.
-func ToOperatorNamespace(s string) string {
-	return filepath.Join(OperatorAPINamespace, s)
 }
 
 func dbgPrint(v ...interface{}) {
