@@ -119,7 +119,7 @@ func renderChart(namespace, baseValues, overlayValues string, chrt *chart.Chart)
 
 	var sb strings.Builder
 	for _, f := range files {
-		_, err := sb.WriteString(f)
+		_, err := sb.WriteString(f + YAMLSeparator)
 		if err != nil {
 			return "", err
 		}
