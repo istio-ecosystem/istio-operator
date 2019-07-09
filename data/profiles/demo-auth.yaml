@@ -38,12 +38,13 @@ trafficManagement:
             timeoutSeconds: 5
           resources:
             requests:
-              cpu: 500m
-              memory: 2048Mi
+              cpu: 10m
+              memory: 100Mi
 
         values:
           image: pilot
-          traceSampling: 1.0
+          autoscaleEnabled: fase
+          traceSampling: 100.0
           configNamespace: istio-config
           keepaliveMaxServerConnectionAge: 30m
           configMap: true
@@ -64,12 +65,10 @@ trafficManagement:
           clusterDomain: "cluster.local"
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 2000m
-              memory: 128Mi
+              cpu: 10m
+              memory: 40Mi
           concurrency: 2
+          accessLogFile: "/dev/stdout"
           accessLogEncoding: TEXT
           logLevel: warning
           componentLogLevel: "misc:error"
@@ -105,11 +104,16 @@ policy:
                 resource:
                   name: cpu
                   targetAverageUtilization: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 100Mi
           env:
             - name: GODEBUG
               value: "gctrace=1"
         values:
           image: mixer
+          autoscaleEnabled: false
           adapters:
             kubernetesenv:
               enabled: true
@@ -142,20 +146,18 @@ telemetry:
           replicaCount: 1
           resources:
             requests:
-              cpu: 1000m
-              memory: 1G
-            limits:
-              cpu: 4800m
-              memory: 4G
+              cpu: 50m
+              memory: 100Mi
         values:
           image: mixer
+          autoscaleEnabled: false
           sessionAffinityEnabled: false
           loadshedding:
             mode: enforce
             latencyThreshold: 100ms
           adapters:
             stdio:
-              enabled: false
+              enabled: true
               outputAsJson: false
             prometheus:
               enabled: true
@@ -169,6 +171,8 @@ telemetry:
 # Security feature
 security:
   enabled: true
+  controlPlaneMtls: true
+  dataPlaneMtlsStrict: true
   components:
     namespace: istio-security
 
@@ -240,7 +244,6 @@ gateways:
     ingressGateway:
     - gateway:
         common:
-          enabled: true
           namespace: istio-ingress
           k8s:
             replicaCount: 1
@@ -256,8 +259,12 @@ gateways:
                 resource:
                   name: cpu
                   targetAverageUtilization: 80
+            resources:
+              requests:
+                cpu: 10m
+                memory: 40Mi
           values:
-            autoscaleEnabled: true
+            autoscaleEnabled: false
             ports:
               ## You can add custom gateway ports
               # Note that AWS ELB will by default perform health checks on the first port
@@ -327,7 +334,6 @@ gateways:
     egressGateway:
     - gateway:
         common:
-          enabled: false
           namespace: istio-egress
           k8s:
             replicaCount: 1
@@ -343,8 +349,12 @@ gateways:
                   resource:
                     name: cpu
                     targetAverageUtilization: 80
+            resources:
+              requests:
+                cpu: 10m
+                memory: 40Mi
           values:
-            autoscaleEnabled: true
+            autoscaleEnabled: false
             ports:
             - port: 80
               name: http2
@@ -374,7 +384,7 @@ values:
     image: proxy_init
   imagePullPolicy: Always
   controlPlaneSecurityEnabled: true
-  disablePolicyChecks: true
+  disablePolicyChecks: false
   policyCheckFailOpen: false
   enableTracing: true
   mtls:
