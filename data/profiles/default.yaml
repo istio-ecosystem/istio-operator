@@ -233,54 +233,6 @@ autoInjection:
           rewriteAppHTTPProbe: false
           selfSigned: false
 
-# Istio Gateway feature
-gateways:
-  enabled: true
-  components:
-    ingressGateway:
-    - gateway:
-        common:
-          namespace: istio-ingress
-          k8s:
-            replicaCount: 1
-            hpaSpec:
-              maxReplicas: 5
-              minReplicas: 1
-              scaleTargetRef:
-                apiVersion: apps/v1
-                kind: Deployment
-                name: istio-ingressgateway
-              metrics:
-              - type: Resource
-                resource:
-                  name: cpu
-                  targetAverageUtilization: 80
-          values:
-            domain: ""
-            debug: info
-            telemetry_domain_name: ""
-    egressGateway:
-    - gateway:
-        common:
-          namespace: istio-egress
-          k8s:
-            replicaCount: 1
-            hpaSpec:
-              maxReplicas: 5
-              minReplicas: 1
-              scaleTargetRef:
-                apiVersion: apps/v1
-                kind: Deployment
-                name: istio-egressgateway
-              metrics:
-                - type: Resource
-                  resource:
-                    name: cpu
-                    targetAverageUtilization: 80
-          values:
-            drainDuration: 45s
-            connectTimeout: 10s
-
 # Global values passed through to helm global.yaml.
 values:
   logging:
