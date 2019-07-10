@@ -14,18 +14,6 @@ trafficManagement:
           env:
           - name: GODEBUG
             value: "gctrace=1"
-          hpaSpec:
-            maxReplicas: 5
-            minReplicas: 1
-            scaleTargetRef:
-              apiVersion: apps/v1
-              kind: Deployment
-              name: istio-pilot
-            metrics:
-              - type: Resource
-                resource:
-                  name: cpu
-                  targetAverageUtilization: 80
           replicaCount: 1
           readinessProbe:
             handler: {}
@@ -43,7 +31,7 @@ trafficManagement:
 
         values:
           image: pilot
-          autoscaleEnabled: fase
+          autoscaleEnabled: false
           traceSampling: 100.0
           configNamespace: istio-config
           keepaliveMaxServerConnectionAge: 30m
@@ -92,18 +80,6 @@ policy:
       common:
         k8s:
           replicaCount: 1
-          hpaSpec:
-            maxReplicas: 5
-            minReplicas: 1
-            scaleTargetRef:
-              apiVersion: apps/v1
-              kind: Deployment
-              name: istio-pilot
-            metrics:
-              - type: Resource
-                resource:
-                  name: cpu
-                  targetAverageUtilization: 80
           resources:
             requests:
               cpu: 10m
@@ -131,18 +107,6 @@ telemetry:
             value: "gctrace=1"
           - name: GOMAXPROCS
             value: "6"
-          hpaSpec:
-            maxReplicas: 5
-            minReplicas: 1
-            scaleTargetRef:
-              apiVersion: apps/v1
-              kind: Deployment
-              name: istio-pilot
-            metrics:
-              - type: Resource
-                resource:
-                  name: cpu
-                  targetAverageUtilization: 80
           replicaCount: 1
           resources:
             requests:
@@ -247,29 +211,12 @@ gateways:
           namespace: istio-ingress
           k8s:
             replicaCount: 1
-            hpaSpec:
-              maxReplicas: 5
-              minReplicas: 1
-              scaleTargetRef:
-                apiVersion: apps/v1
-                kind: Deployment
-                name: istio-ingressgateway
-              metrics:
-              - type: Resource
-                resource:
-                  name: cpu
-                  targetAverageUtilization: 80
             resources:
               requests:
                 cpu: 10m
                 memory: 40Mi
-            env:
-              # A gateway with this mode ensures that pilot generates an additional
-              # set of clusters for internal services but without Istio mTLS, to
-              # enable cross cluster routing.
-              ISTIO_META_ROUTER_MODE: "sni-dnat"
           values:
-            autoscaleEnabled: true
+            autoscaleEnabled: false
             # Debug level for envoy. Can be set to 'debug'
             debug: info
             domain: ""
@@ -279,6 +226,11 @@ gateways:
               suffix: global
             # Domain name for telemetry addons
             telemetry_domain_name: ""
+            env:
+              # A gateway with this mode ensures that pilot generates an additional
+              # set of clusters for internal services but without Istio mTLS, to
+              # enable cross cluster routing.
+              ISTIO_META_ROUTER_MODE: "sni-dnat"
             ports:
             ## You can add custom gateway ports in user values overrides, but it must include those ports since helm replaces.
             # Note that AWS ELB will by default perform health checks on the first port
@@ -365,37 +317,12 @@ gateways:
           namespace: istio-egress
           k8s:
             replicaCount: 1
-            hpaSpec:
-              maxReplicas: 5
-              minReplicas: 1
-              scaleTargetRef:
-                apiVersion: apps/v1
-                kind: Deployment
-                name: istio-egressgateway
-              metrics:
-                - type: Resource
-                  resource:
-                    name: cpu
-                    targetAverageUtilization: 80
             resources:
               requests:
                 cpu: 10m
                 memory: 40Mi
-            env:
-              # Set this to "external" if and only if you want the egress gateway to
-              # act as a transparent SNI gateway that routes mTLS/TLS traffic to
-              # external services defined using service entries, where the service
-              # entry has resolution set to DNS, has one or more endpoints with
-              # network field set to "external". By default its set to "" so that
-              # the egress gateway sees the same set of endpoints as the sidecars
-              # preserving backward compatibility
-              # ISTIO_META_REQUESTED_NETWORK_VIEW: ""
-              # A gateway with this mode ensures that pilot generates an additional
-              # set of clusters for internal services but without Istio mTLS, to
-              # enable cross cluster routing.
-              ISTIO_META_ROUTER_MODE: "sni-dnat"
           values:
-            autoscaleEnabled: true
+            autoscaleEnabled: false
             # Enable cross-cluster access using SNI matching.
             # Make sure you set suffix if deploying multiple egress gateways.
             zvpn:
@@ -408,6 +335,18 @@ gateways:
               enabled: true
             drainDuration: 45s
             connectTimeout: 10s
+            env:
+              # Set this to "external" if and only if you want the egress gateway to
+              # act as a transparent SNI gateway that routes mTLS/TLS traffic to
+              # external services defined using service entries, where the service
+              # entry has resolution set to DNS, has one or more endpoints with
+              # network field set to "external". By default its set to "" so that
+              # the egress gateway sees the same set of endpoints as the sidecars
+              # preserving backward compatibility
+              # ISTIO_META_REQUESTED_NETWORK_VIEW: ""
+              # A gateway with this mode ensures that pilot generates an additional
+              # set of clusters for internal services but without Istio mTLS, to
+              ISTIO_META_ROUTER_MODE: "sni-dnat"
             ports:
             - port: 80
               name: http2
