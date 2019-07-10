@@ -294,11 +294,29 @@ func ToIntValue(val interface{}) (int, bool) {
 		return 0, false
 	}
 	v := reflect.ValueOf(val)
-	switch v.Kind() {
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+	switch {
+	case IsIntKind(v.Kind()):
 		return int(v.Int()), true
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+	case IsUintKind(v.Kind()):
 		return int(v.Uint()), true
 	}
 	return 0, false
+}
+
+// IsIntKind reports whether k is an integer kind of any size.
+func IsIntKind(k reflect.Kind) bool {
+	switch k {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return true
+	}
+	return false
+}
+
+// IsUintKind reports whether k is an unsigned integer kind of any size.
+func IsUintKind(k reflect.Kind) bool {
+	switch k {
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return true
+	}
+	return false
 }

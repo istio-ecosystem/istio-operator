@@ -253,7 +253,6 @@ func TestIsTypeFuncs(t *testing.T) {
 			}
 		}
 	}
-
 }
 
 type interfaceContainer struct {
@@ -321,4 +320,58 @@ func TestInsertIntoMap(t *testing.T) {
 	if got, want := errToString(InsertIntoMap(&badParent, key, value)), wantErr; got != want {
 		t.Fatalf("got error: %s, want error: %s", got, want)
 	}
+}
+
+var (
+	allIntTypes     = []interface{}{int(-42), int8(-43), int16(-44), int32(-45), int64(-46)}
+	allUintTypes    = []interface{}{uint(42), uint8(43), uint16(44), uint32(45), uint64(46)}
+	allIntegerTypes = append(allIntTypes, allUintTypes...)
+	nonIntTypes     = []interface{}{nil, "", []int{}, map[string]bool{}}
+	allTypes        = append(allIntegerTypes, nonIntTypes...)
+)
+
+func TestIsInteger(t *testing.T) {
+
+	tests := []struct {
+		desc     string
+		function func(v reflect.Kind) bool
+		want     []interface{}
+	}{
+		{
+			desc:     "ints",
+			function: IsIntKind,
+			want:     allIntTypes,
+		},
+		{
+			desc:     "uints",
+			function: IsUintKind,
+			want:     allUintTypes,
+		},
+	}
+
+	for _, tt := range tests {
+		var got []interface{}
+		for _, v := range allTypes {
+			if tt.function(reflect.ValueOf(v).Kind()) {
+				got = append(got, v)
+			}
+		}
+		if !reflect.DeepEqual(got, tt.want) {
+			t.Errorf("%s: got %v, want %v", tt.desc, got, tt.want)
+		}
+	}
+}
+
+func TestToIntValue(t *testing.T) {
+	var got []int
+	for _, v := range allTypes {
+		if i, ok := ToIntValue(v); ok {
+			got = append(got, i)
+		}
+	}
+	want := []int{-42, -43, -44, -45, -46, 42, 43, 44, 45, 46}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+
 }
