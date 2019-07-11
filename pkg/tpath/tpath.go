@@ -37,15 +37,16 @@ func (nc *PathContext) String() string {
 }
 
 // GetPathContext returns the PathContext for the Node which has the given path from root.
-// If createMissing is true, it creates any missing map (but NOT list) path entries in root.
-// It
+// It returns false and and no error if the given path is not found, or an error code in other error situations, like
+// a malformed path.
 // It also creates a tree of PathContexts during the traversal so that Parent nodes can be updated if required. This is
 // required when modifying, say an entry in a map, where the parent map itself must be rewritten.
-func GetPathContext(root interface{}, path util.Path, createMissing bool) (*PathContext, bool, error) {
-	return getPathContext(&PathContext{Node: root}, path, path, createMissing)
+func GetPathContext(root interface{}, path util.Path) (*PathContext, bool, error) {
+	return getPathContext(&PathContext{Node: root}, path, path, false)
 }
 
 // getPathContext is the internal implementation of GetPathContext.
+// If createMissing is true, it creates any missing map (but NOT list) path entries in root.
 func getPathContext(nc *PathContext, fullPath, remainPath util.Path, createMissing bool) (*PathContext, bool, error) {
 	dbgPrint("getPathContext remainPath=%s, Node=%s", remainPath, pretty.Sprint(nc.Node))
 	if len(remainPath) == 0 {
@@ -147,9 +148,18 @@ func getPathContext(nc *PathContext, fullPath, remainPath util.Path, createMissi
 	return nil, false, fmt.Errorf("leaf type %T in non-leaf Node %s", nc.Node, remainPath)
 }
 
-// WriteNode writes the given value to the Node in the given PathContext.
-func WriteNode(nc *PathContext, value interface{}) error {
-	dbgPrint("WriteNode PathContext=%s, value=%v", nc, value)
+// WriteNode writes value to the tree in root at the given path, creating any required missing internal nodes in path.
+func WriteNode(root interface{}, path util.Path, value interface{}) error {
+	pc, _, err := getPathContext(&PathContext{Node: root}, path, path, true)
+	if err != nil {
+		return err
+	}
+	return WritePathContext(pc, value)
+}
+
+// WritePathContext writes the given value to the Node in the given PathContext.
+func WritePathContext(nc *PathContext, value interface{}) error {
+	dbgPrint("WritePathContext PathContext=%s, value=%v", nc, value)
 
 	switch {
 	case value == nil:

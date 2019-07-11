@@ -8,7 +8,7 @@ import (
 	"istio.io/operator/pkg/util"
 )
 
-func TestWriteNodeOps(t *testing.T) {
+func TestWritePathContext(t *testing.T) {
 	rootYAML := `
 a:
   b:
@@ -142,7 +142,7 @@ a:
 			if err := yaml.Unmarshal([]byte(rootYAML), &root); err != nil {
 				t.Fatal(err)
 			}
-			pc, gotFound, gotErr := GetPathContext(root, util.PathFromString(tt.path), false)
+			pc, gotFound, gotErr := GetPathContext(root, util.PathFromString(tt.path))
 			if gotErr, wantErr := errToString(gotErr), tt.wantErr; gotErr != wantErr {
 				t.Fatalf("YAMLManifestPatch(%s): gotErr:%s, wantErr:%s", tt.desc, gotErr, wantErr)
 			}
@@ -153,7 +153,7 @@ a:
 				return
 			}
 
-			err := WriteNode(pc, tt.value)
+			err := WritePathContext(pc, tt.value)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -167,7 +167,7 @@ a:
 	}
 }
 
-func TestWriteNodeSet(t *testing.T) {
+func TestWriteNode(t *testing.T) {
 	testTreeYAML := `
 a:
   b:
@@ -185,19 +185,17 @@ a:
             i1: va11
 `
 	tests := []struct {
-		desc          string
-		baseYAML      string
-		path          string
-		value         string
-		createMissing bool
-		want          string
-		wantErr       string
+		desc     string
+		baseYAML string
+		path     string
+		value    string
+		want     string
+		wantErr  string
 	}{
 		{
-			desc:          "insert empty",
-			path:          "a.b.c",
-			value:         "val1",
-			createMissing: true,
+			desc:  "insert empty",
+			path:  "a.b.c",
+			value: "val1",
 			want: `
 a:
   b:
@@ -227,11 +225,10 @@ a:
 `,
 		},
 		{
-			desc:          "partial create",
-			baseYAML:      testTreeYAML,
-			path:          "a.b.d",
-			value:         "val3",
-			createMissing: true,
+			desc:     "partial create",
+			baseYAML: testTreeYAML,
+			path:     "a.b.d",
+			value:    "val3",
 			want: `
 a:
   b:
@@ -281,7 +278,7 @@ a:
 				}
 			}
 			p := util.PathFromString(tt.path)
-			err := setTree(root, p, tt.value, tt.createMissing)
+			err := WriteNode(root, p, tt.value)
 			if gotErr, wantErr := errToString(err), tt.wantErr; gotErr != wantErr {
 				t.Errorf("%s: gotErr:%s, wantErr:%s", tt.desc, gotErr, wantErr)
 				return
@@ -291,14 +288,6 @@ a:
 			}
 		})
 	}
-}
-
-func setTree(root interface{}, path util.Path, value interface{}, createMissing bool) error {
-	pc, _, err := GetPathContext(root, path, createMissing)
-	if err != nil {
-		return err
-	}
-	return WriteNode(pc, value)
 }
 
 // errToString returns the string representation of err and the empty string if

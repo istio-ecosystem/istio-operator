@@ -288,7 +288,7 @@ func overlayK8s(baseYAML, overlayYAML []byte, path util.Path) ([]byte, error) {
 			return nil, fmt.Errorf("overlayK8s: %s for overlayYAML:\n%s", err, overlayYAML)
 		}
 	}
-	if err := setTree(base, path, overlay); err != nil {
+	if err := tpath.WriteNode(base, path, overlay); err != nil {
 		return nil, err
 	}
 	return yaml.Marshal(base)
@@ -428,7 +428,7 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp
 		if err != nil {
 			return err
 		}
-		if err := setTree(root, util.PathFromString(c.ToHelmValuesTreeRoot+"."+HelmValuesEnabledSubpath), e); err != nil {
+		if err := tpath.WriteNode(root, util.PathFromString(c.ToHelmValuesTreeRoot+"."+HelmValuesEnabledSubpath), e); err != nil {
 			return err
 		}
 
@@ -436,7 +436,7 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp
 		if err != nil {
 			return err
 		}
-		if err := setTree(root, util.PathFromString(c.ToHelmValuesTreeRoot+"."+HelmValuesNamespaceSubpath), ns); err != nil {
+		if err := tpath.WriteNode(root, util.PathFromString(c.ToHelmValuesTreeRoot+"."+HelmValuesNamespaceSubpath), ns); err != nil {
 			return err
 		}
 	}
@@ -498,15 +498,6 @@ func getValuesPathMapping(mappings map[string]*Translation, path util.Path) (str
 	out := m.outPath + "." + path[len(p):].String()
 	dbgPrint("translating %s to %s", path, out)
 	return out, m
-}
-
-// setTree sets the YAML path in the given Tree to the given value, creating any required intermediate nodes.
-func setTree(root interface{}, path util.Path, value interface{}) error {
-	pc, _, err := tpath.GetPathContext(root, path, true)
-	if err != nil {
-		return err
-	}
-	return tpath.WriteNode(pc, value)
 }
 
 // featureComponentString renders a template of the form <path>{{.FeatureName}}<path>{{.ComponentName}}<path> with
@@ -576,7 +567,7 @@ func defaultTranslationFunc(m *Translation, root map[string]interface{}, valuesP
 		path = append(path, firstCharToLower(p))
 	}
 
-	return setTree(root, path, value)
+	return tpath.WriteNode(root, path, value)
 }
 
 func dbgPrint(v ...interface{}) {

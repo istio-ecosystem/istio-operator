@@ -177,12 +177,12 @@ func applyPatches(base *util.K8sObject, patches []*v1alpha2.K8SObjectOverlay_Pat
 	}
 	for _, p := range patches {
 		dbgPrint("applying path=%s, value=%s\n", p.Path, p.Value)
-		inc, _, err := tpath.GetPathContext(bo, util.PathFromString(p.Path), false)
+		inc, _, err := tpath.GetPathContext(bo, util.PathFromString(p.Path))
 		if err != nil {
 			errs = util.AppendErr(errs, err)
 			continue
 		}
-		errs = util.AppendErr(errs, tpath.WriteNode(inc, p.Value))
+		errs = util.AppendErr(errs, tpath.WritePathContext(inc, p.Value))
 	}
 	oy, err := yaml.Marshal(bo)
 	if err != nil {
