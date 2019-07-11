@@ -44,6 +44,7 @@ func validateValues(validations map[string]ValidatorFunc, node interface{}, path
 	nn, ok := node.(map[string]interface{})
 	if !ok {
 		// Leaf, nothing more to recurse.
+		return errs
 	}
 	for k, v := range nn {
 		errs = util.AppendErrs(errs, validateValues(validations, v, append(path, k)))
