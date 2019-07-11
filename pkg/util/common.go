@@ -25,6 +25,11 @@ const (
 	LocalFilePrefix = "file:///"
 )
 
+var (
+	// DebugPackage controls verbose debugging in this package. Used for offline debugging.
+	DebugPackage = false
+)
+
 // Tree is a tree.
 type Tree map[string]interface{}
 

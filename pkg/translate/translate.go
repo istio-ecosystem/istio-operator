@@ -22,10 +22,11 @@ import (
 	"reflect"
 	"strings"
 
+	"istio.io/operator/pkg/tpath"
+
 	"github.com/ghodss/yaml"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/version"
@@ -205,7 +206,7 @@ var (
 
 // OverlayK8sSettings overlays k8s settings from icp over the manifest objects, based on t's translation mappings.
 func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPlaneSpec, featureName name.FeatureName, componentName name.ComponentName) (string, error) {
-	objects, err := manifest.ParseK8sObjectsFromYAMLManifest(yml)
+	objects, err := util.ParseK8sObjectsFromYAMLManifest(yml)
 	if err != nil {
 		return "", err
 	}
@@ -263,7 +264,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 		}
 		dbgPrint("baseYAML:\n%s\n, overlayYAML:\n%s\n, mergedYAML:\n%s\n", string(baseYAML), string(overlayYAML), string(mergedYAML))
 
-		mergedObj, err := manifest.ParseYAMLToK8sObject(mergedYAML)
+		mergedObj, err := util.ParseYAMLToK8sObject(mergedYAML)
 		if err != nil {
 			return "", err
 		}
@@ -497,6 +498,15 @@ func getValuesPathMapping(mappings map[string]*Translation, path util.Path) (str
 	out := m.outPath + "." + path[len(p):].String()
 	dbgPrint("translating %s to %s", path, out)
 	return out, m
+}
+
+// setTree sets the YAML path in the given Tree to the given value, creating any required intermediate nodes.
+func setTree(root interface{}, path util.Path, value interface{}) error {
+	pc, _, err := tpath.GetPathContext(root, path, true)
+	if err != nil {
+		return err
+	}
+	return tpath.WriteNode(pc, value)
 }
 
 // featureComponentString renders a template of the form <path>{{.FeatureName}}<path>{{.ComponentName}}<path> with
