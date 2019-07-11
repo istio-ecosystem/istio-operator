@@ -6,9 +6,9 @@ import (
 
 	"istio.io/pkg/log"
 
-	"github.com/godebug/diff"
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/gogo/protobuf/proto"
+	"github.com/kylelemons/godebug/diff"
 	"sigs.k8s.io/yaml"
 )
 

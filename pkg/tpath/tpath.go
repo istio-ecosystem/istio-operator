@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"regexp"
 
-	"github.com/godebug/pretty"
+	"github.com/kylelemons/godebug/pretty"
 
 	"istio.io/operator/pkg/util"
 	"istio.io/pkg/log"
