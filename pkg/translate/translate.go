@@ -232,7 +232,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 	// om is a map of kind:name string to Object ptr.
 	om := objects.ToNameKindMap()
 	for inPath, v := range t.KubernetesMapping {
-		inPath = featureComponentPathString(inPath, t.ToFeature[componentName], componentName)
+		inPath = renderFeatureComponentPathTemplate(inPath, t.ToFeature[componentName], componentName)
 		log.Infof("Checking for path %s in IstioControlPlaneSpec", inPath)
 		m, found, err := name.GetFromStructPath(icp, inPath)
 		if err != nil {
@@ -256,7 +256,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 		if err != nil {
 			return "", err
 		}
-		outPath := t.resourceContainerPathString(v.outPath, componentName)
+		outPath := t.renderResourceComponentPathTemplate(v.outPath, componentName)
 		log.Infof("path has value in IstioControlPlaneSpec, mapping to output path %s", outPath)
 		path := util.PathFromString(outPath)
 		pe := path[0]
@@ -351,12 +351,7 @@ func (t *Translator) ValuesOverlaysToHelmValues(in map[string]interface{}, cname
 	cur := out
 	for len(pv) > 1 {
 		cur[pv[0]] = make(map[string]interface{})
-		var ok bool
-		cur, ok = cur[pv[0]].(map[string]interface{})
-		if !ok {
-			log.Errorf("Unexpected path type %T at element %s in path %s", cur[pv[0]], pv, toPath)
-			return out
-		}
+		cur = cur[pv[0]].(map[string]interface{})
 		pv = pv[1:]
 	}
 	cur[pv[0]] = in
@@ -498,9 +493,9 @@ func getValuesPathMapping(mappings map[string]*Translation, path util.Path) (str
 	return out, m
 }
 
-// featureComponentPathString renders a template of the form <path>{{.FeatureName}}<path>{{.ComponentName}}<path> with
+// renderFeatureComponentPathTemplate renders a template of the form <path>{{.FeatureName}}<path>{{.ComponentName}}<path> with
 // the supplied parameters.
-func featureComponentPathString(tmpl string, featureName name.FeatureName, componentName name.ComponentName) string {
+func renderFeatureComponentPathTemplate(tmpl string, featureName name.FeatureName, componentName name.ComponentName) string {
 	type Temp struct {
 		FeatureName   name.FeatureName
 		ComponentName name.ComponentName
@@ -523,9 +518,9 @@ func featureComponentPathString(tmpl string, featureName name.FeatureName, compo
 	return buf.String()
 }
 
-// resourceContainerPathString renders a template of the form <path>{{.ResourceName}}<path>{{.ContainerName}}<path> with
+// renderResourceComponentPathTemplate renders a template of the form <path>{{.ResourceName}}<path>{{.ContainerName}}<path> with
 // the supplied parameters.
-func (t *Translator) resourceContainerPathString(tmpl string, componentName name.ComponentName) string {
+func (t *Translator) renderResourceComponentPathTemplate(tmpl string, componentName name.ComponentName) string {
 	ts := struct {
 		ResourceName  string
 		ContainerName string
