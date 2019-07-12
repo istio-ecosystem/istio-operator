@@ -16,8 +16,6 @@ package util
 
 import (
 	"strings"
-
-	"gopkg.in/yaml.v2"
 )
 
 const (

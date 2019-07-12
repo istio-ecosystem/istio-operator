@@ -303,6 +303,42 @@ func isInListOfInterface(lv []interface{}, v interface{}) bool {
 	return false
 }
 
+func TestDeleteFromSlicePtr(t *testing.T) {
+	parentSlice := []int{42, 43, 44, 45}
+	var parentSliceI interface{} = parentSlice
+	if err := DeleteFromSlicePtr(&parentSliceI, 1); err != nil {
+		t.Fatalf("got error: %s, want error: nil", err)
+	}
+	wantSlice := []int{42, 44, 45}
+	if got, want := parentSliceI, wantSlice; !reflect.DeepEqual(got, want) {
+		t.Errorf("got:\n%v\nwant:\n%v\n", got, want)
+	}
+
+	badParent := struct{}{}
+	wantErr := `deleteFromSlicePtr parent type is *struct {}, must be *[]interface{}`
+	if got, want := errToString(DeleteFromSlicePtr(&badParent, 1)), wantErr; got != want {
+		t.Fatalf("got error: %s, want error: %s", got, want)
+	}
+}
+
+func TestUpdateSlicePtr(t *testing.T) {
+	parentSlice := []int{42, 43, 44, 45}
+	var parentSliceI interface{} = parentSlice
+	if err := UpdateSlicePtr(&parentSliceI, 1, 42); err != nil {
+		t.Fatalf("got error: %s, want error: nil", err)
+	}
+	wantSlice := []int{42, 42, 44, 45}
+	if got, want := parentSliceI, wantSlice; !reflect.DeepEqual(got, want) {
+		t.Errorf("got:\n%v\nwant:\n%v\n", got, want)
+	}
+
+	badParent := struct{}{}
+	wantErr := `updateSlicePtr parent type is *struct {}, must be *[]interface{}`
+	if got, want := errToString(UpdateSlicePtr(&badParent, 1, 42)), wantErr; got != want {
+		t.Fatalf("got error: %s, want error: %s", got, want)
+	}
+}
+
 func TestInsertIntoMap(t *testing.T) {
 	parentMap := map[int]string{42: "forty two", 43: "forty three"}
 	key := 44
@@ -374,4 +410,14 @@ func TestToIntValue(t *testing.T) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 
+		t.Run(tt.desc, func(t *testing.T) {
+			got, ok := ToIntValue(tt.in)
+			if ok != tt.wantOk {
+				t.Errorf("%s: gotOk %v, wantOk %v", tt.desc, ok, tt.wantOk)
+			}
+			if got != tt.want {
+				t.Errorf("%s: got %v, want %v", tt.desc, got, tt.want)
+			}
+		})
+	}
 }
