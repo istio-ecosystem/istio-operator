@@ -1,54 +1,59 @@
-# Istio operator architecture
+# Istio operator code overview
 
 ## Introduction
 
-The operator code is divided roughly into five areas:
+This document covers primarily the code, with some background on how the design maps to it.
+See the 
+[design doc](https://docs.google.com/document/d/11j9ZtYWNWnxQYnZy8ayZav1FMwTH6F6z6fkDYZ7V298/edit#heading=h.qex63c29z2to)
+for a more complete design description. The operator code is divided roughly into five areas:
 
-1. [New API](The_new_API) and related infrastructure. The new API is expressed as a
+1. [New API](The_new_API) (`IstioControlPlaneSpec`) and related infrastructure, which is expressed as a
 [proto](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto) and
-compiled to [Go structs](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go). The new
-API has pass-through fields to the Helm values.yaml API, but these are additionally validated through a
-[schema](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/values_types.go).
+compiled to [Go
+structs](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go).
+`IstioControlPlaneSpec` has pass-through fields to the Helm values.yaml API, but these are additionally validated through
+a [schema](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/values_types.go). 
 1. [Controller](K8s_controller) code. The code comprises the K8s listener, webhook and logic for reconciling the cluster
-to an IstioControlPlane CR.
-1. [Manifest creation](Manifest_creation) code. Manifest rendering is done by overlaying user settings on top of a
-selected profile and passing the resulting values to a renderer in the Helm library to create manifests. Further
-overlays on the created manifests may be applied if they are defined in the user settings.
-1. [CLI](CLI) code. CLI code shares the IstioControlPlane API with the controller, but allows manifests to be generated
-and optionally applied from the command line without the need to run a privileged controller in the cluster.
-1. [Migration tools](Migration_tools). The migration tools are intended to automate configuration migration from Helm to
-the operator.
+to an `IstioControlPlaneSpec` CR. 
+1. [Manifest creation](Manifest_creation) code. User settings are overlaid on top of the
+selected profile values and passed to a renderer in the Helm library to create manifests. Further customization on the
+created manifests can be done through overlays. 
+1. [CLI](CLI) code. CLI code shares the `IstioControlPlaneSpec` API with
+the controller, but allows manifests to be generated and optionally applied from the command line without the need to
+run a privileged controller in the cluster. 
+1. [Migration tools](Migration_tools). The migration tools are intended to
+automate configuration migration from Helm to the operator.
 
 The operator code uses the new Helm charts in the [istio/installer](https://github.com/istio/installer) repo. It is not
 compatible with the older charts in [istio/istio](https://github.com/istio/istio/tree/master/install/kubernetes/helm).
 See the istio/installer repo for details about the new charts and why they were created. Briefly, the new charts
-are intended to support more realistic production deployments of Istio and hitless upgrades with canarying.
+are intended to support production ready deployments of Istio that follow best practises like canarying for upgrade.
 
 ## Terminology
 
 Throughout the document, the following terms are used:
 
-- New API: The API directly defined in the
-[IstioControlPlane proto](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto),
+- `IstioControlPlaneSpec`: The API directly defined in the
+[IstioControlPlaneSpec proto](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto),
 including feature and component groupings, namespaces and enablement, and per-component K8s settings. The term new API
 in this document excludes the pass-through to Helm values fields in the proto.
-- Old API: The Helm values.yaml API, implicitly defined through the various values.yaml files in the
+- Helm values.yaml API, implicitly defined through the various values.yaml files in the
 [Helm charts](https://github.com/istio/installer) and schematized in the operator through
 [Go structs](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/values_types.go).
 
-## The new API
+## IstioControlPlaneSpec API
 
-The new API is intended to replace the installation and K8s parts of Helm values.yaml.
+The `IstioControlPlaneSpec` API is intended to replace the installation and K8s parts of Helm values.yaml.
 
 ### Features and components
 
 The operator has a very similar structure to istio/installer: components are grouped into features.
-The operator API defines functional settings at the feature level. Functional settings are those that performs some
+`IstioControlPlaneSpec` defines functional settings at the feature level. Functional settings are those that performs some
 function in the Istio control plane without necessarily being tied to any one component that runs in a Deployment.
 Component settings are those that necessarily refer to a particular Deployment or Service. For example, the number
 of Pilot replicas is clearly a component setting, because it refers to a component which is a Deployment in the
 cluster. Most K8s platform settings are necessarily component settings.
-The available features and components are as follows:
+The available features and the components that comprise it are as follows:
 
 | Feature | Components |
 |---------|------------|
@@ -57,11 +62,11 @@ Traffic Management | Pilot
 Policy | Policy
 Telemetry | Telemetry
 Security | Citadel
-| | Node agent
-| | Cert manager
+Security | Node agent
+Security | Cert manager
 Configuration management | Galley
 Gateways | Ingress gateway
-| | Egress gateway
+Gateways | Egress gateway
 AutoInjection | Sidecar injector
 
 Features and components are defined in the
@@ -69,10 +74,10 @@ Features and components are defined in the
 
 ### Namespaces
 
-The operator API and underlying Helm charts offer a lot of flexibility in which namespaces features and components are
-installed into. Namespace definitions can be defined and specialized at the global, feature and component level, with
-each lower level overriding the setting of the higher parent level. For example, if the global default namespace
-is defined as:
+The `IstioControlPlaneSpec` API and underlying new Helm charts offer a lot of flexibility in which namespaces features and
+components are installed into. Namespace definitions can be defined and specialized at the global, feature and component
+level, with each lower level overriding the setting of the higher parent level. For example, if the global default
+namespace is defined as:
 
 ```yaml
 defaultNamespacePrefix: istio-system
@@ -94,8 +99,8 @@ policy:
 
 the resulting namespaces will be:
 
-|Component|Namespace|
-|---------|:--------|
+| Component | Namespace |
+| --------- | :-------- |
 policy | istio-system
 citadel | istio-security
 nodeAgent | istio-security-nodeagent
@@ -117,7 +122,7 @@ security:
       enabled: false
 ```
 
-will enable all components of the Security feature except citadel.
+will enable all components of the security feature except citadel.
 
 These rules are expressed in code in the
 [name](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/name/name.go#L38) package.
@@ -129,7 +134,7 @@ K8s block for each Istio component. The available K8s settings are defined in
 [KubernetesResourcesSpec](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto#L411):
 
 | Field name | K8s API reference |
-|:-----------|:------------------|
+| :--------- | :---------------- |
 resources | [resources](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container)
 readinessProbe | [readiness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/)
 replicaCount | [replica count](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
@@ -185,26 +190,26 @@ and refer to the values.yaml data paths. Hence, these rules have names with a lo
 
 ## K8s controller
 
-WIP.
+TODO(rcernich).
 
 ## Manifest creation
 
-Manifest rendering is a multi-step process, shown in the figure below.
-![rendering process](images/operator_render_flow.png)
-The example in the figure shows the rendering being triggered by a CLI `iop` command with a IstioControlPlane CR passed
-to it from a file; however, the same rendering steps would occur when an in-cluster CR is updated and the controller
-acts upon it to generate a new manifest to apply to the cluster.
-Note that both the charts and configuration profiles can come from three different sources: compiled-in, local
-filesystem, or URL. The source may be selected independently for the charts and profiles.
-The different steps in creating the manifest are as follows:
+Manifest rendering is a multi-step process, shown in the figure below. ![rendering
+process](images/operator_render_flow.svg) The example in the figure shows the rendering being triggered by a CLI `iop`
+command with a `IstioControlPlaneSpec` CR passed to it from a file; however, the same rendering steps would occur when an
+in-cluster CR is updated and the controller acts upon it to generate a new manifest to apply to the cluster. Note that
+both the charts and configuration profiles can come from three different sources: compiled-in, local filesystem, or URL.
+The source may be selected independently for the charts and profiles. The different steps in creating the manifest are
+as follows:
 
-1. The user CR (my_custom.yaml) selects a configuration profile. If no profile is selected, the
-[default profile](https://github.com/istio/operator/blob/master/data/profiles/default.yaml) is used. Each profile
-is defined as a set of defaults for IstioControlPlane, for both the new API (K8s settings, namespaces and enablement)
-and the old Helm values (Istio behavior configuration).
-1. The new API fields defined in the user CR override any values defined in the configuration profile CR.  The
+1. The user CR (my_custom.yaml) selects a configuration profile. If no profile is selected, the 
+[default profile](https://github.com/istio/operator/blob/master/data/profiles/default.yaml) is used. Each profile is defined as a
+set of defaults for `IstioControlPlaneSpec`, for both the restructured fields (K8s settings, namespaces and enablement)
+and the Helm values (Istio behavior configuration).
+
+1. The fields defined in the user CR override any values defined in the configuration profile CR.  The
 resulting CR is converted to Helm values.yaml format and passed to the next step.
-1. Part of the configuration profile contains settings in the old API values.yaml schema format. User overrides of
+1. Part of the configuration profile contains settings in the Helm values.yaml schema format. User overrides of
 these fields are applied and merged with the output of this step. The result of this step is a merge of configuration
 profile defaults and user overlays, all expressed in Helm values.yaml format. This final values.yaml configuration
 is passed to the Helm rendering library and used to render the charts. The rendered manifests are passed to the next
@@ -223,4 +228,4 @@ subdirectory as a Cobra command with the following subcommands:
 
 ## Migration tools
 
-WIP.
+TODO(richardwxn).
