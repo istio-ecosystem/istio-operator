@@ -27,7 +27,6 @@ import (
 	"github.com/ghodss/yaml"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/version"
@@ -222,7 +221,7 @@ func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
 }
 
 // OverlayK8sSettings overlays k8s settings from icp over the manifest objects, based on t's translation mappings.
-func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPlaneSpec, featureName name.FeatureName, componentName name.ComponentName) (string, error) {
+func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPlaneSpec, componentName name.ComponentName) (string, error) {
 	objects, err := util.ParseK8sObjectsFromYAMLManifest(yml)
 	if err != nil {
 		return "", err
@@ -317,7 +316,7 @@ func overlayK8s(baseYAML, overlayYAML []byte, path util.Path) ([]byte, error) {
 func (t *Translator) ProtoToValues(ii *v1alpha2.IstioControlPlaneSpec) (string, error) {
 	root := make(map[string]interface{})
 
-	errs := t.protoToValues(ii, root, nil)
+	errs := t.protoToHelmValues(ii, root, nil)
 	if len(errs) != 0 {
 		return "", errs.ToError()
 	}
@@ -370,7 +369,7 @@ func (t *Translator) Components(featureName name.FeatureName) []name.ComponentNa
 // If no mapping function is defined, it uses the default mapping function.
 func (t *Translator) protoToHelmValues(node interface{}, root map[string]interface{}, path util.Path) (errs util.Errors) {
 	dbgPrint("protoToHelmValues with path %s, %v (%T)", path, node, node)
-	if node == nil {
+	if util.IsValueNil(node) {
 		return nil
 	}
 
