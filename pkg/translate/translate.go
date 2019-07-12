@@ -27,6 +27,7 @@ import (
 	"github.com/ghodss/yaml"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/version"
@@ -59,6 +60,9 @@ type Translator struct {
 	ToFeature map[name.ComponentName]name.FeatureName
 	// ComponentMaps is a set of mappings for each Istio component.
 	ComponentMaps map[name.ComponentName]*ComponentMaps
+
+	// featureToComponents maps feature names to their component names.
+	featureToComponents map[name.FeatureName][]name.ComponentName
 }
 
 // ComponentMaps is a set of mappings for an Istio component.
@@ -204,6 +208,19 @@ var (
 	}
 )
 
+// NewTranslator creates a new Translator for minorVersion and returns a ptr to it.
+func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
+	t := Translators[minorVersion]
+	if t == nil {
+		return nil, fmt.Errorf("no translator available for version %s", minorVersion)
+	}
+
+	for c, f := range t.ToFeature {
+		t.featureToComponents[f] = append(t.featureToComponents[f], c)
+	}
+	return t, nil
+}
+
 // OverlayK8sSettings overlays k8s settings from icp over the manifest objects, based on t's translation mappings.
 func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPlaneSpec, featureName name.FeatureName, componentName name.ComponentName) (string, error) {
 	objects, err := util.ParseK8sObjectsFromYAMLManifest(yml)
@@ -217,7 +234,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 	// om is a map of kind:name string to Object ptr.
 	om := objects.ToNameKindMap()
 	for inPath, v := range t.KubernetesMapping {
-		inPath = featureComponentString(inPath, featureName, componentName)
+		inPath = renderFeatureComponentPathTemplate(inPath, t.ToFeature[componentName], componentName)
 		log.Infof("Checking for path %s in IstioControlPlaneSpec", inPath)
 		m, found, err := name.GetFromStructPath(icp, inPath)
 		if err != nil {
@@ -231,6 +248,8 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 			log.Infof("path %s is empty string, skip mapping.", inPath)
 			continue
 		}
+		// Zero int values are due to proto3 compiling to scalars rather than ptrs. Skip these because values of 0 are
+		// the default in destination fields and need not be set explicitly.
 		if mint, ok := util.ToIntValue(m); ok && mint == 0 {
 			log.Infof("path %s is int 0, skip mapping.", inPath)
 			continue
@@ -239,7 +258,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 		if err != nil {
 			return "", err
 		}
-		outPath := t.resourceContainerString(v.outPath, componentName)
+		outPath := t.renderResourceComponentPathTemplate(v.outPath, componentName)
 		log.Infof("path has value in IstioControlPlaneSpec, mapping to output path %s", outPath)
 		path := util.PathFromString(outPath)
 		pe := path[0]
@@ -247,7 +266,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 		if !util.IsKVPathElement(pe) {
 			return "", fmt.Errorf("path %s has an unexpected first element %s in OverlayK8sSettings", path, pe)
 		}
-		// After brackets are removed, the remaining "kind:name" string maps to the right object in om.
+		// After brackets are removed, the remaining "kind:name" is the same format as the keys in om.
 		pe, _ = util.RemoveBrackets(pe)
 		oo, ok := om[pe]
 		if !ok {
@@ -256,7 +275,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 
 		baseYAML, err := oo.YAML()
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("could not marshal to YAML in OverlayK8sSettings: %s", err)
 		}
 		mergedYAML, err := overlayK8s(baseYAML, overlayYAML, path[1:])
 		if err != nil {
@@ -266,7 +285,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 
 		mergedObj, err := util.ParseYAMLToK8sObject(mergedYAML)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("could not ParseYAMLToK8sObject in OverlayK8sSettings: %s", err)
 		}
 		// Update the original object in objects slice, since the output should be ordered.
 		*(om[pe]) = *mergedObj
@@ -303,10 +322,12 @@ func (t *Translator) ProtoToValues(ii *v1alpha2.IstioControlPlaneSpec) (string, 
 		return "", errs.ToError()
 	}
 
+	// Enabled and namespace fields require special handling because of inheritance rules.
 	if err := t.setEnablementAndNamespaces(root, ii); err != nil {
 		return "", err
 	}
 
+	// Return blank string for empty case.
 	if len(root) == 0 {
 		return "", nil
 	}
@@ -338,85 +359,58 @@ func (t *Translator) ValuesOverlaysToHelmValues(in map[string]interface{}, cname
 	return out
 }
 
-// ToComponent returns the Components under the featureName feature.
-// TODO: should do this once only, create a NewTranslator and do it there.
-func (t *Translator) ToComponent(featureName name.FeatureName) []name.ComponentName {
-	var out []name.ComponentName
-	for c, f := range t.ToFeature {
-		if f == featureName {
-			out = append(out, c)
-		}
-	}
-	return out
+// Components returns the Components under the featureName feature.
+func (t *Translator) Components(featureName name.FeatureName) []name.ComponentName {
+	return t.featureToComponents[featureName]
 }
 
-// protoToValues takes an interface which must be a struct ptr and recursively iterates through all its fields.
+// protoToHelmValues takes an interface which must be a struct ptr and recursively iterates through all its fields.
 // For each leaf, if looks for a mapping from the struct data path to the corresponding YAML path and if one is
 // found, it calls the associated mapping function if one is defined to populate the values YAML path.
 // If no mapping function is defined, it uses the default mapping function.
-func (t *Translator) protoToValues(structPtr interface{}, root map[string]interface{}, path util.Path) (errs util.Errors) {
-	dbgPrint("protoToValues with path %s, %v (%T)", path, structPtr, structPtr)
-	if structPtr == nil {
+func (t *Translator) protoToHelmValues(node interface{}, root map[string]interface{}, path util.Path) (errs util.Errors) {
+	dbgPrint("protoToHelmValues with path %s, %v (%T)", path, node, node)
+	if node == nil {
 		return nil
 	}
 
-	structElems := reflect.ValueOf(structPtr)
-	if reflect.TypeOf(structPtr).Kind() == reflect.Ptr {
-		structElems = structElems.Elem()
-	}
-	if reflect.TypeOf(structElems).Kind() != reflect.Struct {
-		return util.NewErrs(fmt.Errorf("protoToValues path %s, value: %v, expected struct or struct ptr, got %T", path, structPtr, structPtr))
-	}
-
-	if util.IsNilOrInvalidValue(structElems) {
-		return
-	}
-
-	for i := 0; i < structElems.NumField(); i++ {
-		fieldName := structElems.Type().Field(i).Name
-		fieldValue := structElems.Field(i)
-		kind := structElems.Type().Field(i).Type.Kind()
-		if a, ok := structElems.Type().Field(i).Tag.Lookup("json"); ok && a == "-" {
-			continue
+	vv := reflect.ValueOf(node)
+	vt := reflect.TypeOf(node)
+	switch vt.Kind() {
+	case reflect.Ptr:
+		if !util.IsNilOrInvalidValue(vv.Elem()) {
+			errs = util.AppendErrs(errs, t.protoToHelmValues(vv.Elem().Interface(), root, path))
 		}
-
-		dbgPrint("Checking field %s", fieldName)
-		switch kind {
-		case reflect.Struct:
-			dbgPrint("Struct")
-			errs = util.AppendErrs(errs, t.protoToValues(fieldValue.Addr().Interface(), root, append(path, fieldName)))
-		case reflect.Map:
-			dbgPrint("Map")
-			newPath := append(path, fieldName)
-			for _, key := range fieldValue.MapKeys() {
-				nnp := append(newPath, key.String())
-				errs = util.AppendErrs(errs, t.insertLeaf(root, nnp, fieldValue.MapIndex(key)))
-			}
-		case reflect.Slice:
-			dbgPrint("Slice")
-			newPath := append(path, fieldName)
-			for i := 0; i < fieldValue.Len(); i++ {
-				errs = util.AppendErrs(errs, t.protoToValues(fieldValue.Index(i).Interface(), root, newPath))
-			}
-		case reflect.Ptr:
-			if util.IsNilOrInvalidValue(fieldValue.Elem()) {
+	case reflect.Struct:
+		dbgPrint("Struct")
+		for i := 0; i < vv.NumField(); i++ {
+			fieldName := vv.Type().Field(i).Name
+			fieldValue := vv.Field(i)
+			dbgPrint("Checking field %s", fieldName)
+			if a, ok := vv.Type().Field(i).Tag.Lookup("json"); ok && a == "-" {
 				continue
 			}
-			newPath := append(path, fieldName)
-			if fieldValue.Elem().Kind() == reflect.Struct {
-				dbgPrint("Struct Ptr")
-				errs = util.AppendErrs(errs, t.protoToValues(fieldValue.Interface(), root, newPath))
-			} else {
-				dbgPrint("Leaf Ptr")
-				errs = util.AppendErrs(errs, t.insertLeaf(root, newPath, fieldValue))
-			}
-		default:
-			dbgPrint("field has kind %s", kind)
-			if structElems.Field(i).CanInterface() {
-				errs = util.AppendErrs(errs, t.insertLeaf(root, append(path, fieldName), fieldValue))
-			}
+			errs = util.AppendErrs(errs, t.protoToHelmValues(fieldValue.Interface(), root, append(path, fieldName)))
+		}
+	case reflect.Map:
+		dbgPrint("Map")
+		for _, key := range vv.MapKeys() {
+			nnp := append(path, key.String())
+			errs = util.AppendErrs(errs, t.insertLeaf(root, nnp, vv.MapIndex(key)))
+		}
+	case reflect.Slice:
+		dbgPrint("Slice")
+		for i := 0; i < vv.Len(); i++ {
+			errs = util.AppendErrs(errs, t.protoToHelmValues(vv.Index(i).Interface(), root, path))
+		}
+	default:
+		// Must be a leaf
+		dbgPrint("field has kind %s", vt.Kind())
+		if vv.CanInterface() {
+			errs = util.AppendErrs(errs, t.insertLeaf(root, path, vv))
 		}
 	}
+
 	return errs
 }
 
@@ -500,9 +494,9 @@ func getValuesPathMapping(mappings map[string]*Translation, path util.Path) (str
 	return out, m
 }
 
-// featureComponentString renders a template of the form <path>{{.FeatureName}}<path>{{.ComponentName}}<path> with
+// renderFeatureComponentPathTemplate renders a template of the form <path>{{.FeatureName}}<path>{{.ComponentName}}<path> with
 // the supplied parameters.
-func featureComponentString(tmpl string, featureName name.FeatureName, componentName name.ComponentName) string {
+func renderFeatureComponentPathTemplate(tmpl string, featureName name.FeatureName, componentName name.ComponentName) string {
 	type Temp struct {
 		FeatureName   name.FeatureName
 		ComponentName name.ComponentName
@@ -525,9 +519,9 @@ func featureComponentString(tmpl string, featureName name.FeatureName, component
 	return buf.String()
 }
 
-// resourceContainerString renders a template of the form <path>{{.ResourceName}}<path>{{.ContainerName}}<path> with
+// renderResourceComponentPathTemplate renders a template of the form <path>{{.ResourceName}}<path>{{.ContainerName}}<path> with
 // the supplied parameters.
-func (t *Translator) resourceContainerString(tmpl string, componentName name.ComponentName) string {
+func (t *Translator) renderResourceComponentPathTemplate(tmpl string, componentName name.ComponentName) string {
 	ts := struct {
 		ResourceName  string
 		ContainerName string
