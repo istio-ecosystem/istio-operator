@@ -409,15 +409,4 @@ func TestToIntValue(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, want %v", got, want)
 	}
-
-		t.Run(tt.desc, func(t *testing.T) {
-			got, ok := ToIntValue(tt.in)
-			if ok != tt.wantOk {
-				t.Errorf("%s: gotOk %v, wantOk %v", tt.desc, ok, tt.wantOk)
-			}
-			if got != tt.want {
-				t.Errorf("%s: got %v, want %v", tt.desc, got, tt.want)
-			}
-		})
-	}
 }

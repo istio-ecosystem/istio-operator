@@ -16,6 +16,8 @@ package util
 
 import (
 	"strings"
+
+	"github.com/ghodss/yaml"
 )
 
 const (

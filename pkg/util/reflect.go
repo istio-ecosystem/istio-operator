@@ -275,7 +275,7 @@ func InsertIntoMap(parentMap interface{}, key interface{}, value interface{}) er
 // ToIntValue returns 0, false if val is not a number type, otherwise it returns the int value of val.
 func ToIntValue(val interface{}) (int, bool) {
 	if IsValueNil(val) {
-		return 0, true
+		return 0, false
 	}
 	v := reflect.ValueOf(val)
 	switch {
