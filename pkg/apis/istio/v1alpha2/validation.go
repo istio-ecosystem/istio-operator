@@ -26,13 +26,12 @@ func (v *Values) Validation(failOnMissingValidation bool) []string {
 
 	e := reflect.ValueOf(v).Elem()
 	for i := 0; i < e.NumField(); i++ {
-		// Validation is not requred if it is not a defined type
+		// Validation is not required if it is not a custom type
 		if e.Field(i).Kind() != reflect.Interface && e.Field(i).Kind() != reflect.Ptr {
 			continue
 		}
 		val := e.Field(i).Elem()
 		if val == reflect.ValueOf(nil) {
-			fmt.Printf("element: %s is not defined\n", e.Type().Field(i).Name)
 			continue
 		}
 		validation := e.Field(i).MethodByName("Validation")
