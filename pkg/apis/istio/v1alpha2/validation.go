@@ -20,18 +20,34 @@ import (
 )
 
 // Validation  calls a validation func for every defined element of Values
-// Validation checks
 func (v *Values) Validation(failOnMissingValidation bool) []string {
 	var validationErrors []string
 
-	e := reflect.ValueOf(v).Elem()
+	validationErrors = append(validationErrors, validateSubTypes(reflect.ValueOf(v).Elem(), failOnMissingValidation)...)
+
+	return validationErrors
+}
+
+// Validation checks CNIConfig  and all subc types
+func (c *CNIConfig) Validation(failOnMissingValidation bool) []string {
+	var validationErrors []string
+
+	validationErrors = append(validationErrors, validateSubTypes(reflect.ValueOf(c).Elem(), failOnMissingValidation)...)
+
+	return validationErrors
+}
+
+func validateSubTypes(e reflect.Value, failOnMissingValidation bool) []string {
+	var validationErrors []string
+
 	for i := 0; i < e.NumField(); i++ {
-		// Validation is not required if it is not a custom type
+		// Validation is not required if it is not a defined type
 		if e.Field(i).Kind() != reflect.Interface && e.Field(i).Kind() != reflect.Ptr {
 			continue
 		}
 		val := e.Field(i).Elem()
 		if val == reflect.ValueOf(nil) {
+			fmt.Printf("element: %s is not defined\n", e.Type().Field(i).Name)
 			continue
 		}
 		validation := e.Field(i).MethodByName("Validation")
@@ -47,10 +63,4 @@ func (v *Values) Validation(failOnMissingValidation bool) []string {
 	}
 
 	return validationErrors
-}
-
-// Validation checks
-func (c *CNIConfig) Validation(failOnMissingValidation bool) []string {
-	fmt.Printf("CNIConfig validation was called\n")
-	return nil
 }
