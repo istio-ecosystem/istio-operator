@@ -22,6 +22,7 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
+
 	v2beta1 "k8s.io/api/autoscaling/v2beta1"
 	v1 "k8s.io/api/core/v1"
 	_ "k8s.io/apimachinery/pkg/util/intstr"
@@ -143,7 +144,7 @@ trafficManagement:
       common:
         values:
           image: proxyv2
-		  clusterDomain: "cluster.local"
+          clusterDomain: "cluster.local"
 `
 )
 
