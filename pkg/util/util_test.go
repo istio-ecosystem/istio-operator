@@ -79,7 +79,23 @@ var (
 							},
 						},
 						Values: map[string]interface{}{
-							"image": "pilot",
+							"image":                           "pilot",
+							"traceSampling":                   1.0,
+							"configNamespace":                 "istio-config",
+							"keepaliveMaxServerConnectionAge": "30m",
+							"configMap":                       true,
+							"ingress": map[string]interface{}{
+								"ingressService":        "istio-ingressgateway",
+								"ingressControllerMode": "OFF",
+								"ingressClass":          "istio",
+							},
+							"telemetry": map[string]interface{}{
+								"enabled": true,
+							},
+							"policy": map[string]interface{}{
+								"enabled": false,
+							},
+							"useMCP": true,
 						},
 					},
 				},
@@ -88,6 +104,30 @@ var (
 						Values: map[string]interface{}{
 							"image":         "proxyv2",
 							"clusterDomain": "cluster.local",
+							"resources": map[string]interface{}{
+								"requests": map[string]interface{}{
+									"cpu":    "100m",
+									"memory": "128Mi",
+								},
+								"limits": map[string]interface{}{
+									"cpu":    "2000m",
+									"memory": "128Mi",
+								},
+							},
+							"concurrency":                  2,
+							"accessLogEncoding":            "TEXT",
+							"logLevel":                     "warning",
+							"componentLogLevel":            "misc:error",
+							"dnsRefreshRate":               "300s",
+							"privileged":                   false,
+							"enableCoreDump":               false,
+							"statusPort":                   15020,
+							"readinessInitialDelaySeconds": 1,
+							"readinessPeriodSeconds":       2,
+							"readinessFailureThreshold":    30,
+							"includeIPRanges":              "*",
+							"autoInject":                   "enabled",
+							"tracer":                       "zipkin",
 						},
 					},
 				},
@@ -140,11 +180,45 @@ trafficManagement:
               memory: 2048Mi
         values:
           image: pilot
+          traceSampling: 1.0
+          configNamespace: istio-config
+          keepaliveMaxServerConnectionAge: 30m
+          configMap: true
+          ingress:
+            ingressService: istio-ingressgateway
+            ingressControllerMode: "OFF"
+            ingressClass: istio
+          telemetry:
+            enabled: true
+          policy:
+            enabled: false
+          useMCP: true
     proxy:
       common:
         values:
           image: proxyv2
           clusterDomain: "cluster.local"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 2000m
+              memory: 128Mi
+          concurrency: 2
+          accessLogEncoding: TEXT
+          logLevel: warning
+          componentLogLevel: "misc:error"
+          dnsRefreshRate: 300s
+          privileged: false
+          enableCoreDump: false
+          statusPort: 15020
+          readinessInitialDelaySeconds: 1
+          readinessPeriodSeconds: 2
+          readinessFailureThreshold: 30
+          includeIPRanges: "*"
+          autoInject: enabled
+          tracer: "zipkin"
 `
 )
 
