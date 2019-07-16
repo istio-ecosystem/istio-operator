@@ -86,7 +86,9 @@ readinessProbe:
   initialDelaySeconds: 11
   periodSeconds: 22
   successThreshold: 33
-  handler: {}
+  httpGet:
+    path: /ready
+    port: 8080
 `,
 		},
 		{
