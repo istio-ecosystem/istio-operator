@@ -7,7 +7,7 @@ See the
 [design doc](https://docs.google.com/document/d/11j9ZtYWNWnxQYnZy8ayZav1FMwTH6F6z6fkDYZ7V298/edit#heading=h.qex63c29z2to)
 for a more complete design description. The operator code is divided roughly into five areas:
 
-1. [New API](The_new_API) (`IstioControlPlaneSpec`) and related infrastructure, which is expressed as a
+1. [IstioControlPlaneSpec API](The_new_API) and related infrastructure, which is expressed as a
 [proto](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto) and
 compiled to [Go
 structs](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go).
@@ -27,7 +27,7 @@ automate configuration migration from Helm to the operator.
 The operator code uses the new Helm charts in the [istio/installer](https://github.com/istio/installer) repo. It is not
 compatible with the older charts in [istio/istio](https://github.com/istio/istio/tree/master/install/kubernetes/helm).
 See the istio/installer repo for details about the new charts and why they were created. Briefly, the new charts
-are intended to support production ready deployments of Istio that follow best practises like canarying for upgrade.
+are intended to support production ready deployments of Istio that follow best practices like canarying for upgrade.
 
 ## Terminology
 
@@ -35,8 +35,7 @@ Throughout the document, the following terms are used:
 
 - `IstioControlPlaneSpec`: The API directly defined in the
 [IstioControlPlaneSpec proto](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto),
-including feature and component groupings, namespaces and enablement, and per-component K8s settings. The term new API
-in this document excludes the pass-through to Helm values fields in the proto.
+including feature and component groupings, namespaces and enablement, and per-component K8s settings. 
 - Helm values.yaml API, implicitly defined through the various values.yaml files in the
 [Helm charts](https://github.com/istio/installer) and schematized in the operator through
 [Go structs](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/values_types.go).
@@ -51,9 +50,9 @@ The operator has a very similar structure to istio/installer: components are gro
 `IstioControlPlaneSpec` defines functional settings at the feature level. Functional settings are those that performs some
 function in the Istio control plane without necessarily being tied to any one component that runs in a Deployment.
 Component settings are those that necessarily refer to a particular Deployment or Service. For example, the number
-of Pilot replicas is clearly a component setting, because it refers to a component which is a Deployment in the
+of Pilot replicas is a component setting, because it refers to a component which is a Deployment in the
 cluster. Most K8s platform settings are necessarily component settings.
-The available features and the components that comprise it are as follows:
+The available features and the components that comprise each feature are as follows:
 
 | Feature | Components |
 |---------|------------|
@@ -129,8 +128,8 @@ These rules are expressed in code in the
 
 ### K8s settings
 
-Rather than defining selective mappings from parameters to fields in K8s resources, the new API contains a consistent
-K8s block for each Istio component. The available K8s settings are defined in
+Rather than defining selective mappings from parameters to fields in K8s resources, the `IstioControlPlaneSpec` API
+contains a consistent K8s block for each Istio component. The available K8s settings are defined in
 [KubernetesResourcesSpec](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto#L411):
 
 | Field name | K8s API reference |
@@ -164,9 +163,9 @@ API translations are version specific and are expressed as a
 indexed by minor [version](https://github.com/istio/operator/blob/master/pkg/version/version.go). This is because
 mapping rules are only allowed to change between minor (not patch) versions.
 
-The new API fields are translated to the output manifest in two ways:
+The `IstioControlPlaneSpec` API fields are translated to the output manifest in two ways:
 
-1. The new API fields are mapped to the old Helm values.yaml schema using the
+1. The `IstioControlPlaneSpec` API fields are mapped to the Helm values.yaml schema using the
 [APIMapping](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/translate/translate.go#L91)
 field of the [Translator](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/translate/translate.go#L48)
 struct.
@@ -181,12 +180,16 @@ struct.
 
 ### Validations
 
-Both the new API and old Helm API are validated. The new API is validated through a table of validation rules in
+Both the `IstioControlPlaneSpec` and Helm APIs are validated. The `IstioControlPlaneSpec` API is validated through a 
+table of validation rules in
 [pkg/validate/validate.go](https://github.com/istio/operator/blob/master/pkg/validate/validate.go). These rules
 refer to the Go struct path schema and hence have names with a capitalized first letter.
-The old Helm values.yaml API is validated in
+The Helm values.yaml API is validated in
 [validate_values.go](https://github.com/istio/operator/blob/master/pkg/validate/validate_values.go)
 and refer to the values.yaml data paths. Hence, these rules have names with a lower case first letter.
+Apart from validating the correctness of individual fields, the operator ensure that relationships between values in
+different parts of the configuration tree are correct. For example, it's an error to enable a component while its
+parent feature is disabled.
 
 ## K8s controller
 
@@ -198,7 +201,8 @@ Manifest rendering is a multi-step process, shown in the figure below. ![renderi
 process](images/operator_render_flow.svg) The example in the figure shows the rendering being triggered by a CLI `iop`
 command with a `IstioControlPlaneSpec` CR passed to it from a file; however, the same rendering steps would occur when an
 in-cluster CR is updated and the controller acts upon it to generate a new manifest to apply to the cluster. Note that
-both the charts and configuration profiles can come from three different sources: compiled-in, local filesystem, or URL.
+both the charts and configuration profiles can come from three different sources: compiled-in, local filesystem, or URL
+(TODO(mostrowski): describe the remote URL functionality). 
 The source may be selected independently for the charts and profiles. The different steps in creating the manifest are
 as follows:
 
