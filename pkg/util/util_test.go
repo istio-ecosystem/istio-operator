@@ -234,7 +234,7 @@ func TestToYAMLWithJSONPB(t *testing.T) {
 	for _, tt := range toYAMLWithJSONPBTests {
 		t.Run(tt.desc, func(t *testing.T) {
 			got := ToYAMLWithJSONPB(icp)
-			if !IsYAMLEqual(got, tt.want) {
+			if !IsYAMLEqual(got, tt.want) || YAMLDiff(got, tt.want) != "" {
 				t.Errorf("TestToYAMLWithJSONPB(%s): got:\n%s\n\nwant:\n%s\nDiff:\n%s\n", tt.desc, got, tt.want, YAMLDiff(got, tt.want))
 			}
 		})
