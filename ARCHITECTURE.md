@@ -110,8 +110,8 @@ These rules are expressed in code in the
 ### Enablement
 
 Features and components can be individually or collectively enabled or disabled. If a feature is disabled, all of its
-components are disabled, regardless of their component level enablement. If a feature is enabled, all of its components
-are enabled, unless they individually disabled. For example:
+components are disabled, regardless of their component-level enablement. If a feature is enabled, all of its components
+are enabled, unless they are individually disabled. For example:
 
 ```yaml
 security:
