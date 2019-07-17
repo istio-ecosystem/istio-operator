@@ -62,7 +62,7 @@ var (
 							ReadinessProbe: &v1alpha2.ReadinessProbe{
 								HttpGet: &v1alpha2.HTTPGetAction{
 									Path: "/ready",
-									Port: 8080,
+									Port: v1alpha2.FromInt(8080),
 								},
 								InitialDelaySeconds: 5,
 								PeriodSeconds:       30,
