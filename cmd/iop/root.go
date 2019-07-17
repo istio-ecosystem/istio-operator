@@ -60,19 +60,25 @@ func GetRootCmd(args []string) *cobra.Command {
 	rootCmd.PersistentFlags().AddGoFlagSet(flag.CommandLine)
 
 	rootArgs := &rootArgs{}
+	diffArgs := &manDiffArgs{}
 	dumpArgs := &dumpArgs{}
 
 	ic := installCmd(rootArgs)
 	mc := manifestCmd(rootArgs)
-	dpc := dumpProfileDefaultsCmd(rootArgs, dumpArgs)
+	mdc := manifestDiffCmd(rootArgs, diffArgs)
+	dpc := dumpProfileDefaultsCmd(rootArgs)
 
 	addFlags(ic, rootArgs)
 	addFlags(mc, rootArgs)
 	addFlags(dpc, rootArgs)
+	addFlags(mdc, rootArgs)
+
+	addManDiffFlag(mdc, diffArgs)
 	addDumpFlags(dpc, dumpArgs)
 
 	rootCmd.AddCommand(ic)
 	rootCmd.AddCommand(mc)
+	rootCmd.AddCommand(mdc)
 	rootCmd.AddCommand(dpc)
 	rootCmd.AddCommand(version.CobraCommand())
 
