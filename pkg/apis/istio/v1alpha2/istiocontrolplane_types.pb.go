@@ -2970,7 +2970,7 @@ func (m *HTTPHeader) GetValue() string {
 
 // Mirrors k8s.io.api.core.v1.TCPSocketAction for unmarshaling
 type TCPSocketAction struct {
-	Port IntOrStringForPB `protobuf:"bytes,2,opt,name=port,proto3" json:"port,omitempty"`
+	Port IntOrStringForPB `protobuf:"bytes,1,opt,name=port,proto3" json:"port,omitempty"`
 	Host                 string   `protobuf:"bytes,2,opt,name=host,proto3" json:"host,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

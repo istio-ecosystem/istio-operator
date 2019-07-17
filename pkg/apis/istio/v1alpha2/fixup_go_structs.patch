@@ -1,5 +1,5 @@
 --- pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go.orig	2019-07-16 23:54:05.946555219 -0700
-+++ pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go	2019-07-16 23:59:04.026479187 -0700
++++ pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go	2019-07-17 00:29:40.578006785 -0700
 @@ -248,9 +248,9 @@
  	ConfigManagement  *ConfigManagementFeatureSpec  `protobuf:"bytes,29,opt,name=config_management,json=configManagement,proto3" json:"config_management,omitempty"`
  	AutoInjection     *AutoInjectionFeatureSpec     `protobuf:"bytes,30,opt,name=auto_injection,json=autoInjection,proto3" json:"auto_injection,omitempty"`
@@ -47,7 +47,7 @@
  
  // Mirrors k8s.io.api.core.v1.TCPSocketAction for unmarshaling
  type TCPSocketAction struct {
-+	Port IntOrStringForPB `protobuf:"bytes,2,opt,name=port,proto3" json:"port,omitempty"`
++	Port IntOrStringForPB `protobuf:"bytes,1,opt,name=port,proto3" json:"port,omitempty"`
  	Host                 string   `protobuf:"bytes,2,opt,name=host,proto3" json:"host,omitempty"`
  	XXX_NoUnkeyedLiteral struct{} `json:"-"`
  	XXX_unrecognized     []byte   `json:"-"`
