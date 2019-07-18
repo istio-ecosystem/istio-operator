@@ -17,10 +17,10 @@ package v1alpha2
 // TODO: create remaining enum types.
 
 import (
-	"github.com/gogo/protobuf/jsonpb"
-
 	"fmt"
-
+        
+        "github.com/gogo/protobuf/jsonpb"
+	"github.com/golang/protobuf/jsonpb"
 	"istio.io/operator/pkg/util"
 	corev1 "k8s.io/api/core/v1"
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
@@ -646,6 +646,7 @@ func FromInt(val int) IntOrStringForPB {
 // FromString creates an IntOrStringForPB object with a string value.
 func FromString(val string) IntOrStringForPB {
 	return IntOrStringForPB{intstr.FromString(val)}
+}
 
 // Validation checks
 func (t *PilotConfig) Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) util.Errors {
