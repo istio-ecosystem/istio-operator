@@ -18,11 +18,11 @@ import (
 	fmt "fmt"
 	"reflect"
 
-	istiocontrolplane "istio.io/operator/pkg/apis/istio/v1alpha1"
+	_ "istio.io/operator/pkg/util"
 )
 
 // Validation  calls a validation func for every defined element of Values
-func Validation(failOnMissingValidation bool, values *Values, icpls *istiocontrolplane.IstioControlPlaneSpec) []string {
+func Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) []string {
 	var validationErrors []string
 
 	validationErrors = append(validationErrors, validateSubTypes(reflect.ValueOf(values).Elem(), failOnMissingValidation, values, icpls)...)
@@ -31,20 +31,20 @@ func Validation(failOnMissingValidation bool, values *Values, icpls *istiocontro
 }
 
 // Validation checks PilotConfig  and all subc types
-func (t *PilotConfig) Validation(failOnMissingValidation bool, values *Values, icpls *istiocontrolplane.IstioControlPlaneSpec) []string {
+func (t *PilotConfig) Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) []string {
 	var validationErrors []string
 
 	return validationErrors
 }
 
 // Validation checks CNIConfig  and all subc types
-func (t *CNIConfig) Validation(failOnMissingValidation bool, values *Values, icpls *istiocontrolplane.IstioControlPlaneSpec) []string {
+func (t *CNIConfig) Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) []string {
 	var validationErrors []string
 
 	return validationErrors
 }
 
-func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *Values, icpls *istiocontrolplane.IstioControlPlaneSpec) []string {
+func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) []string {
 	var validationErrors []string
 
 	for i := 0; i < e.NumField(); i++ {
