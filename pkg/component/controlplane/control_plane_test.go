@@ -21,9 +21,7 @@ import (
 	"testing"
 
 	"istio.io/operator/pkg/object"
-
 	"istio.io/operator/pkg/util"
-
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/translate"

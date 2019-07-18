@@ -17,7 +17,8 @@ meeting to share your ideas.
 This repo reorganizes the current [Helm installation parameters](https://istio.io/docs/reference/config/installation-options/) into two groups:
 
 - The new [platform level installation API](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto), for managing
-K8s settings like resources, auto scaling, pod disruption budgets etc.
+K8s settings like resources, auto scaling, pod disruption budgets and others defined in the
+[KubernetesResourceSpec](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto#L411)
 - The configuration API that currently uses the
 [Helm installation parameters](https://istio.io/docs/reference/config/installation-options/) for backwards
 compatibility. This API is for managing the Istio control plane configuration settings.
@@ -76,7 +77,8 @@ The quick start describes how to install and use the operator `iop` CLI command.
 ### Installation
 
 ```bash
-git clone https://istio.io/operator.git
+export GO111MODULE=on # for pre-1.13 Go versions
+git clone https://github.com/istio/operator.git
 cd operator
 go build -o $GOPATH/bin/iop ./cmd/iop.go
 ```
@@ -86,7 +88,7 @@ go build -o $GOPATH/bin/iop ./cmd/iop.go
 The `iop` command supports the following flags:
 
 - `logtostderr`: log to console (by default logs go to ./iop.go).
-- `dry-run`: console output only, nothing applied to cluster or written to files (default is true for now).
+- `dry-run`: console output only, nothing applied to cluster or written to files (**default is true until the tool is robust enough**).
 - `verbose`: display entire manifest contents and other debug info (default is false).
 
 ### Quick tour of CLI commands 
@@ -111,6 +113,7 @@ levels representing a child dependency, use the following command:
 iop manifest -o istio_manifests
 ```
 
+(Note that the default dry-run setting only writes the intended actions to log.)
 Use depth first search to traverse the created directory hierarchy when applying your YAML files. This is needed for
 correct sequencing of dependencies. Child manifest directories must wait for their parent directory to be fully applied,
 but not their sibling manifest directories.
@@ -168,7 +171,7 @@ local file system.
 ### New API customization
 
 The [new platform level installation API](https://github.com/istio/operator/blob/95e89c4fb838b0b374f70d7c5814329e25a64819/pkg/apis/istio/v1alpha1/istioinstaller_types.proto#L25)
-defines install time parameters like feature/component enablement and namespace, and K8s settings like resources, HPA spec etc. in a structured way.
+defines install time parameters like feature and component enablement and namespace, and K8s settings like resources, HPA spec etc. in a structured way.
 The simplest customization is to turn features and components on and off. For example, to turn off all policy:
 
 ```yaml
