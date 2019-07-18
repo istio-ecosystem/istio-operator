@@ -42,8 +42,6 @@ type dumpArgs struct {
 	helmValues bool
 	// rootConfigNode sets the root node for the subtree to display the config for.
 	rootConfigNode string
-	// depth is the maximum depth of config tree to display.
-	depth int
 }
 
 func addDumpFlags(cmd *cobra.Command, dumpArgs *dumpArgs) {
@@ -93,6 +91,9 @@ func dumpProfile(args *rootArgs, dumpArgs *dumpArgs) {
 	switch {
 	case dumpArgs.profile != "":
 		mergedYAML, err = helm.ReadValuesYAML(dumpArgs.profile)
+		if err != nil {
+			logAndFatalf(args, err.Error())
+		}
 	default:
 		overlayYAML := ""
 		if args.inFilename != "" {
@@ -148,7 +149,7 @@ func dumpProfile(args *rootArgs, dumpArgs *dumpArgs) {
 		}
 	}
 
-	finalYAML, err := getConfigSubtree(args, mergedYAML, dumpArgs.rootConfigNode)
+	finalYAML, err := getConfigSubtree(mergedYAML, dumpArgs.rootConfigNode)
 	if err != nil {
 		logAndFatalf(args, "%s", err)
 	}
@@ -158,7 +159,7 @@ func dumpProfile(args *rootArgs, dumpArgs *dumpArgs) {
 	}
 }
 
-func getConfigSubtree(args *rootArgs, manifest, path string) (string, error) {
+func getConfigSubtree(manifest, path string) (string, error) {
 	root := make(map[string]interface{})
 	if err := yaml.Unmarshal([]byte(manifest), &root); err != nil {
 		return "", err

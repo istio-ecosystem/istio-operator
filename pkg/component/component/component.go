@@ -592,7 +592,7 @@ func overlayTrees(base map[string]interface{}, overlays ...map[string]interface{
 			return nil, err
 		}
 
-		by, err = helm.OverlayYAML(string(by), string(oy))
+		by, err = helm.OverlayYAML(by, string(oy))
 		if err != nil {
 			return nil, err
 		}
