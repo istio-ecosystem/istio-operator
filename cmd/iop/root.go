@@ -66,7 +66,7 @@ func GetRootCmd(args []string) *cobra.Command {
 	ic := installCmd(rootArgs)
 	mc := manifestCmd(rootArgs)
 	mdc := manifestDiffCmd(rootArgs, diffArgs)
-	dpc := dumpProfileDefaultsCmd(rootArgs)
+	dpc := dumpProfileDefaultsCmd(rootArgs, dumpArgs)
 
 	addFlags(ic, rootArgs)
 	addFlags(mc, rootArgs)
