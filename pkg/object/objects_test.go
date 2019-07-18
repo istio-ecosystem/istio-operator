@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package object
 
 import (
 	"strings"
 	"testing"
+
+	"istio.io/operator/pkg/util"
 )
 
 func TestHash(t *testing.T) {
@@ -488,8 +490,8 @@ spec:
 					if gotObj, ok := gotK8sObjsMap[objHash]; ok {
 						gotObjYaml, err := gotObj.YAMLDebugString()
 						if err != nil {
-							if !IsYAMLEqual(gotObjYaml, want) {
-								t.Errorf("ParseK8sObjectsFromYAMLManifest(%s): got:\n%s\n\nwant:\n%s\nDiff:\n%s\n", tt.desc, gotObjYaml, want, YAMLDiff(gotObjYaml, want))
+							if !util.IsYAMLEqual(gotObjYaml, want) {
+								t.Errorf("ParseK8sObjectsFromYAMLManifest(%s): got:\n%s\n\nwant:\n%s\nDiff:\n%s\n", tt.desc, gotObjYaml, want, util.YAMLDiff(gotObjYaml, want))
 							}
 						}
 					} else {

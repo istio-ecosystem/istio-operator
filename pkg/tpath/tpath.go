@@ -12,6 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/*
+Package tpath contains functions for traversing and updating a tree constructed from yaml or json.Unmarshal.
+Nodes in such trees have the form map[interface{}]interface{} or map[interface{}][]interface{}.
+For some tree updates, like delete or append, it's necessary to have access to the parent node. PathContext is a
+tree constructed during tree traversal that gives access to ancestor nodes all the way up to the root, which can be
+used for this purpose.
+*/
+
 package tpath
 
 import (
@@ -54,7 +62,7 @@ func (nc *PathContext) String() string {
 // It returns false and and no error if the given path is not found, or an error code in other error situations, like
 // a malformed path.
 // It also creates a tree of PathContexts during the traversal so that Parent nodes can be updated if required. This is
-// required when modifying, say an entry in a map, where the parent map itself must be rewritten.
+// required when (say) appending to a list, where the parent list itself must be updated.
 func GetPathContext(root interface{}, path util.Path) (*PathContext, bool, error) {
 	return getPathContext(&PathContext{Node: root}, path, path, false)
 }

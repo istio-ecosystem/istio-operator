@@ -20,6 +20,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"istio.io/operator/pkg/object"
+
 	"istio.io/operator/pkg/util"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
@@ -185,7 +187,7 @@ trafficManagement:
 			if err != nil {
 				t.Fatal(err)
 			}
-			diff, err := util.ManifestDiff(manifestMapToStr(got), want)
+			diff, err := object.ManifestDiff(manifestMapToStr(got), want)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -22,6 +22,8 @@ import (
 	"reflect"
 	"strings"
 
+	"istio.io/operator/pkg/object"
+
 	"istio.io/operator/pkg/tpath"
 
 	"github.com/ghodss/yaml"
@@ -222,7 +224,7 @@ func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
 
 // OverlayK8sSettings overlays k8s settings from icp over the manifest objects, based on t's translation mappings.
 func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPlaneSpec, componentName name.ComponentName) (string, error) {
-	objects, err := util.ParseK8sObjectsFromYAMLManifest(yml)
+	objects, err := object.ParseK8sObjectsFromYAMLManifest(yml)
 	if err != nil {
 		return "", err
 	}
@@ -282,7 +284,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 		}
 		dbgPrint("baseYAML:\n%s\n, overlayYAML:\n%s\n, mergedYAML:\n%s\n", string(baseYAML), string(overlayYAML), string(mergedYAML))
 
-		mergedObj, err := util.ParseYAMLToK8sObject(mergedYAML)
+		mergedObj, err := object.ParseYAMLToK8sObject(mergedYAML)
 		if err != nil {
 			return "", fmt.Errorf("could not ParseYAMLToK8sObject in OverlayK8sSettings: %s", err)
 		}

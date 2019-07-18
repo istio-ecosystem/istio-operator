@@ -87,6 +87,8 @@ import (
 	"fmt"
 	"strings"
 
+	"istio.io/operator/pkg/object"
+
 	"istio.io/operator/pkg/tpath"
 
 	"github.com/kr/pretty"
@@ -106,7 +108,7 @@ var (
 // Each overlay has the format described in the K8SObjectOverlay definition.
 // It returns the patched manifest YAML.
 func YAMLManifestPatch(baseYAML string, namespace string, overlays []*v1alpha2.K8SObjectOverlay) (string, error) {
-	baseObjs, err := util.ParseK8sObjectsFromYAMLManifest(baseYAML)
+	baseObjs, err := object.ParseK8sObjectsFromYAMLManifest(baseYAML)
 	if err != nil {
 		return "", err
 	}
@@ -165,7 +167,7 @@ func YAMLManifestPatch(baseYAML string, namespace string, overlays []*v1alpha2.K
 
 // applyPatches applies the given patches against the given object. It returns the resulting patched YAML if successful,
 // or a list of errors otherwise.
-func applyPatches(base *util.K8sObject, patches []*v1alpha2.K8SObjectOverlay_PathValue) (outYAML []byte, errs util.Errors) {
+func applyPatches(base *object.K8sObject, patches []*v1alpha2.K8SObjectOverlay_PathValue) (outYAML []byte, errs util.Errors) {
 	bo := make(map[interface{}]interface{})
 	by, err := base.YAML()
 	if err != nil {
@@ -196,7 +198,7 @@ func applyPatches(base *util.K8sObject, patches []*v1alpha2.K8SObjectOverlay_Pat
 func objectOverrideMap(oos []*v1alpha2.K8SObjectOverlay, namespace string) map[string][]*v1alpha2.K8SObjectOverlay_PathValue {
 	ret := make(map[string][]*v1alpha2.K8SObjectOverlay_PathValue)
 	for _, o := range oos {
-		ret[util.Hash(o.Kind, namespace, o.Name)] = o.Patches
+		ret[object.Hash(o.Kind, namespace, o.Name)] = o.Patches
 	}
 	return ret
 }
