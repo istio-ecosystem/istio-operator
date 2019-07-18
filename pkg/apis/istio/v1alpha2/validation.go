@@ -18,7 +18,7 @@ import (
 	fmt "fmt"
 	"reflect"
 
-	_ "istio.io/operator/pkg/util"
+	"istio.io/operator/pkg/util"
 )
 
 // Validation  calls a validation func for every defined element of Values
@@ -53,11 +53,11 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *Val
 			continue
 		}
 		val := e.Field(i).Elem()
-		if val == reflect.ValueOf(nil) {
+		if util.IsNilOrInvalidValue(val) {
 			continue
 		}
 		validation := e.Field(i).MethodByName("Validation")
-		if validation == reflect.ValueOf(nil) {
+		if util.IsNilOrInvalidValue(validation) {
 			if failOnMissingValidation {
 				validationErrors = append(validationErrors, fmt.Sprintf("type %s is missing Validation method", e.Type().Field(i).Type))
 			}
