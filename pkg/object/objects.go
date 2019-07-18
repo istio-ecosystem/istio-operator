@@ -334,3 +334,52 @@ func (os K8sObjects) YAML() (string, error) {
 	}
 	return sb.String(), nil
 }
+
+func ManifestDiff(a, b string) (string, error) {
+	ao, err := ParseK8sObjectsFromYAMLManifest(a)
+	if err != nil {
+		return "", err
+	}
+	bo, err := ParseK8sObjectsFromYAMLManifest(b)
+	if err != nil {
+		return "", err
+	}
+	aom, bom := ao.ToMap(), bo.ToMap()
+	var sb strings.Builder
+	for ak, av := range aom {
+		ay, err := av.YAML()
+		if err != nil {
+			return "", err
+		}
+		by, err := bom[ak].YAML()
+		if err != nil {
+			return "", err
+		}
+		diff := util.YAMLDiff(string(ay), string(by))
+		if diff != "" {
+			writeStringSafe(sb, "\n\nObject "+ak+" has diffs:\n\n")
+			writeStringSafe(sb, diff)
+		}
+	}
+	for bk, bv := range bom {
+		if aom[bk] == nil {
+			by, err := bv.YAML()
+			if err != nil {
+				return "", err
+			}
+			diff := util.YAMLDiff(string(by), "")
+			if diff != "" {
+				writeStringSafe(sb, "\n\nObject "+bk+" is missing:\n\n")
+				writeStringSafe(sb, diff)
+			}
+		}
+	}
+	return sb.String(), err
+}
+
+func writeStringSafe(sb strings.Builder, s string) {
+	_, err := sb.WriteString(s)
+	if err != nil {
+		log.Error(err.Error())
+	}
+}
