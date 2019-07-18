@@ -650,7 +650,7 @@ func FromString(val string) IntOrStringForPB {
 // Validation checks
 func (t *PilotConfig) Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) util.Errors {
 	var validationErrors util.Errors
-	validationErrors = util.AppendErr(validationErrors, fmt.Errorf("PilotConfig has not been yet implemented"))
+	validationErrors = util.AppendErr(validationErrors, fmt.Errorf("pilotconfig has not been yet implemented"))
 
 	return validationErrors
 }
@@ -658,7 +658,7 @@ func (t *PilotConfig) Validation(failOnMissingValidation bool, values *Values, i
 // Validation checks CNIConfig confiugration
 func (t *CNIConfig) Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) util.Errors {
 	var validationErrors util.Errors
-	validationErrors = util.AppendErr(validationErrors, fmt.Errorf("CNIConfig has not been yet implemented"))
+	validationErrors = util.AppendErr(validationErrors, fmt.Errorf("cniconfig has not been yet implemented"))
 
 	return validationErrors
 }
