@@ -22,8 +22,8 @@ import (
 )
 
 // Validation  calls a validation func for every defined element of Values
-func Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) []string {
-	var validationErrors []string
+func Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) util.Errors {
+	var validationErrors util.Errors
 
 	validationErrors = append(validationErrors, validateSubTypes(reflect.ValueOf(values).Elem(), failOnMissingValidation, values, icpls)...)
 
@@ -31,21 +31,21 @@ func Validation(failOnMissingValidation bool, values *Values, icpls *IstioContro
 }
 
 // Validation checks PilotConfig  and all subc types
-func (t *PilotConfig) Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) []string {
-	var validationErrors []string
+func (t *PilotConfig) Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) util.Errors {
+	var validationErrors util.Errors
 
 	return validationErrors
 }
 
 // Validation checks CNIConfig  and all subc types
-func (t *CNIConfig) Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) []string {
-	var validationErrors []string
+func (t *CNIConfig) Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) util.Errors {
+	var validationErrors util.Errors
 
 	return validationErrors
 }
 
-func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) []string {
-	var validationErrors []string
+func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) util.Errors {
+	var validationErrors util.Errors
 
 	for i := 0; i < e.NumField(); i++ {
 		// Validation is not required if it is not a defined type
@@ -59,12 +59,14 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *Val
 		validation := e.Field(i).MethodByName("Validation")
 		if util.IsNilOrInvalidValue(validation) {
 			if failOnMissingValidation {
-				validationErrors = append(validationErrors, fmt.Sprintf("type %s is missing Validation method", e.Type().Field(i).Type))
+				validationErrors = append(validationErrors, fmt.Errorf("type %s is missing Validation method", e.Type().Field(i).Type))
 			}
 		} else {
 			r := validation.Call([]reflect.Value{reflect.ValueOf(failOnMissingValidation), reflect.ValueOf(values), reflect.ValueOf(icpls)})[0].Interface().([]string)
 			if len(r) != 0 {
-				validationErrors = append(validationErrors, r...)
+				for _, e := range r {
+					validationErrors = append(validationErrors, fmt.Errorf(e))
+				}
 			}
 		}
 		validationErrors = append(validationErrors, validateSubTypes(e.Field(i).Elem(), failOnMissingValidation, values, icpls)...)
