@@ -22,10 +22,13 @@ import (
 	"reflect"
 	"strings"
 
+	"istio.io/operator/pkg/object"
+
+	"istio.io/operator/pkg/tpath"
+
 	"github.com/ghodss/yaml"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/version"
@@ -222,7 +225,7 @@ func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
 
 // OverlayK8sSettings overlays k8s settings from icp over the manifest objects, based on t's translation mappings.
 func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPlaneSpec, componentName name.ComponentName) (string, error) {
-	objects, err := manifest.ParseK8sObjectsFromYAMLManifest(yml)
+	objects, err := object.ParseK8sObjectsFromYAMLManifest(yml)
 	if err != nil {
 		return "", err
 	}
@@ -282,7 +285,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 		}
 		dbgPrint("baseYAML:\n%s\n, overlayYAML:\n%s\n, mergedYAML:\n%s\n", string(baseYAML), string(overlayYAML), string(mergedYAML))
 
-		mergedObj, err := manifest.ParseYAMLToK8sObject(mergedYAML)
+		mergedObj, err := object.ParseYAMLToK8sObject(mergedYAML)
 		if err != nil {
 			return "", fmt.Errorf("could not ParseYAMLToK8sObject in OverlayK8sSettings: %s", err)
 		}
@@ -306,7 +309,7 @@ func overlayK8s(baseYAML, overlayYAML []byte, path util.Path) ([]byte, error) {
 			return nil, fmt.Errorf("overlayK8s: %s for overlayYAML:\n%s", err, overlayYAML)
 		}
 	}
-	if err := setTree(base, path, overlay); err != nil {
+	if err := tpath.WriteNode(base, path, overlay); err != nil {
 		return nil, err
 	}
 	return yaml.Marshal(base)
@@ -316,7 +319,6 @@ func overlayK8s(baseYAML, overlayYAML []byte, path util.Path) ([]byte, error) {
 func (t *Translator) ProtoToValues(ii *v1alpha2.IstioControlPlaneSpec) (string, error) {
 	root := make(map[string]interface{})
 
-	// First, map proto fields to helm values according to rules map.
 	errs := t.protoToHelmValues(ii, root, nil)
 	if len(errs) != 0 {
 		return "", errs.ToError()
@@ -370,7 +372,7 @@ func (t *Translator) Components(featureName name.FeatureName) []name.ComponentNa
 // If no mapping function is defined, it uses the default mapping function.
 func (t *Translator) protoToHelmValues(node interface{}, root map[string]interface{}, path util.Path) (errs util.Errors) {
 	dbgPrint("protoToHelmValues with path %s, %v (%T)", path, node, node)
-	if node == nil {
+	if util.IsValueNil(node) {
 		return nil
 	}
 
@@ -422,7 +424,7 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp
 		if err != nil {
 			return err
 		}
-		if err := setTree(root, util.PathFromString(c.ToHelmValuesTreeRoot+"."+HelmValuesEnabledSubpath), e); err != nil {
+		if err := tpath.WriteNode(root, util.PathFromString(c.ToHelmValuesTreeRoot+"."+HelmValuesEnabledSubpath), e); err != nil {
 			return err
 		}
 
@@ -430,7 +432,7 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp
 		if err != nil {
 			return err
 		}
-		if err := setTree(root, util.PathFromString(c.ToHelmValuesTreeRoot+"."+HelmValuesNamespaceSubpath), ns); err != nil {
+		if err := tpath.WriteNode(root, util.PathFromString(c.ToHelmValuesTreeRoot+"."+HelmValuesNamespaceSubpath), ns); err != nil {
 			return err
 		}
 	}
@@ -570,7 +572,7 @@ func defaultTranslationFunc(m *Translation, root map[string]interface{}, valuesP
 		path = append(path, firstCharToLower(p))
 	}
 
-	return setTree(root, path, value)
+	return tpath.WriteNode(root, path, value)
 }
 
 func dbgPrint(v ...interface{}) {

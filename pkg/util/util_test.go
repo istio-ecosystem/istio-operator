@@ -15,17 +15,14 @@
 package util
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/gogo/protobuf/types"
 	"github.com/golang/protobuf/proto"
+	"k8s.io/api/autoscaling/v2beta1"
+	v1 "k8s.io/api/core/v1"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
-
-	v2beta1 "k8s.io/api/autoscaling/v2beta1"
-	v1 "k8s.io/api/core/v1"
-	_ "k8s.io/apimachinery/pkg/util/intstr"
 )
 
 var (
@@ -60,13 +57,11 @@ var (
 								},
 							},
 							ReplicaCount: 1,
-							ReadinessProbe: &v1.Probe{
-								Handler: v1.Handler{},
-								// 	HTTPGet: &v1.HTTPGetAction{
-								// 		Path: "/ready",
-								// 		Port: intstr.FromInt(8080),
-								// 	},
-								// },
+							ReadinessProbe: &v1alpha2.ReadinessProbe{
+								HttpGet: &v1alpha2.HTTPGetAction{
+									Path: "/ready",
+									Port: v1alpha2.FromInt(8080),
+								},
 								InitialDelaySeconds: 5,
 								PeriodSeconds:       30,
 								TimeoutSeconds:      5,
@@ -166,11 +161,9 @@ trafficManagement:
                   targetAverageUtilization: 80
           replicaCount: 1
           readinessProbe:
-            handler: {}
-# TODO: uncomment the following lines after the jsonpb unmarshaling issue is resolved: https://github.com/istio/istio/issues/15366
-#            httpGet:
-#              path: /ready
-#              port: 8080
+            httpGet:
+              path: /ready
+              port: 8080
             initialDelaySeconds: 5
             periodSeconds: 30
             timeoutSeconds: 5
@@ -236,28 +229,6 @@ func TestToYAMLWithJSONPB(t *testing.T) {
 			got := ToYAMLWithJSONPB(icp)
 			if !IsYAMLEqual(got, tt.want) || YAMLDiff(got, tt.want) != "" {
 				t.Errorf("TestToYAMLWithJSONPB(%s): got:\n%s\n\nwant:\n%s\nDiff:\n%s\n", tt.desc, got, tt.want, YAMLDiff(got, tt.want))
-			}
-		})
-	}
-}
-
-func TestUnmarshalWithJSONPB(t *testing.T) {
-	unmarshalWithJSONPBTests := []struct {
-		desc string
-		yaml string
-		want *v1alpha2.IstioControlPlaneSpec
-	}{
-		{"UnmarshalWithJSONPBToYAML", icpYaml, icp},
-	}
-
-	for _, tt := range unmarshalWithJSONPBTests {
-		t.Run(tt.desc, func(t *testing.T) {
-			got := &v1alpha2.IstioControlPlaneSpec{}
-			err := UnmarshalWithJSONPB(icpYaml, got)
-			if err != nil {
-				if !reflect.DeepEqual(got, tt.want) {
-					t.Errorf("TestUnmarshalWithJSONPB(%s): got:\n%v\n\nwant:\n%v", tt.desc, got, tt.want)
-				}
 			}
 		})
 	}
