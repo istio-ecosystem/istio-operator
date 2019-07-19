@@ -67,36 +67,19 @@ function helm_manifest() {
     local cfg="-f ${chart}/global.yaml"
 
     # the specified profile will override the gloal settings
-    if [ -f "${chart}/values-istio-${profile}.yaml" ]; then
-        cfg="${cfg} -f ${chart}/values-istio-${profile}.yaml"
+    if [ -f "${ROOT}/tests/profiles/values-istio-${profile}.yaml" ]; then
+        cfg="${cfg} -f ${ROOT}/tests/profiles/values-istio-${profile}.yaml"
     fi
 
+    # create parent directory for the manifests rendered by helm template
     mkdir -p ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}
 
-    # crds are mandatory for each profile
-    helm_render_template ${namespace} ${relase} ${chart}/crds ${cfg} $* > ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/crds.yaml
-
-    # pilot are required for all the profiles
-    helm_render_template ${namespace} ${relase} ${chart}/istio-control/istio-discovery ${cfg} $* > ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/pilot.yaml
-
-    if [ ${profile} != "minimal" ]; then
-        helm_render_template ${namespace} ${relase} ${chart}/istio-control/istio-config ${cfg} $* > ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/galley.yaml
-        helm_render_template ${namespace} ${relase} ${chart}/istio-control/istio-autoinject ${cfg} $* > ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/sidecar-injector.yaml
-        helm_render_template ${namespace} ${relase} ${chart}/gateways/istio-ingress ${cfg} $* > ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/ingress.yaml
-        helm_render_template ${namespace} ${relase} ${chart}/istio-telemetry/mixer-telemetry ${cfg} $* > ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/telemetry.yaml
-        helm_render_template ${namespace} ${relase} ${chart}/istio-policy ${cfg} $* > ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/policy.yaml
-        helm_render_template ${namespace} ${relase} ${chart}/security/citadel ${cfg} $* > ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/citadel.yaml
-    fi
-
-    if [ ${profile} == "demo*" ]; then
-        helm_render_template ${namespace} ${relase} ${chart}/gateways/istio-egress ${cfg} $* > ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/egress.yaml
-    fi
-
-    #helm_render_template ${namespace} ${relase} ${chart}/security/certmanager ${cfg} $* > ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/certmanager.yaml
-
-    if [ ${profile} == "sds" ]; then
-        helm_render_template ${namespace} ${relase} ${chart}/security/nodeagent ${cfg} $* > ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/nodeagent.yaml
-    fi
+    local charts=${profile_charts_map[${profile}]}
+    for c in $(echo $charts | tr " " "\n")
+    do
+        mkdir -p $(dirname ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/${c}.yaml)
+        helm_render_template ${namespace} ${relase} ${chart}/${c} ${cfg} $* > ${OUT}/helm-template/istio-${namespace}-${relase}-${profile}/${c}.yaml
+    done
 }
 
 # render all the templates with iop manifest.
@@ -115,7 +98,7 @@ function iop_mandiff_with_profile() {
     iop_manifest ${profile}
 
     # compare the manifests with iop diff-manifest command
-    iop diff-manifest --directory ${OUT}/helm-template/istio-${ISTIO_SYSTEM_NS}-${ISTIO_RELEASE}-${ISTIO_PROFILE} ${OUT}/iop-manifest/istio-${ISTIO_PROFILE}
+    iop diff-manifest --directory ${OUT}/helm-template/istio-${ISTIO_SYSTEM_NS}-${ISTIO_RELEASE}-${profile} ${OUT}/iop-manifest/istio-${profile}
 }
 
 # TODO: handle the case that different components are deployed in different namespaces
@@ -125,7 +108,15 @@ ISTIO_DEFAULT_PROFILE=${ISTIO_DEFAULT_PROFILE:-default}
 ISTIO_DEMO_PROFILE=${ISTIO_DEMO_PROFILE:-demo}
 ISTIO_DEMOAUTH_PROFILE=${ISTIO_DEMOAUTH_PROFILE:-"demo-auth"}
 ISTIO_MINIMAL_PROFILE=${ISTIO_MINIMAL_PROFILE:-minimal}
-ISTIO_SDS_PROFILE=${ISTIO_SDS_PROFILE:-sds}
+ISTIO_SDS_PROFILE=${ISTIO_SDS_PROFILE:-sds}\
+
+# declare map with profile as key and charts as values
+declare -A profile_charts_map
+profile_charts_map[${ISTIO_DEFAULT_PROFILE}]="crds istio-control/istio-discovery istio-control/istio-config istio-control/istio-autoinject gateways/istio-ingress istio-telemetry/mixer-telemetry istio-policy security/citadel"
+profile_charts_map[${ISTIO_DEMO_PROFILE}]="crds istio-control/istio-discovery istio-control/istio-config istio-control/istio-autoinject gateways/istio-ingress gateways/istio-egress istio-telemetry/mixer-telemetry istio-policy security/citadel"
+profile_charts_map[${ISTIO_DEMOAUTH_PROFILE}]="crds istio-control/istio-discovery istio-control/istio-config istio-control/istio-autoinject gateways/istio-ingress gateways/istio-egress istio-telemetry/mixer-telemetry istio-policy security/citadel"
+profile_charts_map[${ISTIO_MINIMAL_PROFILE}]="crds istio-control/istio-discovery"
+profile_charts_map[${ISTIO_SDS_PROFILE}]="crds istio-control/istio-discovery istio-control/istio-config istio-control/istio-autoinject gateways/istio-ingress istio-telemetry/mixer-telemetry istio-policy security/citadel security/nodeagent"
 
 iop_mandiff_with_profile ${ISTIO_DEFAULT_PROFILE}
 iop_mandiff_with_profile ${ISTIO_DEMO_PROFILE}
