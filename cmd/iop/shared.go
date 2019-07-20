@@ -85,14 +85,13 @@ func genManifests(args *rootArgs) (name.ManifestMap, error) {
 		return nil, errs.ToError()
 	}
 
-	// Now read the base profile specified in the user spec. If nothing specified, use default.
-	baseYAML, err := helm.ReadValuesYAML(overlayICPS.Profile)
-
 	baseProfileName := overlayICPS.Profile
 	if baseProfileName == "" {
 		baseProfileName = "[Builtin Profile]"
 	}
 
+	// Now read the base profile specified in the user spec. If nothing specified, use default.
+	baseYAML, err := helm.ReadValuesYAML(overlayICPS.Profile)
 	if err != nil {
 		log.Errorf("Error reading YAML from profile: %s", baseProfileName)
 		return nil, err
@@ -143,9 +142,4 @@ func genManifests(args *rootArgs) (name.ManifestMap, error) {
 		return manifests, errs.ToError()
 	}
 	return manifests, nil
-}
-
-func logAndFatalf(args *rootArgs, v ...interface{}) {
-	logAndPrintf(args, v...)
-	os.Exit(-1)
 }
