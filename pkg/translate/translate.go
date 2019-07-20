@@ -301,12 +301,12 @@ func overlayK8s(baseYAML, overlayYAML []byte, path util.Path) ([]byte, error) {
 	base, overlayMap := make(map[string]interface{}), make(map[string]interface{})
 	var overlay interface{} = overlayMap
 	if err := yaml.Unmarshal(baseYAML, &base); err != nil {
-		return nil, fmt.Errorf("Failed to unmarshal in overlayK8s: %s for baseYAML:\n%s", err, baseYAML)
+		return nil, fmt.Errorf("failed to unmarshal in overlayK8s: %s for baseYAML:\n%s", err, baseYAML)
 	}
 	if err := yaml.Unmarshal(overlayYAML, &overlayMap); err != nil {
 		// May be a scalar type, try to unmarshal into interface instead.
 		if err := yaml.Unmarshal(overlayYAML, &overlay); err != nil {
-			return nil, fmt.Errorf("Failed to unmarshal in overlayK8s: %s for overlayYAML:\n%s", err, overlayYAML)
+			return nil, fmt.Errorf("failed to unmarshal in overlayK8s: %s for overlayYAML:\n%s", err, overlayYAML)
 		}
 	}
 	if err := tpath.WriteNode(base, path, overlay); err != nil {

@@ -126,7 +126,7 @@ func genManifests(args *rootArgs) (name.ManifestMap, error) {
 	}
 
 	if yd := util.YAMLDiff(mergedYAML, util.ToYAMLWithJSONPB(mergedICPS)); yd != "" {
-		return nil, fmt.Errorf("Merged YAML differs from merged spec: \n%s\n", yd)
+		return nil, fmt.Errorf("merged YAML differs from merged spec: \n%s", yd)
 	}
 
 	log.Infof("Start running Istio control plane.")

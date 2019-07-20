@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"fmt"
+
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
@@ -28,12 +29,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 
-	"istio.io/pkg/ctrlz"
-	"istio.io/pkg/log"
-
 	"istio.io/operator/pkg/apis"
 	"istio.io/operator/pkg/controller"
 	"istio.io/operator/pkg/controller/istiocontrolplane"
+	"istio.io/pkg/ctrlz"
+	"istio.io/pkg/log"
 )
 
 // Change below variables to serve metrics on different host or port.
@@ -102,7 +102,7 @@ func run() {
 		log.Fatalf("Could not create a controller manager: %v", err)
 	}
 
-	log.Infof("Registering Components.")
+	log.Info("Registering Components.")
 
 	// Setup Scheme for all resources
 	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
@@ -120,7 +120,7 @@ func run() {
 		log.Errorf("Could not create a service to expose the metrics port: %v", err.Error())
 	}
 
-	log.Infof("Starting the Cmd.")
+	log.Info("Starting the Cmd.")
 
 	// Start the Cmd
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
