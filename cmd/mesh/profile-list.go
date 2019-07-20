@@ -42,7 +42,7 @@ func profileListCmd(rootArgs *rootArgs, plArgs *profileListArgs) *cobra.Command 
 
 }
 
-func profileList(args *rootArgs, plArgs *profileListArgs) {
+func profileList(args *rootArgs, _ *profileListArgs) {
 	checkLogsOrExit(args)
 	fmt.Println("This command is not yet implemented.")
 }

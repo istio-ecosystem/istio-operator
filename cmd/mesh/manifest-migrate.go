@@ -32,6 +32,6 @@ func manifestMigrateCmd(rootArgs *rootArgs) *cobra.Command {
 
 }
 
-func manifestMigrate(args *rootArgs) {
+func manifestMigrate(_ *rootArgs) {
 	fmt.Println("Not yet implemented.")
 }
