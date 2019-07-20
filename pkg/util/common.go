@@ -20,11 +20,6 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-const (
-	// LocalFilePrefix is a prefix for local files.
-	LocalFilePrefix = "file:///"
-)
-
 var (
 	// DebugPackage controls verbose debugging in this package. Used for offline debugging.
 	DebugPackage = false
@@ -44,11 +39,5 @@ func (t Tree) String() string {
 
 // IsFilePath reports whether the given URL is a local file path.
 func IsFilePath(path string) bool {
-	return strings.HasPrefix(path, LocalFilePrefix)
-}
-
-// GetLocalFilePath returns the local file path string of the form /a/b/c, given a file URL of the form file:///a/b/c
-func GetLocalFilePath(path string) string {
-	// LocalFilePrefix always starts with file:/// but this includes the absolute path leading slash, preserve that.
-	return "/" + strings.TrimPrefix(path, LocalFilePrefix)
+	return strings.Contains(path, "/") || strings.Contains(path, ".")
 }

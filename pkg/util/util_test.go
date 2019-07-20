@@ -27,10 +27,10 @@ import (
 
 var (
 	icp = &v1alpha2.IstioControlPlaneSpec{
-		DefaultNamespacePrefix: "istio-system",
-		Hub:                    "docker.io/istio",
-		Tag:                    "1.1.4",
-		Profile:                "default",
+		DefaultNamespace: "istio-system",
+		Hub:              "docker.io/istio",
+		Tag:              "1.1.4",
+		Profile:          "default",
 		TrafficManagement: &v1alpha2.TrafficManagementFeatureSpec{
 			Enabled: &types.BoolValue{Value: true},
 			Components: &v1alpha2.TrafficManagementFeatureSpec_Components{
@@ -131,10 +131,10 @@ var (
 	}
 
 	icpYaml = `
-defaultNamespacePrefix: istio-system
+defaultNamespace: istio-system
 hub: docker.io/istio
 tag: 1.1.4
-defaultNamespacePrefix: istio-system
+defaultNamespace: istio-system
 profile: default
 
 trafficManagement:
