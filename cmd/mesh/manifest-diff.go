@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package iop
+package mesh
 
 import (
 	"fmt"
@@ -27,16 +27,22 @@ import (
 	"istio.io/pkg/log"
 )
 
-type manDiffArgs struct {
+// YAMLSuffix is the suffix of a YAML file.
+const YAMLSuffix = "yaml"
+
+type manifestDiffArgs struct {
 	// compareDir indicates comparison between directory.
 	compareDir bool
 }
 
-const YamlSuffix = "yaml"
+func addManifestDiffFlags(cmd *cobra.Command, diffArgs *manifestDiffArgs) {
+	cmd.PersistentFlags().BoolVarP(&diffArgs.compareDir, "directory", "r",
+		false, "compare directory")
+}
 
-func manifestDiffCmd(rootArgs *rootArgs, diffArgs *manDiffArgs) *cobra.Command {
+func manifestDiffCmd(rootArgs *rootArgs, diffArgs *manifestDiffArgs) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "diff-manifest",
+		Use:   "diff",
 		Short: "Compare manifests and generate diff.",
 		Long:  "The diff-manifest subcommand is used to compare manifest from two files or directories.",
 		Args:  cobra.ExactArgs(2),
@@ -48,11 +54,6 @@ func manifestDiffCmd(rootArgs *rootArgs, diffArgs *manDiffArgs) *cobra.Command {
 			}
 		}}
 	return cmd
-}
-
-func addManDiffFlag(cmd *cobra.Command, diffArgs *manDiffArgs) {
-	cmd.PersistentFlags().BoolVarP(&diffArgs.compareDir, "directory", "r",
-		false, "compare directory")
 }
 
 //compareManifestsFromFiles compares two manifest files
@@ -89,7 +90,7 @@ func readFromDir(dirName string) (string, error) {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() || filepath.Ext(path) != YamlSuffix {
+		if info.IsDir() || filepath.Ext(path) != YAMLSuffix {
 			return nil
 		}
 		fileList = append(fileList, path)

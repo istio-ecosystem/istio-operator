@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package iop
+package mesh
 
 import (
 	"flag"
@@ -22,11 +22,14 @@ import (
 	"istio.io/pkg/version"
 )
 
+const (
+	setFlagHelpStr = `Set a value in IstioControlPlane CustomResource. e.g. --set policy.enabled=true.
+Overrides the corresponding path value in the selected profile or passed through IstioControlPlane CR
+customization file.`
+	filenameFlagHelpStr = `Path to file containing IstioControlPlane CustomResource.`
+)
+
 type rootArgs struct {
-	// inFilename is the path to the input IstioIstall CR.
-	inFilename string
-	// outFilename is the path to the generated output filename.
-	outFilename string
 	// logToStdErr controls whether logs are sent to stderr.
 	logToStdErr bool
 	// Dry run performs all steps except actually applying the manifests or creating output dirs/files.
@@ -36,10 +39,6 @@ type rootArgs struct {
 }
 
 func addFlags(cmd *cobra.Command, rootArgs *rootArgs) {
-	cmd.PersistentFlags().StringVarP(&rootArgs.inFilename, "filename", "f", "",
-		"The path to the input IstioIstall CR. Uses in cluster value with kubectl if unset.")
-	cmd.PersistentFlags().StringVarP(&rootArgs.outFilename, "output", "o",
-		"", "Manifest output path.")
 	cmd.PersistentFlags().BoolVarP(&rootArgs.logToStdErr, "logtostderr", "",
 		false, "Send logs to stderr.")
 	cmd.PersistentFlags().BoolVarP(&rootArgs.dryRun, "dry-run", "",
@@ -51,7 +50,7 @@ func addFlags(cmd *cobra.Command, rootArgs *rootArgs) {
 // GetRootCmd returns the root of the cobra command-tree.
 func GetRootCmd(args []string) *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:   "iop",
+		Use:   "mesh",
 		Short: "Command line Istio install utility.",
 		Long: "This command uses the Istio operator code to generate templates, query configurations and perform " +
 			"utility operations.",
@@ -60,26 +59,15 @@ func GetRootCmd(args []string) *cobra.Command {
 	rootCmd.PersistentFlags().AddGoFlagSet(flag.CommandLine)
 
 	rootArgs := &rootArgs{}
-	diffArgs := &manDiffArgs{}
-	dumpArgs := &dumpArgs{}
 
-	ic := installCmd(rootArgs)
 	mc := manifestCmd(rootArgs)
-	mdc := manifestDiffCmd(rootArgs, diffArgs)
-	dpc := dumpProfileDefaultsCmd(rootArgs, dumpArgs)
+	pc := profileCmd(rootArgs)
 
-	addFlags(ic, rootArgs)
 	addFlags(mc, rootArgs)
-	addFlags(dpc, rootArgs)
-	addFlags(mdc, rootArgs)
+	addFlags(pc, rootArgs)
 
-	addManDiffFlag(mdc, diffArgs)
-	addDumpFlags(dpc, dumpArgs)
-
-	rootCmd.AddCommand(ic)
 	rootCmd.AddCommand(mc)
-	rootCmd.AddCommand(mdc)
-	rootCmd.AddCommand(dpc)
+	rootCmd.AddCommand(pc)
 	rootCmd.AddCommand(version.CobraCommand())
 
 	return rootCmd

@@ -1,25 +1,10 @@
-// Copyright 2017 Istio Authors
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-// Package iop contains types and functions that are used across the full
-// set of mixer commands.
-package iop
+package mesh
 
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
+
+	"github.com/spf13/cobra"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/component/controlplane"
@@ -32,36 +17,42 @@ import (
 	"istio.io/pkg/log"
 )
 
-const (
-	logFilePath = "./iop.log"
-)
-
-func getWriter(args *rootArgs) (*os.File, error) {
-	writer := os.Stdout
-	if args.outFilename != "" {
-		file, err := os.Create(args.outFilename)
-		if err != nil {
-			return nil, err
-		}
-
-		writer = file
+func manifestCmd(args *rootArgs) *cobra.Command {
+	mc := &cobra.Command{
+		Use:   "manifest",
+		Short: "Commands related to Istio manifests.",
+		Long:  "The manifest subcommand is used to generate, apply, diff or migrate Istio manifests.",
 	}
-	return writer, nil
+
+	mgcArgs := &manifestGenerateArgs{}
+	mdcArgs := &manifestDiffArgs{}
+	macArgs := &manifestApplyArgs{}
+
+	mgc := manifestGenerateCmd(args, mgcArgs)
+	mdc := manifestDiffCmd(args, mdcArgs)
+	mac := manifestApplyCmd(args, macArgs)
+	mmc := manifestMigrateCmd(args)
+
+	addFlags(mgc, args)
+	addFlags(mdc, args)
+	addFlags(mac, args)
+
+	addManifestGenerateFlags(mgc, mgcArgs)
+	addManifestDiffFlags(mdc, mdcArgs)
+	addManifestApplyFlags(mac, macArgs)
+
+	mc.AddCommand(mgc)
+	mc.AddCommand(mdc)
+	mc.AddCommand(mac)
+	mc.AddCommand(mmc)
+
+	return mc
 }
 
-func configLogs(args *rootArgs) error {
-	opt := log.DefaultOptions()
-	if !args.logToStdErr {
-		opt.ErrorOutputPaths = []string{logFilePath}
-		opt.OutputPaths = []string{logFilePath}
-	}
-	return log.Configure(opt)
-}
-
-func genManifests(args *rootArgs) (name.ManifestMap, error) {
+func genManifests(args *rootArgs, inFilename string) (name.ManifestMap, error) {
 	overlayYAML := ""
-	if args.inFilename != "" {
-		b, err := ioutil.ReadFile(args.inFilename)
+	if inFilename != "" {
+		b, err := ioutil.ReadFile(inFilename)
 		if err != nil {
 			log.Fatalf("Could not open input file: %s", err)
 		}
@@ -118,18 +109,4 @@ func genManifests(args *rootArgs) (name.ManifestMap, error) {
 	manifests, errs := cp.RenderManifest()
 
 	return manifests, errs.ToError()
-}
-
-// TODO: this really doesn't belong here. Figure out if it's generally needed and possibly move to istio.io/pkg/log.
-func logAndPrintf(args *rootArgs, v ...interface{}) {
-	s := fmt.Sprintf(v[0].(string), v[1:]...)
-	if !args.logToStdErr {
-		fmt.Println(s)
-	}
-	log.Infof(s)
-}
-
-func logAndFatalf(args *rootArgs, v ...interface{}) {
-	logAndPrintf(args, v...)
-	os.Exit(-1)
 }
