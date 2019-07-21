@@ -27,7 +27,7 @@ set -e
 
 # shellcheck source=prow/lib.sh
 source "${ROOT}/prow/lib.sh"
-setup_and_export_git_sha
+#setup_and_export_git_sha
 
 cd "${ROOT}"
 
