@@ -127,7 +127,7 @@ func profileDump(args *rootArgs, pdArgs *profileDumpArgs) {
 	}
 
 	if pdArgs.helmValues {
-		mergedYAML, err = component.CompileHelmValues(mergedcps, t, "")
+		mergedYAML, err = component.TranslateHelmValues(mergedcps, t, "")
 		if err != nil {
 			logAndFatalf(args, err.Error())
 		}

@@ -25,10 +25,9 @@ func profileCmd(args *rootArgs) *cobra.Command {
 		Long:  "The profile subcommand is list, dump or diff Istio configuration profiles.",
 	}
 
-	plArgs := &profileListArgs{}
 	pdArgs := &profileDumpArgs{}
 
-	plc := profileListCmd(args, plArgs)
+	plc := profileListCmd(args)
 	pdc := profileDumpCmd(args, pdArgs)
 	pdfc := profileDiffCmd(args)
 
