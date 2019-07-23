@@ -47,12 +47,12 @@ func CheckIstioControlPlaneSpec(is *v1alpha2.IstioControlPlaneSpec, checkRequire
 }
 
 func validate(validations map[string]ValidatorFunc, structPtr interface{}, path util.Path, checkRequired bool) (errs util.Errors) {
-	dbgPrint("validate with path %s, %v (%T)", path, structPtr, structPtr)
+	scope.Debugf("validate with path %s, %v (%T)", path, structPtr, structPtr)
 	if structPtr == nil {
 		return nil
 	}
 	if reflect.TypeOf(structPtr).Kind() == reflect.Struct {
-		dbgPrint("validate path %s, skipping struct type %T", path, structPtr)
+		scope.Debugf("validate path %s, skipping struct type %T", path, structPtr)
 		return nil
 	}
 	if reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
@@ -75,7 +75,7 @@ func validate(validations map[string]ValidatorFunc, structPtr interface{}, path 
 			continue
 		}
 
-		dbgPrint("Checking field %s", fieldName)
+		scope.Debugf("Checking field %s", fieldName)
 		switch kind {
 		case reflect.Struct:
 			errs = util.AppendErrs(errs, validate(validations, fieldValue.Addr().Interface(), append(path, fieldName), checkRequired))
@@ -110,18 +110,18 @@ func validate(validations map[string]ValidatorFunc, structPtr interface{}, path 
 
 func validateLeaf(validations map[string]ValidatorFunc, path util.Path, val interface{}, checkRequired bool) util.Errors {
 	pstr := path.String()
-	dbgPrintC("validate %s:%v(%T) ", pstr, val, val)
+	scope.Debugf("validate %s:%v(%T) ", pstr, val, val)
 	if util.IsValueNil(val) || util.IsEmptyString(val) {
 		if checkRequired && requiredValues[pstr] {
 			return util.NewErrs(fmt.Errorf("field %s is required but not set", util.ToYAMLPathString(pstr)))
 		}
-		dbgPrint("validate %s: OK (empty value)", pstr)
+		scope.Debugf("validate %s: OK (empty value)", pstr)
 		return nil
 	}
 
 	vf, ok := validations[pstr]
 	if !ok {
-		dbgPrint("validate %s: OK (no validation)", pstr)
+		scope.Debugf("validate %s: OK (no validation)", pstr)
 		// No validation defined.
 		return nil
 	}
