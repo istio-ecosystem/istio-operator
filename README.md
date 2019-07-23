@@ -1,4 +1,3 @@
-[![Mergify Status](https://gh.mergify.io/badges/istio/operator.png?style=cut)](https://mergify.io)
 [![Go Report Card](https://goreportcard.com/badge/github.com/istio/operator)](https://goreportcard.com/report/github.com/istio/operator)
 [![GolangCI](https://golangci.com/badges/github.com/istio/operator.svg)](https://golangci.com/r/github.com/istio/operator)
 
@@ -79,10 +78,9 @@ The quick start describes how to install and use the operator `iop` CLI command.
 ### Installation
 
 ```bash
-export GO111MODULE=on # for pre-1.13 Go versions
 git clone https://github.com/istio/operator.git
 cd operator
-go build -o $GOPATH/bin/iop ./cmd/iop.go
+make iop
 ```
 
 ### Flags

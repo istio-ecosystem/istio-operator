@@ -20,8 +20,8 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
+	"github.com/gogo/protobuf/jsonpb"
 	"github.com/gogo/protobuf/proto"
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/kylelemons/godebug/diff"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
@@ -241,14 +241,14 @@ trafficManagement:
 			yamlStr: `
 hub: ?illegal-tag!
 `,
-			wantErrs: makeErrors([]string{`invalid value Hub:?illegal-tag!`}),
+			wantErrs: makeErrors([]string{`invalid value Hub: ?illegal-tag!`}),
 		},
 		{
 			desc: "BadHub",
 			yamlStr: `
 hub: docker.io:tag/istio
 `,
-			wantErrs: makeErrors([]string{`invalid value Hub:docker.io:tag/istio`}),
+			wantErrs: makeErrors([]string{`invalid value Hub: docker.io:tag/istio`}),
 		},
 		{
 			desc: "GoodURL",
@@ -261,7 +261,7 @@ customPackagePath: file:///local/file/path
 			yamlStr: `
 customPackagePath: bad_schema://local/file/path
 `,
-			wantErrs: makeErrors([]string{`invalid value CustomPackagePath:bad_schema://local/file/path`}),
+			wantErrs: makeErrors([]string{`invalid value CustomPackagePath: bad_schema://local/file/path`}),
 		},
 	}
 
