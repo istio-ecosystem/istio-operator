@@ -23,7 +23,6 @@ import (
 
 	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/version"
-
 	"istio.io/pkg/log"
 )
 
@@ -34,13 +33,13 @@ type manifestApplyArgs struct {
 	kubeConfigPath string
 	// set is a string with element format "path=value" where path is an IstioControlPlane path and the value is a
 	// value to set the node at that path to.
-	set string
+	set []string
 }
 
 func addManifestApplyFlags(cmd *cobra.Command, args *manifestApplyArgs) {
 	cmd.PersistentFlags().StringVarP(&args.inFilename, "filename", "f", "", filenameFlagHelpStr)
 	cmd.PersistentFlags().StringVarP(&args.kubeConfigPath, "kubeconfig", "c", "", "Path to kube config.")
-	cmd.PersistentFlags().StringVarP(&args.set, "set", "s", "", setFlagHelpStr)
+	cmd.PersistentFlags().StringSliceVarP(&args.set, "set", "s", nil, setFlagHelpStr)
 }
 
 func manifestApplyCmd(rootArgs *rootArgs, maArgs *manifestApplyArgs) *cobra.Command {
@@ -61,28 +60,31 @@ func manifestApply(args *rootArgs, maArgs *manifestApplyArgs) {
 		os.Exit(1)
 	}
 
-	manifests, err := genManifests(args, maArgs.inFilename)
+	overlayFromSet, err := makeTreeFromSetList(maArgs.set)
 	if err != nil {
-		log.Fatalf("Could not generate manifest: %v", err)
+		logAndFatalf(args, err)
+	}
+	manifests, err := genManifests(args, maArgs.inFilename, overlayFromSet)
+	if err != nil {
+		logAndFatalf(args, "Could not generate manifest: %v", err)
 	}
 
 	out, err := manifest.ApplyAll(manifests, version.NewVersion("", 1, 2, 0, ""), args.dryRun, args.verbose)
 	if err != nil {
-		log.Fatalf("Failed to apply manifest with kubectl client: %v", err)
+		logAndFatalf(args, "Failed to apply manifest with kubectl client: %v", err)
 	}
 
 	for cn := range manifests {
-
 		cs := fmt.Sprintf("CompositeOutput for component %s:", cn)
 		log.Infof("\n%s\n%s", cs, strings.Repeat("=", len(cs)))
 		if out.Err[cn] != nil {
-			log.Errorf("Error object: %s\n", out.Err[cn])
+			logAndPrintf(args, "Error object: %s\n", out.Err[cn])
 		}
 		if strings.TrimSpace(out.Stderr[cn]) != "" {
-			log.Errorf("Error string:\n%s\n", out.Stderr[cn])
+			logAndPrintf(args, "Error string:\n%s\n", out.Stderr[cn])
 		}
 		if strings.TrimSpace(out.Stdout[cn]) != "" {
-			log.Infof("Output:\n%s\n", out.Stdout[cn])
+			logAndPrintf(args, "Output:\n%s\n", out.Stdout[cn])
 		}
 	}
 }

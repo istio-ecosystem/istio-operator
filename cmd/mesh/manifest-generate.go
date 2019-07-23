@@ -21,7 +21,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"istio.io/operator/pkg/manifest"
-	"istio.io/pkg/log"
 )
 
 type manifestGenerateArgs struct {
@@ -31,13 +30,13 @@ type manifestGenerateArgs struct {
 	outFilename string
 	// set is a string with element format "path=value" where path is an IstioControlPlane path and the value is a
 	// value to set the node at that path to.
-	set string
+	set []string
 }
 
 func addManifestGenerateFlags(cmd *cobra.Command, args *manifestGenerateArgs) {
 	cmd.PersistentFlags().StringVarP(&args.inFilename, "filename", "f", "", filenameFlagHelpStr)
 	cmd.PersistentFlags().StringVarP(&args.outFilename, "output", "o", "", "Manifest output directory path.")
-	cmd.PersistentFlags().StringVarP(&args.set, "set", "s", "", setFlagHelpStr)
+	cmd.PersistentFlags().StringSliceVarP(&args.set, "set", "s", nil, setFlagHelpStr)
 }
 
 func manifestGenerateCmd(rootArgs *rootArgs, mgArgs *manifestGenerateArgs) *cobra.Command {
@@ -58,9 +57,13 @@ func manifestGenerate(args *rootArgs, mgArgs *manifestGenerateArgs) {
 		os.Exit(1)
 	}
 
-	manifests, err := genManifests(args, mgArgs.inFilename)
+	overlayFromSet, err := makeTreeFromSetList(mgArgs.set)
 	if err != nil {
-		log.Fatalf(err.Error())
+		logAndFatalf(args, err.Error())
+	}
+	manifests, err := genManifests(args, mgArgs.inFilename, overlayFromSet)
+	if err != nil {
+		logAndFatalf(args, err.Error())
 	}
 
 	if mgArgs.outFilename == "" {
@@ -69,10 +72,10 @@ func manifestGenerate(args *rootArgs, mgArgs *manifestGenerateArgs) {
 		}
 	} else {
 		if err := os.MkdirAll(mgArgs.outFilename, os.ModePerm); err != nil {
-			log.Fatalf(err.Error())
+			logAndFatalf(args, err.Error())
 		}
 		if err := manifest.RenderToDir(manifests, mgArgs.outFilename, args.dryRun, args.verbose); err != nil {
-			log.Errorf(err.Error())
+			logAndFatalf(args, err.Error())
 		}
 	}
 }

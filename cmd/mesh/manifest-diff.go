@@ -105,7 +105,9 @@ func readFromDir(dirName string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		sb.WriteString(string(a))
+		if _, err := sb.WriteString(string(a)); err != nil {
+			return "", err
+		}
 	}
 	return sb.String(), nil
 }
