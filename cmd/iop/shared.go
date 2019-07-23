@@ -143,3 +143,17 @@ func genManifests(args *rootArgs) (name.ManifestMap, error) {
 	}
 	return manifests, nil
 }
+
+// TODO: this really doesn't belong here. Figure out if it's generally needed and possibly move to istio.io/pkg/log.
+func logAndPrintf(args *rootArgs, v ...interface{}) {
+	s := fmt.Sprintf(v[0].(string), v[1:]...)
+	if !args.logToStdErr {
+		fmt.Println(s)
+		log.Infof(s)
+	}
+}
+
+func logAndFatalf(args *rootArgs, v ...interface{}) {
+	logAndPrintf(args, v...)
+	os.Exit(-1)
+}
