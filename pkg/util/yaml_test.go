@@ -111,20 +111,15 @@ var (
 									"memory": "128Mi",
 								},
 							},
-							"concurrency":                  2,
-							"accessLogEncoding":            "TEXT",
-							"logLevel":                     "warning",
-							"componentLogLevel":            "misc:error",
-							"dnsRefreshRate":               "300s",
-							"privileged":                   false,
-							"enableCoreDump":               false,
-							"statusPort":                   15020,
-							"readinessInitialDelaySeconds": 1,
-							"readinessPeriodSeconds":       2,
-							"readinessFailureThreshold":    30,
-							"includeIPRanges":              "*",
-							"autoInject":                   "enabled",
-							"tracer":                       "zipkin",
+							"accessLogEncoding": "TEXT",
+							"logLevel":          "warning",
+							"componentLogLevel": "misc:error",
+							"dnsRefreshRate":    "300s",
+							"privileged":        false,
+							"enableCoreDump":    false,
+							"includeIPRanges":   "*",
+							"autoInject":        "enabled",
+							"tracer":            "zipkin",
 						},
 					},
 				},
@@ -199,17 +194,12 @@ trafficManagement:
             limits:
               cpu: 2000m
               memory: 128Mi
-          concurrency: 2
           accessLogEncoding: TEXT
           logLevel: warning
           componentLogLevel: "misc:error"
           dnsRefreshRate: 300s
           privileged: false
           enableCoreDump: false
-          statusPort: 15020
-          readinessInitialDelaySeconds: 1
-          readinessPeriodSeconds: 2
-          readinessFailureThreshold: 30
           includeIPRanges: "*"
           autoInject: enabled
           tracer: "zipkin"
@@ -227,9 +217,9 @@ func TestToYAMLWithJSONPB(t *testing.T) {
 
 	for _, tt := range toYAMLWithJSONPBTests {
 		t.Run(tt.desc, func(t *testing.T) {
-			got := ToYAMLWithJSONPB(icp)
+			got := ToYAMLWithJSONPB(tt.pb)
 			if !IsYAMLEqual(got, tt.want) || YAMLDiff(got, tt.want) != "" {
-				t.Errorf("TestToYAMLWithJSONPB(%s): got:\n%s\n\nwant:\n%s\nDiff:\n%s\n", tt.desc, got, tt.want, YAMLDiff(got, tt.want))
+				t.Errorf("%s:\ngot:\n%s\n\nwant:\n%s\nDiff:\n%s\n", tt.desc, got, tt.want, YAMLDiff(got, tt.want))
 			}
 		})
 	}
@@ -247,11 +237,12 @@ func TestUnmarshalWithJSONPB(t *testing.T) {
 	for _, tt := range unmarshalWithJSONPBTests {
 		t.Run(tt.desc, func(t *testing.T) {
 			got := &v1alpha2.IstioControlPlaneSpec{}
-			err := UnmarshalWithJSONPB(icpYaml, got)
+			err := UnmarshalWithJSONPB(tt.yaml, got)
 			if err != nil {
-				if !reflect.DeepEqual(got, tt.want) {
-					t.Errorf("TestUnmarshalWithJSONPB(%s): got:\n%v\n\nwant:\n%v", tt.desc, got, tt.want)
-				}
+				t.Errorf("unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("%s:\ngot:\n%v\n\nwant:\n%v", tt.desc, got, tt.want)
 			}
 		})
 	}
