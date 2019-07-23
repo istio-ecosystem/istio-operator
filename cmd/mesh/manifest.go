@@ -87,7 +87,7 @@ func genManifests(_ *rootArgs, inFilename string, setOverlayYAML string) (name.M
 		return nil, fmt.Errorf("could not unmarshal the overlay YAML from file: %s", overlayFilenameLog)
 	}
 	if errs := validate.CheckIstioControlPlaneSpec(overlayICPS, false); len(errs) != 0 {
-		return nil, fmt.Errorf("Overlay spec failed validation against IstioControlPlaneSpec: \n%v", overlayICPS)
+		return nil, fmt.Errorf("overlay spec failed validation against IstioControlPlaneSpec: \n%v", overlayICPS)
 	}
 
 	baseProfileName := overlayICPS.Profile
