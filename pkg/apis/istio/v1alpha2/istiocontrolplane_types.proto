@@ -384,7 +384,8 @@ message GalleyComponentSpec {
 message CommonComponentSpec {
     // Selects whether this component is installed.
     google.protobuf.BoolValue enabled = 1;
-    // Namespace that all resources for this component are installed into. Overrides for parent feature namespace.
+    // Namespace that all resources for this component are installed into. Overrides the parent feature namespace and
+    // IstioControlPlaneSpec.DefaultNamespace.
     string namespace = 2;
     // LogLevel sets the component log level. Mappings to underlying log levels are not necessarily 1:1 and depend on
     // component support of these levels e.g. DEBUG or INFO may result in the same log verbosity.
