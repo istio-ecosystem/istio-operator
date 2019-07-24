@@ -110,7 +110,7 @@ func validate(validations map[string]ValidatorFunc, structPtr interface{}, path 
 
 func validateLeaf(validations map[string]ValidatorFunc, path util.Path, val interface{}, checkRequired bool) util.Errors {
 	pstr := path.String()
-	scope.Debugf("validate %s:%v(%T) ", pstr, val, val)
+	scope.Debugf("validate %s:%v(%T) start", pstr, val, val)
 	if util.IsValueNil(val) || util.IsEmptyString(val) {
 		if checkRequired && requiredValues[pstr] {
 			return util.NewErrs(fmt.Errorf("field %s is required but not set", util.ToYAMLPathString(pstr)))
@@ -125,7 +125,9 @@ func validateLeaf(validations map[string]ValidatorFunc, path util.Path, val inte
 		// No validation defined.
 		return nil
 	}
-	return vf(path, val)
+	errs := vf(path, val)
+	scope.Debugf("validate %s:%v(%T) end", pstr, val, val)
+	return errs
 }
 
 func validateHub(path util.Path, val interface{}) util.Errors {
