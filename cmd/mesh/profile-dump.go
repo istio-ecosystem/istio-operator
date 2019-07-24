@@ -35,8 +35,8 @@ type profileDumpArgs struct {
 	inFilename string
 	// If set, display the translated Helm values rather than IstioControlPlaneSpec.
 	helmValues bool
-	// rootConfigNode sets the root node for the subtree to display the config for.
-	rootConfigNode string
+	// configPath sets the root node for the subtree to display the config for.
+	configPath string
 	// set is a string with element format "path=value" where path is an IstioControlPlane path and the value is a
 	// value to set the node at that path to.
 	set string
@@ -44,7 +44,7 @@ type profileDumpArgs struct {
 
 func addProfileDumpFlags(cmd *cobra.Command, args *profileDumpArgs) {
 	cmd.PersistentFlags().StringVarP(&args.inFilename, "filename", "f", "", filenameFlagHelpStr)
-	cmd.PersistentFlags().StringVarP(&args.rootConfigNode, "root-config-node", "r", "",
+	cmd.PersistentFlags().StringVarP(&args.configPath, "config-path", "p", "",
 		"The path the root of the configuration subtree to dump e.g. trafficManagement.components.pilot. By default, dump whole tree. ")
 	cmd.PersistentFlags().BoolVarP(&args.helmValues, "helm-values", "", false,
 		"If set, dumps the Helm values that IstioControlPlaceSpec is translated to before manifests are rendered.")
@@ -133,7 +133,7 @@ func profileDump(args *rootArgs, pdArgs *profileDumpArgs) {
 		}
 	}
 
-	finalYAML, err := getConfigSubtree(mergedYAML, pdArgs.rootConfigNode)
+	finalYAML, err := getConfigSubtree(mergedYAML, pdArgs.configPath)
 	if err != nil {
 		logAndFatalf(args, "%s", err)
 	}
