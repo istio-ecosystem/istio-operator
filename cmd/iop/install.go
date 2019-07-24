@@ -23,6 +23,7 @@ import (
 
 	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/version"
+	"istio.io/pkg/log"
 )
 
 func installCmd(rootArgs *rootArgs, logOpts *log.Options) *cobra.Command {

@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	scope = log.RegisterScope("name", "name translator", 0)
+	scope = log.RegisterScope("name", "name", 0)
 )
 
 // FeatureName is a feature name string, typed to constrain allowed values.

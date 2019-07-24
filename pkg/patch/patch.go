@@ -99,7 +99,7 @@ import (
 )
 
 var (
-	scope = log.RegisterScope("patch", "yaml patch", 0)
+	scope = log.RegisterScope("patch", "patch", 0)
 )
 
 // YAMLManifestPatch patches a base YAML in the given namespace with a list of overlays.

@@ -32,6 +32,7 @@ import (
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/validate"
 	"istio.io/operator/pkg/version"
+	"istio.io/pkg/log"
 )
 
 type dumpArgs struct {

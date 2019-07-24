@@ -28,7 +28,7 @@ const (
 )
 
 var (
-	scope = log.RegisterScope("util", "common util", 0)
+	scope = log.RegisterScope("util", "util", 0)
 )
 
 // Tree is a tree.
