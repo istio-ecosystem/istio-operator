@@ -35,7 +35,6 @@ func profileCmd(args *rootArgs) *cobra.Command {
 	addFlags(pdc, args)
 	addFlags(pdfc, args)
 
-	addProfileListFlags(plc, plArgs)
 	addProfileDumpFlags(pdc, pdArgs)
 
 	pc.AddCommand(plc)
