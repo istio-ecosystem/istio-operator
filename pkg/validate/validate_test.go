@@ -241,14 +241,14 @@ trafficManagement:
 			yamlStr: `
 hub: ?illegal-tag!
 `,
-			wantErrs: makeErrors([]string{`invalid value Hub:?illegal-tag!`}),
+			wantErrs: makeErrors([]string{`invalid value Hub: ?illegal-tag!`}),
 		},
 		{
 			desc: "BadHub",
 			yamlStr: `
 hub: docker.io:tag/istio
 `,
-			wantErrs: makeErrors([]string{`invalid value Hub:docker.io:tag/istio`}),
+			wantErrs: makeErrors([]string{`invalid value Hub: docker.io:tag/istio`}),
 		},
 		{
 			desc: "GoodURL",

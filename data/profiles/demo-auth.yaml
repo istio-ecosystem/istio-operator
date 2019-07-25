@@ -1,6 +1,6 @@
 hub: docker.io/istio
 tag: 1.1.4
-defaultNamespacePrefix: istio-system
+defaultNamespace: istio-system
 
 # Traffic management feature
 trafficManagement:
