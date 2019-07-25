@@ -103,7 +103,7 @@ func validateWithRegex(path util.Path, val interface{}, r *regexp.Regexp) (errs 
 // each element.
 func validateStringList(vf ValidatorFunc) ValidatorFunc {
 	return func(path util.Path, val interface{}) util.Errors {
-		scope.Debugf("validateStringList %v start", val)
+		msg := fmt.Sprintf("validateStringList %v", val)
 		if reflect.TypeOf(val).Kind() != reflect.String {
 			err := fmt.Errorf("validateStringList %s got %T, want string", path, val)
 			printError(err)
@@ -113,16 +113,16 @@ func validateStringList(vf ValidatorFunc) ValidatorFunc {
 		for _, s := range strings.Split(val.(string), ",") {
 			errs = util.AppendErrs(errs, vf(path, strings.TrimSpace(s)))
 			scope.Debugf("\nerrors(%d): %v", len(errs), errs)
+			msg += fmt.Sprintf("\nerrors(%d): %v", len(errs), errs)
 		}
-		printError(errs.ToError())
-		scope.Debugf("validateStringList %v end", val)
+		logWithError(errs.ToError(), msg)
 		return errs
 	}
 }
 
 // validatePortNumberString checks if val is a string with a valid port number.
 func validatePortNumberString(path util.Path, val interface{}) util.Errors {
-	scope.Debugf("validatePortNumberString %v start", val)
+	scope.Debugf("validatePortNumberString %v:", val)
 	if !isString(val) {
 		return util.NewErrs(fmt.Errorf("validatePortNumberString(%s) bad type %T, want string", path, val))
 	}
@@ -130,9 +130,7 @@ func validatePortNumberString(path util.Path, val interface{}) util.Errors {
 	if err != nil {
 		return util.NewErrs(fmt.Errorf("%s : %s", path, err))
 	}
-	errs := validatePortNumber(path, intV)
-	scope.Debugf("validatePortNumberString %v end", val)
-	return errs
+	return validatePortNumber(path, intV)
 }
 
 // validatePortNumber checks whether val is an integer representing a valid port number.
@@ -142,7 +140,6 @@ func validatePortNumber(path util.Path, val interface{}) util.Errors {
 
 // validateIntRange checks whether val is an integer in [min, max].
 func validateIntRange(path util.Path, val interface{}, min, max int64) util.Errors {
-	scope.Debugf("validateIntRange %s:%v in [%d, %d]? start", path, val, min, max)
 	k := reflect.TypeOf(val).Kind()
 	var err error
 	switch {
@@ -159,14 +156,12 @@ func validateIntRange(path util.Path, val interface{}, min, max int64) util.Erro
 	default:
 		err = fmt.Errorf("validateIntRange %s unexpected type %T, want int type", path, val)
 	}
-	printError(err)
-	scope.Debugf("validateIntRange %s:%v in [%d, %d]? end", path, val, min, max)
+	logWithError(err, "validateIntRange %s:%v in [%d, %d]?: ", path, val, min, max)
 	return util.NewErrs(err)
 }
 
 // validateCIDR checks whether val is a string with a valid CIDR.
 func validateCIDR(path util.Path, val interface{}) util.Errors {
-	scope.Debugf("validateCIDR (%s) start", val)
 	var err error
 	if reflect.TypeOf(val).Kind() != reflect.String {
 		err = fmt.Errorf("validateCIDR %s got %T, want string", path, val)
@@ -176,8 +171,7 @@ func validateCIDR(path util.Path, val interface{}) util.Errors {
 			err = fmt.Errorf("%s %s", path, err)
 		}
 	}
-	printError(err)
-	scope.Debugf("validateCIDR (%s) end", val)
+	logWithError(err, "validateCIDR (%s): ", val)
 	return util.NewErrs(err)
 }
 
@@ -190,7 +184,18 @@ func printError(err error) {
 		scope.Debug("OK")
 		return
 	}
-	scope.Debugf("%v\n", err)
+	scope.Debugf("%v", err)
+}
+
+// logWithError prints debug log with err message
+func logWithError(err error, format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	if err == nil {
+		msg += fmt.Sprint(": OK\n")
+	} else {
+		msg += fmt.Sprintf(": %v\n", err)
+	}
+	scope.Debug(msg)
 }
 
 // match compiles the string to a regular expression.
