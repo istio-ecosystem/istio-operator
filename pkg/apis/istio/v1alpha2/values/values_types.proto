@@ -52,7 +52,7 @@ message CPUTargetUtilizationConfig {
   int32 targetAverageUtilization = 1;
 }
 
-// CertManagerConfig is a set of configuration parameters for Pilot.
+// CertManagerConfig is a set of configuration parameters for CertManager.
 message CertManagerConfig {
   // Controls whether CertManager is enabled.
   bool enabled = 1;
@@ -60,6 +60,9 @@ message CertManagerConfig {
   // Image hub for the CertManager Deployment.
   string hub = 2;
 
+  // K8s node selector.
+  //
+  // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   // 	NodeSelector map[string]interface{} `json:"nodeSelector"`
 
   // K8s resources settings.
@@ -489,16 +492,25 @@ message MultiClusterConfig {
   bool enabled = 1;
 }
 
-// NodeAgentConfig is a set of configuration parameters for Pilot.
+// NodeAgentConfig is a set of configuration parameters for Node Agent Daemonset.
 message NodeAgentConfig {
   // Controls whether Node Agent is enabled.
   bool enabled = 1;
 
+  // Environment variables passed to the Node Agent container.
+  //
+  // Examples:
+  // env:
+  //   ENV_VAR_1: value1
+  //   ENV_VAR_2: value2
   // 	Env          map[string]interface{} `json:"env,omitempty"`
 
   // Image name for the Node Agent DaemonSet.
   string image = 2;
 
+  // K8s node selector.
+  //
+  // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   // NodeSelector map[string]interface{} `json:"nodeSelector,omitempty"`
 }
 
@@ -761,7 +773,7 @@ message SecretVolume {
   string secretName = 3;
 }
 
-// SecurityConfig is a set of configuration parameters for Pilot.
+// SecurityConfig is a set of configuration parameters for Citadel.
 message SecurityConfig {
   // Controls whether Citadel is enabled.
   bool enabled = 1;
@@ -801,6 +813,9 @@ message SecurityConfig {
   // Setting to true creates the mesh-wide authentication policy with name "default".
   bool createMeshPolicy = 7;
 
+  // K8s node selector.
+  //
+  // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   // NodeSelector     map[string]interface{} `json:"nodeSelector,omitempty"`
 }
 
