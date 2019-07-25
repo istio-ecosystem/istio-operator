@@ -18,11 +18,12 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+
+	"istio.io/pkg/log"
 )
 
 var (
-	// DebugPackage controls verbose debugging in this package. Used for offline debugging.
-	DebugPackage = false
+	scope = log.RegisterScope("util", "util", 0)
 )
 
 // Tree is a tree.

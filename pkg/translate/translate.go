@@ -41,8 +41,7 @@ const (
 )
 
 var (
-	// DebugPackage controls detailed debug output for this package.
-	DebugPackage = false
+	scope = log.RegisterScope("translator", "API translator", 0)
 )
 
 // Translator is a set of mappings to translate between API paths, charts, values.yaml and k8s paths.
@@ -214,6 +213,7 @@ func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
 		return nil, fmt.Errorf("no translator available for version %s", minorVersion)
 	}
 
+	t.featureToComponents = make(map[name.FeatureName][]name.ComponentName)
 	for c, f := range t.ToFeature {
 		t.featureToComponents[f] = append(t.featureToComponents[f], c)
 	}
@@ -280,7 +280,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 		if err != nil {
 			return "", err
 		}
-		dbgPrint("baseYAML:\n%s\n, overlayYAML:\n%s\n, mergedYAML:\n%s\n", string(baseYAML), string(overlayYAML), string(mergedYAML))
+		scope.Debugf("baseYAML:\n%s\n, overlayYAML:\n%s\n, mergedYAML:\n%s\n", string(baseYAML), string(overlayYAML), string(mergedYAML))
 
 		mergedObj, err := object.ParseYAMLToK8sObject(mergedYAML)
 		if err != nil {
@@ -298,12 +298,12 @@ func overlayK8s(baseYAML, overlayYAML []byte, path util.Path) ([]byte, error) {
 	base, overlayMap := make(map[string]interface{}), make(map[string]interface{})
 	var overlay interface{} = overlayMap
 	if err := yaml.Unmarshal(baseYAML, &base); err != nil {
-		return nil, fmt.Errorf("overlayK8s: %s for baseYAML:\n%s", err, baseYAML)
+		return nil, fmt.Errorf("failed to unmarshal in overlayK8s: %s for baseYAML:\n%s", err, baseYAML)
 	}
 	if err := yaml.Unmarshal(overlayYAML, &overlayMap); err != nil {
 		// May be a scalar type, try to unmarshal into interface instead.
 		if err := yaml.Unmarshal(overlayYAML, &overlay); err != nil {
-			return nil, fmt.Errorf("overlayK8s: %s for overlayYAML:\n%s", err, overlayYAML)
+			return nil, fmt.Errorf("failed to unmarshal in overlayK8s: %s for overlayYAML:\n%s", err, overlayYAML)
 		}
 	}
 	if err := tpath.WriteNode(base, path, overlay); err != nil {
@@ -368,7 +368,7 @@ func (t *Translator) Components(featureName name.FeatureName) []name.ComponentNa
 // found, it calls the associated mapping function if one is defined to populate the values YAML path.
 // If no mapping function is defined, it uses the default mapping function.
 func (t *Translator) protoToHelmValues(node interface{}, root map[string]interface{}, path util.Path) (errs util.Errors) {
-	dbgPrint("protoToHelmValues with path %s, %v (%T)", path, node, node)
+	scope.Debugf("protoToHelmValues with path %s, %v (%T)", path, node, node)
 	if util.IsValueNil(node) {
 		return nil
 	}
@@ -381,30 +381,30 @@ func (t *Translator) protoToHelmValues(node interface{}, root map[string]interfa
 			errs = util.AppendErrs(errs, t.protoToHelmValues(vv.Elem().Interface(), root, path))
 		}
 	case reflect.Struct:
-		dbgPrint("Struct")
+		scope.Debug("Struct")
 		for i := 0; i < vv.NumField(); i++ {
 			fieldName := vv.Type().Field(i).Name
 			fieldValue := vv.Field(i)
-			dbgPrint("Checking field %s", fieldName)
+			scope.Debugf("Checking field %s", fieldName)
 			if a, ok := vv.Type().Field(i).Tag.Lookup("json"); ok && a == "-" {
 				continue
 			}
 			errs = util.AppendErrs(errs, t.protoToHelmValues(fieldValue.Interface(), root, append(path, fieldName)))
 		}
 	case reflect.Map:
-		dbgPrint("Map")
+		scope.Debug("Map")
 		for _, key := range vv.MapKeys() {
 			nnp := append(path, key.String())
 			errs = util.AppendErrs(errs, t.insertLeaf(root, nnp, vv.MapIndex(key)))
 		}
 	case reflect.Slice:
-		dbgPrint("Slice")
+		scope.Debug("Slice")
 		for i := 0; i < vv.Len(); i++ {
 			errs = util.AppendErrs(errs, t.protoToHelmValues(vv.Index(i).Interface(), root, path))
 		}
 	default:
 		// Must be a leaf
-		dbgPrint("field has kind %s", vt.Kind())
+		scope.Debugf("field has kind %s", vt.Kind())
 		if vv.CanInterface() {
 			errs = util.AppendErrs(errs, t.insertLeaf(root, path, vv))
 		}
@@ -443,6 +443,15 @@ func (t *Translator) IsComponentEnabled(cn name.ComponentName, icp *v1alpha2.Ist
 		return true, nil
 	}
 	return name.IsComponentEnabledInSpec(t.ToFeature[cn], cn, icp)
+}
+
+// AllComponentsNames returns a slice of all components used in t.
+func (t *Translator) AllComponentsNames() []name.ComponentName {
+	var out []name.ComponentName
+	for cn := range t.ComponentMaps {
+		out = append(out, cn)
+	}
+	return out
 }
 
 // insertLeaf inserts a leaf with value into root at path, which is first mapped using t.APIMapping.
@@ -489,7 +498,7 @@ func getValuesPathMapping(mappings map[string]*Translation, path util.Path) (str
 	}
 
 	out := m.outPath + "." + path[len(p):].String()
-	dbgPrint("translating %s to %s", path, out)
+	scope.Debugf("translating %s to %s", path, out)
 	return out, m
 }
 
@@ -506,13 +515,13 @@ func renderFeatureComponentPathTemplate(tmpl string, featureName name.FeatureNam
 	}
 	t, err := template.New("").Parse(tmpl)
 	if err != nil {
-		log.Error(err.Error())
+		log.Errorf("Failed to create template object, Error: %v. Template string: \n%s\n", err.Error(), tmpl)
 		return err.Error()
 	}
 	buf := new(bytes.Buffer)
 	err = t.Execute(buf, ts)
 	if err != nil {
-		log.Error(err.Error())
+		log.Errorf("Failed to execute template: %v", err.Error())
 		return err.Error()
 	}
 	return buf.String()
@@ -548,11 +557,11 @@ func defaultTranslationFunc(m *Translation, root map[string]interface{}, valuesP
 	var path []string
 
 	if util.IsEmptyString(value) {
-		dbgPrint("Skip empty string value for path %s", m.outPath)
+		scope.Debugf("Skip empty string value for path %s", m.outPath)
 		return nil
 	}
 	if valuesPath == "" {
-		dbgPrint("Not mapping to values, resources path is %s", m.outPath)
+		scope.Debugf("Not mapping to values, resources path is %s", m.outPath)
 		return nil
 	}
 
@@ -561,13 +570,6 @@ func defaultTranslationFunc(m *Translation, root map[string]interface{}, valuesP
 	}
 
 	return tpath.WriteNode(root, path, value)
-}
-
-func dbgPrint(v ...interface{}) {
-	if !DebugPackage {
-		return
-	}
-	log.Infof(fmt.Sprintf(v[0].(string), v[1:]...))
 }
 
 func firstCharToLower(s string) string {

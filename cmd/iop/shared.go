@@ -49,13 +49,13 @@ func getWriter(args *rootArgs) (*os.File, error) {
 	return writer, nil
 }
 
-func configLogs(args *rootArgs) error {
-	opt := log.DefaultOptions()
+func configLogs(args *rootArgs, logOpts *log.Options) error {
 	if !args.logToStdErr {
-		opt.ErrorOutputPaths = []string{logFilePath}
-		opt.OutputPaths = []string{logFilePath}
+		logOpts.ErrorOutputPaths = []string{logFilePath}
+		logOpts.OutputPaths = []string{logFilePath}
+		defer log.Infof("Start running command: %v", os.Args)
 	}
-	return log.Configure(opt)
+	return log.Configure(logOpts)
 }
 
 func genManifests(args *rootArgs) (name.ManifestMap, error) {
@@ -68,56 +68,70 @@ func genManifests(args *rootArgs) (name.ManifestMap, error) {
 		overlayYAML = string(b)
 	}
 
+	overlayFilenameLog := args.inFilename
+	if overlayFilenameLog == "" {
+		overlayFilenameLog = "[Empty Filename]"
+	}
+
 	// Start with unmarshaling and validating the user CR (which is an overlay on the base profile).
 	overlayICPS := &v1alpha2.IstioControlPlaneSpec{}
 	if err := util.UnmarshalWithJSONPB(overlayYAML, overlayICPS); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not unmarshal the overlay YAML from file: %s, caused by: %v", overlayFilenameLog, err)
 	}
 	if errs := validate.CheckIstioControlPlaneSpec(overlayICPS, false); len(errs) != 0 {
-		return nil, errs.ToError()
+		return nil, fmt.Errorf("overlay spec failed validation against IstioControlPlaneSpec: \n%v\n, caused by: %v", overlayICPS, errs.ToError())
+	}
+
+	baseProfileName := overlayICPS.Profile
+	if baseProfileName == "" {
+		baseProfileName = "[Builtin Profile]"
 	}
 
 	// Now read the base profile specified in the user spec. If nothing specified, use default.
 	baseYAML, err := helm.ReadValuesYAML(overlayICPS.Profile)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading YAML from profile: %s, caused by: %v", baseProfileName, err)
 	}
 	// Unmarshal and validate the base CR.
 	baseICPS := &v1alpha2.IstioControlPlaneSpec{}
 	if err := util.UnmarshalWithJSONPB(baseYAML, baseICPS); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not unmarshal the base YAML from profile: %s, caused by: %v", baseProfileName, err)
 	}
 	if errs := validate.CheckIstioControlPlaneSpec(baseICPS, true); len(errs) != 0 {
-		return nil, err
+		return nil, fmt.Errorf("base spec failed validation against IstioControlPlaneSpec: \n%v\n, caused by: %v", baseICPS, err)
 	}
 
 	mergedYAML, err := helm.OverlayYAML(baseYAML, overlayYAML)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to merge base YAML (%s) and overlay YAML (%s), caused by: %v", baseProfileName, overlayFilenameLog, err)
 	}
 
 	// Now unmarshal and validate the combined base profile and user CR overlay.
-	mergedcps := &v1alpha2.IstioControlPlaneSpec{}
-	if err := util.UnmarshalWithJSONPB(mergedYAML, mergedcps); err != nil {
-		return nil, err
+	mergedICPS := &v1alpha2.IstioControlPlaneSpec{}
+	if err := util.UnmarshalWithJSONPB(mergedYAML, mergedICPS); err != nil {
+		return nil, fmt.Errorf("could not unmarshal the merged YAML: \n%s\n, caused by: %v", mergedYAML, err)
 	}
-	if errs := validate.CheckIstioControlPlaneSpec(mergedcps, true); len(errs) != 0 {
-		return nil, errs.ToError()
+	if errs := validate.CheckIstioControlPlaneSpec(mergedICPS, true); len(errs) != 0 {
+		return nil, fmt.Errorf("merged spec failed validation against IstioControlPlaneSpec: \n%v\n, caused by: %v", mergedICPS, errs.ToError())
 	}
 
-	if yd := util.YAMLDiff(mergedYAML, util.ToYAMLWithJSONPB(mergedcps)); yd != "" {
-		return nil, fmt.Errorf("validated YAML differs from input: \n%s", yd)
+	if yd := util.YAMLDiff(mergedYAML, util.ToYAMLWithJSONPB(mergedICPS)); yd != "" {
+		return nil, fmt.Errorf("merged YAML differs from merged spec: \n%s", yd)
 	}
+
+	log.Infof("Start running Istio control plane.")
 
 	// TODO: remove version hard coding.
-	cp := controlplane.NewIstioControlPlane(mergedcps, translate.Translators[version.NewMinorVersion(1, 2)])
+	cp := controlplane.NewIstioControlPlane(mergedICPS, translate.Translators[version.NewMinorVersion(1, 2)])
 	if err := cp.Run(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to run Istio control plane with spec: \n%v\n, caused by: %v", mergedICPS, err)
 	}
 
 	manifests, errs := cp.RenderManifest()
-
-	return manifests, errs.ToError()
+	if errs != nil {
+		return manifests, errs.ToError()
+	}
+	return manifests, nil
 }
 
 // TODO: this really doesn't belong here. Figure out if it's generally needed and possibly move to istio.io/pkg/log.
@@ -125,6 +139,11 @@ func logAndPrintf(args *rootArgs, v ...interface{}) {
 	s := fmt.Sprintf(v[0].(string), v[1:]...)
 	if !args.logToStdErr {
 		fmt.Println(s)
+		log.Infof(s)
 	}
-	log.Infof(s)
+}
+
+func logAndFatalf(args *rootArgs, v ...interface{}) {
+	logAndPrintf(args, v...)
+	os.Exit(-1)
 }

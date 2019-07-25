@@ -1,3 +1,5 @@
+export GO111MODULE=on
+
 gen_img := gcr.io/istio-testing/protoc:2019-03-29
 pwd := $(shell pwd)
 mount_dir := /src
@@ -43,6 +45,10 @@ api_path := pkg/apis/istio/v1alpha2
 api_protos := $(shell find $(api_path) -type f -name '*.proto' | sort)
 api_pb_gos := $(api_protos:.proto=.pb.go)
 
+.PHONY: default lint mandiff coverage test build
+
+default: iop
+
 generate-api-go: $(api_pb_gos)
 	patch pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go < pkg/apis/istio/v1alpha2/fixup_go_structs.patch
 
@@ -52,19 +58,29 @@ $(api_pb_gos): $(api_protos)
 clean-proto:
 	rm -f $(api_pb_gos)
 
+fmt:
+	@scripts/run_gofmt.sh
+
+
+include Makefile.common.mk
+
+# CI Targets
 lint:
 	# These PATH hacks are temporary until prow properly sets its paths
 	@PATH=${PATH}:${GOPATH}/bin scripts/check_license.sh
 	@PATH=${PATH}:${GOPATH}/bin scripts/run_golangci.sh
 
-fmt:
-	@scripts/run_gofmt.sh
+mandiff:
+	# These PATH hacks are temporary until prow properly sets its paths
+	@PATH=${PATH}:${GOPATH}/bin scripts/run_mandiff.sh
 
-include Makefile.common.mk
-
-# Coverage tests
 coverage:
-	scripts/codecov.sh
+	@scripts/codecov.sh
+
+test:
+	GO111MODULE=on go test -race ./...
+
+build: iop
 
 # get imported protos to $GOPATH
 get_dep_proto:
@@ -83,7 +99,7 @@ proto_iscp_orig:
 proto_values:
 	protoc -I=${GOPATH}/src -I./pkg/apis/istio/v1alpha2/values --proto_path=pkg/apis/istio/v1alpha2/values --go_out=pkg/apis/istio/v1alpha2/values pkg/apis/istio/v1alpha2/values/values_types.proto
 	sed -i -e 's|github.com/gogo/protobuf/protobuf/google/protobuf|github.com/gogo/protobuf/types|g' pkg/apis/istio/v1alpha2/values/values_types.pb.go
-	patch pkg/apis/istio/v1alpha2/values/values_types.pb.go < pkg/apis/istio/v1alpha2/values/fixup_go_structs.patch
+	patch pkg/apis/istio/v1alpha2/values/values_types.pb.go < pkg/apis/istio/v1alpha2/values/fix_values_structs.patch
 
 proto_values_orig:
 	protoc -I=${GOPATH}/src -I./pkg/apis/istio/v1alpha2/values --proto_path=pkg/apis/istio/v1alpha2/values --go_out=pkg/apis/istio/v1alpha2/values pkg/apis/istio/v1alpha2/values/values_types.proto
@@ -104,5 +120,9 @@ gen_patch_iscp:
 gen_patch_values:
 	diff -u pkg/apis/istio/v1alpha2/values/values_types.pb.go.orig pkg/apis/istio/v1alpha2/values/values_types.pb.go > pkg/apis/istio/v1alpha2/values/fix_values_structs.patch || true
 
-vfsgen:
+vfsgen: data/
+	go get github.com/shurcooL/vfsgen
 	go generate ./cmd/iop.go
+
+iop: vfsgen
+	go build -o ${GOPATH}/bin/iop ./cmd/iop.go

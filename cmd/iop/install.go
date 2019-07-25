@@ -23,37 +23,36 @@ import (
 
 	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/version"
+	"istio.io/pkg/log"
 )
 
-func installCmd(rootArgs *rootArgs) *cobra.Command {
+func installCmd(rootArgs *rootArgs, logOpts *log.Options) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "install",
 		Short: "Installs Istio to cluster.",
 		Long:  "The install subcommand is used to install Istio into a cluster, given a CR path. ",
 		Args:  cobra.ExactArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
-			installManifests(rootArgs)
+			installManifests(rootArgs, logOpts)
 		}}
 
 	return cmd
 }
 
-func installManifests(args *rootArgs) {
-	if err := configLogs(args); err != nil {
+func installManifests(args *rootArgs, logOpts *log.Options) {
+	if err := configLogs(args, logOpts); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Could not configure logs: %s", err)
 		os.Exit(1)
 	}
 
 	manifests, err := genManifests(args)
 	if err != nil {
-		logAndPrintf(args, "%s", err)
-		os.Exit(1)
+		logAndFatalf(args, "Could not generate manifest: %v", err)
 	}
 
 	out, err := manifest.ApplyAll(manifests, version.NewVersion("", 1, 2, 0, ""), args.dryRun, args.verbose)
 	if err != nil {
-		logAndPrintf(args, "%s", err)
-		os.Exit(1)
+		logAndFatalf(args, "Failed to apply manifest with kubectl client: %v", err)
 	}
 
 	for cn := range manifests {
@@ -61,13 +60,13 @@ func installManifests(args *rootArgs) {
 		cs := fmt.Sprintf("CompositeOutput for component %s:", cn)
 		logAndPrintf(args, "\n%s\n%s", cs, strings.Repeat("=", len(cs)))
 		if out.Err[cn] != nil {
-			logAndPrintf(args, "Errors: %s\n", out.Err[cn])
+			logAndPrintf(args, "Error object: %s\n", out.Err[cn])
 		}
 		if strings.TrimSpace(out.Stderr[cn]) != "" {
-			logAndPrintf(args, "Error strings:\n%s\n", out.Stderr[cn])
+			logAndPrintf(args, "Error string:\n%s\n", out.Stderr[cn])
 		}
 		if strings.TrimSpace(out.Stdout[cn]) != "" {
-			logAndPrintf(args, "Command output:\n%s\n", out.Stdout[cn])
+			logAndPrintf(args, "Output:\n%s\n", out.Stdout[cn])
 		}
 	}
 }
