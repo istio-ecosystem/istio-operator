@@ -31,7 +31,8 @@ import (
 	"istio.io/operator/pkg/version"
 )
 
-func manifestCmd(args *rootArgs) *cobra.Command {
+// ManifestCmd is a group of commands related to manifest generation, installation, diffing and migration.
+func ManifestCmd(args *rootArgs) *cobra.Command {
 	mc := &cobra.Command{
 		Use:   "manifest",
 		Short: "Commands related to Istio manifests.",
@@ -47,6 +48,7 @@ func manifestCmd(args *rootArgs) *cobra.Command {
 	mac := manifestApplyCmd(args, macArgs)
 	mmc := manifestMigrateCmd(args)
 
+	addFlags(mc, args)
 	addFlags(mgc, args)
 	addFlags(mdc, args)
 	addFlags(mac, args)

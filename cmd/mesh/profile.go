@@ -18,7 +18,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func profileCmd(args *rootArgs) *cobra.Command {
+// ProfileCmd is a group of commands related to profile listing, dumping and diffing.
+func ProfileCmd(args *rootArgs) *cobra.Command {
 	pc := &cobra.Command{
 		Use:   "profile",
 		Short: "Commands related to Istio configuration profiles.",
@@ -31,6 +32,7 @@ func profileCmd(args *rootArgs) *cobra.Command {
 	pdc := profileDumpCmd(args, pdArgs)
 	pdfc := profileDiffCmd(args)
 
+	addFlags(pc, args)
 	addFlags(plc, args)
 	addFlags(pdc, args)
 	addFlags(pdfc, args)

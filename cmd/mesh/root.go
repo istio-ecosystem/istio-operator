@@ -60,11 +60,8 @@ func GetRootCmd(args []string) *cobra.Command {
 
 	rootArgs := &rootArgs{}
 
-	mc := manifestCmd(rootArgs)
-	pc := profileCmd(rootArgs)
-
-	addFlags(mc, rootArgs)
-	addFlags(pc, rootArgs)
+	mc := ManifestCmd(rootArgs)
+	pc := ProfileCmd(rootArgs)
 
 	rootCmd.AddCommand(mc)
 	rootCmd.AddCommand(pc)
