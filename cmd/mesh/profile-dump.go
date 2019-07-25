@@ -128,7 +128,7 @@ func genProfile(helmValues bool, inFilename, setOverlayYAML, configPath string) 
 	}
 
 	// Merge base and overlay.
-	mergedYAML, err := helm.OverlayYAML(string(baseYAML), string(overlayYAML))
+	mergedYAML, err := helm.OverlayYAML(baseYAML, overlayYAML)
 	if err != nil {
 		return "", fmt.Errorf("could not overlay user config over base: %s", err)
 	}
@@ -171,10 +171,10 @@ func unmarshalAndValidateICP(crYAML string) (*v1alpha2.IstioControlPlaneSpec, st
 	// TODO: add GVK handling as appropriate.
 	icps, _, err := manifest.ParseK8SYAMLToIstioControlPlaneSpec(crYAML)
 	if err != nil {
-		return nil, "", fmt.Errorf("could not unmarshal the overlay file: %s\n\nOriginal YAML:\n%s\n", err, crYAML)
+		return nil, "", fmt.Errorf("could not unmarshal the overlay file: %s\n\nOriginal YAML:\n%s", err, crYAML)
 	}
 	if errs := validate.CheckIstioControlPlaneSpec(icps, false); len(errs) != 0 {
-		return nil, "", fmt.Errorf("input file failed validation with the following errors: %s\n\nOriginal YAML:\n%s\n", errs, crYAML)
+		return nil, "", fmt.Errorf("input file failed validation with the following errors: %s\n\nOriginal YAML:\n%s", errs, crYAML)
 	}
 	icpsYAML, err := util.MarshalWithJSONPB(icps)
 	if err != nil {
@@ -186,7 +186,7 @@ func unmarshalAndValidateICP(crYAML string) (*v1alpha2.IstioControlPlaneSpec, st
 func unmarshalAndValidateICPS(icpsYAML string) (*v1alpha2.IstioControlPlaneSpec, error) {
 	icps := &v1alpha2.IstioControlPlaneSpec{}
 	if err := util.UnmarshalWithJSONPB(icpsYAML, icps); err != nil {
-		return nil, fmt.Errorf("could not unmarshal the merged YAML: %s\n\nYAML:\n%s\n", err, icpsYAML)
+		return nil, fmt.Errorf("could not unmarshal the merged YAML: %s\n\nYAML:\n%s", err, icpsYAML)
 	}
 	if errs := validate.CheckIstioControlPlaneSpec(icps, true); len(errs) != 0 {
 		return nil, fmt.Errorf(errs.Error())

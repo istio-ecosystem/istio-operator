@@ -65,7 +65,7 @@ func manifestCmd(args *rootArgs) *cobra.Command {
 
 //func genProfile(args *rootArgs, helmValues bool, inFilename, setOverlayYAML, configPath string) (string, error) {
 
-func genManifests(rootArgs *rootArgs, inFilename string, setOverlayYAML string) (name.ManifestMap, error) {
+func genManifests(inFilename string, setOverlayYAML string) (name.ManifestMap, error) {
 	mergedYAML, err := genProfile(false, inFilename, setOverlayYAML, "")
 	if err != nil {
 		return nil, err

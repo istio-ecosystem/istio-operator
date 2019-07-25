@@ -64,7 +64,7 @@ func manifestApply(args *rootArgs, maArgs *manifestApplyArgs) {
 	if err != nil {
 		logAndFatalf(args, err)
 	}
-	manifests, err := genManifests(args, maArgs.inFilename, overlayFromSet)
+	manifests, err := genManifests(maArgs.inFilename, overlayFromSet)
 	if err != nil {
 		logAndFatalf(args, "Could not generate manifest: %v", err)
 	}
