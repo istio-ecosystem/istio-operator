@@ -122,7 +122,7 @@ gen_patch_values:
 
 vfsgen: data/
 	go get github.com/shurcooL/vfsgen
-	go generate ./cmd/iop.go
+	go generate ./cmd/mesh.go
 
 iop: vfsgen
 	go build -o ${GOPATH}/bin/iop ./cmd/iop.go

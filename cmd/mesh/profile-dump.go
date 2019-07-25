@@ -15,12 +15,16 @@
 package mesh
 
 import (
+	"fmt"
 	"io/ioutil"
+
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
+
+	"istio.io/operator/pkg/manifest"
 
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/component/component"
 	"istio.io/operator/pkg/helm"
 	"istio.io/operator/pkg/tpath"
@@ -39,7 +43,7 @@ type profileDumpArgs struct {
 	configPath string
 	// set is a string with element format "path=value" where path is an IstioControlPlane path and the value is a
 	// value to set the node at that path to.
-	set string
+	set []string
 }
 
 func addProfileDumpFlags(cmd *cobra.Command, args *profileDumpArgs) {
@@ -48,7 +52,7 @@ func addProfileDumpFlags(cmd *cobra.Command, args *profileDumpArgs) {
 		"The path the root of the configuration subtree to dump e.g. trafficManagement.components.pilot. By default, dump whole tree. ")
 	cmd.PersistentFlags().BoolVarP(&args.helmValues, "helm-values", "", false,
 		"If set, dumps the Helm values that IstioControlPlaceSpec is translated to before manifests are rendered.")
-	cmd.PersistentFlags().StringVarP(&args.set, "set", "s", "", setFlagHelpStr)
+	cmd.PersistentFlags().StringSliceVarP(&args.set, "set", "s", nil, setFlagHelpStr)
 }
 
 func profileDumpCmd(rootArgs *rootArgs, pdArgs *profileDumpArgs) *cobra.Command {
@@ -76,71 +80,118 @@ func profileDump(args *rootArgs, pdArgs *profileDumpArgs) {
 		}
 	}()
 
-	mergedYAML := ""
-	mergedcps := &v1alpha2.IstioControlPlaneSpec{}
+	overlayFromSet, err := makeTreeFromSetList(pdArgs.set)
+	if err != nil {
+		logAndFatalf(args, err.Error())
+	}
 
+	y, err := genProfile(pdArgs.helmValues, pdArgs.inFilename, overlayFromSet, pdArgs.configPath)
+	if err != nil {
+		logAndFatalf(args, err.Error())
+	}
+
+	if _, err := writer.WriteString(y); err != nil {
+		logAndFatalf(args, "Could not write values; %s", err)
+	}
+}
+
+func genProfile(helmValues bool, inFilename, setOverlayYAML, configPath string) (string, error) {
 	// TODO(mostrowski): load profile if set using --set flag.
-	overlayYAML := ""
-	if pdArgs.inFilename != "" {
-		b, err := ioutil.ReadFile(pdArgs.inFilename)
+	overlayCRYAML := ""
+	if inFilename != "" {
+		b, err := ioutil.ReadFile(inFilename)
 		if err != nil {
-			logAndFatalf(args, "Could not read values file %f: %s", pdArgs.inFilename, err)
+			return "", fmt.Errorf("could not read values file %s: %s", inFilename, err)
 		}
-		overlayYAML = string(b)
+		overlayCRYAML = string(b)
 	}
 
-	// Start with unmarshaling and validating the user CR (which is an overlay on the base profile).
-	overlayICPS := &v1alpha2.IstioControlPlaneSpec{}
-	if err := util.UnmarshalWithJSONPB(overlayYAML, overlayICPS); err != nil {
-		logAndFatalf(args, "Could not unmarshal the input file: %s\n\nOriginal YAML:\n%s\n", err, overlayYAML)
-	}
-	if errs := validate.CheckIstioControlPlaneSpec(overlayICPS, false); len(errs) != 0 {
-		logAndFatalf(args, "Input file failed validation with the following errors: %s\n\nOriginal YAML:\n%s\n", errs, overlayYAML)
+	overlayICPS, overlayYAML, err := unmarshalAndValidateICP(overlayCRYAML)
+	if err != nil {
+		return "", err
 	}
 
 	// Now read the base profile specified in the user spec.
 	fname, err := helm.FilenameFromProfile(overlayICPS.Profile)
 	if err != nil {
-		logAndFatalf(args, "Could not get filename from profile: %s", err)
+		return "", fmt.Errorf("could not get filename from profile: %s", err)
+	}
+	// This contains the IstioControlPlane CR.
+	baseCRYAML, err := helm.ReadValuesYAML(overlayICPS.Profile)
+	if err != nil {
+		return "", fmt.Errorf("could not read the profile values for %s: %s", fname, err)
 	}
 
-	baseYAML, err := helm.ReadValuesYAML(overlayICPS.Profile)
+	_, baseYAML, err := unmarshalAndValidateICP(baseCRYAML)
 	if err != nil {
-		logAndFatalf(args, "Could not read the profile values for %s: %s", fname, err)
+		return "", err
 	}
 
-	mergedYAML, err = helm.OverlayYAML(baseYAML, overlayYAML)
+	// Merge base and overlay.
+	mergedYAML, err := helm.OverlayYAML(string(baseYAML), string(overlayYAML))
 	if err != nil {
-		logAndFatalf(args, "Could not overlay user config over base: %s", err)
+		return "", fmt.Errorf("could not overlay user config over base: %s", err)
 	}
-	// Now unmarshal and validate the combined base profile and user CR overlay.
-	if err := util.UnmarshalWithJSONPB(mergedYAML, mergedcps); err != nil {
-		logAndFatalf(args, err.Error())
+	if _, err := unmarshalAndValidateICPS(mergedYAML); err != nil {
+		return "", err
 	}
-	if errs := validate.CheckIstioControlPlaneSpec(mergedcps, true); len(errs) != 0 {
-		logAndFatalf(args, err.Error())
+
+	// Merge the tree build from --set option on top of that.
+	finalYAML, err := helm.OverlayYAML(mergedYAML, setOverlayYAML)
+	if err != nil {
+		return "", fmt.Errorf("could not overlay --set values over merged: %s", err)
+	}
+
+	finalICPS, err := unmarshalAndValidateICPS(finalYAML)
+	if err != nil {
+		return "", err
 	}
 
 	t, err := translate.NewTranslator(version.NewMinorVersion(1, 2))
 	if err != nil {
-		logAndFatalf(args, "%s", err)
+		return "", err
 	}
 
-	if pdArgs.helmValues {
-		mergedYAML, err = component.TranslateHelmValues(mergedcps, t, "")
+	if helmValues {
+		finalYAML, err = component.TranslateHelmValues(finalICPS, t, "")
 		if err != nil {
-			logAndFatalf(args, err.Error())
+			return "", err
 		}
 	}
 
-	finalYAML, err := getConfigSubtree(mergedYAML, pdArgs.configPath)
+	finalYAML, err = getConfigSubtree(finalYAML, configPath)
 	if err != nil {
-		logAndFatalf(args, "%s", err)
+		return "", err
 	}
 
-	if _, err := writer.WriteString(finalYAML); err != nil {
-		logAndFatalf(args, "Could not write values; %s", err)
+	return finalYAML, err
+}
+
+func unmarshalAndValidateICP(crYAML string) (*v1alpha2.IstioControlPlaneSpec, string, error) {
+	// TODO: add GVK handling as appropriate.
+	icps, _, err := manifest.ParseK8SYAMLToIstioControlPlaneSpec(crYAML)
+	if err != nil {
+		return nil, "", fmt.Errorf("could not unmarshal the overlay file: %s\n\nOriginal YAML:\n%s\n", err, crYAML)
 	}
+	if errs := validate.CheckIstioControlPlaneSpec(icps, false); len(errs) != 0 {
+		return nil, "", fmt.Errorf("input file failed validation with the following errors: %s\n\nOriginal YAML:\n%s\n", errs, crYAML)
+	}
+	icpsYAML, err := util.MarshalWithJSONPB(icps)
+	if err != nil {
+		return nil, "", fmt.Errorf("could not marshal: %s", err)
+	}
+	return icps, icpsYAML, nil
+}
+
+func unmarshalAndValidateICPS(icpsYAML string) (*v1alpha2.IstioControlPlaneSpec, error) {
+	icps := &v1alpha2.IstioControlPlaneSpec{}
+	if err := util.UnmarshalWithJSONPB(icpsYAML, icps); err != nil {
+		return nil, fmt.Errorf("could not unmarshal the merged YAML: %s\n\nYAML:\n%s\n", err, icpsYAML)
+	}
+	if errs := validate.CheckIstioControlPlaneSpec(icps, true); len(errs) != 0 {
+		return nil, fmt.Errorf(errs.Error())
+	}
+	return icps, nil
 }
 
 func getConfigSubtree(manifest, path string) (string, error) {

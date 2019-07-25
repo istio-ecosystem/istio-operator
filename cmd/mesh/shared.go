@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	logFilePath = "./iop.log"
+	logFilePath = "./mesh-cli.log"
 )
 
 func getWriter(outFilename string) (*os.File, error) {
