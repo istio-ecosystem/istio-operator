@@ -22,10 +22,11 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 
-	"github.com/ghodss/yaml"
+	ghodssyaml "github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -174,7 +175,7 @@ func (o *K8sObject) YAML() ([]byte, error) {
 		return nil, err
 	}
 	o.json = oj
-	y, err := yaml.JSONToYAML(oj)
+	y, err := ghodssyaml.JSONToYAML(oj)
 	if err != nil {
 		return nil, err
 	}
@@ -301,7 +302,10 @@ func (os K8sObjects) Sort(score func(o *K8sObject) int) {
 func (os K8sObjects) ToMap() map[string]*K8sObject {
 	ret := make(map[string]*K8sObject)
 	for _, oo := range os {
-		ret[oo.Hash()] = oo
+		// ignore comments
+		if oo.Kind != "" || oo.Name != "" || oo.Namespace != "" {
+			ret[oo.Hash()] = oo
+		}
 	}
 	return ret
 }
@@ -377,7 +381,7 @@ func ManifestDiff(a, b string) (string, error) {
 	return sb.String(), err
 }
 
-func writeStringSafe(sb *strings.Builder, s string) {
+func writeStringSafe(sb io.StringWriter, s string) {
 	_, err := sb.WriteString(s)
 	if err != nil {
 		log.Error(err.Error())
