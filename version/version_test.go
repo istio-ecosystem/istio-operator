@@ -1,6 +1,6 @@
 // Copyright 2019 Istio Authors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed under the Apache License, OperatorBinaryVersionString 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -29,7 +29,7 @@ const (
 )
 
 func TestVersions(t *testing.T) {
-	operatorVersion, err := goversion.NewVersion(Version)
+	operatorVersion, err := goversion.NewVersion(OperatorBinaryVersionString)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +38,7 @@ func TestVersions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var vs []version.IstioOperatorVersionCompatibility
+	var vs []version.CompatibilityMapping
 	if err := yaml.Unmarshal(b, &vs); err != nil {
 		t.Fatal(err)
 	}

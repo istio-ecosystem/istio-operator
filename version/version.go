@@ -1,6 +1,6 @@
 // Copyright 2019 Istio Authors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed under the Apache License, OperatorBinaryVersionString 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -14,9 +14,13 @@
 
 package version
 
+import (
+	pkgversion "istio.io/operator/pkg/version"
+)
+
 const (
-	// Version is the Istio operator version.
-	Version = "1.3.0"
+	// OperatorBinaryVersionString is the Istio operator version.
+	OperatorBinaryVersionString = "1.3.0"
 )
 
 var (
@@ -25,4 +29,15 @@ var (
 	SupportedVersions = []string{
 		"1.3.0",
 	}
+
+	// OperatorBinaryVersion is the Istio operator version.
+	OperatorBinaryVersion pkgversion.Version
 )
+
+func init() {
+	v, err := pkgversion.NewVersionFromString(OperatorBinaryVersionString)
+	if err != nil {
+		panic(err)
+	}
+	OperatorBinaryVersion = *v
+}

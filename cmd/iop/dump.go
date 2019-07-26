@@ -1,6 +1,6 @@
 // Copyright 2019 Istio Authors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed under the Apache License, OperatorBinaryVersionString 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -31,7 +31,7 @@ import (
 	"istio.io/operator/pkg/translate"
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/validate"
-	"istio.io/operator/pkg/version"
+	binversion "istio.io/operator/version"
 	"istio.io/pkg/log"
 )
 
@@ -137,7 +137,7 @@ func dumpProfile(args *rootArgs, dumpArgs *dumpArgs, logOpts *log.Options) {
 		}
 	}
 
-	t, err := translate.NewTranslator(version.NewMinorVersion(1, 2))
+	t, err := translate.NewTranslator(binversion.OperatorBinaryVersion.MinorVersion)
 	if err != nil {
 		logAndFatalf(args, "Failed to create translator: %v", err)
 	}

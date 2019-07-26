@@ -21,16 +21,43 @@ import (
 	goversion "github.com/hashicorp/go-version"
 )
 
-// IstioOperatorVersionCompatibility is a mapping from an Istio operator version and the corresponding recommended and
+// CompatibilityMapping is a mapping from an Istio operator version and the corresponding recommended and
 // supported versions of Istio.
-type IstioOperatorVersionCompatibility struct {
+type CompatibilityMapping struct {
 	OperatorVersion          *goversion.Version    `json:"operatorVersion,omitempty"`
 	SupportedIstioVersions   goversion.Constraints `json:"supportedIstioVersions,omitempty"`
 	RecommendedIstioVersions goversion.Constraints `json:"recommendedIstioVersions,omitempty"`
 }
 
+// NewVersionFromString creates a new Version from the provided SemVer formatted string and returns a pointer to it.
+func NewVersionFromString(s string) (*Version, error) {
+	ver, err := goversion.NewVersion(s)
+	if err != nil {
+		return nil, err
+	}
+
+	newVer := &Version{}
+	vv := ver.Segments()
+	if len(vv) > 0 {
+		newVer.Major = uint32(vv[0])
+	}
+	if len(vv) > 1 {
+		newVer.Minor = uint32(vv[1])
+	}
+	if len(vv) > 2 {
+		newVer.Patch = uint32(vv[2])
+	}
+
+	sv := strings.Split(s, "-")
+	if len(sv) > 0 {
+		newVer.Suffix = strings.Join(sv[1:], "-")
+	}
+
+	return newVer, nil
+}
+
 // MarshalYAML implements the Marshaler interface.
-func (v *IstioOperatorVersionCompatibility) MarshalYAML() (interface{}, error) {
+func (v *CompatibilityMapping) MarshalYAML() (interface{}, error) {
 	out := make(map[string]string)
 	if v.OperatorVersion != nil {
 		out["operatorVersion"] = v.OperatorVersion.String()
@@ -48,7 +75,7 @@ func (v *IstioOperatorVersionCompatibility) MarshalYAML() (interface{}, error) {
 }
 
 // UnmarshalYAML implements the Unmarshaler interface.
-func (v *IstioOperatorVersionCompatibility) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (v *CompatibilityMapping) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type inStruct struct {
 		OperatorVersion          string `yaml:"operatorVersion"`
 		SupportedIstioVersions   string `yaml:"supportedIstioVersions"`
@@ -56,7 +83,7 @@ func (v *IstioOperatorVersionCompatibility) UnmarshalYAML(unmarshal func(interfa
 	}
 	tmp := inStruct{}
 	if err := unmarshal(&tmp); err != nil {
-		return nil
+		return err
 	}
 
 	if tmp.OperatorVersion == "" {
@@ -150,7 +177,7 @@ func (v MinorVersion) String() string {
 
 // String implements the Stringer interface.
 func (v PatchVersion) String() string {
-	return fmt.Sprintf("%s.%d", v.MinorVersion, v.Minor)
+	return fmt.Sprintf("%s.%d", v.MinorVersion, v.Patch)
 }
 
 // String implements the Stringer interface.
@@ -164,26 +191,10 @@ func (v *Version) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal(&s); err != nil {
 		return err
 	}
-	ver, err := goversion.NewVersion(s)
+	out, err := NewVersionFromString(s)
 	if err != nil {
 		return err
 	}
-
-	vv := ver.Segments()
-	if len(vv) > 0 {
-		v.Major = uint32(vv[0])
-	}
-	if len(vv) > 1 {
-		v.Minor = uint32(vv[1])
-	}
-	if len(vv) > 2 {
-		v.Patch = uint32(vv[2])
-	}
-
-	sv := strings.Split(s, "-")
-	if len(sv) > 0 {
-		v.Suffix = strings.Join(sv[1:], "-")
-	}
-
+	*v = *out
 	return nil
 }

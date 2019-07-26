@@ -127,13 +127,42 @@ operatorVersion: 1.3.0
 supportedIstioVersions: "> 1.1, < 1.4.0"
 `,
 		},
+		{
+			desc: "missing operatorVersion",
+			yamlStr: `
+supportedIstioVersions: 1.3.0
+recommendedIstioVersions: 1.3.0
+`,
+			wantErr: `operatorVersion must be set`,
+		},
+		{
+			desc: "missing supportedIstioVersions",
+			yamlStr: `
+operatorVersion: 1.3.0
+recommendedIstioVersions: 1.3.0
+`,
+			wantErr: `supportedIstioVersions must be set`,
+		},
+		{
+			desc: "unknown field",
+			yamlStr: `
+operatorVersion: 1.3.0
+supportedIstioVersions: "> 1.1, < 1.4.0, = 1.5.2"
+badField: ">= 1, < 1.4"
+`,
+			wantErr: `yaml: unmarshal errors:
+  line 4: field badField not found in type version.inStruct`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			got := &IstioOperatorVersionCompatibility{}
-			err := yaml.Unmarshal([]byte(tt.yamlStr), got)
+			got := &CompatibilityMapping{}
+			err := yaml.UnmarshalStrict([]byte(tt.yamlStr), got)
 			if gotErr, wantErr := errToString(err), tt.wantErr; gotErr != wantErr {
 				t.Fatalf("yaml.Unmarshal(%s): got error: %s, want error: %s", tt.desc, gotErr, wantErr)
+			}
+			if tt.wantErr != "" {
+				return
 			}
 			y, err := yaml.Marshal(got)
 			if err != nil {

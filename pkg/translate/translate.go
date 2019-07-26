@@ -1,6 +1,6 @@
 // Copyright 2019 Istio Authors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed under the Apache License, OperatorBinaryVersionString 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -92,7 +92,7 @@ var (
 	// Translators is a map of minor versions to Translator for that version.
 	// TODO: this should probably be moved out to a config file that's versioned.
 	Translators = map[version.MinorVersion]*Translator{
-		version.NewMinorVersion(1, 2): {
+		version.NewMinorVersion(1, 3): {
 			APIMapping: map[string]*Translation{
 				"Hub":                    {"global.hub", nil},
 				"Tag":                    {"global.tag", nil},

@@ -1,6 +1,6 @@
 // Copyright 2019 Istio Authors
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed under the Apache License, OperatorBinaryVersionString 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"istio.io/operator/pkg/manifest"
-	"istio.io/operator/pkg/version"
+	opversion "istio.io/operator/version"
 	"istio.io/pkg/log"
 )
 
@@ -50,7 +50,7 @@ func installManifests(args *rootArgs, logOpts *log.Options) {
 		logAndFatalf(args, "Could not generate manifest: %v", err)
 	}
 
-	out, err := manifest.ApplyAll(manifests, version.NewVersion(1, 2, 0, ""), args.dryRun, args.verbose)
+	out, err := manifest.ApplyAll(manifests, opversion.OperatorBinaryVersion, args.dryRun, args.verbose)
 	if err != nil {
 		logAndFatalf(args, "Failed to apply manifest with kubectl client: %v", err)
 	}
