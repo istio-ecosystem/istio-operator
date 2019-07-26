@@ -26,7 +26,7 @@ import (
 	"sort"
 	"strings"
 
-	ghodssyaml "github.com/ghodss/yaml"
+	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -175,7 +175,7 @@ func (o *K8sObject) YAML() ([]byte, error) {
 		return nil, err
 	}
 	o.json = oj
-	y, err := ghodssyaml.JSONToYAML(oj)
+	y, err := yaml.JSONToYAML(oj)
 	if err != nil {
 		return nil, err
 	}
@@ -302,8 +302,8 @@ func (os K8sObjects) Sort(score func(o *K8sObject) int) {
 func (os K8sObjects) ToMap() map[string]*K8sObject {
 	ret := make(map[string]*K8sObject)
 	for _, oo := range os {
-		// ignore comments
-		if oo.Kind != "" || oo.Name != "" || oo.Namespace != "" {
+		// ignore invalid k8s object
+		if oo.Valid() {
 			ret[oo.Hash()] = oo
 		}
 	}
@@ -314,9 +314,20 @@ func (os K8sObjects) ToMap() map[string]*K8sObject {
 func (os K8sObjects) ToNameKindMap() map[string]*K8sObject {
 	ret := make(map[string]*K8sObject)
 	for _, oo := range os {
-		ret[oo.HashNameKind()] = oo
+		// ignore invalid k8s object
+		if oo.Valid() {
+			ret[oo.HashNameKind()] = oo
+		}
 	}
 	return ret
+}
+
+func (o *K8sObject) Valid() bool {
+	if o.Kind != "" && o.Name != "" {
+		return true
+	} else {
+		return false
+	}
 }
 
 // YAML returns a YAML representation of os, using an internal cache.
