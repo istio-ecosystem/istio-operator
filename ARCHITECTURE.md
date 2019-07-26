@@ -7,21 +7,21 @@ See the
 [design doc](https://docs.google.com/document/d/11j9ZtYWNWnxQYnZy8ayZav1FMwTH6F6z6fkDYZ7V298/edit#heading=h.qex63c29z2to)
 for a more complete design description. The operator code is divided roughly into five areas:
 
-1. [IstioControlPlaneSpec API](The_new_API) and related infrastructure, which is expressed as a
+1. [IstioControlPlaneSpec API](#istiocontrolplanespec-api) and related infrastructure, which is expressed as a
 [proto](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto) and
 compiled to [Go
 structs](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go).
 `IstioControlPlaneSpec` has pass-through fields to the Helm values.yaml API, but these are additionally validated through
-a [schema](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/values_types.go). 
-1. [Controller](K8s_controller) code. The code comprises the K8s listener, webhook and logic for reconciling the cluster
+a [schema](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/values/values_types.proto). 
+1. [Controller](#k8s-controller) code. The code comprises the K8s listener, webhook and logic for reconciling the cluster
 to an `IstioControlPlaneSpec` CR. 
-1. [Manifest creation](Manifest_creation) code. User settings are overlaid on top of the
+1. [Manifest creation](#manifest-creation) code. User settings are overlaid on top of the
 selected profile values and passed to a renderer in the Helm library to create manifests. Further customization on the
 created manifests can be done through overlays. 
-1. [CLI](CLI) code. CLI code shares the `IstioControlPlaneSpec` API with
+1. [CLI](#cli) code. CLI code shares the `IstioControlPlaneSpec` API with
 the controller, but allows manifests to be generated and optionally applied from the command line without the need to
 run a privileged controller in the cluster. 
-1. [Migration tools](Migration_tools). The migration tools are intended to
+1. [Migration tools](#migration-tools). The migration tools are intended to
 automate configuration migration from Helm to the operator.
 
 The operator code uses the new Helm charts in the [istio/installer](https://github.com/istio/installer) repo. It is not
@@ -38,7 +38,7 @@ Throughout the document, the following terms are used:
 including feature and component groupings, namespaces and enablement, and per-component K8s settings. 
 - Helm values.yaml API, implicitly defined through the various values.yaml files in the
 [Helm charts](https://github.com/istio/installer) and schematized in the operator through
-[Go structs](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/values_types.go).
+[values_types.proto](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/values/values_types.proto).
 
 ## IstioControlPlaneSpec API
 
@@ -198,7 +198,7 @@ TODO(rcernich).
 ## Manifest creation
 
 Manifest rendering is a multi-step process, shown in the figure below. ![rendering
-process](images/operator_render_flow.svg) The example in the figure shows the rendering being triggered by a CLI `iop`
+process](images/operator_render_flow.svg) The example in the figure shows the rendering being triggered by a CLI `mesh`
 command with a `IstioControlPlaneSpec` CR passed to it from a file; however, the same rendering steps would occur when an
 in-cluster CR is updated and the controller acts upon it to generate a new manifest to apply to the cluster. Note that
 both the charts and configuration profiles can come from three different sources: compiled-in, local filesystem, or URL
@@ -223,12 +223,12 @@ CRs at this layer, so no merge is performed in this step.
 
 ## CLI
 
-The CLI `iop` command is implemented in the [cmd/iop](https://github.com/istio/operator/blob/master/cmd/iop/)
+The CLI `mesh` command is implemented in the [cmd/mesh](https://github.com/istio/operator/blob/master/cmd/mesh/)
 subdirectory as a Cobra command with the following subcommands:
 
-- [manifest](https://github.com/istio/operator/blob/master/cmd/iop/manifest.go): renders a manifest and outputs to console or files.
-- [install](https://github.com/istio/operator/blob/master/cmd/iop/install.go): renders and manifest and applies it to a cluster.
-- [dump-profile](https://github.com/istio/operator/blob/master/cmd/iop/dump.go): dumps the default values for a selected profile.
+- [manifest](https://github.com/istio/operator/blob/master/cmd/mesh/manifest.go): renders a manifest and outputs to console or files.
+- [install](https://github.com/istio/operator/blob/master/cmd/mesh/install.go): renders and manifest and applies it to a cluster.
+- [dump-profile](https://github.com/istio/operator/blob/master/cmd/mesh/dump.go): dumps the default values for a selected profile.
 
 ## Migration tools
 
