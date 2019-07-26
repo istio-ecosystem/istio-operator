@@ -50,7 +50,7 @@ func installManifests(args *rootArgs, logOpts *log.Options) {
 		logAndFatalf(args, "Could not generate manifest: %v", err)
 	}
 
-	out, err := manifest.ApplyAll(manifests, version.NewVersion("", 1, 2, 0, ""), args.dryRun, args.verbose)
+	out, err := manifest.ApplyAll(manifests, version.NewVersion(1, 2, 0, ""), args.dryRun, args.verbose)
 	if err != nil {
 		logAndFatalf(args, "Failed to apply manifest with kubectl client: %v", err)
 	}
