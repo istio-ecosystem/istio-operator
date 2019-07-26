@@ -2,7 +2,6 @@ package version
 
 import (
 	"io/ioutil"
-	"strings"
 	"testing"
 
 	goversion "github.com/hashicorp/go-version"
@@ -12,21 +11,16 @@ import (
 )
 
 const (
-	operatorVersionFilePath     = "./version.yaml"
 	operatorVersionsMapFilePath = "./versions.yaml"
 )
 
 func TestVersions(t *testing.T) {
-	b, err := ioutil.ReadFile(operatorVersionFilePath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	operatorVersion, err := goversion.NewVersion(strings.TrimSpace(string(b)))
+	operatorVersion, err := goversion.NewVersion(Version)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	b, err = ioutil.ReadFile(operatorVersionsMapFilePath)
+	b, err := ioutil.ReadFile(operatorVersionsMapFilePath)
 	if err != nil {
 		t.Fatal(err)
 	}
