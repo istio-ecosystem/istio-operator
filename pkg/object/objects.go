@@ -323,11 +323,10 @@ func (os K8sObjects) ToNameKindMap() map[string]*K8sObject {
 }
 
 func (o *K8sObject) Valid() bool {
-	if o.Kind != "" && o.Name != "" {
-		return true
-	} else {
+	if o.Kind == "" || o.Name == "" {
 		return false
 	}
+	return true
 }
 
 // YAML returns a YAML representation of os, using an internal cache.
