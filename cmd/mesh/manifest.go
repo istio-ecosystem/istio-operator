@@ -28,7 +28,8 @@ import (
 	"istio.io/operator/pkg/translate"
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/validate"
-	"istio.io/operator/pkg/version"
+
+	binversion "istio.io/operator/version"
 )
 
 // ManifestCmd is a group of commands related to manifest generation, installation, diffing and migration.
@@ -65,8 +66,6 @@ func ManifestCmd(args *rootArgs) *cobra.Command {
 	return mc
 }
 
-//func genProfile(args *rootArgs, helmValues bool, inFilename, setOverlayYAML, configPath string) (string, error) {
-
 func genManifests(inFilename string, setOverlayYAML string) (name.ManifestMap, error) {
 	mergedYAML, err := genProfile(false, inFilename, setOverlayYAML, "")
 	if err != nil {
@@ -77,8 +76,11 @@ func genManifests(inFilename string, setOverlayYAML string) (name.ManifestMap, e
 		return nil, err
 	}
 
-	// TODO: remove version hard coding.
-	cp := controlplane.NewIstioControlPlane(mergedICPS, translate.Translators[version.NewMinorVersion(1, 2)])
+	t, err := translate.NewTranslator(binversion.OperatorBinaryVersion.MinorVersion)
+	if err != nil {
+		return nil, err
+	}
+	cp := controlplane.NewIstioControlPlane(mergedICPS, t)
 	if err := cp.Run(); err != nil {
 		return nil, fmt.Errorf("failed to create Istio control plane with spec: \n%v\nerror: %s", mergedICPS, err)
 	}
