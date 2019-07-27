@@ -80,7 +80,7 @@ func genManifests(inFilename string, setOverlayYAML string) (name.ManifestMap, e
 	// TODO: remove version hard coding.
 	cp := controlplane.NewIstioControlPlane(mergedICPS, translate.Translators[version.NewMinorVersion(1, 2)])
 	if err := cp.Run(); err != nil {
-		return nil, fmt.Errorf("failed to create Istio control plane with spec: \n%v", mergedICPS)
+		return nil, fmt.Errorf("failed to create Istio control plane with spec: \n%v\nerror: %s", mergedICPS, err)
 	}
 
 	manifests, errs := cp.RenderManifest()
@@ -97,7 +97,7 @@ func makeTreeFromSetList(setOverlay []string) (string, error) {
 	}
 	tree := make(map[string]interface{})
 	// Populate a default namespace for convenience, otherwise most --set commands will error out.
-	if err := tpath.WriteNode(tree, util.PathFromString("defaultNamespacePrefix"), "istio-system"); err != nil {
+	if err := tpath.WriteNode(tree, util.PathFromString("defaultNamespace"), "istio-system"); err != nil {
 		return "", err
 	}
 	for _, kv := range setOverlay {

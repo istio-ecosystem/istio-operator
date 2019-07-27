@@ -48,7 +48,7 @@ const (
 	SecurityFeatureName          FeatureName = "Security"
 	ConfigManagementFeatureName  FeatureName = "ConfigManagement"
 	AutoInjectionFeatureName     FeatureName = "AutoInjection"
-	GatewayFeatureName           FeatureName = "Gateway"
+	GatewayFeatureName           FeatureName = "Gateways"
 )
 
 // ComponentName is a component name string, typed to constrain allowed values.
@@ -99,7 +99,14 @@ func IsComponentEnabledInSpec(featureName FeatureName, componentName ComponentNa
 		return false, nil
 	}
 
-	componentNodeI, found, err := GetFromStructPath(controlPlaneSpec, string(featureName)+".Components."+string(componentName)+".Common.Enabled")
+	cname := string(componentName)
+	switch componentName {
+	case IngressComponentName, EgressComponentName:
+		cname +=
+	}
+
+
+	componentNodeI, found, err := GetFromStructPath(controlPlaneSpec, string(featureName)+".Components."+cname+".Common.Enabled")
 	if err != nil {
 		return false, fmt.Errorf("error in IsComponentEnabledInSpec GetFromStructPath componentEnabled for feature=%s, component=%s: %s", featureName, componentName, err)
 	}
