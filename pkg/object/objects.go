@@ -302,7 +302,6 @@ func (os K8sObjects) Sort(score func(o *K8sObject) int) {
 func (os K8sObjects) ToMap() map[string]*K8sObject {
 	ret := make(map[string]*K8sObject)
 	for _, oo := range os {
-		// ignore invalid k8s object
 		if oo.Valid() {
 			ret[oo.Hash()] = oo
 		}
@@ -314,7 +313,6 @@ func (os K8sObjects) ToMap() map[string]*K8sObject {
 func (os K8sObjects) ToNameKindMap() map[string]*K8sObject {
 	ret := make(map[string]*K8sObject)
 	for _, oo := range os {
-		// ignore invalid k8s object
 		if oo.Valid() {
 			ret[oo.HashNameKind()] = oo
 		}
