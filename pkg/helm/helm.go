@@ -56,11 +56,13 @@ func NewHelmRenderer(chartsRootDir, helmBaseDir, profile, componentName, namespa
 		return nil, err
 	}
 
+	// filepath would remove leading slash here if chartsRootDir is empty.
+	dir := chartsRootDir + "/" + helmBaseDir
 	switch {
 	case chartsRootDir == "":
 		return NewVFSRenderer(helmBaseDir, globalValues, componentName, namespace), nil
-	case util.IsFilePath(helmBaseDir):
-		return NewFileTemplateRenderer(helmBaseDir, globalValues, componentName, namespace), nil
+	case util.IsFilePath(dir):
+		return NewFileTemplateRenderer(dir, globalValues, componentName, namespace), nil
 	default:
 		return nil, fmt.Errorf("unknown helm renderer with chartsRoot=%s", chartsRootDir)
 	}
