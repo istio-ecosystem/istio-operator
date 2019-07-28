@@ -35,18 +35,14 @@ import (
 	// For kubeclient GCP auth
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
-	v1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 
-	"istio.io/operator/pkg/kubectlcmd"
+	"istio.io/operator/pkg/kubeclient"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/version"
 	"istio.io/pkg/log"
@@ -111,8 +107,8 @@ var (
 
 	installTree      = make(componentTree)
 	dependencyWaitCh = make(map[name.ComponentName]chan struct{})
-	kubectl          = kubectlcmd.New()
 
+	kc            *kubeclient.Client
 	k8sRESTConfig *rest.Config
 )
 
@@ -188,15 +184,17 @@ func renderRecursive(manifests name.ManifestMap, installTree componentTree, outp
 }
 
 // ApplyAll applies all given manifests using kubectl client.
-func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbose bool) (*CompositeOutput, error) {
+func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbose bool, kubeconfig, context string) (*CompositeOutput, error) {
+	var err error
+	kc, err = kubeclient.NewClient(kubeconfig, context)
+	if err != nil {
+		return nil, err
+	}
 	logAndPrint("Applying manifests for these components:")
 	for c := range manifests {
 		logAndPrint("- %s", c)
 	}
 	logAndPrint("Component dependencies tree: \n%s", installTreeString())
-	if err := initK8SRestClient(); err != nil {
-		return nil, err
-	}
 	return applyRecursive(manifests, version, dryRun, verbose), nil
 }
 
@@ -253,7 +251,7 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 	objects.Sort(defaultObjectOrder())
 
 	// TODO; add "--prune" back
-	extraArgs := []string{"--force", "--selector", fmt.Sprintf("%s=%s", operatorLabelStr, operatorReconcileStr)}
+	//extraArgs := []string{"--force", "--selector", fmt.Sprintf("%s=%s", operatorLabelStr, operatorReconcileStr)}
 
 	logAndPrint("kubectl applying manifest for component %s", componentName)
 
@@ -264,24 +262,26 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 			return "", "", err
 		}
 
-		stdoutCRD, stderrCRD, err = kubectl.Apply(dryRun, verbose, namespace, mcrd, extraArgs...)
+		err = kc.Apply(dryRun, verbose, namespace, mcrd)
 		if err != nil {
 			// Not all Istio components are robust to not yet created CRDs.
 			if err := waitForCRDs(objects, dryRun); err != nil {
-				return stdoutCRD, stderrCRD, err
+				return "", err.Error(), err
 			}
 		}
 	}
 
 	log.Infof("Applying the following manifest:\n%s", manifestStr)
-	stdout, stderr := "", ""
 	m, err := objects.JSONManifest()
 	if err != nil {
 		return stdoutCRD, stderrCRD, err
 	}
-	stdout, stderr, err = kubectl.Apply(dryRun, verbose, namespace, m, extraArgs...)
+	err = kc.Apply(dryRun, verbose, namespace, m)
+	if err != nil {
+		return err.Error(), err.Error(), err
+	}
 	logAndPrint("finished applying manifest for component %s", componentName)
-	return stdoutCRD + "\n" + stdout, stderrCRD + "\n" + stderr, err
+	return "", "", nil
 }
 
 func defaultObjectOrder() func(o *object.K8sObject) int {
@@ -408,66 +408,6 @@ func buildInstallTreeString(componentName name.ComponentName, prefix string, sb 
 	for k := range installTree[componentName].(componentTree) {
 		buildInstallTreeString(k, prefix+"  ", sb)
 	}
-}
-
-func initK8SRestClient() error {
-	var err error
-	if k8sRESTConfig != nil {
-		return nil
-	}
-	k8sRESTConfig, err = defaultRestConfig("", "")
-	if err != nil {
-		return err
-	}
-	/*	k8sRESTConfig, err = rest.RESTClientFor(config)
-		if err != nil {
-			return nil, err
-		}
-		return &Client{config, restClient}, nil
-	*/
-	return nil
-}
-
-func defaultRestConfig(kubeconfig, configContext string) (*rest.Config, error) {
-	config, err := BuildClientConfig(kubeconfig, configContext)
-	if err != nil {
-		return nil, err
-	}
-	config.APIPath = "/api"
-	config.GroupVersion = &v1.SchemeGroupVersion
-	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
-	return config, nil
-}
-
-// BuildClientConfig is a helper function that builds client config from a kubeconfig filepath.
-// It overrides the current context with the one provided (empty to use default).
-//
-// This is a modified version of k8s.io/client-go/tools/clientcmd/BuildConfigFromFlags with the
-// difference that it loads default configs if not running in-cluster.
-func BuildClientConfig(kubeconfig, context string) (*rest.Config, error) {
-	if kubeconfig != "" {
-		info, err := os.Stat(kubeconfig)
-		if err != nil || info.Size() == 0 {
-			// If the specified kubeconfig doesn't exists / empty file / any other error
-			// from file stat, fall back to default
-			kubeconfig = ""
-		}
-	}
-
-	//Config loading rules:
-	// 1. kubeconfig if it not empty string
-	// 2. In cluster config if running in-cluster
-	// 3. Config(s) in KUBECONFIG environment variable
-	// 4. Use $HOME/.kube/config
-	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	loadingRules.DefaultClientConfig = &clientcmd.DefaultClientConfig
-	loadingRules.ExplicitPath = kubeconfig
-	configOverrides := &clientcmd.ConfigOverrides{
-		ClusterDefaults: clientcmd.ClusterDefaults,
-		CurrentContext:  context,
-	}
-
-	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides).ClientConfig()
 }
 
 func logAndPrint(v ...interface{}) {
