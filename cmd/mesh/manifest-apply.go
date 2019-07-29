@@ -79,20 +79,14 @@ func manifestApply(args *rootArgs, maArgs *manifestApplyArgs) {
 
 	out, err := manifest.ApplyAll(manifests, opversion.OperatorBinaryVersion, args.dryRun, args.verbose, maArgs.kubeConfigPath, maArgs.context)
 	if err != nil {
-		logAndFatalf(args, "Failed to apply manifest with kubectl client: %v", err)
+		logAndFatalf(args, "Failed to apply manifest into kube-apiserver: %v", err)
 	}
 
 	for cn := range manifests {
-		cs := fmt.Sprintf("CompositeOutput for component %s:", cn)
+		cs := fmt.Sprintf("Output for component %s:", cn)
 		log.Infof("\n%s\n%s", cs, strings.Repeat("=", len(cs)))
-		if out.Err[cn] != nil {
-			logAndPrintf(args, "Error object: %s\n", out.Err[cn])
-		}
-		if strings.TrimSpace(out.Stderr[cn]) != "" {
-			logAndPrintf(args, "Error string:\n%s\n", out.Stderr[cn])
-		}
-		if strings.TrimSpace(out.Stdout[cn]) != "" {
-			logAndPrintf(args, "Output:\n%s\n", out.Stdout[cn])
+		if out[cn] != nil {
+			logAndPrintf(args, "Error object: %s\n", out[cn])
 		}
 	}
 }

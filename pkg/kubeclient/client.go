@@ -21,6 +21,7 @@ import (
 	"istio.io/operator/pkg/object"
 	"istio.io/pkg/log"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"k8s.io/client-go/dynamic"
@@ -75,19 +76,14 @@ func CreateKubeInterface(kubeconfig, context string) (*kubernetes.Clientset, err
 	return kubernetes.NewForConfig(restConfig)
 }
 
-// Apply runs the kubectl apply with the provided manifest argument
-func (c *Client) Apply(dryRun, verbose bool, namespace string, manifest string) error {
-	obj, err := object.ParseYAMLToK8sObject([]byte(manifest))
-	if err != nil {
-		logAndPrint("ParseYAMLToK8sObject from manifest string: %s with error: %v", manifest, err)
-		return err
-	}
+// Apply function the k8s object into kube-apiserver with kubeclient.
+func (c *Client) Apply(dryRun, verbose, prune bool, namespace string, obj *object.K8sObject, selector map[string]string) error {
 	gvk := obj.GroupVersionKind()
 	gk := obj.GroupKind()
 
 	groupResources, err := restmapper.GetAPIGroupResources(c.kubeClient.Discovery())
 	if err != nil {
-		logAndPrint("error GetAPIGroupResources from kube-apiserver: %v", err)
+		logAndPrint("getting API groupResources from kube-apiserver failed with error %v", err)
 		return err
 	}
 
@@ -95,17 +91,68 @@ func (c *Client) Apply(dryRun, verbose bool, namespace string, manifest string) 
 	mapping, err := rm.RESTMapping(gk, gvk.Version)
 
 	if err != nil {
-		logAndPrint("getting RESTMappings for the provided group version kind: %v with error: %v", gvk, err)
+		logAndPrint("getting REST mappings for the provided group version kind %v failed with error %v", gvk, err)
 		return err
 	}
 
-	// TODO: check if the obj already exists
-	_, err = c.dynamicInterface.Resource(mapping.Resource).Namespace(namespace).Create(obj.UnstructuredObject(), metav1.CreateOptions{})
-	if err != nil {
-		logAndPrint("creating the resource:\n%s\nwith error: %v", manifest, err)
-		return err
+	createOpts := metav1.CreateOptions{}
+	deleteOpts := &metav1.DeleteOptions{}
+	if dryRun {
+		createOpts.DryRun = []string{metav1.DryRunAll}
+		deleteOpts.DryRun = []string{metav1.DryRunAll}
 	}
-	return nil
+	resInterface := c.dynamicInterface.Resource(mapping.Resource).Namespace(namespace)
+
+	objName := obj.UnstructuredObject().GetName()
+	existingObj, err := resInterface.Get(objName, metav1.GetOptions{})
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			logAndPrint("creating the resource %s", obj.HashNameKind())
+			_, err := resInterface.Create(obj.UnstructuredObject(), createOpts)
+			if err != nil {
+				logAndPrint("creating the resource %s failed with error %v", obj.HashNameKind(), err)
+				return err
+			}
+			return nil
+		}
+	}
+
+	labels := existingObj.GetLabels()
+	if containsSelector(labels, selector) {
+		if prune {
+			// if there already exists resource with the selector, then delete the existing resource before creating new one.
+			logAndPrint("pruning the existing resource %s", obj.HashNameKind())
+			err := resInterface.Delete(objName, deleteOpts)
+			if err != nil {
+				return fmt.Errorf("pruning existing resource failed with error %v", err)
+			}
+			logAndPrint("creating the resource %s", obj.HashNameKind())
+			_, err = resInterface.Create(obj.UnstructuredObject(), createOpts)
+			if err != nil {
+				logAndPrint("creating the resource %s failed with error %v", obj.HashNameKind(), err)
+				return err
+			}
+			return nil
+		}
+		return fmt.Errorf("there already exists resource %s", obj.HashNameKind())
+	}
+	return fmt.Errorf("there already exists resource %s", obj.HashNameKind())
+}
+
+// containsSelector check if the labels contains the specified selector.
+func containsSelector(labels, selector map[string]string) bool {
+	if labels == nil {
+		return selector == nil
+	}
+	if selector == nil {
+		return true
+	}
+	for k, v := range selector {
+		if val, ok := labels[k]; !ok || val != v {
+			return false
+		}
+	}
+	return true
 }
 
 func logAndPrint(v ...interface{}) {

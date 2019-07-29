@@ -2,6 +2,8 @@ module istio.io/operator
 
 go 1.12
 
+replace github.com/spf13/viper => github.com/istio/viper v1.3.3-0.20190515210538-2789fed3109c
+
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.4.12 // indirect
 	github.com/Azure/go-autorest v12.0.0+incompatible // indirect

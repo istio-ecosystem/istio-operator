@@ -184,7 +184,7 @@ func renderRecursive(manifests name.ManifestMap, installTree componentTree, outp
 }
 
 // ApplyAll applies all given manifests using kubectl client.
-func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbose bool, kubeconfig, context string) (*CompositeOutput, error) {
+func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbose bool, kubeconfig, context string) (map[name.ComponentName]util.Errors, error) {
 	var err error
 	kc, err = kubeclient.NewClient(kubeconfig, context)
 	if err != nil {
@@ -198,9 +198,9 @@ func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbo
 	return applyRecursive(manifests, version, dryRun, verbose), nil
 }
 
-func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun, verbose bool) *CompositeOutput {
+func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun, verbose bool) map[name.ComponentName]util.Errors {
 	var wg sync.WaitGroup
-	out := NewCompositeOutput()
+	out := make(map[name.ComponentName]util.Errors)
 	for c, m := range manifests {
 		c := c
 		m := m
@@ -211,7 +211,7 @@ func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun,
 				<-s
 				logAndPrint("Parent dependency for %s has unblocked, proceeding.", c)
 			}
-			out.Stdout[c], out.Stderr[c], out.Err[c] = applyManifest(c, m, version, dryRun, verbose)
+			out[c] = applyManifest(c, m, version, dryRun, verbose)
 
 			// Signal all the components that depend on us.
 			for _, ch := range componentDependencies[c] {
@@ -229,16 +229,17 @@ func versionString(version version.Version) string {
 	return version.String()
 }
 
-func applyManifest(componentName name.ComponentName, manifestStr string, version version.Version, dryRun, verbose bool) (string, string, error) {
+func applyManifest(componentName name.ComponentName, manifestStr string, version version.Version, dryRun, verbose bool) util.Errors {
+	errsOut := util.Errors{}
 	objects, err := object.ParseK8sObjectsFromYAMLManifest(manifestStr)
 	if err != nil {
-		return "", "", err
+		return util.AppendErr(errsOut, err)
 	}
 	if len(objects) == 0 {
-		return "", "", nil
+		return errsOut
 	}
 
-	namespace, stdoutCRD, stderrCRD := "", "", ""
+	namespace := ""
 	for _, o := range objects {
 		o.AddLabels(map[string]string{istioComponentLabelStr: string(componentName)})
 		o.AddLabels(map[string]string{operatorLabelStr: operatorReconcileStr})
@@ -250,38 +251,39 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 	}
 	objects.Sort(defaultObjectOrder())
 
-	// TODO; add "--prune" back
-	//extraArgs := []string{"--force", "--selector", fmt.Sprintf("%s=%s", operatorLabelStr, operatorReconcileStr)}
+	var prune bool
+	operatorSelector := map[string]string{
+		operatorLabelStr: operatorReconcileStr,
+	}
 
-	logAndPrint("kubectl applying manifest for component %s", componentName)
+	logAndPrint("applying manifest for component %s", componentName)
 
-	crdObjects := cRDKindObjects(objects)
+	crdObjects, nonCrdObjects := filterCRDKindObjects(objects)
 	if len(crdObjects) > 0 {
-		mcrd, err := crdObjects.JSONManifest()
-		if err != nil {
-			return "", "", err
+		for _, obj := range crdObjects {
+			if err := kc.Apply(dryRun, verbose, prune, namespace, obj, operatorSelector); err != nil {
+				errsOut = util.AppendErr(errsOut, err)
+			}
 		}
 
-		err = kc.Apply(dryRun, verbose, namespace, mcrd)
-		if err != nil {
+		if len(errsOut) > 0 {
 			// Not all Istio components are robust to not yet created CRDs.
-			if err := waitForCRDs(objects, dryRun); err != nil {
-				return "", err.Error(), err
+			if err := waitForCRDs(crdObjects, dryRun); err != nil {
+				errsOut = util.AppendErr(errsOut, err)
 			}
 		}
 	}
 
-	log.Infof("Applying the following manifest:\n%s", manifestStr)
-	m, err := objects.JSONManifest()
-	if err != nil {
-		return stdoutCRD, stderrCRD, err
+	log.Infof("applying the following manifest:\n%s", manifestStr)
+
+	for _, obj := range nonCrdObjects {
+		if err := kc.Apply(dryRun, verbose, prune, namespace, obj, operatorSelector); err != nil {
+			errsOut = util.AppendErr(errsOut, err)
+		}
 	}
-	err = kc.Apply(dryRun, verbose, namespace, m)
-	if err != nil {
-		return err.Error(), err.Error(), err
-	}
+
 	logAndPrint("finished applying manifest for component %s", componentName)
-	return "", "", nil
+	return errsOut
 }
 
 func defaultObjectOrder() func(o *object.K8sObject) int {
@@ -320,14 +322,16 @@ func defaultObjectOrder() func(o *object.K8sObject) int {
 	}
 }
 
-func cRDKindObjects(objects object.K8sObjects) object.K8sObjects {
-	var ret object.K8sObjects
+// filterCRDKindObjects filter the CRD kind objects and others
+func filterCRDKindObjects(objects object.K8sObjects) (crdObjects, nonCrdObjects object.K8sObjects) {
 	for _, o := range objects {
 		if o.Kind == "CustomResourceDefinition" {
-			ret = append(ret, o)
+			crdObjects = append(crdObjects, o)
+		} else {
+			nonCrdObjects = append(nonCrdObjects, o)
 		}
 	}
-	return ret
+	return
 }
 
 func waitForCRDs(objects object.K8sObjects, dryRun bool) error {
@@ -343,7 +347,7 @@ func waitForCRDs(objects object.K8sObjects, dryRun bool) error {
 	}
 
 	var crdNames []string
-	for _, o := range cRDKindObjects(objects) {
+	for _, o := range objects {
 		crdNames = append(crdNames, o.Name)
 	}
 
