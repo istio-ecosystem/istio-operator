@@ -123,7 +123,7 @@ func renderChart(namespace, baseValues, overlayValues string, chrt *chart.Chart)
 
 	var sb strings.Builder
 	for _, f := range files {
-		// add yaml separater if the rendered file doesn't have one at the end
+		// add yaml separator if the rendered file doesn't have one at the end
 		if !strings.HasSuffix(strings.TrimSpace(f)+"\n", YAMLSeparator) {
 			f += YAMLSeparator
 		}
