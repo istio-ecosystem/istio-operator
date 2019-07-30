@@ -2155,4 +2155,3 @@ func (d *vfsgen۰Dir) Readdir(count int) ([]os.FileInfo, error) {
 	d.pos += count
 	return e, nil
 }
-

@@ -21,8 +21,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	v1 "k8s.io/api/core/v1"
-
 	"istio.io/operator/pkg/manifest"
 	opversion "istio.io/operator/version"
 	"istio.io/pkg/log"
@@ -35,8 +33,6 @@ type manifestApplyArgs struct {
 	kubeConfigPath string
 	// context is the name of the kubeconfig context to use.
 	context string
-	// namespace is the kubeconfig namespace
-	namespace string
 	// set is a string with element format "path=value" where path is an IstioControlPlane path and the value is a
 	// value to set the node at that path to.
 	set []string
@@ -46,7 +42,6 @@ func addManifestApplyFlags(cmd *cobra.Command, args *manifestApplyArgs) {
 	cmd.PersistentFlags().StringVarP(&args.inFilename, "filename", "f", "", filenameFlagHelpStr)
 	cmd.PersistentFlags().StringVarP(&args.kubeConfigPath, "kubeconfig", "c", "", "Path to kube config.")
 	cmd.PersistentFlags().StringVar(&args.context, "context", "", "The name of the kubeconfig context to use.")
-	cmd.PersistentFlags().StringVarP(&args.namespace, "namespace", "n", v1.NamespaceAll, "Namespace for the kubeConfig.")
 	cmd.PersistentFlags().StringSliceVarP(&args.set, "set", "s", nil, setFlagHelpStr)
 }
 
