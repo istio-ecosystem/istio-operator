@@ -195,7 +195,7 @@ func renderRecursive(manifests name.ManifestMap, installTree componentTree, outp
 }
 
 // ApplyAll applies all given manifests using kubectl client.
-func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbose, wait bool, timeout int64) (CompositeOutput, error) {
+func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbose, wait bool, timeout time.Duration) (CompositeOutput, error) {
 	logAndPrint("Applying manifests for these components:")
 	for c := range manifests {
 		logAndPrint("- %s", c)
@@ -207,7 +207,7 @@ func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbo
 	return applyRecursive(manifests, version, dryRun, verbose, wait, timeout)
 }
 
-func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun, verbose, wait bool, timeout int64) (CompositeOutput, error) {
+func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun, verbose, wait bool, timeout time.Duration) (CompositeOutput, error) {
 	var wg sync.WaitGroup
 	out := CompositeOutput{}
 	for c, m := range manifests {
@@ -232,7 +232,7 @@ func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun,
 	}
 	wg.Wait()
 	if wait {
-		return out, waitForResources(time.Duration(timeout)*time.Second, appliedObjects, dryRun)
+		return out, waitForResources(timeout, appliedObjects, dryRun)
 	}
 	return out, nil
 }
