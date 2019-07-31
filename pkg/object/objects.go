@@ -239,11 +239,7 @@ func ParseK8sObjectsFromYAMLManifest(manifest string) (K8sObjects, error) {
 	var objects K8sObjects
 
 	for _, yaml := range yamls {
-		yaml = removeCommentedLines(yaml)
-		if strings.TrimSpace(yaml) == "" {
-			// helm charts sometimes emits blank objects with just a "disabled" comment.
-			continue
-		}
+		yaml = removeNonYAMLLines(yaml)
 		o, err := ParseYAMLToK8sObject([]byte(yaml))
 		if err != nil {
 			log.Errorf("Failed to parse YAML to a k8s object: %v", err.Error())
@@ -256,7 +252,7 @@ func ParseK8sObjectsFromYAMLManifest(manifest string) (K8sObjects, error) {
 	return objects, nil
 }
 
-func removeCommentedLines(yms string) string {
+func removeNonYAMLLines(yms string) string {
 	out := ""
 	for _, s := range strings.Split(yms, "\n") {
 		if strings.HasPrefix(s, "#") {
@@ -264,7 +260,9 @@ func removeCommentedLines(yms string) string {
 		}
 		out += s + "\n"
 	}
-	return out
+
+	// helm charts sometimes emits blank objects with just a "disabled" comment.
+	return strings.TrimSpace(out)
 }
 
 // JSONManifest returns a JSON representation of K8sObjects os.
