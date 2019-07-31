@@ -37,7 +37,7 @@ function die() {
     echo "$*" 1>&2 ; exit 1;
 }
 
-while getopts i:o:v:d: arg ; do
+while getopts o:v:d: arg ; do
   case "${arg}" in
     o) OUTPUT_ROOT_DIR="${OPTARG}";;
     v) INSTALLER_VERSION="${OPTARG}";;
