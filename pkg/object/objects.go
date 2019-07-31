@@ -240,6 +240,9 @@ func ParseK8sObjectsFromYAMLManifest(manifest string) (K8sObjects, error) {
 
 	for _, yaml := range yamls {
 		yaml = removeNonYAMLLines(yaml)
+		if yaml == "" {
+			continue
+		}
 		o, err := ParseYAMLToK8sObject([]byte(yaml))
 		if err != nil {
 			log.Errorf("Failed to parse YAML to a k8s object: %v", err.Error())
