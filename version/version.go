@@ -16,6 +16,7 @@ package version
 
 import (
 	"io/ioutil"
+	"strings"
 
 	goversion "github.com/hashicorp/go-version"
 
@@ -41,16 +42,16 @@ var (
 )
 
 func init() {
-	b, err := ioutil.ReadFile("v")
+	b, err := ioutil.ReadFile(versionFileName)
 	if err != nil {
 		panic(err)
 	}
-
-	OperatorBinaryGoVersion, err = goversion.NewVersion(string(b))
+	vs := strings.TrimSpace(string(b))
+	OperatorBinaryGoVersion, err = goversion.NewVersion(vs)
 	if err != nil {
 		panic(err)
 	}
-	v, err := pkgversion.NewVersionFromString(string(b))
+	v, err := pkgversion.NewVersionFromString(vs)
 	if err != nil {
 		panic(err)
 	}
