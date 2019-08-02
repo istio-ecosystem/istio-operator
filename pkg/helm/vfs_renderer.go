@@ -145,3 +145,14 @@ func stripPrefix(path, prefix string) string {
 	pv := strings.Split(path, "/")
 	return strings.Join(pv[pl:], "/")
 }
+
+// list all the buildin profiles.
+func ListBuildinProfiles() []string {
+	buildinProfiles := make([]string, 0, len(ProfileNames))
+	for p, isBuildin := range ProfileNames {
+		if isBuildin {
+			buildinProfiles = append(buildinProfiles, p)
+		}
+	}
+	return buildinProfiles
+}
