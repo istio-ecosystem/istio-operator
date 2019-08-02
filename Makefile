@@ -120,6 +120,18 @@ gen_patch_iscp:
 gen_patch_values:
 	diff -u pkg/apis/istio/v1alpha2/values/values_types.pb.go.orig pkg/apis/istio/v1alpha2/values/values_types.pb.go > pkg/apis/istio/v1alpha2/values/fix_values_structs.patch || true
 
+sync_charts:
+	charts_dir := $(GOPATH)/src/istio.io/installer
+	out_idr := $(GOPATH)/src/istio.io/operator
+	cp -Rf $(charts_dir)/crds $(out_dir)
+	cp -Rf $(charts_dir)/gateways $(out_dir)
+	cp -Rf $(charts_dir)/istio-cni $(out_dir)
+	cp -Rf $(charts_dir)/istiocoredns $(out_dir)
+	cp -Rf $(charts_dir)/istio-telemetry $(out_dir)
+	cp -Rf $(charts_dir)/istio-control $(out_dir)
+	cp -Rf $(charts_dir)/istio-policy $(out_dir)
+	cp -Rf $(charts_dir)/security $(out_dir)
+
 vfsgen: data/
 	go get github.com/shurcooL/vfsgen
 	go generate ./cmd/mesh.go
