@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
-	"istio.io/operator/pkg/httpget"
+	"istio.io/operator/pkg/httprequest"
 	"istio.io/operator/pkg/version"
 	binversion "istio.io/operator/version"
 )
@@ -61,7 +61,7 @@ func manifestVersions(args *rootArgs, mvArgs *manifestVersionsArgs) {
 	uri := mvArgs.versionsURI
 
 	if strings.HasPrefix(uri, "http") {
-		b, err = httpget.Get(uri)
+		b, err = httprequest.Get(uri)
 		if err != nil {
 			logAndFatalf(args, err.Error())
 		}

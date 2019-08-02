@@ -21,8 +21,6 @@ import (
 )
 
 const (
-	// versionFileName is the name of the file containing the operator version.
-	versionFileName = "./version.yaml"
 	// OperatorVersionString is the version string of this operator binary.
 	OperatorVersionString = "1.3.0"
 )
