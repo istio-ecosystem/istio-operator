@@ -32,12 +32,12 @@ const (
 )
 
 type manifestVersionsArgs struct {
-	// versionsURI is a URI pointing to a YAML formatted manifestVersions mapping.
+	// versionsURI is a URI pointing to a YAML formatted versions mapping.
 	versionsURI string
 }
 
-func addManifestVersionsFlags(cmd *cobra.Command, versionsArgs *manifestVersionsArgs) {
-	cmd.PersistentFlags().StringVarP(&versionsArgs.versionsURI, "versionsURI", "u",
+func addManifestVersionsFlags(cmd *cobra.Command, mvArgs *manifestVersionsArgs) {
+	cmd.PersistentFlags().StringVarP(&mvArgs.versionsURI, "versionsURI", "u",
 		versionsMapURL, "URI for operator versions to Istio versions map.")
 }
 
@@ -53,12 +53,12 @@ func manifestVersionsCmd(rootArgs *rootArgs, versionsArgs *manifestVersionsArgs)
 
 }
 
-func manifestVersions(args *rootArgs, versionsArgs *manifestVersionsArgs) {
+func manifestVersions(args *rootArgs, mvArgs *manifestVersionsArgs) {
 	checkLogsOrExit(args)
 
 	var b []byte
 	var err error
-	uri := versionsArgs.versionsURI
+	uri := mvArgs.versionsURI
 
 	if strings.HasPrefix(uri, "http") {
 		b, err = httpget.Get(uri)
