@@ -10,6 +10,7 @@ metadata:
 spec:
   ports:
   - port: 443
+    targetPort: 9443
     name: https-validation
   - port: 15014
     name: http-monitoring
