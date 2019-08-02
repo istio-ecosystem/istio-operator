@@ -34,12 +34,12 @@ func profileListCmd(rootArgs *rootArgs) *cobra.Command {
 
 }
 
-// profileList list all the buildin profiles.
+// profileList list all the builtin profiles.
 func profileList(args *rootArgs) {
 	checkLogsOrExit(args)
-	profiles := helm.ListBuildinProfiles()
+	profiles := helm.ListBuiltinProfiles()
 	if len(profiles) == 0 {
-		fmt.Println("No profile available.")
+		fmt.Println("No profiles available.")
 	} else {
 		fmt.Println("Istio configuration profiles:")
 		for _, profile := range profiles {

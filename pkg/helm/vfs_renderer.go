@@ -22,6 +22,7 @@ import (
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
+	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/vfsgen"
 
 	"istio.io/pkg/log"
@@ -146,13 +147,7 @@ func stripPrefix(path, prefix string) string {
 	return strings.Join(pv[pl:], "/")
 }
 
-// list all the buildin profiles.
-func ListBuildinProfiles() []string {
-	buildinProfiles := make([]string, 0, len(ProfileNames))
-	for p, isBuildin := range ProfileNames {
-		if isBuildin {
-			buildinProfiles = append(buildinProfiles, p)
-		}
-	}
-	return buildinProfiles
+// list all the builtin profiles.
+func ListBuiltinProfiles() []string {
+	return util.StringBoolMapToSlice(ProfileNames)
 }
