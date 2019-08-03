@@ -6,6 +6,8 @@ mount_dir := /src
 uid := $(shell id -u)
 docker_gen := docker run --rm --user $(uid) -v /etc/passwd:/etc/passwd:ro -v $(pwd):$(mount_dir) -w $(mount_dir) $(gen_img) -I.
 out_path = .
+charts_dir := ${GOPATH}/src/istio.io/installer
+out_dir := ${GOPATH}/src/istio.io/operator/data/charts
 
 ########################
 # protoc_gen_gogo*
@@ -121,8 +123,6 @@ gen_patch_values:
 	diff -u pkg/apis/istio/v1alpha2/values/values_types.pb.go.orig pkg/apis/istio/v1alpha2/values/values_types.pb.go > pkg/apis/istio/v1alpha2/values/fix_values_structs.patch || true
 
 sync_charts:
-	charts_dir := $(GOPATH)/src/istio.io/installer
-	out_idr := $(GOPATH)/src/istio.io/operator
 	cp -Rf $(charts_dir)/crds $(out_dir)
 	cp -Rf $(charts_dir)/gateways $(out_dir)
 	cp -Rf $(charts_dir)/istio-cni $(out_dir)

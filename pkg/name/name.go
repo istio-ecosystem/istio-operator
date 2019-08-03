@@ -66,8 +66,8 @@ const (
 	CitadelComponentName         ComponentName = "Citadel"
 	CertManagerComponentName     ComponentName = "CertManager"
 	NodeAgentComponentName       ComponentName = "NodeAgent"
-	IngressComponentName         ComponentName = "Ingress"
-	EgressComponentName          ComponentName = "Egress"
+	IngressComponentName         ComponentName = "IngressGateway"
+	EgressComponentName          ComponentName = "EgressGateway"
 )
 
 // ManifestMap is a map of ComponentName to its manifest string.
