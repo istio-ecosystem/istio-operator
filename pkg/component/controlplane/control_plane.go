@@ -36,17 +36,15 @@ func NewIstioControlPlane(installSpec *v1alpha2.IstioControlPlaneSpec, translato
 		InstallSpec: installSpec,
 		Traslator:   translator,
 	}
+	features := make([]feature.IstioFeature, 0, len(translator.FeatureMaps))
+	for ft := range translator.FeatureMaps {
+		enabled, err := translator.IsFeatureEnabled(ft, installSpec)
+		if err == nil && enabled {
+			features = append(features, feature.NewFeature(ft, opts))
+		}
+	}
 	return &IstioControlPlane{
-		features: []feature.IstioFeature{
-			feature.NewBaseFeature(opts),
-			feature.NewTrafficManagementFeature(opts),
-			feature.NewSecurityFeature(opts),
-			feature.NewPolicyFeature(opts),
-			feature.NewTelemetryFeature(opts),
-			feature.NewConfigManagementFeature(opts),
-			feature.NewAutoInjectionFeature(opts),
-			feature.NewGatewayFeature(opts),
-		},
+		features: features,
 	}
 }
 

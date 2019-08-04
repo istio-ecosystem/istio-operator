@@ -46,6 +46,29 @@ type CommonFeatureFields struct {
 	components []component.IstioComponent
 }
 
+func NewFeature(ft name.FeatureName, opts *Options) IstioFeature {
+	var feature IstioFeature
+	switch ft {
+	case name.IstioBaseFeatureName:
+		feature = NewBaseFeature(opts)
+	case name.TrafficManagementFeatureName:
+		feature = NewTrafficManagementFeature(opts)
+	case name.PolicyFeatureName:
+		feature = NewPolicyFeature(opts)
+	case name.TelemetryFeatureName:
+		feature = NewTelemetryFeature(opts)
+	case name.SecurityFeatureName:
+		feature = NewSecurityFeature(opts)
+	case name.ConfigManagementFeatureName:
+		feature = NewConfigManagementFeature(opts)
+	case name.AutoInjectionFeatureName:
+		feature = NewAutoInjectionFeature(opts)
+	case name.GatewayFeatureName:
+		feature = NewGatewayFeature(opts)
+	}
+	return feature
+}
+
 // BaseFeature is the base feature, containing essential Istio base items.
 type BaseFeature struct {
 	// CommonFeatureFields is the struct shared among all features.
@@ -57,8 +80,15 @@ func NewBaseFeature(opts *Options) *BaseFeature {
 	cff := &CommonFeatureFields{
 		Options: *opts,
 	}
-	cff.components = []component.IstioComponent{
-		component.NewCRDComponent(newComponentOptions(cff, name.IstioBaseFeatureName)),
+
+	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
+		ftMap := opts.Traslator.FeatureMaps[name.IstioBaseFeatureName]
+		for _, cn := range ftMap.Components {
+			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
+			if err == nil && enabled {
+				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.IstioBaseFeatureName)))
+			}
+		}
 	}
 
 	return &BaseFeature{
@@ -87,8 +117,15 @@ func NewTrafficManagementFeature(opts *Options) *TrafficManagementFeature {
 	cff := &CommonFeatureFields{
 		Options: *opts,
 	}
-	cff.components = []component.IstioComponent{
-		component.NewPilotComponent(newComponentOptions(cff, name.TrafficManagementFeatureName)),
+
+	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
+		ftMap := opts.Traslator.FeatureMaps[name.TrafficManagementFeatureName]
+		for _, cn := range ftMap.Components {
+			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
+			if err == nil && enabled {
+				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.TrafficManagementFeatureName)))
+			}
+		}
 	}
 
 	return &TrafficManagementFeature{
@@ -116,11 +153,17 @@ func NewSecurityFeature(opts *Options) *SecurityFeature {
 	cff := &CommonFeatureFields{
 		Options: *opts,
 	}
-	cff.components = []component.IstioComponent{
-		component.NewCitadelComponent(newComponentOptions(cff, name.SecurityFeatureName)),
-		component.NewCertManagerComponent(newComponentOptions(cff, name.SecurityFeatureName)),
-		component.NewNodeAgentComponent(newComponentOptions(cff, name.SecurityFeatureName)),
+
+	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
+		ftMap := opts.Traslator.FeatureMaps[name.SecurityFeatureName]
+		for _, cn := range ftMap.Components {
+			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
+			if err == nil && enabled {
+				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.SecurityFeatureName)))
+			}
+		}
 	}
+
 	return &SecurityFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -146,9 +189,17 @@ func NewPolicyFeature(opts *Options) *PolicyFeature {
 	cff := &CommonFeatureFields{
 		Options: *opts,
 	}
-	cff.components = []component.IstioComponent{
-		component.NewPolicyComponent(newComponentOptions(cff, name.PolicyFeatureName)),
+
+	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
+		ftMap := opts.Traslator.FeatureMaps[name.PolicyFeatureName]
+		for _, cn := range ftMap.Components {
+			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
+			if err == nil && enabled {
+				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.PolicyFeatureName)))
+			}
+		}
 	}
+
 	return &PolicyFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -179,9 +230,17 @@ func NewTelemetryFeature(opts *Options) *TelemetryFeature {
 	cff := &CommonFeatureFields{
 		Options: *opts,
 	}
-	cff.components = []component.IstioComponent{
-		component.NewTelemetryComponent(newComponentOptions(cff, name.TelemetryFeatureName)),
+
+	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
+		ftMap := opts.Traslator.FeatureMaps[name.TelemetryFeatureName]
+		for _, cn := range ftMap.Components {
+			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
+			if err == nil && enabled {
+				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.TelemetryFeatureName)))
+			}
+		}
 	}
+
 	return &TelemetryFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -202,9 +261,17 @@ func NewConfigManagementFeature(opts *Options) *ConfigManagementFeature {
 	cff := &CommonFeatureFields{
 		Options: *opts,
 	}
-	cff.components = []component.IstioComponent{
-		component.NewGalleyComponent(newComponentOptions(cff, name.ConfigManagementFeatureName)),
+
+	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
+		ftMap := opts.Traslator.FeatureMaps[name.ConfigManagementFeatureName]
+		for _, cn := range ftMap.Components {
+			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
+			if err == nil && enabled {
+				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.ConfigManagementFeatureName)))
+			}
+		}
 	}
+
 	return &ConfigManagementFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -230,9 +297,17 @@ func NewAutoInjectionFeature(opts *Options) *AutoInjectionFeature {
 	cff := &CommonFeatureFields{
 		Options: *opts,
 	}
-	cff.components = []component.IstioComponent{
-		component.NewSidecarInjectorComponent(newComponentOptions(cff, name.AutoInjectionFeatureName)),
+
+	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
+		ftMap := opts.Traslator.FeatureMaps[name.AutoInjectionFeatureName]
+		for _, cn := range ftMap.Components {
+			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
+			if err == nil && enabled {
+				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.AutoInjectionFeatureName)))
+			}
+		}
 	}
+
 	return &AutoInjectionFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -258,10 +333,17 @@ func NewGatewayFeature(opts *Options) *GatewayFeature {
 	cff := &CommonFeatureFields{
 		Options: *opts,
 	}
-	cff.components = []component.IstioComponent{
-		component.NewIngressComponent(newComponentOptions(cff, name.GatewayFeatureName)),
-		component.NewEgressComponent(newComponentOptions(cff, name.GatewayFeatureName)),
+
+	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
+		ftMap := opts.Traslator.FeatureMaps[name.GatewayFeatureName]
+		for _, cn := range ftMap.Components {
+			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
+			if err == nil && enabled {
+				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.GatewayFeatureName)))
+			}
+		}
 	}
+
 	return &GatewayFeature{
 		CommonFeatureFields: *cff,
 	}

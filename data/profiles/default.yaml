@@ -187,10 +187,20 @@ spec:
       certManager:
         common:
           enabled: false
+          values:
+            replicaCount: 1
+            hub: quay.io/jetstack
+            tag: v0.6.2
 
       nodeAgent:
         common:
           enabled: false
+          values:
+            image: node-agent-k8s
+            env:
+              CA_PROVIDER: ""
+              CA_ADDR: ""
+              Plugins: ""
 
   # Config management feature
   configManagement:
