@@ -20,7 +20,6 @@ import (
 	"fmt"
         
         "github.com/gogo/protobuf/jsonpb"
-	"github.com/golang/protobuf/jsonpb"
 	"istio.io/operator/pkg/util"
 	corev1 "k8s.io/api/core/v1"
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
@@ -648,18 +647,20 @@ func FromString(val string) IntOrStringForPB {
 	return IntOrStringForPB{intstr.FromString(val)}
 }
 
-// Validation checks
-func (t *PilotConfig) Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) util.Errors {
+// Validate checks
+func (t *PilotConfig) Validate(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) util.Errors {
 	var validationErrors util.Errors
-	validationErrors = util.AppendErr(validationErrors, fmt.Errorf("pilotconfig has not been yet implemented"))
+	// Exmple
+	// validationErrors = util.AppendErr(validationErrors, fmt.Errorf("pilotconfig has not been yet implemented"))
 
 	return validationErrors
 }
 
-// Validation checks CNIConfig confiugration
-func (t *CNIConfig) Validation(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) util.Errors {
+// Validate checks CNIConfig confiugration
+func (t *CNIConfig) Validate(failOnMissingValidation bool, values *Values, icpls *IstioControlPlaneSpec) util.Errors {
 	var validationErrors util.Errors
-	validationErrors = util.AppendErr(validationErrors, fmt.Errorf("cniconfig has not been yet implemented"))
+	// Example
+	// validationErrors = util.AppendErr(validationErrors, fmt.Errorf("cniconfig has not been yet implemented"))
 
 	return validationErrors
 }

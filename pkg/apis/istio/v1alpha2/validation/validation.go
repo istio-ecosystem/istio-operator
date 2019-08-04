@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	validationMethodName = "Validation"
+	validationMethodName = "Validate"
 )
 
 // ValidateConfig  calls validation func for every defined element in Values
@@ -37,28 +37,77 @@ func ValidateConfig(failOnMissingValidation bool, values *v1alpha2.Values, icpls
 
 func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *v1alpha2.Values, icpls *v1alpha2.IstioControlPlaneSpec) util.Errors {
 	var validationErrors util.Errors
+	var ptr reflect.Value
+	var value reflect.Value
+	var object reflect.Value
+	var finalMethod reflect.Value
 
-	for i := 0; i < e.NumField(); i++ {
-		// Validation is not required if it is not a defined type
-		if e.Field(i).Kind() != reflect.Interface && e.Field(i).Kind() != reflect.Ptr {
+	fmt.Printf("Visiting: %s of kind: %s\n", reflect.TypeOf(e.Interface()).Name(), e.Kind().String())
+
+	// Dealing with receiver pointer and receiver value
+	if e.Type().Kind() == reflect.Ptr {
+		ptr = e
+		value = ptr.Elem()
+		object = reflect.Indirect(e)
+	} else {
+		ptr = reflect.New(reflect.TypeOf(e.Interface()))
+		temp := ptr.Elem()
+		temp.Set(e)
+		object = e
+	}
+
+	// check for method on value
+	method := value.MethodByName("Validate")
+	if method.IsValid() {
+		finalMethod = method
+	}
+	// check for method on pointer
+	method = ptr.MethodByName("Validate")
+	if method.IsValid() {
+		finalMethod = method
+	}
+
+	if util.IsNilOrInvalidValue(finalMethod) {
+		if failOnMissingValidation {
+			validationErrors = append(validationErrors, fmt.Errorf("type %s is missing Validation method", e.Type().String()))
+		}
+	} else {
+		r := finalMethod.Call([]reflect.Value{reflect.ValueOf(failOnMissingValidation), reflect.ValueOf(values), reflect.ValueOf(icpls)})[0].Interface().(util.Errors)
+		if len(r) != 0 {
+			validationErrors = append(validationErrors, r...)
+		}
+	}
+	// If it is not a struct nothing to do, returning previously collected validation errors
+	if object.Kind() != reflect.Struct {
+		return validationErrors
+	}
+	for i := 0; i < object.NumField(); i++ {
+		// Corner case of a slice of something, if something is defined type, then process it recursiveley.
+		if object.Field(i).Kind() == reflect.Slice {
+			fmt.Printf("Discovered slice of type: %+v\n", reflect.SliceOf(object.Field(i).Type()))
+			validationErrors = append(validationErrors, processMapOrSlice(object.Field(i), failOnMissingValidation, values, icpls)...)
 			continue
 		}
-		val := e.Field(i).Elem()
+		// Validation is not required if it is not a defined type
+		if object.Field(i).Kind() != reflect.Interface && object.Field(i).Kind() != reflect.Ptr {
+			continue
+		}
+		val := object.Field(i).Elem()
 		if util.IsNilOrInvalidValue(val) {
 			continue
 		}
-		validation := e.Field(i).MethodByName(validationMethodName)
-		if util.IsNilOrInvalidValue(validation) {
-			if failOnMissingValidation {
-				validationErrors = util.AppendErr(validationErrors, fmt.Errorf("type %s is missing Validation method", e.Type().Field(i).Type))
-			}
-		} else {
-			r := validation.Call([]reflect.Value{reflect.ValueOf(failOnMissingValidation), reflect.ValueOf(values), reflect.ValueOf(icpls)})[0].Interface().(util.Errors)
-			if len(r) != 0 {
-				validationErrors = util.AppendErrs(validationErrors, r)
-			}
+		validationErrors = append(validationErrors, validateSubTypes(object.Field(i), failOnMissingValidation, values, icpls)...)
+	}
+
+	return validationErrors
+}
+
+func processMapOrSlice(e reflect.Value, failOnMissingValidation bool, values *v1alpha2.Values, icpls *v1alpha2.IstioControlPlaneSpec) util.Errors {
+	var validationErrors util.Errors
+	for i := 0; i < e.Len(); i++ {
+		if e.Index(i).Kind() == reflect.Interface || e.Index(i).Kind() == reflect.Ptr {
+			validationErrors = append(validationErrors, validateSubTypes(e.Index(i), failOnMissingValidation, values, icpls)...)
 		}
-		validationErrors = util.AppendErrs(validationErrors, validateSubTypes(e.Field(i).Elem(), failOnMissingValidation, values, icpls))
 	}
 
 	return validationErrors
