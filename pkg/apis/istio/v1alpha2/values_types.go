@@ -18,8 +18,8 @@ package v1alpha2
 
 import (
 	"fmt"
-        
-        "github.com/gogo/protobuf/jsonpb"
+
+	"github.com/gogo/protobuf/jsonpb"
 	"istio.io/operator/pkg/util"
 	corev1 "k8s.io/api/core/v1"
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
