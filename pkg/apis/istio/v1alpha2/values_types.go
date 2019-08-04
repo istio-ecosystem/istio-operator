@@ -17,8 +17,6 @@ package v1alpha2
 // TODO: create remaining enum types.
 
 import (
-	"fmt"
-
 	"github.com/gogo/protobuf/jsonpb"
 	"istio.io/operator/pkg/util"
 	corev1 "k8s.io/api/core/v1"
