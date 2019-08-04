@@ -15,7 +15,7 @@
 package validation
 
 import (
-	fmt "fmt"
+	"fmt"
 	"reflect"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
@@ -42,8 +42,6 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *v1a
 	var object reflect.Value
 	var finalMethod reflect.Value
 
-	fmt.Printf("Visiting: %s of kind: %s\n", reflect.TypeOf(e.Interface()).Name(), e.Kind().String())
-
 	// Dealing with receiver pointer and receiver value
 	if e.Type().Kind() == reflect.Ptr {
 		ptr = e
@@ -57,12 +55,12 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *v1a
 	}
 
 	// check for method on value
-	method := value.MethodByName("Validate")
+	method := value.MethodByName(validationMethodName)
 	if method.IsValid() {
 		finalMethod = method
 	}
 	// check for method on pointer
-	method = ptr.MethodByName("Validate")
+	method = ptr.MethodByName(validationMethodName)
 	if method.IsValid() {
 		finalMethod = method
 	}
@@ -82,9 +80,8 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *v1a
 		return validationErrors
 	}
 	for i := 0; i < object.NumField(); i++ {
-		// Corner case of a slice of something, if something is defined type, then process it recursiveley.
-		if object.Field(i).Kind() == reflect.Slice {
-			fmt.Printf("Discovered slice of type: %+v\n", reflect.SliceOf(object.Field(i).Type()))
+		// Corner case of a slice or map of something, if something is a defined type, then process it recursiveley.
+		if object.Field(i).Kind() == reflect.Slice || object.Field(i).Kind() == reflect.Map {
 			validationErrors = append(validationErrors, processMapOrSlice(object.Field(i), failOnMissingValidation, values, icpls)...)
 			continue
 		}
