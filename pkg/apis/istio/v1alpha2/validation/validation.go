@@ -52,6 +52,7 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *v1a
 		temp := ptr.Elem()
 		temp.Set(e)
 		object = e
+		value = e
 	}
 
 	// check for method on value
