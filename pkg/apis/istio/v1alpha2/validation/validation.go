@@ -81,9 +81,13 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *v1a
 		return validationErrors
 	}
 	for i := 0; i < object.NumField(); i++ {
-		// Corner case of a slice or map of something, if something is a defined type, then process it recursiveley.
-		if object.Field(i).Kind() == reflect.Slice || object.Field(i).Kind() == reflect.Map {
-			validationErrors = append(validationErrors, processMapOrSlice(object.Field(i), failOnMissingValidation, values, icpls)...)
+		// Corner case of a slice of something, if something is defined type, then process it recursiveley.
+		if object.Field(i).Kind() == reflect.Slice {
+			validationErrors = append(validationErrors, processSlice(object.Field(i), failOnMissingValidation, values, icpls)...)
+			continue
+		}
+		if object.Field(i).Kind() == reflect.Map {
+			validationErrors = append(validationErrors, processMap(object.Field(i), failOnMissingValidation, values, icpls)...)
 			continue
 		}
 		// Validation is not required if it is not a defined type
@@ -100,12 +104,20 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *v1a
 	return validationErrors
 }
 
-func processMapOrSlice(e reflect.Value, failOnMissingValidation bool, values *v1alpha2.Values, icpls *v1alpha2.IstioControlPlaneSpec) util.Errors {
+func processSlice(e reflect.Value, failOnMissingValidation bool, values *v1alpha2.Values, icpls *v1alpha2.IstioControlPlaneSpec) util.Errors {
 	var validationErrors util.Errors
 	for i := 0; i < e.Len(); i++ {
-		if e.Index(i).Kind() == reflect.Interface || e.Index(i).Kind() == reflect.Ptr {
-			validationErrors = append(validationErrors, validateSubTypes(e.Index(i), failOnMissingValidation, values, icpls)...)
-		}
+		validationErrors = append(validationErrors, validateSubTypes(e.Index(i), failOnMissingValidation, values, icpls)...)
+	}
+
+	return validationErrors
+}
+
+func processMap(e reflect.Value, failOnMissingValidation bool, values *v1alpha2.Values, icpls *v1alpha2.IstioControlPlaneSpec) util.Errors {
+	var validationErrors util.Errors
+	for _, k := range e.MapKeys() {
+		v := e.MapIndex(k)
+		validationErrors = append(validationErrors, validateSubTypes(v, failOnMissingValidation, values, icpls)...)
 	}
 
 	return validationErrors
