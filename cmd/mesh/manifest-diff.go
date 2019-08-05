@@ -19,11 +19,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/spf13/cobra"
 
 	"istio.io/operator/pkg/object"
+	"istio.io/operator/pkg/util"
 	"istio.io/pkg/log"
 )
 
@@ -83,44 +83,20 @@ func compareManifestsFromFiles(rootArgs *rootArgs, args []string) {
 	}
 }
 
-func readFromDir(dirName string) (string, error) {
-	var fileList []string
-	err := filepath.Walk(dirName, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() || filepath.Ext(path) != YAMLSuffix {
-			return nil
-		}
-		fileList = append(fileList, path)
-		return nil
-	})
-	if err != nil {
-		return "", err
-	}
-	var sb strings.Builder
-	for _, file := range fileList {
-		a, err := ioutil.ReadFile(file)
-		if err != nil {
-			return "", err
-		}
-		if _, err := sb.WriteString(string(a)); err != nil {
-			return "", err
-		}
-	}
-	return sb.String(), nil
+func yamlFileFilter(path string) bool {
+	return filepath.Ext(path) == YAMLSuffix
 }
 
 //compareManifestsFromDirs compares manifests from two directories
 func compareManifestsFromDirs(rootArgs *rootArgs, dirName1 string, dirName2 string) {
 	checkLogsOrExit(rootArgs)
 
-	mf1, err := readFromDir(dirName1)
+	mf1, err := util.ReadFiles(dirName1, yamlFileFilter)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
 	}
-	mf2, err := readFromDir(dirName2)
+	mf2, err := util.ReadFiles(dirName2, yamlFileFilter)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
@@ -134,5 +110,6 @@ func compareManifestsFromDirs(rootArgs *rootArgs, dirName1 string, dirName2 stri
 		fmt.Println("Manifests are identical")
 	} else {
 		fmt.Printf("Difference of manifests are:\n%s", diff)
+		os.Exit(1)
 	}
 }
