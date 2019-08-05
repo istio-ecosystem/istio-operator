@@ -15,17 +15,14 @@
 package version
 
 import (
-	"io/ioutil"
-	"strings"
-
 	goversion "github.com/hashicorp/go-version"
 
 	pkgversion "istio.io/operator/pkg/version"
 )
 
 const (
-	// versionFileName is the name of the file containing the operator version.
-	versionFileName = "./version.yaml"
+	// OperatorVersionString is the version string of this operator binary.
+	OperatorVersionString = "1.3.0"
 )
 
 var (
@@ -42,16 +39,12 @@ var (
 )
 
 func init() {
-	b, err := ioutil.ReadFile(versionFileName)
+	var err error
+	OperatorBinaryGoVersion, err = goversion.NewVersion(OperatorVersionString)
 	if err != nil {
 		panic(err)
 	}
-	vs := strings.TrimSpace(string(b))
-	OperatorBinaryGoVersion, err = goversion.NewVersion(vs)
-	if err != nil {
-		panic(err)
-	}
-	v, err := pkgversion.NewVersionFromString(vs)
+	v, err := pkgversion.NewVersionFromString(OperatorVersionString)
 	if err != nil {
 		panic(err)
 	}
