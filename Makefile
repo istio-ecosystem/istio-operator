@@ -6,8 +6,6 @@ mount_dir := /src
 uid := $(shell id -u)
 docker_gen := docker run --rm --user $(uid) -v /etc/passwd:/etc/passwd:ro -v $(pwd):$(mount_dir) -w $(mount_dir) $(gen_img) -I.
 out_path = .
-charts_dir := ${GOPATH}/src/istio.io/installer
-out_dir := ${GOPATH}/src/istio.io/operator/data/charts
 
 ########################
 # protoc_gen_gogo*
@@ -121,16 +119,6 @@ gen_patch_iscp:
 
 gen_patch_values:
 	diff -u pkg/apis/istio/v1alpha2/values/values_types.pb.go.orig pkg/apis/istio/v1alpha2/values/values_types.pb.go > pkg/apis/istio/v1alpha2/values/fix_values_structs.patch || true
-
-sync_charts:
-	cp -Rf $(charts_dir)/crds $(out_dir)
-	cp -Rf $(charts_dir)/gateways $(out_dir)
-	cp -Rf $(charts_dir)/istio-cni $(out_dir)
-	cp -Rf $(charts_dir)/istiocoredns $(out_dir)
-	cp -Rf $(charts_dir)/istio-telemetry $(out_dir)
-	cp -Rf $(charts_dir)/istio-control $(out_dir)
-	cp -Rf $(charts_dir)/istio-policy $(out_dir)
-	cp -Rf $(charts_dir)/security $(out_dir)
 
 vfsgen: data/
 	go get github.com/shurcooL/vfsgen
