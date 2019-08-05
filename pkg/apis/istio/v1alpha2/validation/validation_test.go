@@ -32,10 +32,12 @@ func TestValidate(t *testing.T) {
 	tests := []struct {
 		name       string
 		toValidate *v1alpha2.Values
+		validated  bool
 	}{
 		{
 			name:       "Empty struct",
 			toValidate: &v1alpha2.Values{},
+			validated:  true,
 		},
 		{
 			name: "With CNI defined",
@@ -44,6 +46,7 @@ func TestValidate(t *testing.T) {
 					Enabled: makeBoolPtr(true),
 				},
 			},
+			validated: true,
 		},
 		{
 			name: "With Slice",
@@ -62,13 +65,17 @@ func TestValidate(t *testing.T) {
 					},
 				},
 			},
+			validated: true,
 		},
 	}
 
 	for _, tt := range tests {
 		err := validateSubTypes(reflect.ValueOf(tt.toValidate).Elem(), false, tt.toValidate, nil)
-		if len(err) != 0 {
-			t.Fatalf("Test %s failed with errors: %+v", tt.name, err)
+		if len(err) != 0 && tt.validated {
+			t.Fatalf("Test %s failed with errors: %+v but supposed to succeed", tt.name, err)
+		}
+		if len(err) == 0 && !tt.validated {
+			t.Fatalf("Test %s failed as it is supposed to fail but succeeded", tt.name)
 		}
 	}
 }

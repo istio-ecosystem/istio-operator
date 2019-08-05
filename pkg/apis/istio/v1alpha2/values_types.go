@@ -18,9 +18,10 @@ package v1alpha2
 
 import (
 	"github.com/gogo/protobuf/jsonpb"
-	"istio.io/operator/pkg/util"
 	corev1 "k8s.io/api/core/v1"
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
+
+	"istio.io/operator/pkg/util"
 )
 
 // Values is described in istio.io documentation.
