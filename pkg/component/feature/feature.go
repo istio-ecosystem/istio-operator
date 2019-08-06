@@ -35,7 +35,7 @@ type Options struct {
 	// InstallSpec is the installation spec for the control plane.
 	InstallSpec *v1alpha2.IstioControlPlaneSpec
 	// Translator is the translator for this feature.
-	Traslator *translate.Translator
+	Translator *translate.Translator
 }
 
 // CommonFeatureFields are fields common to all features.
@@ -77,20 +77,7 @@ type BaseFeature struct {
 
 // NewBaseFeature creates a new BaseFeature and returns a pointer to it.
 func NewBaseFeature(opts *Options) *BaseFeature {
-	cff := &CommonFeatureFields{
-		Options: *opts,
-	}
-
-	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
-		ftMap := opts.Traslator.FeatureMaps[name.IstioBaseFeatureName]
-		for _, cn := range ftMap.Components {
-			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
-			if err == nil && enabled {
-				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.IstioBaseFeatureName)))
-			}
-		}
-	}
-
+	cff := buildCommonFeatureFields(opts, name.IstioBaseFeatureName)
 	return &BaseFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -114,20 +101,7 @@ type TrafficManagementFeature struct {
 
 // NewTrafficManagementFeature creates a new TrafficManagementFeature and returns a pointer to it.
 func NewTrafficManagementFeature(opts *Options) *TrafficManagementFeature {
-	cff := &CommonFeatureFields{
-		Options: *opts,
-	}
-
-	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
-		ftMap := opts.Traslator.FeatureMaps[name.TrafficManagementFeatureName]
-		for _, cn := range ftMap.Components {
-			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
-			if err == nil && enabled {
-				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.TrafficManagementFeatureName)))
-			}
-		}
-	}
-
+	cff := buildCommonFeatureFields(opts, name.TrafficManagementFeatureName)
 	return &TrafficManagementFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -150,20 +124,7 @@ type SecurityFeature struct {
 
 // NewSecurityFeature creates a new SecurityFeature and returns a pointer to it.
 func NewSecurityFeature(opts *Options) *SecurityFeature {
-	cff := &CommonFeatureFields{
-		Options: *opts,
-	}
-
-	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
-		ftMap := opts.Traslator.FeatureMaps[name.SecurityFeatureName]
-		for _, cn := range ftMap.Components {
-			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
-			if err == nil && enabled {
-				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.SecurityFeatureName)))
-			}
-		}
-	}
-
+	cff := buildCommonFeatureFields(opts, name.SecurityFeatureName)
 	return &SecurityFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -186,20 +147,7 @@ type PolicyFeature struct {
 
 // NewPolicyFeature creates a new PolicyFeature and returns a pointer to it.
 func NewPolicyFeature(opts *Options) *PolicyFeature {
-	cff := &CommonFeatureFields{
-		Options: *opts,
-	}
-
-	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
-		ftMap := opts.Traslator.FeatureMaps[name.PolicyFeatureName]
-		for _, cn := range ftMap.Components {
-			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
-			if err == nil && enabled {
-				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.PolicyFeatureName)))
-			}
-		}
-	}
-
+	cff := buildCommonFeatureFields(opts, name.PolicyFeatureName)
 	return &PolicyFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -227,20 +175,7 @@ func (f *TelemetryFeature) Run() error {
 
 // NewTelemetryFeature creates a new TelemetryFeature and returns a pointer to it.
 func NewTelemetryFeature(opts *Options) *TelemetryFeature {
-	cff := &CommonFeatureFields{
-		Options: *opts,
-	}
-
-	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
-		ftMap := opts.Traslator.FeatureMaps[name.TelemetryFeatureName]
-		for _, cn := range ftMap.Components {
-			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
-			if err == nil && enabled {
-				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.TelemetryFeatureName)))
-			}
-		}
-	}
-
+	cff := buildCommonFeatureFields(opts, name.TelemetryFeatureName)
 	return &TelemetryFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -258,20 +193,7 @@ type ConfigManagementFeature struct {
 
 // NewConfigManagementFeature creates a new ConfigManagementFeature and returns a pointer to it.
 func NewConfigManagementFeature(opts *Options) *ConfigManagementFeature {
-	cff := &CommonFeatureFields{
-		Options: *opts,
-	}
-
-	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
-		ftMap := opts.Traslator.FeatureMaps[name.ConfigManagementFeatureName]
-		for _, cn := range ftMap.Components {
-			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
-			if err == nil && enabled {
-				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.ConfigManagementFeatureName)))
-			}
-		}
-	}
-
+	cff := buildCommonFeatureFields(opts, name.ConfigManagementFeatureName)
 	return &ConfigManagementFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -294,20 +216,7 @@ type AutoInjectionFeature struct {
 
 // NewAutoInjectionFeature creates a new AutoInjectionFeature and returns a pointer to it.
 func NewAutoInjectionFeature(opts *Options) *AutoInjectionFeature {
-	cff := &CommonFeatureFields{
-		Options: *opts,
-	}
-
-	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
-		ftMap := opts.Traslator.FeatureMaps[name.AutoInjectionFeatureName]
-		for _, cn := range ftMap.Components {
-			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
-			if err == nil && enabled {
-				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.AutoInjectionFeatureName)))
-			}
-		}
-	}
-
+	cff := buildCommonFeatureFields(opts, name.AutoInjectionFeatureName)
 	return &AutoInjectionFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -330,20 +239,7 @@ type GatewayFeature struct {
 
 // NewGatewayFeature creates a new GatewayFeature and returns a pointer to it.
 func NewGatewayFeature(opts *Options) *GatewayFeature {
-	cff := &CommonFeatureFields{
-		Options: *opts,
-	}
-
-	if opts != nil && opts.Traslator != nil && opts.Traslator.FeatureMaps != nil {
-		ftMap := opts.Traslator.FeatureMaps[name.GatewayFeatureName]
-		for _, cn := range ftMap.Components {
-			enabled, err := opts.Traslator.IsComponentEnabled(cn, opts.InstallSpec)
-			if err == nil && enabled {
-				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, name.GatewayFeatureName)))
-			}
-		}
-	}
-
+	cff := buildCommonFeatureFields(opts, name.GatewayFeatureName)
 	return &GatewayFeature{
 		CommonFeatureFields: *cff,
 	}
@@ -399,7 +295,7 @@ func newComponentOptions(cff *CommonFeatureFields, featureName name.FeatureName)
 	return &component.Options{
 		InstallSpec: cff.InstallSpec,
 		FeatureName: featureName,
-		Translator:  cff.Traslator,
+		Translator:  cff.Translator,
 	}
 }
 
@@ -425,4 +321,21 @@ func renderComponents(cs []component.IstioComponent) (manifests name.ManifestMap
 		return nil, errsOut
 	}
 	return
+}
+
+// buildCommonFeatureFields is an internal function to build the Common Feature Fields for specified feature.
+func buildCommonFeatureFields(opts *Options, ftname name.FeatureName) *CommonFeatureFields {
+	cff := &CommonFeatureFields{
+		Options: *opts,
+	}
+	if opts != nil && opts.Translator != nil && opts.Translator.FeatureMaps != nil {
+		ftMap := opts.Translator.FeatureMaps[ftname]
+		for _, cn := range ftMap.Components {
+			enabled, err := opts.Translator.IsComponentEnabled(cn, opts.InstallSpec)
+			if err == nil && enabled {
+				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, ftname)))
+			}
+		}
+	}
+	return cff
 }

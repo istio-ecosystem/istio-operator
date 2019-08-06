@@ -34,7 +34,7 @@ type IstioControlPlane struct {
 func NewIstioControlPlane(installSpec *v1alpha2.IstioControlPlaneSpec, translator *translate.Translator) *IstioControlPlane {
 	opts := &feature.Options{
 		InstallSpec: installSpec,
-		Traslator:   translator,
+		Translator:  translator,
 	}
 	features := make([]feature.IstioFeature, 0, len(translator.FeatureMaps))
 	for ft := range translator.FeatureMaps {
