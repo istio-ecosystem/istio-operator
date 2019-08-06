@@ -1,6 +1,8 @@
 # make targets
 .PHONY: lint test_with_coverage mandiff build fmt vfsgen
 
+GOBIN = /work/out/bin
+
 lint:
 	@scripts/check_license.sh
 	@golangci-lint run -j 8 -v ./...
@@ -22,7 +24,6 @@ fmt:
 
 # make target dependencies
 vfsgen: data/
-	go get github.com/shurcooL/vfsgen
 	go generate ./cmd/mesh.go
 
 ########################

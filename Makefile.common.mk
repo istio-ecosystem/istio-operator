@@ -19,22 +19,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-IMG = docker.io/sdake/build-tools:2019-08-03
+IMG = docker.io/sdake/build-tools:2019-08-06
 UID = $(shell id -u)
 PWD = $(shell pwd)
-GOBIN ?= $(GOPATH)/bin
+GOBIN_SOURCE ?= $(GOPATH)/bin
+GOBIN ?= /work/out/bin
+
+LOCAL_ARCH := $(shell uname -m)
+ifeq ($(LOCAL_ARCH),x86_64)
+GOARCH_LOCAL := amd64
+else ifeq ($(shell echo $(LOCAL_ARCH) | head -c 5),armv8)
+GOARCH_LOCAL := arm64
+else ifeq ($(shell echo $(LOCAL_ARCH) | head -c 4),armv)
+GOARCH_LOCAL := arm
+else
+GOARCH_LOCAL := $(LOCAL_ARCH)
+endif
+export GOARCH ?= $(GOARCH_LOCAL)
+
+LOCAL_OS := $(shell uname)
+ifeq ($(LOCAL_OS),Linux)
+   export GOOS_LOCAL = linux
+else ifeq ($(LOCAL_OS),Darwin)
+   export GOOS_LOCAL = darwin
+else
+   $(error "This system's OS $(LOCAL_OS) isn't recognized/supported")
+endif
+
+export GOOS ?= $(GOOS_LOCAL)
 
 RUN = docker run -t --sig-proxy=true -u $(UID) --rm \
+	-e GOOS="$(GOOS)" \
+	-e GOARCH="$(GOARCH)" \
 	-v /etc/passwd:/etc/passwd:ro \
-	-v /etc/passwd:/etc/passwd:ro \
-	-v /etc/localtime:/etc/localtime:ro \
-	-v /etc/timezeone:/etc/timezeone:ro \
+	-v $(readlink /etc/localtime):/etc/localtime:ro \
 	--mount type=bind,source="$(PWD)",destination="/work" \
 	--mount type=volume,source=istio-go-mod,destination="/go/pkg/mod" \
 	--mount type=volume,source=istio-go-cache,destination="/gocache" \
-	--mount type=bind,source="$(GOBIN)",destination="/go/out/bin" \
+	--mount type=bind,source="$(GOBIN_SOURCE)",destination="/go/out/bin" \
 	-w /work $(IMG)
 
+#	-v /etc/timezeone:/etc/timezeone:ro \
 # Set the enviornment variable USE_LOCAL_TOOLCHAIN to 1 to use the
 # systemwide toolchain. Otherwise use a fairly tidy build container to
 # build the repository. In this second mode of operation, only docker
@@ -44,7 +69,7 @@ ifeq ($(USE_LOCAL_TOOLCHAIN),1)
 RUN =
 endif
 
-MAKE = $(RUN) make -f Makefile.container.mk
+MAKE = $(RUN) make -e -f Makefile.container.mk
 
 .PHONY: updatecommon
 
