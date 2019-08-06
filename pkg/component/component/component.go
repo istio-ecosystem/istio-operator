@@ -397,7 +397,7 @@ func (c *IngressComponent) Name() name.ComponentName {
 	return c.CommonComponentFields.name
 }
 
-// PrometheusComponent is the egress gateway component.
+// EgressComponent is the egress gateway component.
 type EgressComponent struct {
 	*CommonComponentFields
 }
@@ -662,8 +662,6 @@ func TranslateHelmValues(icp *v1alpha2.IstioControlPlaneSpec, translator *transl
 	if err != nil {
 		return "", err
 	}
-	//log.Infof("Untranslated values from IstioControlPlaneSpec.Values:\n%s", util.ToYAML(globalVals))
-	//globalVals = translator.ValuesOverlaysToHelmValues(globalVals, name.IstioBaseComponentName)
 	log.Infof("Values from IstioControlPlaneSpec.Values:\n%s", util.ToYAML(globalVals))
 
 	mergedVals, err := overlayTrees(globalVals, apiVals)
