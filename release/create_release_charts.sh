@@ -62,7 +62,7 @@ function get_version() {
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 OPERATOR_BASE_DIR="${SCRIPT_DIR}/.."
 OPERATOR_VERSION=$(get_version)
-TEMP_DIR=${TEMP_DIR:-"$(mktemp -d ${TEMP_DIR_DEFAULT}/istio.${OPERATOR_VERSION}.XXXX)"}
+TEMP_DIR=${TEMP_DIR:-"$(mktemp -d ${TEMP_DIR_DEFAULT}/istio.${OPERATOR_VERSION}.XXXXXXXX)"}
 
 INSTALLER_VERSION=${INSTALLER_VERSION:-"${OPERATOR_VERSION}"}
 OUTPUT_DIR="${OUTPUT_ROOT_DIR}/install/kubernetes/operator"
@@ -93,6 +93,3 @@ function copy_versions_files() {
 copy_installer_charts
 copy_profiles
 copy_versions_files
-
-
-
