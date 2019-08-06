@@ -21,13 +21,6 @@ import (
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 )
 
-func makeBoolPtr(v bool) *bool {
-	return &v
-}
-func makeStringPtr(v string) *string {
-	return &v
-}
-
 func TestValidate(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -78,4 +71,11 @@ func TestValidate(t *testing.T) {
 			t.Fatalf("Test %s failed as it is supposed to fail but succeeded", tt.name)
 		}
 	}
+}
+
+func makeBoolPtr(v bool) *bool {
+	return &v
+}
+func makeStringPtr(v string) *string {
+	return &v
 }
