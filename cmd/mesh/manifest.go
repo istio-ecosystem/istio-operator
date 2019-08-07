@@ -29,7 +29,6 @@ import (
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/validate"
 	binversion "istio.io/operator/version"
-	"istio.io/pkg/version"
 )
 
 // ManifestCmd is a group of commands related to manifest generation, installation, diffing and migration.
@@ -72,8 +71,6 @@ func ManifestCmd() *cobra.Command {
 	mc.AddCommand(mac)
 	mc.AddCommand(mmc)
 	mc.AddCommand(mvc)
-
-	mc.AddCommand(version.CobraCommand())
 
 	return mc
 }
