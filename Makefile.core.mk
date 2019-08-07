@@ -24,7 +24,6 @@ fmt:
 
 # make target dependencies
 vfsgen: data/
-	go get github.com/shurcooL/vfsgen
 	go generate ./cmd/mesh.go
 
 ########################
@@ -120,3 +119,5 @@ gen_patch_values:
 
 mesh: vfsgen
 	go build -o ${GOBIN}/mesh ./cmd/mesh.go
+
+include Makefile.common.mk
