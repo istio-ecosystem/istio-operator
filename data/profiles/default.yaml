@@ -414,6 +414,8 @@ spec:
   values:
     # TODO: derive from operator API
     version: ""
+    clusterResources: true
+
     global:
       logging:
         level: "default:info"
@@ -424,7 +426,6 @@ spec:
       proxy_init:
         image: proxy_init
       imagePullPolicy: Always
-      clusterResources: true
       controlPlaneSecurityEnabled: true
       disablePolicyChecks: true
       policyCheckFailOpen: false
