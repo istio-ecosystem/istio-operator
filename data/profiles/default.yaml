@@ -15,8 +15,24 @@ spec:
         common:
           k8s:
             env:
-            - name: GODEBUG
-              value: "gctrace=1"
+              - name: POD_NAME
+                valueFrom:
+                  fieldRef:
+                    apiVersion: v1
+                    fieldPath: metadata.name
+              - name: POD_NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    apiVersion: v1
+                    fieldPath: metadata.namespace
+              - name: GODEBUG
+                value: gctrace=1
+              - name: PILOT_TRACE_SAMPLING
+                value: "1"
+              - name: PILOT_DISABLE_XDS_MARSHALING_TO_ANY
+                value: "1"
+              - name: CONFIG_NAMESPACE
+                value: istio-config
             hpaSpec:
               maxReplicas: 5
               minReplicas: 1
@@ -44,6 +60,8 @@ spec:
 
           values:
             image: pilot
+            # TODO: derive from top level
+            version: ""
             traceSampling: 1.0
             configNamespace: istio-config
             keepaliveMaxServerConnectionAge: 30m
@@ -394,6 +412,8 @@ spec:
 
   # Global values passed through to helm global.yaml.
   values:
+    # TODO: derive from operator API
+    version: ""
     global:
       logging:
         level: "default:info"
@@ -425,7 +445,9 @@ spec:
       useMCP: true
       outboundTrafficPolicy:
         mode: ALLOW_ANY
+      # TODO: derive from operator API version.
       version: ""
+      prometheusNamespace: istio-telemetry
       # TODO: remove requirement to set these to nil values. This is an issue with helm charts.
       meshExpansion: {}
       multiCluster: {}
