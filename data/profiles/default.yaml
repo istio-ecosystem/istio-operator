@@ -404,6 +404,7 @@ spec:
       proxy_init:
         image: proxy_init
       imagePullPolicy: Always
+      clusterResources: true
       controlPlaneSecurityEnabled: true
       disablePolicyChecks: true
       policyCheckFailOpen: false
@@ -424,6 +425,7 @@ spec:
       useMCP: true
       outboundTrafficPolicy:
         mode: ALLOW_ANY
+      version: ""
       # TODO: remove requirement to set these to nil values. This is an issue with helm charts.
       meshExpansion: {}
       multiCluster: {}
