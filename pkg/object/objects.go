@@ -377,6 +377,8 @@ func ManifestDiff(a, b string) (string, error) {
 		return "", err
 	}
 
+	var sb strings.Builder
+
 	aom, bom := ao.ToMap(), bo.ToMap()
 	for ak, av := range aom {
 		ay, err := av.YAML()
