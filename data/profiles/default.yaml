@@ -223,6 +223,7 @@ spec:
   gateways:
     enabled: true
     components:
+      namespace: istio-control
       ingressGateway:
         common:
           enabled: true
