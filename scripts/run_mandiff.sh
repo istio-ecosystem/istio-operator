@@ -96,7 +96,7 @@ function mesh_manifest() {
     local profile="${1}"
     local out_dir="${OUT}/mesh-manifest/istio-${profile}"
     mkdir -p "${out_dir}"
-    mesh manifest generate --filename "${ROOT}/tests/profiles/mesh/${profile}-profile.yaml" --dry-run=false --output "${out_dir}" 2>&1
+    mesh manifest generate --filename "${ROOT}/data/profiles/${profile}.yaml" --dry-run=false --output "${out_dir}" 2>&1
 #    cat $(find "${out_dir}" -name "*.yaml") > "${out_dir}/combined.yaml"
 }
 

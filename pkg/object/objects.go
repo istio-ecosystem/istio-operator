@@ -376,8 +376,18 @@ func ManifestDiff(a, b string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	aom, bom := ao.ToMap(), bo.ToMap()
+
 	var sb strings.Builder
+	writeStringSafe(&sb, "Objects in A:\n\n")
+	for _, o := range ao {
+		writeStringSafe(&sb, o.Hash()+"\n")
+	}
+	writeStringSafe(&sb, "\nObjects in B:\n\n")
+	for _, o := range bo {
+		writeStringSafe(&sb, o.Hash()+"\n")
+	}
+
+	aom, bom := ao.ToMap(), bo.ToMap()
 	for ak, av := range aom {
 		ay, err := av.YAML()
 		if err != nil {
