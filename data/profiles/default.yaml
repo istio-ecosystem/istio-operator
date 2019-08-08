@@ -218,6 +218,7 @@ spec:
             enableNamespacesByDefault: false
             rewriteAppHTTPProbe: false
             selfSigned: false
+            injectLabel: istio-injection
 
   # Istio Gateway feature
   gateways:
@@ -403,6 +404,8 @@ spec:
     clusterResources: true
 
     global:
+      # TODO: derive from operator API
+      prometheusNamespace: istio-telemetry
       logging:
         level: "default:info"
       k8sIngress:
@@ -487,53 +490,3 @@ spec:
       tolerations: []
       podAntiAffinityLabelSelector: []
       podAntiAffinityTermLabelSelector: []
-
-    grafana:
-      enabled: true
-      replicaCount: 1
-      image:
-        repository: grafana/grafana
-        tag: 6.1.6
-      persist: false
-      storageClassName: ""
-      accessMode: ReadWriteMany
-      security:
-        enabled: false
-        secretName: grafana
-        usernameKey: username
-        passphraseKey: passphrase
-
-      contextPath: /grafana
-      service:
-        annotations: {}
-        name: http
-        type: ClusterIP
-        externalPort: 3000
-        loadBalancerIP:
-        loadBalancerSourceRanges:
-      ingress:
-        enabled: false
-        hosts:
-          - grafana.local
-        annotations:
-        tls:
-      datasources:
-        datasources.yaml:
-          apiVersion: 1
-          datasources:
-      dashboardProviders:
-        dashboardproviders.yaml:
-          apiVersion: 1
-          providers:
-            - name: 'istio'
-              orgId: 1
-              folder: 'istio'
-              type: file
-              disableDeletion: false
-              options:
-                path: /var/lib/grafana/dashboards/istio
-      nodeSelector: {}
-      tolerations: []
-      podAntiAffinityLabelSelector: []
-      podAntiAffinityTermLabelSelector: []
-

@@ -224,6 +224,7 @@ spec:
             enableNamespacesByDefault: false
             rewriteAppHTTPProbe: false
             selfSigned: false
+            injectLabel: istio-injection
 
   # Istio Gateway feature
   gateways:
@@ -406,50 +407,56 @@ spec:
 
   # Global values passed through to helm global.yaml.
   values:
-    logging:
-      level: "default:info"
-    k8sIngress:
-      enabled: false
-      gatewayName: ingressgateway
-      enableHttps: false
-    proxy_init:
-      image: proxy_init
-    imagePullPolicy: Always
-    controlPlaneSecurityEnabled: true
-    disablePolicyChecks: true
-    policyCheckFailOpen: false
-    enableTracing: true
-    mtls:
-      enabled: false
-    arch:
-      amd64: 2
-      s390x: 2
-      ppc64le: 2
-    oneNamespace: false
-    configValidation: true
-    defaultResources:
-      requests:
-        cpu: 10m
-    defaultPodDisruptionBudget:
-      enabled: true
-    useMCP: true
-    outboundTrafficPolicy:
-      mode: ALLOW_ANY
-  # TODO: remove requirement to set these to nil values. This is an issue with helm charts.
-    meshExpansion: {}
-    multiCluster: {}
-    sds:
-      enabled: false
-      udsPath: ""
-      useTrustworthyJwt: false
-      useNormalJwt: false
-    tracer:
-      lightstep:
-        address: ""
-        accessToken: ""
-        secure: true
-        cacertPath: ""
-      zipkin:
-        address: ""
-      datadog:
-        address: "$(HOST_IP):8126"
+    # TODO: derive from operator API
+    version: ""
+    clusterResources: true
+    global:
+      # TODO: derive from operator API
+      prometheusNamespace: istio-telemetry
+      logging:
+        level: "default:info"
+      k8sIngress:
+        enabled: false
+        gatewayName: ingressgateway
+        enableHttps: false
+      proxy_init:
+        image: proxy_init
+      imagePullPolicy: Always
+      controlPlaneSecurityEnabled: true
+      disablePolicyChecks: true
+      policyCheckFailOpen: false
+      enableTracing: true
+      mtls:
+        enabled: false
+      arch:
+        amd64: 2
+        s390x: 2
+        ppc64le: 2
+      oneNamespace: false
+      configValidation: true
+      defaultResources:
+        requests:
+          cpu: 10m
+      defaultPodDisruptionBudget:
+        enabled: true
+      useMCP: true
+      outboundTrafficPolicy:
+        mode: ALLOW_ANY
+      # TODO: remove requirement to set these to nil values. This is an issue with helm charts.
+      meshExpansion: {}
+      multiCluster: {}
+      sds:
+        enabled: false
+        udsPath: ""
+        useTrustworthyJwt: false
+        useNormalJwt: false
+      tracer:
+        lightstep:
+          address: ""
+          accessToken: ""
+          secure: true
+          cacertPath: ""
+        zipkin:
+          address: ""
+        datadog:
+          address: "$(HOST_IP):8126"

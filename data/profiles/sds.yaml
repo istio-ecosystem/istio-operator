@@ -227,6 +227,7 @@ spec:
             enableNamespacesByDefault: false
             rewriteAppHTTPProbe: false
             selfSigned: false
+            injectLabel: istio-injection
 
   # Istio Gateway feature
   gateways:
@@ -409,50 +410,91 @@ spec:
 
   # Global values passed through to helm global.yaml.
   values:
-    logging:
-      level: "default:info"
-    k8sIngress:
-      enabled: false
-      gatewayName: ingressgateway
-      enableHttps: false
-    proxy_init:
-      image: proxy_init
-    imagePullPolicy: Always
-    controlPlaneSecurityEnabled: true
-    disablePolicyChecks: true
-    policyCheckFailOpen: false
-    enableTracing: true
-    mtls:
-      enabled: false
-    arch:
-      amd64: 2
-      s390x: 2
-      ppc64le: 2
-    oneNamespace: false
-    configValidation: true
-    defaultResources:
-      requests:
-        cpu: 10m
-    defaultPodDisruptionBudget:
+    # TODO: derive from operator API
+    version: ""
+    clusterResources: true
+    global:
+      # TODO: derive from operator API
+      prometheusNamespace: istio-telemetry
+      logging:
+        level: "default:info"
+      k8sIngress:
+        enabled: false
+        gatewayName: ingressgateway
+        enableHttps: false
+      proxy_init:
+        image: proxy_init
+      imagePullPolicy: Always
+      controlPlaneSecurityEnabled: true
+      disablePolicyChecks: true
+      policyCheckFailOpen: false
+      enableTracing: true
+      mtls:
+        enabled: true
+      arch:
+        amd64: 2
+        s390x: 2
+        ppc64le: 2
+      oneNamespace: false
+      configValidation: true
+      defaultResources:
+        requests:
+          cpu: 10m
+      defaultPodDisruptionBudget:
+        enabled: true
+      useMCP: true
+      outboundTrafficPolicy:
+        mode: ALLOW_ANY
+      # TODO: remove requirement to set these to nil values. This is an issue with helm charts.
+      meshExpansion: {}
+      multiCluster: {}
+      sds:
+        enabled: true
+        udsPath: "unix:/var/run/sds/uds_path"
+        useTrustworthyJwt: true
+        useNormalJwt: false
+      tracer:
+        lightstep:
+          address: ""
+          accessToken: ""
+          secure: true
+          cacertPath: ""
+        zipkin:
+          address: ""
+        datadog:
+          address: "$(HOST_IP):8126"
+
+    mixer:
+      adapters:
+        stdio:
+          enabled: false
+          outputAsJson: false
+        prometheus:
+          enabled: true
+          metricsExpiryDuration: 10m
+        kubernetesenv:
+          enabled: true
+        stackdriver:
+          enabled: false
+        useAdapterCRDs: false
+
+    prometheus:
       enabled: true
-    useMCP: true
-    outboundTrafficPolicy:
-      mode: ALLOW_ANY
-  # TODO: remove requirement to set these to nil values. This is an issue with helm charts.
-    meshExpansion: {}
-    multiCluster: {}
-    sds:
-      enabled: true
-      udsPath: "unix:/var/run/sds/uds_path"
-      useTrustworthyJwt: false
-      useNormalJwt: true
-    tracer:
-      lightstep:
-        address: ""
-        accessToken: ""
-        secure: true
-        cacertPath: ""
-      zipkin:
-        address: ""
-      datadog:
-        address: "$(HOST_IP):8126"
+      replicaCount: 1
+      hub: docker.io/prom
+      tag: v2.8.0
+      retention: 6h
+      scrapeInterval: 15s
+      contextPath: /prometheus
+      ingress:
+        enabled: false
+        hosts:
+          - prometheus.local
+        annotations:
+        tls:
+      security:
+        enabled: true
+      nodeSelector: {}
+      tolerations: []
+      podAntiAffinityLabelSelector: []
+      podAntiAffinityTermLabelSelector: []
