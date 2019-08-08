@@ -65,6 +65,8 @@ func NewFeature(ft name.FeatureName, opts *Options) IstioFeature {
 		feature = NewAutoInjectionFeature(opts)
 	case name.GatewayFeatureName:
 		feature = NewGatewayFeature(opts)
+	case name.ThirdPartyFeatureName:
+		feature = NewThirdPartyFeature(opts)
 	}
 	return feature
 }
@@ -263,18 +265,7 @@ type ThirdPartyFeature struct {
 
 // NewThirdPartyFeature creates a new ThirdPartyFeature and returns a pointer to it.
 func NewThirdPartyFeature(opts *Options) *ThirdPartyFeature {
-	cff := &CommonFeatureFields{
-		Options: *opts,
-	}
-	cff.components = []component.IstioComponent{
-		component.NewPrometheusComponent(newComponentOptions(cff, name.ThirdPartyFeatureName)),
-		component.NewPrometheusOperatorComponent(newComponentOptions(cff, name.ThirdPartyFeatureName)),
-		component.NewGrafanaComponent(newComponentOptions(cff, name.ThirdPartyFeatureName)),
-		component.NewKialiComponent(newComponentOptions(cff, name.ThirdPartyFeatureName)),
-		component.NewCNIComponent(newComponentOptions(cff, name.ThirdPartyFeatureName)),
-		component.NewTracingComponent(newComponentOptions(cff, name.ThirdPartyFeatureName)),
-	}
-
+	cff := buildCommonFeatureFields(opts, name.ThirdPartyFeatureName)
 	return &ThirdPartyFeature{
 		CommonFeatureFields: *cff,
 	}

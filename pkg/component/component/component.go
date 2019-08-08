@@ -92,6 +92,16 @@ func NewComponent(cn name.ComponentName, opts *Options) IstioComponent {
 		component = NewIngressComponent(opts)
 	case name.EgressComponentName:
 		component = NewEgressComponent(opts)
+	case name.PrometheusComponentName:
+		component = NewPrometheusComponent(opts)
+	case name.PrometheusOperatorComponentName:
+		component = NewPrometheusOperatorComponent(opts)
+	case name.KialiComponentName:
+		component = NewKialiComponent(opts)
+	case name.CNIComponentName:
+		component = NewCNIComponent(opts)
+	case name.TracingComponentName:
+		component = NewTracingComponent(opts)
 	}
 	return component
 }
