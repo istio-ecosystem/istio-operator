@@ -226,7 +226,6 @@ spec:
       ingressGateway:
         common:
           enabled: true
-          namespace: istio-ingress
           k8s:
             hpaSpec:
               maxReplicas: 5
@@ -339,7 +338,6 @@ spec:
       egressGateway:
         common:
           enabled: false
-          namespace: istio-egress
           k8s:
             replicaCount: 1
             hpaSpec:
