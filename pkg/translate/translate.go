@@ -202,7 +202,14 @@ var (
 					Components: []name.ComponentName{name.PolicyComponentName},
 				},
 				name.TelemetryFeatureName: {
-					Components: []name.ComponentName{name.TelemetryComponentName},
+					Components: []name.ComponentName{
+						name.TelemetryComponentName,
+						name.PrometheusComponentName,
+						name.PrometheusOperatorComponentName,
+						name.GrafanaComponentName,
+						name.KialiComponentName,
+						name.TracingComponentName,
+						},
 				},
 				name.SecurityFeatureName: {
 					Components: []name.ComponentName{name.CitadelComponentName, name.CertManagerComponentName, name.NodeAgentComponentName},
@@ -217,14 +224,7 @@ var (
 					Components: []name.ComponentName{name.IngressComponentName, name.EgressComponentName},
 				},
 				name.ThirdPartyFeatureName: {
-					Components: []name.ComponentName{
-						name.PrometheusComponentName,
-						name.PrometheusOperatorComponentName,
-						name.GrafanaComponentName,
-						name.KialiComponentName,
-						name.CNIComponentName,
-						name.TracingComponentName,
-					},
+					Components: []name.ComponentName{name.CNIComponentName},
 				},
 			},
 			ComponentMaps: map[name.ComponentName]*ComponentMaps{
