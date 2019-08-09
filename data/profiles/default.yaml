@@ -419,6 +419,8 @@ spec:
       disablePolicyChecks: true
       policyCheckFailOpen: false
       enableTracing: true
+      mtls:
+        enabled: false
       arch:
         amd64: 2
         s390x: 2

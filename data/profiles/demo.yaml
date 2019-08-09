@@ -77,7 +77,7 @@ spec:
                 memory: 100Mi
           values:
             traceSampling: 100
-          autoscaleEnabled: false
+            autoscaleEnabled: false
       proxy:
         common:
           k8s:

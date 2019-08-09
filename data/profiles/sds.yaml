@@ -17,6 +17,8 @@ spec:
 
   values:
     global:
+      mtls:
+        enabled: true
       sds:
         enabled: true
         udsPath: "unix:/var/run/sds/uds_path"
