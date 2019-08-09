@@ -419,8 +419,6 @@ spec:
       disablePolicyChecks: true
       policyCheckFailOpen: false
       enableTracing: true
-      mtls:
-        enabled: false
       arch:
         amd64: 2
         s390x: 2
@@ -435,8 +433,6 @@ spec:
       useMCP: true
       outboundTrafficPolicy:
         mode: ALLOW_ANY
-      # TODO: derive from operator API version.
-      version: ""
       # TODO: remove requirement to set these to nil values. This is an issue with helm charts.
       meshExpansion: {}
       multiCluster: {}
@@ -490,3 +486,136 @@ spec:
       tolerations: []
       podAntiAffinityLabelSelector: []
       podAntiAffinityTermLabelSelector: []
+
+    grafana:
+      enabled: false
+      replicaCount: 1
+      image:
+        repository: grafana/grafana
+        tag: 6.1.6
+      persist: false
+      storageClassName: ""
+      accessMode: ReadWriteMany
+      security:
+        enabled: false
+        secretName: grafana
+        usernameKey: username
+        passphraseKey: passphrase
+
+      contextPath: /grafana
+      service:
+        annotations: {}
+        name: http
+        type: ClusterIP
+        externalPort: 3000
+        loadBalancerIP:
+        loadBalancerSourceRanges:
+      ingress:
+        enabled: false
+        hosts:
+          - grafana.local
+        annotations:
+        tls:
+      datasources:
+        datasources.yaml:
+          apiVersion: 1
+          datasources:
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+            - name: 'istio'
+              orgId: 1
+              folder: 'istio'
+              type: file
+              disableDeletion: false
+              options:
+                path: /var/lib/grafana/dashboards/istio
+      nodeSelector: {}
+      tolerations: []
+      podAntiAffinityLabelSelector: []
+      podAntiAffinityTermLabelSelector: []
+
+    tracing:
+      enabled: false
+      provider: jaeger
+      nodeSelector: {}
+      podAntiAffinityLabelSelector: []
+      podAntiAffinityTermLabelSelector: []
+      jaeger:
+        hub: docker.io/jaegertracing
+        tag: 1.12
+        memory:
+          max_traces: 50000
+        spanStorageType: badger
+        persist: false
+        storageClassName: ""
+        accessMode: ReadWriteMany
+      zipkin:
+        hub: docker.io/openzipkin
+        tag: 2.14.2
+        probeStartupDelay: 200
+        queryPort: 9411
+        resources:
+          limits:
+            cpu: 300m
+            memory: 900Mi
+          requests:
+            cpu: 150m
+            memory: 900Mi
+        javaOptsHeap: 700
+        maxSpans: 500000
+        node:
+          cpus: 2
+      opencensus:
+        hub: docker.io/omnition
+        tag: 0.1.9
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 200m
+            memory: 400Mi
+        exporters:
+          stackdriver:
+            enable_tracing: true
+      service:
+        annotations: {}
+        name: http
+        type: ClusterIP
+        externalPort: 9411
+      ingress:
+        enabled: false
+        hosts:
+        annotations:
+        tls:
+
+    kiali:
+      enabled: false
+      replicaCount: 1
+      hub: docker.io/kiali
+      tag: v1.1.0
+      contextPath: /kiali
+      nodeSelector: {}
+      podAntiAffinityLabelSelector: []
+      podAntiAffinityTermLabelSelector: []
+      ingress:
+        enabled: false
+        hosts:
+          - kiali.local
+        annotations:
+        tls:
+      dashboard:
+        secretName: kiali
+        usernameKey: username
+        passphraseKey: passphrase
+        viewOnlyMode: false
+        grafanaURL:
+        jaegerURL:
+      prometheusNamespace:
+      createDemoSecret: true
+      security:
+        enabled: true
+        cert_file: /kiali-cert/cert-chain.pem
+        private_key_file: /kiali-cert/key.pem
