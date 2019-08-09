@@ -19,6 +19,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+export GO111MODULE=on
 RUN =
 
 # Set the environment variable BUILD_WITH_CONTAINER to use a container

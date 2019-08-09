@@ -63,6 +63,8 @@ api_protos := $(shell find $(api_path) -type f -name '*.proto' | sort)
 api_pb_gos := $(api_protos:.proto=.pb.go)
 
 
+.PHONY: default
+.DEFAULT_GOAL :=
 default: mesh
 
 generate-api-go: $(api_pb_gos)
