@@ -18,15 +18,13 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
-
-	"istio.io/operator/pkg/manifest"
-
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/component/component"
 	"istio.io/operator/pkg/helm"
+	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/tpath"
 	"istio.io/operator/pkg/translate"
 	"istio.io/operator/pkg/util"
@@ -41,9 +39,6 @@ type profileDumpArgs struct {
 	helmValues bool
 	// configPath sets the root node for the subtree to display the config for.
 	configPath string
-	// set is a string with element format "path=value" where path is an IstioControlPlane path and the value is a
-	// value to set the node at that path to.
-	set []string
 }
 
 func addProfileDumpFlags(cmd *cobra.Command, args *profileDumpArgs) {
