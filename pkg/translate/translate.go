@@ -209,7 +209,7 @@ var (
 						name.GrafanaComponentName,
 						name.KialiComponentName,
 						name.TracingComponentName,
-						},
+					},
 				},
 				name.SecurityFeatureName: {
 					Components: []name.ComponentName{name.CitadelComponentName, name.CertManagerComponentName, name.NodeAgentComponentName},
