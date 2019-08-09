@@ -1,0 +1,7 @@
+apiVersion: install.istio.io/v1alpha2
+kind: IstioControlPlane
+spec:
+  profile: sds
+  trafficManagement:
+    components:
+      namespace: istio-control-custom
