@@ -201,7 +201,7 @@ local file system.
 
 The [new platform level installation API](https://github.com/istio/operator/blob/95e89c4fb838b0b374f70d7c5814329e25a64819/pkg/apis/istio/v1alpha1/istioinstaller_types.proto#L25)
 defines install time parameters like feature and component enablement and namespace, and K8s settings like resources, HPA spec etc. in a structured way.
-The simplest customization is to turn features and components on and off. For example, to turn off all policy ([samples/policy-off.yaml](samples/policy-off.yaml)):
+The simplest customization is to turn features and components on and off. For example, to turn off all policy ([samples/sds-policy-off.yaml](samples/sds-policy-off.yaml)):
 
 ```yaml
 apiVersion: install.istio.io/v1alpha2
@@ -214,13 +214,12 @@ spec:
 
 The operator validates the configuration and automatically detects syntax errors. Helm lacks this capability. If you are
 using Helm values that are incompatible, the schema validation used in the operator may reject input that is valid for
-Helm. Another customization is to define custom namespaces for features ([samples/trafficmgmt-namespace.yaml](samples/trafficmgmt-namespace.yaml)):
+Helm. Another customization is to define custom namespaces for features ([samples/trafficManagement-namespace.yaml](samples/trafficManagement-namespace.yaml)):
 
 ```yaml
 apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
-  profile: sds
   trafficManagement:
     components:
       namespace: istio-control-custom
