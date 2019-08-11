@@ -33,11 +33,23 @@ const YAMLSuffix = ".yaml"
 type manifestDiffArgs struct {
 	// compareDir indicates comparison between directory.
 	compareDir bool
+	// selection specifies the resources to compare, it's comma-separated of resource indicators
+	// in the form of "<kind>:<namespace>:<name>,<kind>:<namespace>:<name>".
+	selection string
+	// ignore specifies the resources to ignore, it's comma-separated of resource indicators
+	// in the form of "<kind>:<namespace>:<name>,<kind>:<namespace>:<name>".
+	ignore string
 }
 
 func addManifestDiffFlags(cmd *cobra.Command, diffArgs *manifestDiffArgs) {
 	cmd.PersistentFlags().BoolVarP(&diffArgs.compareDir, "directory", "r",
 		false, "compare directory")
+	cmd.PersistentFlags().StringVar(&diffArgs.selection, "select", "::",
+		"specifies the resources to compare, it's comma-separated of resource indicators"+
+			"in the form of \"<kind>:<namespace>:<name>,<kind>:<namespace>:<name>\".")
+	cmd.PersistentFlags().StringVar(&diffArgs.ignore, "ignore", "",
+		"specifies the resources to ignore, it's comma-separated of resource indicators"+
+			"in the form of \"<kind>:<namespace>:<name>,<kind>:<namespace>:<name>\".")
 }
 
 func manifestDiffCmd(rootArgs *rootArgs, diffArgs *manifestDiffArgs) *cobra.Command {
@@ -47,17 +59,20 @@ func manifestDiffCmd(rootArgs *rootArgs, diffArgs *manifestDiffArgs) *cobra.Comm
 		Long:  "The diff-manifest subcommand is used to compare manifest from two files or directories.",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
+			if diffArgs.selection != "::" && diffArgs.ignore != "" {
+				logAndFatalf(rootArgs, "Cannot specify both the selected and ignored resources.")
+			}
 			if diffArgs.compareDir {
-				compareManifestsFromDirs(rootArgs, args[0], args[1])
+				compareManifestsFromDirs(rootArgs, args[0], args[1], diffArgs.selection, diffArgs.ignore)
 			} else {
-				compareManifestsFromFiles(rootArgs, args)
+				compareManifestsFromFiles(rootArgs, args, diffArgs.selection, diffArgs.ignore)
 			}
 		}}
 	return cmd
 }
 
 //compareManifestsFromFiles compares two manifest files
-func compareManifestsFromFiles(rootArgs *rootArgs, args []string) {
+func compareManifestsFromFiles(rootArgs *rootArgs, args []string, selection, ignore string) {
 	checkLogsOrExit(rootArgs)
 
 	a, err := ioutil.ReadFile(args[0])
@@ -70,7 +85,14 @@ func compareManifestsFromFiles(rootArgs *rootArgs, args []string) {
 		log.Error(err.Error())
 		os.Exit(1)
 	}
-	diff, err := object.ManifestDiff(string(a), string(b))
+
+	var diff string
+	if ignore != "" {
+		diff, err = object.ManifestDiffWithIgnore(string(a), string(b), ignore)
+	} else {
+		diff, err = object.ManifestDiffWithSelect(string(a), string(b), selection)
+	}
+
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
@@ -88,7 +110,7 @@ func yamlFileFilter(path string) bool {
 }
 
 //compareManifestsFromDirs compares manifests from two directories
-func compareManifestsFromDirs(rootArgs *rootArgs, dirName1 string, dirName2 string) {
+func compareManifestsFromDirs(rootArgs *rootArgs, dirName1, dirName2, selection, ignore string) {
 	checkLogsOrExit(rootArgs)
 
 	mf1, err := util.ReadFiles(dirName1, yamlFileFilter)
@@ -101,7 +123,12 @@ func compareManifestsFromDirs(rootArgs *rootArgs, dirName1 string, dirName2 stri
 		log.Error(err.Error())
 		os.Exit(1)
 	}
-	diff, err := object.ManifestDiff(mf1, mf2)
+	var diff string
+	if ignore != "" {
+		diff, err = object.ManifestDiffWithIgnore(mf1, mf2, ignore)
+	} else {
+		diff, err = object.ManifestDiffWithSelect(mf1, mf2, selection)
+	}
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)

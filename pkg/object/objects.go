@@ -23,6 +23,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -405,6 +406,123 @@ func ManifestDiff(a, b string) (string, error) {
 		if ao == nil {
 			writeStringSafe(&sb, "\n\nObject "+bk+" is missing in A:\n\n")
 			continue
+		}
+	}
+	return sb.String(), err
+}
+
+// buildResourceRegexp translates the resource indicator to regexp.
+func buildResourceRegexp(s string) *regexp.Regexp {
+	hash := strings.Split(s, ":")
+	for i, v := range hash {
+		if v == "" {
+			hash[i] = ".*"
+		}
+	}
+	return regexp.MustCompile(strings.Join(hash, ":"))
+}
+
+// ManifestDiffWithSelect checks the manifest differences with selected indicator.
+func ManifestDiffWithSelect(a, b, selection string) (string, error) {
+	ao, err := ParseK8sObjectsFromYAMLManifest(a)
+	if err != nil {
+		return "", err
+	}
+	bo, err := ParseK8sObjectsFromYAMLManifest(b)
+	if err != nil {
+		return "", err
+	}
+
+	selections := strings.Split(selection, ",")
+
+	var sb strings.Builder
+	aom, bom := ao.ToMap(), bo.ToMap()
+
+	for _, selected := range selections {
+		re := buildResourceRegexp(selected)
+		for ak, av := range aom {
+			if re.MatchString(ak) {
+				ay, err := av.YAML()
+				if err != nil {
+					return "", err
+				}
+				bo := bom[ak]
+				if bo == nil {
+					writeStringSafe(&sb, "\n\nObject "+ak+" is missing in B:\n\n")
+					continue
+				}
+				by, err := bo.YAML()
+				if err != nil {
+					return "", err
+				}
+				diff := util.YAMLDiff(string(ay), string(by))
+				if diff != "" {
+					writeStringSafe(&sb, "\n\nObject "+ak+" has diffs:\n\n")
+					writeStringSafe(&sb, diff)
+				}
+			}
+		}
+		for bk := range bom {
+			if re.MatchString(bk) {
+				ao := aom[bk]
+				if ao == nil {
+					writeStringSafe(&sb, "\n\nObject "+bk+" is missing in A:\n\n")
+					continue
+				}
+			}
+		}
+	}
+	return sb.String(), err
+}
+
+// ManifestDiffWithIgnore checks the manifest differences with ignored indicator.
+func ManifestDiffWithIgnore(a, b, ignore string) (string, error) {
+	ao, err := ParseK8sObjectsFromYAMLManifest(a)
+	if err != nil {
+		return "", err
+	}
+	bo, err := ParseK8sObjectsFromYAMLManifest(b)
+	if err != nil {
+		return "", err
+	}
+
+	ignores := strings.Split(ignore, ",")
+
+	var sb strings.Builder
+	aom, bom := ao.ToMap(), bo.ToMap()
+
+	for _, ignored := range ignores {
+		re := buildResourceRegexp(ignored)
+		for ak, av := range aom {
+			if !re.MatchString(ak) {
+				ay, err := av.YAML()
+				if err != nil {
+					return "", err
+				}
+				bo := bom[ak]
+				if bo == nil {
+					writeStringSafe(&sb, "\n\nObject "+ak+" is missing in B:\n\n")
+					continue
+				}
+				by, err := bo.YAML()
+				if err != nil {
+					return "", err
+				}
+				diff := util.YAMLDiff(string(ay), string(by))
+				if diff != "" {
+					writeStringSafe(&sb, "\n\nObject "+ak+" has diffs:\n\n")
+					writeStringSafe(&sb, diff)
+				}
+			}
+		}
+		for bk := range bom {
+			if !re.MatchString(bk) {
+				ao := aom[bk]
+				if ao == nil {
+					writeStringSafe(&sb, "\n\nObject "+bk+" is missing in A:\n\n")
+					continue
+				}
+			}
 		}
 	}
 	return sb.String(), err
