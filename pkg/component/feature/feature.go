@@ -319,13 +319,14 @@ func buildCommonFeatureFields(opts *Options, ftname name.FeatureName) *CommonFea
 	cff := &CommonFeatureFields{
 		Options: *opts,
 	}
-	if opts != nil && opts.Translator != nil && opts.Translator.FeatureMaps != nil {
-		ftMap := opts.Translator.FeatureMaps[ftname]
-		for _, cn := range ftMap.Components {
-			enabled, err := opts.Translator.IsComponentEnabled(cn, opts.InstallSpec)
-			if err == nil && enabled {
-				cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, ftname)))
-			}
+	if opts == nil || opts.Translator == nil || opts.Translator.FeatureMaps == nil {
+		return cff
+	}
+	ftMap := opts.Translator.FeatureMaps[ftname]
+	for _, cn := range ftMap.Components {
+		enabled, err := opts.Translator.IsComponentEnabled(cn, opts.InstallSpec)
+		if err == nil && enabled {
+			cff.components = append(cff.components, component.NewComponent(cn, newComponentOptions(cff, ftname)))
 		}
 	}
 	return cff
