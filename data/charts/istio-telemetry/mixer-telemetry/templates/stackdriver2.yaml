@@ -1,0 +1,140 @@
+{{- if .Values.mixer.adapters.stackdriver.enabled }}
+apiVersion: "config.istio.io/v1alpha2"
+kind: instance
+metadata:
+  name: server-accesslog-stackdriver
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: istio-telemetry
+    release: {{ .Release.Name }}
+spec:
+  compiledTemplate: logentry
+  params:
+    severity: '"Info"'
+    timestamp: request.time
+    variables:
+      source_uid: source.uid | ""
+      source_ip: source.ip | ip("0.0.0.0")
+      source_app: source.labels["app"] | ""
+      source_principal: source.principal | ""
+      source_name: source.name | ""
+      source_workload: source.workload.name | ""
+      source_namespace: source.namespace | ""
+      source_owner: source.owner | ""
+      destination_uid: destination.uid | ""
+      destination_app: destination.labels["app"] | ""
+      destination_ip: destination.ip | ip("0.0.0.0")
+      destination_service_host: destination.service.host | ""
+      destination_workload: destination.workload.name | ""
+      destination_name: destination.name | ""
+      destination_namespace: destination.namespace | ""
+      destination_owner: destination.owner | ""
+      destination_principal: destination.principal | ""
+      api_name: api.service | ""
+      api_version: api.version | ""
+      api_claims: request.auth.raw_claims | ""
+      api_key: request.api_key | request.headers["x-api-key"] | ""
+      request_operation: conditional((context.protocol | "unknown") == "grpc", request.path | "unknown", request.method | "unknown")
+      protocol: request.scheme | context.protocol | "http"
+      method: request.method | ""
+      url: request.path | ""
+      response_code: response.code | 0
+      response_size: response.size | 0
+      request_size: request.size | 0
+      request_id: request.headers["x-request-id"] | ""
+      latency: response.duration | "0ms"
+      service_authentication_policy: conditional((context.reporter.kind | "inbound") == "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls", "none"))
+      user_agent: request.useragent | ""
+      response_timestamp: response.time
+      received_bytes: request.total_size | 0
+      sent_bytes: response.total_size | 0
+      referer: request.referer | ""
+    monitored_resource_type: '"k8s_container"'
+    monitoredResourceDimensions:
+      project_id: '""'
+      cluster_name: '""'
+      namespace_name: destination.namespace | "unknown"
+      location: '""'
+      container_name: conditional((destination.name | "unknown").startsWith("istio-telemetry") || (destination.name | "unknown").startsWith("istio-policy"), "mixer", destination.container.name | "unknown")
+      pod_name: destination.name | "unknown"
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: instance
+metadata:
+  name: server-tcp-accesslog-stackdriver
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: istio-telemetry
+    release: {{ .Release.Name }}
+spec:
+  compiledTemplate: logentry
+  params:
+    severity: '"Info"'
+    timestamp: context.time | timestamp("2017-01-01T00:00:00Z")
+    variables:
+      source_uid: source.uid | ""
+      connection_id: connection.id | ""
+      connection_event: connection.event | ""
+      source_ip: source.ip | ip("0.0.0.0")
+      source_app: source.labels["app"] | ""
+      source_principal: source.principal | ""
+      source_name: source.name | ""
+      source_workload: source.workload.name | ""
+      source_namespace: source.namespace | ""
+      source_owner: source.owner | ""
+      destination_uid: destination.uid | ""
+      destination_app: destination.labels["app"] | ""
+      destination_ip: destination.ip | ip("0.0.0.0")
+      destination_service_host: destination.service.host | ""
+      destination_workload: destination.workload.name | ""
+      destination_name: destination.name | ""
+      destination_namespace: destination.namespace | ""
+      destination_owner: destination.owner | ""
+      destination_principal: destination.principal | ""
+      protocol: context.protocol | "tcp"
+      connction_duration: connection.duration | "0ms"
+      service_authentication_policy: conditional((context.reporter.kind | "inbound") == "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls", "none"))
+      received_bytes: connection.received.bytes | 0
+      sent_bytes: connection.sent.bytes | 0
+      total_received_bytes: connection.received.bytes_total | 0
+      total_sent_bytes: connection.sent.bytes_total | 0
+    monitored_resource_type: '"k8s_container"'
+    monitoredResourceDimensions:
+      project_id: '""'
+      cluster_name: '""'
+      namespace_name: destination.namespace | "unknown"
+      location: '""'
+      container_name: conditional((destination.name | "unknown").startsWith("istio-telemetry") || (destination.name | "unknown").startsWith("istio-policy"), "mixer", destination.container.name | "unknown")
+      pod_name: destination.name | "unknown"
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: rule
+metadata:
+  name: stackdriver-log
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: istio-telemetry
+    release: {{ .Release.Name }}
+spec:
+  match: (context.protocol == "http" || context.protocol == "grpc") && (context.reporter.kind | "inbound" == "inbound")
+  actions:
+    - handler: stackdriver
+      instances:
+        - server-accesslog-stackdriver
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: rule
+metadata:
+  name: stackdriver-log-tcp
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: istio-telemetry
+    release: {{ .Release.Name }}
+spec:
+  match: (context.protocol == "tcp") && (context.reporter.kind | "inbound" == "inbound")
+  actions:
+    - handler: stackdriver
+      instances:
+        - server-tcp-accesslog-stackdriver
+---
+{{- end }}
