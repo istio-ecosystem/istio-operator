@@ -553,6 +553,9 @@ func (t *Translator) IsFeatureEnabled(ft name.FeatureName, icp *v1alpha2.IstioCo
 // IsComponentEnabled reports whether the component with name cn is enabled, according to the translations in t,
 // and the contents of ocp.
 func (t *Translator) IsComponentEnabled(cn name.ComponentName, icp *v1alpha2.IstioControlPlaneSpec) (bool, error) {
+	if t.ComponentMaps[cn] == nil {
+		return false, nil
+	}
 	if t.ComponentMaps[cn].AlwaysEnabled {
 		return true, nil
 	}
