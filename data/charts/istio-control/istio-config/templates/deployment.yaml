@@ -14,8 +14,8 @@ spec:
       istio: galley
   strategy:
     rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+      maxSurge: {{ .Values.galley.rollingMaxSurge }}
+      maxUnavailable: {{ .Values.galley.rollingMaxUnavailable }}
   template:
     metadata:
       labels:
@@ -60,7 +60,6 @@ spec:
   {{- else }}
           - --enable-validation=false
   {{- end }}
-          - --validation-port=9443
           - --enable-server=true
           - --deployment-namespace={{ .Release.Namespace }}
           - --validation-webhook-config-file

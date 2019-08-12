@@ -3,6 +3,8 @@ sidecarInjectorWebhook:
   # If down, new pods will fail to start or restart for a short time, but they will
   # retry.
   replicaCount: 1
+  rollingMaxSurge: 100%
+  rollingMaxUnavailable: 25%
 
   image: sidecar_injector
 
@@ -24,13 +26,17 @@ sidecarInjectorWebhook:
   nodeSelector: {}
   tolerations: []
 
+  # If set, will use the value as injection label. The value must match the 'release' label of the injector,
+  # except when 1.2 istio-injection label is used, which must be set to "enabled".
+  injectLabel: istio-injection
+
   # Specify the pod anti-affinity that allows you to constrain which nodes
   # your pod is eligible to be scheduled based on labels on pods that are
   # already running on the node rather than based on labels on nodes.
   # There are currently two types of anti-affinity:
   #    "requiredDuringSchedulingIgnoredDuringExecution"
   #    "preferredDuringSchedulingIgnoredDuringExecution"
-  # which denote “hard” vs. “soft” requirements, you can define your values
+  # which denote "hard" vs. "soft" requirements, you can define your values
   # in "podAntiAffinityLabelSelector" and "podAntiAffinityTermLabelSelector"
   # correspondingly.
   # For example:
@@ -41,7 +47,7 @@ sidecarInjectorWebhook:
   #   topologyKey: "kubernetes.io/hostname"
   # This pod anti-affinity rule says that the pod requires not to be scheduled
   # onto a node if that node is already running a pod with label having key
-  # “security” and value “S1”.
+  # "security" and value "S1".
   podAntiAffinityLabelSelector: []
   podAntiAffinityTermLabelSelector: []
 

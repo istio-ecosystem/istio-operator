@@ -27,8 +27,8 @@ spec:
 {{- end }}
   strategy:
     rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+      maxSurge: {{ .Values.pilot.rollingMaxSurge }}
+      maxUnavailable: {{ .Values.pilot.rollingMaxUnavailable }}
   selector:
     matchLabels:
       {{- if ne .Values.version ""}}
@@ -126,8 +126,6 @@ spec:
           - name: PILOT_TRACE_SAMPLING
             value: "{{ .Values.pilot.traceSampling }}"
 {{- end }}
-          - name: PILOT_DISABLE_XDS_MARSHALING_TO_ANY
-            value: "1"
           - name: CONFIG_NAMESPACE
             value: {{ .Values.pilot.configNamespace }}
 {{- if .Values.pilot.appNamespaces }}
@@ -206,10 +204,8 @@ spec:
           - name: sds-uds-path
             mountPath: /var/run/sds
             readOnly: true
-          {{- if .Values.global.sds.useTrustworthyJwt }}
           - name: istio-token
             mountPath: /var/run/secrets/tokens
-          {{- end }}
           {{- end }}
 {{- end }}
       volumes:
@@ -217,7 +213,6 @@ spec:
       - hostPath:
           path: /var/run/sds
         name: sds-uds-path
-      {{- if .Values.global.sds.useTrustworthyJwt }}
       - name: istio-token
         projected:
           sources:
@@ -225,7 +220,6 @@ spec:
               audience: {{ .Values.global.trustDomain }}
               expirationSeconds: 43200
               path: istio-token
-      {{- end }}
       {{- end }}
       - name: config-volume
         configMap:

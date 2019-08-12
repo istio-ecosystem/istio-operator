@@ -20,6 +20,10 @@ spec:
     matchLabels:
       app: istio-egressgateway
       istio: egressgateway
+  strategy:
+    rollingUpdate:
+      maxSurge: {{ $gateway.rollingMaxSurge }}
+      maxUnavailable: {{ $gateway.rollingMaxUnavailable }}
   template:
     metadata:
       labels:
@@ -206,10 +210,8 @@ spec:
           - name: sdsudspath
             mountPath: /var/run/sds
             readOnly: true
-          {{- if .Values.global.sds.useTrustworthyJwt }}
           - name: istio-token
             mountPath: /var/run/secrets/tokens
-          {{- end }}
           {{- end }}
           - name: istio-certs
             mountPath: /etc/certs
@@ -227,7 +229,6 @@ spec:
       - name: sdsudspath
         hostPath:
           path: /var/run/sds
-      {{- if .Values.global.sds.useTrustworthyJwt }}
       - name: istio-token
         projected:
           sources:
@@ -235,7 +236,6 @@ spec:
               path: istio-token
               expirationSeconds: 43200
               audience: {{ .Values.global.trustDomain }}
-      {{- end }}
       {{- end }}
       {{ if .Values.global.sds.enabled }}
       - name: sdsudspath

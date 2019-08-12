@@ -6,6 +6,8 @@ pilot:
   autoscaleMin: 1
   autoscaleMax: 5
   replicaCount: 1
+  rollingMaxSurge: 100%
+  rollingMaxUnavailable: 25%
 
   # Can be a full hub/image:tag
   image: pilot
@@ -38,7 +40,7 @@ pilot:
   # There are currently two types of anti-affinity:
   #    "requiredDuringSchedulingIgnoredDuringExecution"
   #    "preferredDuringSchedulingIgnoredDuringExecution"
-  # which denote “hard” vs. “soft” requirements, you can define your values
+  # which denote "hard" vs. "soft" requirements, you can define your values
   # in "podAntiAffinityLabelSelector" and "podAntiAffinityTermLabelSelector"
   # correspondingly.
   # For example:
@@ -49,7 +51,7 @@ pilot:
   #   topologyKey: "kubernetes.io/hostname"
   # This pod anti-affinity rule says that the pod requires not to be scheduled
   # onto a node if that node is already running a pod with label having key
-  # “security” and value “S1”.
+  # "security" and value "S1".
   podAntiAffinityLabelSelector: []
   podAntiAffinityTermLabelSelector: []
 
@@ -94,6 +96,7 @@ pilot:
     # Will not define mixerCheckServer and mixerReportServer
     enabled: false
 
+  # Indicate if Galley is enabled to send MCP queries
   useMCP: true
 
 ## Mixer settings

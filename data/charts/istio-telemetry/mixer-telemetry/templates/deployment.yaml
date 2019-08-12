@@ -12,8 +12,8 @@ spec:
   replicas: {{ .Values.mixer.telemetry.replicaCount }}
   strategy:
     rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+      maxSurge: {{ .Values.mixer.telemetry.rollingMaxSurge }}
+      maxUnavailable: {{ .Values.mixer.telemetry.rollingMaxUnavailable }}
   selector:
     matchLabels:
       istio: mixer
@@ -21,7 +21,7 @@ spec:
   template:
     metadata:
       labels:
-        app: telemetry
+        app: istio-telemetry
         istio: mixer
         istio-mixer-type: telemetry
       annotations:
@@ -40,7 +40,6 @@ spec:
       - hostPath:
           path: /var/run/sds
         name: sds-uds-path
-      {{- if .Values.global.sds.useTrustworthyJwt }}
       - name: istio-token
         projected:
           sources:
@@ -48,7 +47,6 @@ spec:
               audience: {{ .Values.global.trustDomain }}
               expirationSeconds: 43200
               path: istio-token
-      {{- end }}
       {{- end }}
       - name: uds-socket
         emptyDir: {}
@@ -87,7 +85,7 @@ spec:
 {{- if .Values.global.logAsJson }}
           - --log_as_json
 {{- end }}
-{{- if .Values.global.useMCP }}
+{{- if .Values.mixer.telemetry.useMCP }}
     {{- if .Values.global.controlPlaneSecurityEnabled}}
           - --configStoreURL=mcp://localhost:15019
     {{- else }}
@@ -122,7 +120,7 @@ spec:
 {{ toYaml .Values.global.defaultResources | indent 10 }}
 {{- end }}
         volumeMounts:
-{{- if .Values.global.useMCP }}
+{{- if .Values.mixer.telemetry.useMCP }}
         - name: istio-certs
           mountPath: /etc/certs
           readOnly: true
@@ -138,7 +136,7 @@ spec:
             port: 15014
           initialDelaySeconds: 5
           periodSeconds: 5
-
+{{- if .Values.global.controlPlaneSecurityEnabled }}
       - name: istio-proxy
 {{- if contains "/" .Values.global.proxy.image }}
         image: "{{ .Values.global.proxy.image }}"
@@ -205,11 +203,10 @@ spec:
         - name: sds-uds-path
           mountPath: /var/run/sds
           readOnly: true
-        {{- if .Values.global.sds.useTrustworthyJwt }}
         - name: istio-token
           mountPath: /var/run/secrets/tokens
         {{- end }}
-        {{- end }}
         - name: uds-socket
           mountPath: /sock
+{{- end }}
 ---
