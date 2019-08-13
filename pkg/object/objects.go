@@ -378,9 +378,80 @@ func ManifestDiff(a, b string) (string, error) {
 		return "", err
 	}
 
-	var sb strings.Builder
-
 	aom, bom := ao.ToMap(), bo.ToMap()
+	return manifestDiff(aom, bom)
+}
+
+// ManifestDiffWithSelect checks the manifest differences with selected and ignored resources.
+// The selected filter will apply before the ignored filter.
+func ManifestDiffWithSelectAndIgnore(a, b, selectResources, ignoreResources string) (string, error) {
+	aosm, err := filterResourceWithSelectAndIgnore(a, selectResources, ignoreResources)
+	if err != nil {
+		return "", err
+	}
+	bosm, err := filterResourceWithSelectAndIgnore(b, selectResources, ignoreResources)
+	if err != nil {
+		return "", err
+	}
+
+	return manifestDiff(aosm, bosm)
+}
+
+// filterResourceWithSelectAndIgnore filter the input resources with selected and ignored filter.
+func filterResourceWithSelectAndIgnore(a, selectResources, ignoreResources string) (map[string]*K8sObject, error) {
+	ao, err := ParseK8sObjectsFromYAMLManifest(a)
+	if err != nil {
+		return nil, err
+	}
+	aom := ao.ToMap()
+	aosm := make(map[string]*K8sObject)
+	selections := strings.Split(selectResources, ",")
+	ignores := strings.Split(ignoreResources, ",")
+	for ak, av := range aom {
+		if strings.Compare(selectResources, "") != 0 {
+			for _, selected := range selections {
+				re, err := buildResourceRegexp(selected)
+				if err != nil {
+					return nil, fmt.Errorf("error building the resource regexp: %v", err)
+				}
+				if re.MatchString(ak) {
+					fmt.Printf("adding resource: %s\n", ak)
+					aosm[ak] = av
+				}
+			}
+		}
+		if strings.Compare(ignoreResources, "") != 0 {
+			for _, ignored := range ignores {
+				re, err := buildResourceRegexp(ignored)
+				if err != nil {
+					return nil, fmt.Errorf("error building the resource regexp: %v", err)
+				}
+				if re.MatchString(ak) {
+					if _, ok := aosm[ak]; ok {
+						fmt.Printf("removing resource: %s\n", ak)
+						delete(aosm, ak)
+					}
+				}
+			}
+		}
+	}
+	return aosm, nil
+}
+
+// buildResourceRegexp translates the resource indicator to regexp.
+func buildResourceRegexp(s string) (*regexp.Regexp, error) {
+	hash := strings.Split(s, ":")
+	for i, v := range hash {
+		if v == "" || v == "*" {
+			hash[i] = ".*"
+		}
+	}
+	return regexp.Compile(strings.Join(hash, ":"))
+}
+
+// manifestDiff an internal function to compare the manifests difference specified in the input.
+func manifestDiff(aom, bom map[string]*K8sObject) (string, error) {
+	var sb strings.Builder
 	for ak, av := range aom {
 		ay, err := av.YAML()
 		if err != nil {
@@ -408,124 +479,7 @@ func ManifestDiff(a, b string) (string, error) {
 			continue
 		}
 	}
-	return sb.String(), err
-}
-
-// buildResourceRegexp translates the resource indicator to regexp.
-func buildResourceRegexp(s string) *regexp.Regexp {
-	hash := strings.Split(s, ":")
-	for i, v := range hash {
-		if v == "" {
-			hash[i] = ".*"
-		}
-	}
-	return regexp.MustCompile(strings.Join(hash, ":"))
-}
-
-// ManifestDiffWithSelect checks the manifest differences with selected indicator.
-func ManifestDiffWithSelect(a, b, selection string) (string, error) {
-	ao, err := ParseK8sObjectsFromYAMLManifest(a)
-	if err != nil {
-		return "", err
-	}
-	bo, err := ParseK8sObjectsFromYAMLManifest(b)
-	if err != nil {
-		return "", err
-	}
-
-	selections := strings.Split(selection, ",")
-
-	var sb strings.Builder
-	aom, bom := ao.ToMap(), bo.ToMap()
-
-	for _, selected := range selections {
-		re := buildResourceRegexp(selected)
-		for ak, av := range aom {
-			if re.MatchString(ak) {
-				ay, err := av.YAML()
-				if err != nil {
-					return "", err
-				}
-				bo := bom[ak]
-				if bo == nil {
-					writeStringSafe(&sb, "\n\nObject "+ak+" is missing in B:\n\n")
-					continue
-				}
-				by, err := bo.YAML()
-				if err != nil {
-					return "", err
-				}
-				diff := util.YAMLDiff(string(ay), string(by))
-				if diff != "" {
-					writeStringSafe(&sb, "\n\nObject "+ak+" has diffs:\n\n")
-					writeStringSafe(&sb, diff)
-				}
-			}
-		}
-		for bk := range bom {
-			if re.MatchString(bk) {
-				ao := aom[bk]
-				if ao == nil {
-					writeStringSafe(&sb, "\n\nObject "+bk+" is missing in A:\n\n")
-					continue
-				}
-			}
-		}
-	}
-	return sb.String(), err
-}
-
-// ManifestDiffWithIgnore checks the manifest differences with ignored indicator.
-func ManifestDiffWithIgnore(a, b, ignore string) (string, error) {
-	ao, err := ParseK8sObjectsFromYAMLManifest(a)
-	if err != nil {
-		return "", err
-	}
-	bo, err := ParseK8sObjectsFromYAMLManifest(b)
-	if err != nil {
-		return "", err
-	}
-
-	ignores := strings.Split(ignore, ",")
-
-	var sb strings.Builder
-	aom, bom := ao.ToMap(), bo.ToMap()
-
-	for _, ignored := range ignores {
-		re := buildResourceRegexp(ignored)
-		for ak, av := range aom {
-			if !re.MatchString(ak) {
-				ay, err := av.YAML()
-				if err != nil {
-					return "", err
-				}
-				bo := bom[ak]
-				if bo == nil {
-					writeStringSafe(&sb, "\n\nObject "+ak+" is missing in B:\n\n")
-					continue
-				}
-				by, err := bo.YAML()
-				if err != nil {
-					return "", err
-				}
-				diff := util.YAMLDiff(string(ay), string(by))
-				if diff != "" {
-					writeStringSafe(&sb, "\n\nObject "+ak+" has diffs:\n\n")
-					writeStringSafe(&sb, diff)
-				}
-			}
-		}
-		for bk := range bom {
-			if !re.MatchString(bk) {
-				ao := aom[bk]
-				if ao == nil {
-					writeStringSafe(&sb, "\n\nObject "+bk+" is missing in A:\n\n")
-					continue
-				}
-			}
-		}
-	}
-	return sb.String(), err
+	return sb.String(), nil
 }
 
 func writeStringSafe(sb io.StringWriter, s string) {

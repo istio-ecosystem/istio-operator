@@ -33,23 +33,27 @@ const YAMLSuffix = ".yaml"
 type manifestDiffArgs struct {
 	// compareDir indicates comparison between directory.
 	compareDir bool
-	// selection specifies the resources to compare, it's comma-separated of resource indicators
-	// in the form of "<kind>:<namespace>:<name>,<kind>:<namespace>:<name>".
-	selection string
-	// ignore specifies the resources to ignore, it's comma-separated of resource indicators
-	// in the form of "<kind>:<namespace>:<name>,<kind>:<namespace>:<name>".
-	ignore string
+	// selectResources constrains the list of resources to compare to only the ones in this list, ignoring all others.
+	// The format of each list item is :: and the items are comma separated. The * character represents wildcard selection.
+	// e.g.
+	// Deployment:istio-system:* - compare all deployments in istio-system namespace
+	// Service:*:istio-pilot - compare Services called "istio-pilot" in all namespaces.
+	selectResources string
+	// ignoreResources ignores all listed items during comparison. It uses the same list format as selectResources.
+	ignoreResources string
 }
 
 func addManifestDiffFlags(cmd *cobra.Command, diffArgs *manifestDiffArgs) {
 	cmd.PersistentFlags().BoolVarP(&diffArgs.compareDir, "directory", "r",
 		false, "compare directory")
-	cmd.PersistentFlags().StringVar(&diffArgs.selection, "select", "::",
-		"specifies the resources to compare, it's comma-separated of resource indicators"+
-			"in the form of \"<kind>:<namespace>:<name>,<kind>:<namespace>:<name>\".")
-	cmd.PersistentFlags().StringVar(&diffArgs.ignore, "ignore", "",
-		"specifies the resources to ignore, it's comma-separated of resource indicators"+
-			"in the form of \"<kind>:<namespace>:<name>,<kind>:<namespace>:<name>\".")
+	cmd.PersistentFlags().StringVar(&diffArgs.selectResources, "select", "::",
+		"selectResources constrains the list of resources to compare to only the ones in this list, ignoring all others.\n"+
+			"The format of each list item is \"::\" and the items are comma separated. The \"*\" character represents wildcard selection.\n"+
+			"e.g.\n"+
+			"    Deployment:istio-system:* - compare all deployments in istio-system namespace\n"+
+			"    Service:*:istio-pilot - compare Services called \"istio-pilot\" in all namespaces.")
+	cmd.PersistentFlags().StringVar(&diffArgs.ignoreResources, "ignore", "",
+		"ignoreResources ignores all listed items during comparison. It uses the same list format as selectResources.")
 }
 
 func manifestDiffCmd(rootArgs *rootArgs, diffArgs *manifestDiffArgs) *cobra.Command {
@@ -59,20 +63,17 @@ func manifestDiffCmd(rootArgs *rootArgs, diffArgs *manifestDiffArgs) *cobra.Comm
 		Long:  "The diff-manifest subcommand is used to compare manifest from two files or directories.",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			if diffArgs.selection != "::" && diffArgs.ignore != "" {
-				logAndFatalf(rootArgs, "Cannot specify both the selected and ignored resources.")
-			}
 			if diffArgs.compareDir {
-				compareManifestsFromDirs(rootArgs, args[0], args[1], diffArgs.selection, diffArgs.ignore)
+				compareManifestsFromDirs(rootArgs, args[0], args[1], diffArgs.selectResources, diffArgs.ignoreResources)
 			} else {
-				compareManifestsFromFiles(rootArgs, args, diffArgs.selection, diffArgs.ignore)
+				compareManifestsFromFiles(rootArgs, args, diffArgs.selectResources, diffArgs.ignoreResources)
 			}
 		}}
 	return cmd
 }
 
 //compareManifestsFromFiles compares two manifest files
-func compareManifestsFromFiles(rootArgs *rootArgs, args []string, selection, ignore string) {
+func compareManifestsFromFiles(rootArgs *rootArgs, args []string, selectResources, ignoreResources string) {
 	checkLogsOrExit(rootArgs)
 
 	a, err := ioutil.ReadFile(args[0])
@@ -86,13 +87,7 @@ func compareManifestsFromFiles(rootArgs *rootArgs, args []string, selection, ign
 		os.Exit(1)
 	}
 
-	var diff string
-	if ignore != "" {
-		diff, err = object.ManifestDiffWithIgnore(string(a), string(b), ignore)
-	} else {
-		diff, err = object.ManifestDiffWithSelect(string(a), string(b), selection)
-	}
-
+	diff, err := object.ManifestDiffWithSelectAndIgnore(string(a), string(b), selectResources, ignoreResources)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
@@ -110,7 +105,7 @@ func yamlFileFilter(path string) bool {
 }
 
 //compareManifestsFromDirs compares manifests from two directories
-func compareManifestsFromDirs(rootArgs *rootArgs, dirName1, dirName2, selection, ignore string) {
+func compareManifestsFromDirs(rootArgs *rootArgs, dirName1, dirName2, selectResources, ignoreResources string) {
 	checkLogsOrExit(rootArgs)
 
 	mf1, err := util.ReadFiles(dirName1, yamlFileFilter)
@@ -123,12 +118,8 @@ func compareManifestsFromDirs(rootArgs *rootArgs, dirName1, dirName2, selection,
 		log.Error(err.Error())
 		os.Exit(1)
 	}
-	var diff string
-	if ignore != "" {
-		diff, err = object.ManifestDiffWithIgnore(mf1, mf2, ignore)
-	} else {
-		diff, err = object.ManifestDiffWithSelect(mf1, mf2, selection)
-	}
+
+	diff, err := object.ManifestDiffWithSelectAndIgnore(mf1, mf2, selectResources, ignoreResources)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
