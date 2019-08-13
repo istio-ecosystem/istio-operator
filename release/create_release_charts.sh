@@ -78,6 +78,7 @@ function copy_installer_charts() {
     do
 	    cp -R "${INSTALLER_REPO}/${chart}" "${OUTPUT_CHARTS_DIR}"
     done
+    cp "${INSTALLER_REPO}/global.yaml" "${OUTPUT_CHARTS_DIR}"
 }
 
 function copy_profiles() {
@@ -89,6 +90,18 @@ function copy_versions_files() {
     cp "${OPERATOR_BASE_DIR}/version/versions.yaml" "${OUTPUT_DIR}"
 }
 
+function update_version() {
+    local DOCKER_HUB="docker.io/istio"
+    local DOCKER_TAG=${OPERATOR_VERSION}
+    # Update version string in profiles.
+    sed -i "s|hub: gcr.io/istio-release|hub: ${DOCKER_HUB}|g" "${OUTPUT_DIR}/profiles/*.yaml"
+    sed -i "s|tag: .*-latest-daily|tag: ${DOCKER_TAG}|g"      "${OUTPUT_DIR}/profiles/*.yaml"
+    # Update version string in global.yaml.
+    sed -i "s|hub: gcr.io/istio-release|hub: ${DOCKER_HUB}|g" "${OUTPUT_DIR}/charts/global.yaml"
+    sed -i "s|tag: .*-latest-daily|tag: ${DOCKER_TAG}|g"      "${OUTPUT_DIR}/charts/global.yaml"
+}
+
 copy_installer_charts
 copy_profiles
 copy_versions_files
+update_version
