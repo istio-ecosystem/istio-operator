@@ -415,7 +415,6 @@ func filterResourceWithSelectAndIgnore(a, selectResources, ignoreResources strin
 					return nil, fmt.Errorf("error building the resource regexp: %v", err)
 				}
 				if re.MatchString(ak) {
-					fmt.Printf("adding resource: %s\n", ak)
 					aosm[ak] = av
 				}
 			}
@@ -428,7 +427,6 @@ func filterResourceWithSelectAndIgnore(a, selectResources, ignoreResources strin
 				}
 				if re.MatchString(ak) {
 					if _, ok := aosm[ak]; ok {
-						fmt.Printf("removing resource: %s\n", ak)
 						delete(aosm, ak)
 					}
 				}
