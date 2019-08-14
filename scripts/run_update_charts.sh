@@ -21,7 +21,7 @@ set -x
 set -e
 
 if [[ "$#" -ne 2 ]]; then
-    echo "Usage: run_update_charts.sh <SHA>"
+    echo "Usage: run_update_charts.sh <sha or branch>"
 fi
 
 SHA="${1}"
