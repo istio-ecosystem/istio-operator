@@ -63,7 +63,7 @@ for details.
 
 The quick start describes how to install and use the operator `mesh` CLI command.
 
-### Installation
+### Building
 
 If you're trying to do a local build that bypasses the build container, you'll need to
 to execute the following step one time.
