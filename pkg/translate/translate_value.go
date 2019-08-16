@@ -267,52 +267,42 @@ func translateHPASpec(inPath string, outPath string, value interface{}, valueTre
 	newP := util.PathFromString(inPath)
 	// last path element is k8s setting name
 	newPS := newP[:len(newP)-1].String()
-	minPath := newPS + ".autoscaleMin"
-	asMin, found, err := name.GetFromTreePath(valueTree, util.ToYAMLPath(minPath))
-	if found && err == nil {
-		if err := tpath.WriteNode(cpSpecTree, util.ToYAMLPath(outPath+".minReplicas"), asMin); err != nil {
-			return err
-		}
-	}
-	if _, err := tpath.DeleteFromTree(valueTree, util.ToYAMLPath(minPath), util.ToYAMLPath(minPath)); err != nil {
-		return err
-	}
-	maxPath := newPS + ".autoscaleMax"
-	asMax, found, err := name.GetFromTreePath(valueTree, util.ToYAMLPath(maxPath))
-	if found && err == nil {
-		log.Infof("path has value in helm Value.yaml tree, mapping to output path %s", outPath)
-		if err := tpath.WriteNode(cpSpecTree, util.ToYAMLPath(outPath+".maxReplicas"), asMax); err != nil {
-			return err
-		}
-	}
-	if _, err := tpath.DeleteFromTree(valueTree, util.ToYAMLPath(maxPath), util.ToYAMLPath(maxPath)); err != nil {
-		return err
+
+	valMap := map[string]string{
+		".autoscaleMin":                 ".minReplicas",
+		".autoscaleMax":                 ".maxReplicas",
+		".cpu.targetAverageUtilization": ".metrics",
 	}
 
-	cuPath := newPS + ".cpu.targetAverageUtilization"
-	cuVal, found, err := name.GetFromTreePath(valueTree, util.ToYAMLPath(cuPath))
-
-	if found && err == nil {
-		rs := make([]interface{}, 1)
-		rsVal := `
+	for key, newVal := range valMap {
+		valPath := newPS + key
+		asVal, found, err := name.GetFromTreePath(valueTree, util.ToYAMLPath(valPath))
+		if found && err == nil {
+			log.Infof("path has value in helm Value.yaml tree, mapping to output path %s", outPath)
+			if key == ".cpu.targetAverageUtilization" {
+				rs := make([]interface{}, 1)
+				rsVal := `
 - type: Resource
   resource:
     name: cpu
     targetAverageUtilization: %f`
 
-		rsString := fmt.Sprintf(rsVal, cuVal)
-		if err = yaml.Unmarshal([]byte(rsString), &rs); err != nil {
+				rsString := fmt.Sprintf(rsVal, asVal)
+				if err = yaml.Unmarshal([]byte(rsString), &rs); err != nil {
+					return err
+				}
+				asVal = rs
+			}
+			if err := tpath.WriteNode(cpSpecTree, util.ToYAMLPath(outPath+newVal), asVal); err != nil {
+				return err
+			}
+		}
+		if _, err := tpath.DeleteFromTree(valueTree, util.ToYAMLPath(valPath), util.ToYAMLPath(valPath)); err != nil {
 			return err
 		}
-		log.Infof("path has value in helm Value.yaml tree, mapping to output path %s", outPath)
-		if err := tpath.WriteNode(cpSpecTree, util.ToYAMLPath(outPath+".metrics"), rs); err != nil {
-			return err
-		}
-	}
-	if _, err := tpath.DeleteFromTree(valueTree, util.ToYAMLPath(cuPath), util.ToYAMLPath(cuPath)); err != nil {
-		return err
 	}
 
+	// There is no direct source from value.yaml for scaleTargetRef value, we need to construct from component name
 	st := make(map[string]interface{})
 	stVal := `
 apiVersion: apps/v1
@@ -320,14 +310,13 @@ kind: Deployment
 name: istio-%s`
 
 	stString := fmt.Sprintf(stVal, newPS)
-	if err = yaml.Unmarshal([]byte(stString), &st); err != nil {
+	if err := yaml.Unmarshal([]byte(stString), &st); err != nil {
 		return err
 	}
 	log.Infof("path has value in helm Value.yaml tree, mapping to output path %s", outPath)
 	if err := tpath.WriteNode(cpSpecTree, util.ToYAMLPath(outPath+".scaleTargetRef"), st); err != nil {
 		return err
 	}
-
 	return nil
 }
 
