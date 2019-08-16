@@ -288,6 +288,46 @@ func translateHPASpec(inPath string, outPath string, value interface{}, valueTre
 	if _, err := tpath.DeleteFromTree(valueTree, util.ToYAMLPath(maxPath), util.ToYAMLPath(maxPath)); err != nil {
 		return err
 	}
+
+	cuPath := newPS + ".cpu.targetAverageUtilization"
+	cuVal, found, err := name.GetFromTreePath(valueTree, util.ToYAMLPath(cuPath))
+
+	if found && err == nil {
+		rs := make([]interface{}, 1)
+		rsVal := `
+- type: Resource
+  resource:
+    name: cpu
+    targetAverageUtilization: %f`
+
+		rsString := fmt.Sprintf(rsVal, cuVal)
+		if err = yaml.Unmarshal([]byte(rsString), &rs); err != nil {
+			return err
+		}
+		log.Infof("path has value in helm Value.yaml tree, mapping to output path %s", outPath)
+		if err := tpath.WriteNode(cpSpecTree, util.ToYAMLPath(outPath+".metrics"), rs); err != nil {
+			return err
+		}
+	}
+	if _, err := tpath.DeleteFromTree(valueTree, util.ToYAMLPath(cuPath), util.ToYAMLPath(cuPath)); err != nil {
+		return err
+	}
+
+	st := make(map[string]interface{})
+	stVal := `
+apiVersion: apps/v1
+kind: Deployment
+name: istio-%s`
+
+	stString := fmt.Sprintf(stVal, newPS)
+	if err = yaml.Unmarshal([]byte(stString), &st); err != nil {
+		return err
+	}
+	log.Infof("path has value in helm Value.yaml tree, mapping to output path %s", outPath)
+	if err := tpath.WriteNode(cpSpecTree, util.ToYAMLPath(outPath+".scaleTargetRef"), st); err != nil {
+		return err
+	}
+
 	return nil
 }
 

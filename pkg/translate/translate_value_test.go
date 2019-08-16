@@ -51,6 +51,8 @@ pilot:
   autoscaleEnabled: true
   autoscaleMax: 3
   autoscaleMin: 1
+  cpu:
+    targetAverageUtilization: 80
   traceSampling: 1.0
   image: pilot
   env:
@@ -144,7 +146,15 @@ trafficManagement:
          hpaSpec:
             maxReplicas: 3
             minReplicas: 1
-            scaleTargetRef: {}
+            scaleTargetRef:
+               apiVersion: apps/v1
+               kind: Deployment
+               name: istio-pilot
+            metrics:
+             - resource:
+                 name: cpu
+                 targetAverageUtilization: 80
+               type: Resource
          nodeSelector:
             beta.kubernetes.io/os: linux
          resources:
