@@ -267,37 +267,34 @@ func translateHPASpec(inPath string, outPath string, value interface{}, valueTre
 	newP := util.PathFromString(inPath)
 	// last path element is k8s setting name
 	newPS := newP[:len(newP)-1].String()
-
 	valMap := map[string]string{
-		".autoscaleMin":                 ".minReplicas",
-		".autoscaleMax":                 ".maxReplicas",
-		".cpu.targetAverageUtilization": ".metrics",
+		".autoscaleMin": ".minReplicas",
+		".autoscaleMax": ".maxReplicas",
 	}
-
 	for key, newVal := range valMap {
 		valPath := newPS + key
 		asVal, found, err := name.GetFromTreePath(valueTree, util.ToYAMLPath(valPath))
 		if found && err == nil {
-			log.Infof("path has value in helm Value.yaml tree, mapping to output path %s", outPath)
-			if key == ".cpu.targetAverageUtilization" {
-				rs := make([]interface{}, 1)
-				rsVal := `
+			if err := setOutputAndClean(valPath, outPath+newVal, asVal, valueTree, cpSpecTree, true); err != nil {
+				return err
+			}
+		}
+	}
+	valPath := newPS + ".cpu.targetAverageUtilization"
+	asVal, found, err := name.GetFromTreePath(valueTree, util.ToYAMLPath(valPath))
+	if found && err == nil {
+		rs := make([]interface{}, 1)
+		rsVal := `
 - type: Resource
   resource:
     name: cpu
     targetAverageUtilization: %f`
 
-				rsString := fmt.Sprintf(rsVal, asVal)
-				if err = yaml.Unmarshal([]byte(rsString), &rs); err != nil {
-					return err
-				}
-				asVal = rs
-			}
-			if err := tpath.WriteNode(cpSpecTree, util.ToYAMLPath(outPath+newVal), asVal); err != nil {
-				return err
-			}
+		rsString := fmt.Sprintf(rsVal, asVal)
+		if err = yaml.Unmarshal([]byte(rsString), &rs); err != nil {
+			return err
 		}
-		if _, err := tpath.DeleteFromTree(valueTree, util.ToYAMLPath(valPath), util.ToYAMLPath(valPath)); err != nil {
+		if err := setOutputAndClean(valPath, outPath+".metrics", rs, valueTree, cpSpecTree, true); err != nil {
 			return err
 		}
 	}
@@ -313,8 +310,23 @@ name: istio-%s`
 	if err := yaml.Unmarshal([]byte(stString), &st); err != nil {
 		return err
 	}
+	if err := setOutputAndClean(valPath, outPath+".scaleTargetRef", st, valueTree, cpSpecTree, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+// setOutputAndClean is helper function to set value of iscp tree and clean the original value from value.yaml tree.
+func setOutputAndClean(valPath, outPath string, outVal interface{}, valueTree, cpSpecTree map[string]interface{}, clean bool) error {
 	log.Infof("path has value in helm Value.yaml tree, mapping to output path %s", outPath)
-	if err := tpath.WriteNode(cpSpecTree, util.ToYAMLPath(outPath+".scaleTargetRef"), st); err != nil {
+
+	if err := tpath.WriteNode(cpSpecTree, util.ToYAMLPath(outPath), outVal); err != nil {
+		return err
+	}
+	if !clean {
+		return nil
+	}
+	if _, err := tpath.DeleteFromTree(valueTree, util.ToYAMLPath(valPath), util.ToYAMLPath(valPath)); err != nil {
 		return err
 	}
 	return nil
@@ -444,8 +456,8 @@ func (t *ReverseTranslator) translateRemainingPaths(valueTree map[string]interfa
 				}
 				errs = util.AppendErr(errs, t.translateRemainingPaths(newMap, cpSpecTree, newPath))
 			}
-			if errs.ToError() != nil {
-				return errs.ToError()
+			if err := errs.ToError(); err != nil {
+				return err
 			}
 		// remaining leaf need to be put into common.values
 		default:
