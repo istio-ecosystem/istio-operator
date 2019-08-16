@@ -66,7 +66,7 @@ global:
   tag: 1.2.3
   telemetryNamespace: istio-telemetry
   proxy:
-    ReadinessInitialDelaySeconds: 2
+    readinessInitialDelaySeconds: 2
 mixer:
   policy:
     enabled: true
@@ -170,7 +170,7 @@ autoInjection:
 		{
 			desc: "All Enabled",
 			valueYAML: `
-certManager:
+certmanager:
   enabled: true
 galley:
   enabled: true
@@ -187,7 +187,7 @@ mixer:
     enabled: true
 pilot:
   enabled: true
-nodeAgent:
+nodeagent:
   enabled: true
 gateways:
   enabled: true
@@ -358,7 +358,7 @@ autoInjection:
 				t.Fatalf("unmarshal(%s): got error %s", tt.desc, err)
 			}
 			scope.Debugf("value struct: \n%s\n", pretty.Sprint(valueStruct))
-			got, err := tr.TranslateFromValueToSpec(&valueStruct)
+			got, err := tr.TranslateFromValueToSpec([]byte(tt.valueYAML))
 			if gotErr, wantErr := errToString(err), tt.wantErr; gotErr != wantErr {
 				t.Errorf("ValuesToProto(%s)(%v): gotErr:%s, wantErr:%s", tt.desc, tt.valueYAML, gotErr, wantErr)
 			}
