@@ -34,6 +34,10 @@ import (
 )
 
 const (
+	// K8sDeploymentResourceType is the resource type of kubernetes deployment.
+	K8sDeploymentResourceType = "Deployment"
+	// K8sDaemonSetResourceType is the resource type of kubernetes daemonset.
+	K8sDaemonSetResourceType = "DaemonSet"
 	// HelmValuesEnabledSubpath is the subpath from the component root to the enabled parameter.
 	HelmValuesEnabledSubpath = "enabled"
 	// HelmValuesNamespaceSubpath is the subpath from the component root to the namespace parameter.
@@ -236,70 +240,70 @@ var (
 					AlwaysEnabled:        true,
 				},
 				name.PilotComponentName: {
-					ResourceType:         "Deployment",
+					ResourceType:         K8sDeploymentResourceType,
 					ResourceName:         "istio-pilot",
 					ContainerName:        "discovery",
 					HelmSubdir:           "istio-control/istio-discovery",
 					ToHelmValuesTreeRoot: "pilot",
 				},
 				name.GalleyComponentName: {
-					ResourceType:         "Deployment",
+					ResourceType:         K8sDeploymentResourceType,
 					ResourceName:         "istio-galley",
 					ContainerName:        "galley",
 					HelmSubdir:           "istio-control/istio-config",
 					ToHelmValuesTreeRoot: "galley",
 				},
 				name.SidecarInjectorComponentName: {
-					ResourceType:         "Deployment",
+					ResourceType:         K8sDeploymentResourceType,
 					ResourceName:         "istio-sidecar-injector",
 					ContainerName:        "sidecar-injector-webhook",
 					HelmSubdir:           "istio-control/istio-autoinject",
 					ToHelmValuesTreeRoot: "sidecarInjectorWebhook",
 				},
 				name.PolicyComponentName: {
-					ResourceType:         "Deployment",
+					ResourceType:         K8sDeploymentResourceType,
 					ResourceName:         "istio-policy",
 					ContainerName:        "mixer",
 					HelmSubdir:           "istio-policy",
 					ToHelmValuesTreeRoot: "mixer.policy",
 				},
 				name.TelemetryComponentName: {
-					ResourceType:         "Deployment",
+					ResourceType:         K8sDeploymentResourceType,
 					ResourceName:         "istio-telemetry",
 					ContainerName:        "mixer",
 					HelmSubdir:           "istio-telemetry/mixer-telemetry",
 					ToHelmValuesTreeRoot: "mixer.telemetry",
 				},
 				name.CitadelComponentName: {
-					ResourceType:         "Deployment",
+					ResourceType:         K8sDeploymentResourceType,
 					ResourceName:         "istio-citadel",
 					ContainerName:        "citadel",
 					HelmSubdir:           "security/citadel",
 					ToHelmValuesTreeRoot: "citadel",
 				},
 				name.NodeAgentComponentName: {
-					ResourceType:         "DaemonSet",
+					ResourceType:         K8sDaemonSetResourceType,
 					ResourceName:         "istio-nodeagent",
 					ContainerName:        "nodeagent",
 					HelmSubdir:           "security/nodeagent",
 					ToHelmValuesTreeRoot: "nodeagent",
 				},
 				name.CertManagerComponentName: {
-					ResourceType:         "Deployment",
+					ResourceType:         K8sDeploymentResourceType,
 					ResourceName:         "certmanager",
 					ContainerName:        "certmanager",
 					HelmSubdir:           "security/certmanager",
 					ToHelmValuesTreeRoot: "certmanager",
 				},
 				name.IngressComponentName: {
-					ResourceType:         "Deployment",
+					ResourceType:         K8sDeploymentResourceType,
 					ResourceName:         "istio-ingressgateway",
 					ContainerName:        "istio-proxy",
 					HelmSubdir:           "gateways/istio-ingress",
 					ToHelmValuesTreeRoot: "gateways.istio-ingressgateway",
 				},
 				name.EgressComponentName: {
-					ResourceType:         "Deployment",
+					ResourceType:         K8sDeploymentResourceType,
 					ResourceName:         "istio-egressgateway",
 					ContainerName:        "istio-proxy",
 					HelmSubdir:           "gateways/istio-egress",
