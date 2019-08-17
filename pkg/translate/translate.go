@@ -267,7 +267,7 @@ var (
 					ResourceName:         "istio-citadel",
 					ContainerName:        "citadel",
 					HelmSubdir:           "security/citadel",
-					ToHelmValuesTreeRoot: "citadel",
+					ToHelmValuesTreeRoot: "security",
 				},
 				name.NodeAgentComponentName: {
 					ResourceName:         "istio-nodeagent",
