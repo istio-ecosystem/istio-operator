@@ -17,10 +17,11 @@ package mesh
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
+
 	"github.com/ghodss/yaml"
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/spf13/cobra"
-	"path/filepath"
 
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/translate"
