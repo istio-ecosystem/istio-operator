@@ -432,7 +432,7 @@ func (t *ReverseTranslator) translateK8sTree(valueTree map[string]interface{},
 	return nil
 }
 
-// translateRemainingPaths translates remaining paths that are not availing in existing mappings.
+// translateRemainingPaths translates remaining paths that are not available in existing mappings.
 func (t *ReverseTranslator) translateRemainingPaths(valueTree map[string]interface{},
 	cpSpecTree map[string]interface{}, path util.Path) error {
 	for key, val := range valueTree {

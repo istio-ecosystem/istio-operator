@@ -17,12 +17,10 @@ package mesh
 import (
 	"encoding/json"
 	"fmt"
-	"path/filepath"
-	"strings"
-
 	"github.com/ghodss/yaml"
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/spf13/cobra"
+	"path/filepath"
 
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/translate"
@@ -59,18 +57,21 @@ func manifestMigrateCmd(rootArgs *rootArgs, mmArgs *manifestMigrateArgs) *cobra.
 }
 
 func valueFileFilter(path string) bool {
-	return filepath.Ext(path) == YAMLSuffix && strings.HasPrefix(filepath.Base(path), "values")
+	return filepath.Base(path) == "values.yaml"
 }
 
 // migrateFromFiles handles migration for local values.yaml files
 func migrateFromFiles(rootArgs *rootArgs, args []string) {
 	checkLogsOrExit(rootArgs)
-
-	logAndPrintf(rootArgs, "translating input values.yaml file at: %s to new API", args[0])
 	value, err := util.ReadFiles(args[0], valueFileFilter)
 	if err != nil {
 		logAndFatalf(rootArgs, err.Error())
 	}
+	if value == "" {
+		logAndPrintf(rootArgs, "no valid value.yaml file specified")
+		return
+	}
+	logAndPrintf(rootArgs, "translating input values.yaml file at: %s to new API", args[0])
 	translateFunc(rootArgs, []byte(value))
 }
 
