@@ -2,22 +2,17 @@ apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
   security:
-    controlPlaneMtls: false
-    dataPlaneMtlsStrict: true
     components:
       nodeAgent:
-        common:
-          enabled: true
-          k8s:
-            env:
-            - name: CA_PROVIDER
-              value: "Citadel"
-            - name: CA_ADDR
-              value: "istio-citadel:8060"
-            - name: VALID_TOKEN
-              value: "true"
-          values:
-            image: node-agent-k8s
+        enabled: true
+        k8s:
+          env:
+          - name: CA_PROVIDER
+            value: "Citadel"
+          - name: CA_ADDR
+            value: "istio-citadel:8060"
+          - name: VALID_TOKEN
+            value: "true"
 
   values:
     global:
@@ -28,3 +23,5 @@ spec:
         udsPath: "unix:/var/run/sds/uds_path"
         useNormalJwt: false
         useTrustworthyJwt: true
+    nodeagent:
+      image: node-agent-k8s

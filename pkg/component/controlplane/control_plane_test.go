@@ -175,8 +175,7 @@ trafficManagement:
   enabled: true
   components:
     proxy:
-      common:
-        enabled: false
+      enabled: false
 
 
 `,
@@ -202,18 +201,15 @@ trafficManagement:
   components:
     namespace: istio-control
     proxy:
-      common:
-        enabled: false
-    pilot:
-      common:
-        values:
-          replicaCount: 5
-          resources:
-            requests:
-              cpu: 111m
-              memory: 222Mi
-        unvalidatedValues:
-          myCustomKey: someValue
+      enabled: false
+unvalidatedValues:
+  pilot:
+    replicaCount: 5
+    resources:
+      requests:
+        cpu: 111m
+        memory: 222Mi
+    myCustomKey: someValue
 `,
 		},
 		{
@@ -236,24 +232,22 @@ trafficManagement:
   enabled: true
   components:
     proxy:
-      common:
-        enabled: false
+      enabled: false
     pilot:
-      common:
-        k8s:
-          overlays:
-          - kind: Deployment
-            name: istio-pilot
-            patches:
-            - path: spec.template.spec.containers.[name:discovery].args.[30m]
-              value: "60m" # OVERRIDDEN
-            - path: spec.template.spec.containers.[name:discovery].ports.[containerPort:8080].containerPort
-              value: 1234 # OVERRIDDEN
-          - kind: Service
-            name: istio-pilot
-            patches:
-            - path: spec.ports.[name:grpc-xds].port
-              value: 11111 # OVERRIDDEN
+      k8s:
+        overlays:
+        - kind: Deployment
+          name: istio-pilot
+          patches:
+          - path: spec.template.spec.containers.[name:discovery].args.[30m]
+            value: "60m" # OVERRIDDEN
+          - path: spec.template.spec.containers.[name:discovery].ports.[containerPort:8080].containerPort
+            value: 1234 # OVERRIDDEN
+        - kind: Service
+          name: istio-pilot
+          patches:
+          - path: spec.ports.[name:grpc-xds].port
+            value: 11111 # OVERRIDDEN
 `,
 		},
 	}
