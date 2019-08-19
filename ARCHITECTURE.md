@@ -60,6 +60,11 @@ Base | CRDs
 Traffic Management | Pilot
 Policy | Policy
 Telemetry | Telemetry
+Telemetry | Prometheus
+Telemetry | Prometheus Operator
+Telemetry | Grafana
+Telemetry | Kiali
+Telemetry | Tracing
 Security | Citadel
 Security | Node agent
 Security | Cert manager
@@ -67,9 +72,10 @@ Configuration management | Galley
 Gateways | Ingress gateway
 Gateways | Egress gateway
 AutoInjection | Sidecar injector
+ThirdParty | CNI
 
 Features and components are defined in the
-[name](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/name/name.go#L38) package.
+[name](https://github.com/istio/operator/blob/master/pkg/name/name.go#L246) package.
 
 ### Namespaces
 
@@ -105,7 +111,7 @@ citadel | istio-security
 nodeAgent | istio-security-nodeagent
 
 These rules are expressed in code in the
-[name](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/name/name.go#L38) package.
+[name](https://github.com/istio/operator/blob/master/pkg/name/name.go#L131) package.
 
 ### Enablement
 
@@ -140,6 +146,7 @@ replicaCount | [replica count](https://kubernetes.io/docs/concepts/workloads/con
 hpaSpec | [HorizontalPodAutoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
 podDisruptionBudget | [PodDisruptionBudget](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/#how-disruption-budgets-work)
 podAnnotations | [pod annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+env | [container environment variables](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/)
 imagePullPolicy| [ImagePullPolicy](https://kubernetes.io/docs/concepts/containers/images/)
 priorityClassName | [priority class name](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass)
 nodeSelector| [node selector](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector)
@@ -226,9 +233,16 @@ CRs at this layer, so no merge is performed in this step.
 The CLI `mesh` command is implemented in the [cmd/mesh](https://github.com/istio/operator/blob/master/cmd/mesh/)
 subdirectory as a Cobra command with the following subcommands:
 
-- [manifest](https://github.com/istio/operator/blob/master/cmd/mesh/manifest.go): renders a manifest and outputs to console or files.
-- [install](https://github.com/istio/operator/blob/master/cmd/mesh/install.go): renders and manifest and applies it to a cluster.
-- [dump-profile](https://github.com/istio/operator/blob/master/cmd/mesh/dump.go): dumps the default values for a selected profile.
+- [manifest](https://github.com/istio/operator/blob/master/cmd/mesh/manifest.go): the manifest subcommand is used to generate, apply, diff or migrate Istio manifests, it has the following subcommands:
+    - [apply](https://github.com/istio/operator/blob/master/cmd/mesh/manifest-apply.go): the apply subcommand is used to generate an Istio install manifest and apply it to a cluster.
+    - [diff](https://github.com/istio/operator/blob/master/cmd/mesh/manifest-diff.go): the diff subcommand is used to compare manifest from two files or directories.
+    - [generate](https://github.com/istio/operator/blob/master/cmd/mesh/manifest-generate.go): the generate subcommand is used to generate an Istio install manifest.
+    - [migrate](https://github.com/istio/operator/blob/master/cmd/mesh/manifest-migrate.go): the migrate subcommand is used to migrate a configuration in Helm values format to IstioControlPlane format.
+    - [versions](https://github.com/istio/operator/blob/master/cmd/mesh/manifest-versions.go): the versions subcommand is used to list the version of Istio recommended for and supported by this version of the operator binary.
+- [profile](https://github.com/istio/operator/blob/master/cmd/mesh/profile.go): dumps the default values for a selected profile, it has the following subcommands:
+    - [diff](https://github.com/istio/operator/blob/master/cmd/mesh/profile-diff.go): the diff subcommand is used to display the difference between two Istio configuration profiles.
+    - [dump](https://github.com/istio/operator/blob/master/cmd/mesh/profile-dump.go): the dump subcommand is used to dump the values in an Istio configuration profile.
+    - [list](https://github.com/istio/operator/blob/master/cmd/mesh/profile-list.go): the list subcommand is used to list available Istio configuration profiles.
 
 ## Migration tools
 
