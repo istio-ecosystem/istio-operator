@@ -236,11 +236,7 @@ trafficManagement:
         resources:
           requests:
             cpu: 888m
-            memory: 999Mi
-        strategy:
-          rollingUpdate:
-            maxSurge: 1
-            maxUnavailable: 1          
+            memory: 999Mi 
 `,
 		},
 		{
