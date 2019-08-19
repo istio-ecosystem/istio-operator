@@ -35,6 +35,7 @@ fi
 
 pushd .
 cd "${INSTALLER_DIR}"
+git fetch
 git checkout "${SHA}"
 popd
 
