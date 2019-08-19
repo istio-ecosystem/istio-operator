@@ -169,6 +169,26 @@ spec:
 
       egressGateway:
         enabled: false
+        k8s:
+          hpaSpec:
+            maxReplicas: 5
+            minReplicas: 1
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: istio-egressgateway
+            metrics:
+              - type: Resource
+                resource:
+                  name: cpu
+                  targetAverageUtilization: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 2000m
+              memory: 256Mi
 
   # Global values passed through to helm global.yaml.
   values:
@@ -490,6 +510,41 @@ spec:
             desPort: 9090
             enabled: false
             tls: false
+
+  istio-egressgateway:
+    ports:
+      - port: 80
+        name: http2
+      - port: 443
+        name: https
+      - port: 15443
+        targetPort: 15443
+        name: tls
+    zvpn:
+      suffix: global
+      enabled: true
+    rollingMaxSurge: 100%
+    rollingMaxUnavailable: 25%
+    autoscaleEnabled: true
+    drainDuration: 45s
+    connectTimeout: 10s
+    serviceAnnotations: {}
+    podAnnotations: {}
+    type: ClusterIP # change to NodePort or LoadBalancer if need be
+    secretVolumes:
+      - name: egressgateway-certs
+        secretName: istio-egressgateway-certs
+        mountPath: /etc/istio/egressgateway-certs
+      - name: egressgateway-ca-certs
+        secretName: istio-egressgateway-ca-certs
+        mountPath: /etc/istio/egressgateway-ca-certs
+    env:
+      ISTIO_META_ROUTER_MODE: "sni-dnat"
+    nodeSelector: {}
+    tolerations: []
+    podAntiAffinityLabelSelector: []
+    podAntiAffinityTermLabelSelector: []
+
 
     sidecarInjectorWebhook:
       rollingMaxSurge: 100%

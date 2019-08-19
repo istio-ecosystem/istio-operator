@@ -299,8 +299,10 @@ apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
   values:
-    pilot:
-      traceSampling: 0.1 # override from 1.0
+    mixer:
+      telemetry:
+        loadshedding:
+          latencyThreshold: 200ms  
 ```
 
 ### Advanced K8s resource overlays
