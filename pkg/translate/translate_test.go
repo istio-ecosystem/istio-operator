@@ -40,7 +40,7 @@ defaultNamespace: istio-system
 certmanager:
   enabled: false
   namespace: istio-system
-citadel:
+security:
   enabled: false
   namespace: istio-system
 galley:
@@ -93,7 +93,7 @@ defaultNamespace: istio-system
 certmanager:
   enabled: false
   namespace: istio-system
-citadel:
+security:
   enabled: false
   namespace: istio-system
 galley:
@@ -134,6 +134,62 @@ sidecarInjectorWebhook:
   enabled: false
   namespace: istio-system
 
+`,
+		},
+		{
+			desc: "security",
+			yamlStr: `
+defaultNamespace: istio-system
+security:
+  enabled: true
+  controlPlaneMtls: true
+  dataPlaneMtlsStrict: false
+`,
+			want: `
+certmanager:
+  enabled: true
+  namespace: istio-system
+security:
+  enabled: true
+  namespace: istio-system
+galley:
+  enabled: false
+  namespace: istio-system
+gateways:
+  istio-egressgateway:
+    enabled: false
+    namespace: istio-system
+  istio-ingressgateway:
+    enabled: false
+    namespace: istio-system
+global:
+  controlPlaneSecurityEnabled: true
+  enabled: true
+  istioNamespace: istio-system
+  configNamespace: istio-system
+  policyNamespace: istio-system
+  prometheusNamespace: istio-system
+  securityNamespace: istio-system
+  telemetryNamespace: istio-system
+  mtls:
+    enabled: false
+  namespace: istio-system
+mixer:
+  policy:
+    enabled: false
+    namespace: istio-system
+  telemetry:
+    enabled: false
+    namespace: istio-system
+nodeagent:
+  enabled: true
+  namespace: istio-system
+pilot:
+  enabled: false
+  namespace: istio-system
+sidecarInjectorWebhook:
+  enabled: false
+  namespace: istio-system
 `,
 		},
 	}
