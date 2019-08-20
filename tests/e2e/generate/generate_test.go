@@ -1,24 +1,13 @@
-// Copyright 2019 Istio Authors
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-package controlplane
+package generate
 
 import (
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
+
+	"istio.io/operator/pkg/component/controlplane"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/name"
@@ -40,6 +29,18 @@ func init() {
 	}
 	repoRootDir = filepath.Join(wd, "../../..")
 	testDataDir = filepath.Join(wd, "testdata")
+
+	if err := syncCharts(); err != nil {
+		panic(err)
+	}
+}
+
+func syncCharts() error {
+	cmd := exec.Command(filepath.Join(repoRootDir, "run_update_charts.sh"))
+	return cmd.Run()
+}
+
+func runManifestGenerate(path string) (string, error) {
 
 }
 
@@ -94,7 +95,7 @@ func TestRenderInstallationSuccessV13(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			ins := NewIstioControlPlane(&is, tr)
+			ins := controlplane.NewIstioControlPlane(&is, tr)
 			if err = ins.Run(); err != nil {
 				t.Fatal(err)
 			}
