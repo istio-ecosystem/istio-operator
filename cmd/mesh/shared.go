@@ -95,5 +95,5 @@ func (l *logger) logAndFatal(v ...interface{}) {
 }
 
 func (l *logger) print(s string) {
-	l.stdOut.Write([]byte(s))
+	_, _ = l.stdOut.Write([]byte(s))
 }

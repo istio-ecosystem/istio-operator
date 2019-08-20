@@ -74,11 +74,11 @@ func migrateFromFiles(rootArgs *rootArgs, args []string, l *logger) {
 		return
 	}
 	l.logAndPrint("translating input values.yaml file at: ", args[0], " to new API")
-	translateFunc(rootArgs, []byte(value), l)
+	translateFunc([]byte(value), l)
 }
 
 // translateFunc translates the input values and output the result
-func translateFunc(rootArgs *rootArgs, values []byte, l *logger) {
+func translateFunc(values []byte, l *logger) {
 	ts, err := translate.NewReverseTranslator(version.NewMinorVersion(1, 3))
 	if err != nil {
 		l.logAndFatal("error creating values.yaml translator: ", err.Error())
@@ -126,5 +126,5 @@ func migrateFromClusterConfig(rootArgs *rootArgs, mmArgs *manifestMigrateArgs, l
 	if err != nil {
 		l.logAndFatal("error marshalling untyped map to YAML: ", err.Error())
 	}
-	translateFunc(rootArgs, res, l)
+	translateFunc(res, l)
 }
