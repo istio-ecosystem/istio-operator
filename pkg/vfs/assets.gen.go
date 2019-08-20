@@ -32088,6 +32088,33 @@ spec:
       image: node-agent-k8s
 
     gateways:
+      istio-egressgateway:
+        autoscaleEnabled: true
+        rollingMaxSurge: 100%
+        rollingMaxUnavailable: 25%
+        zvpn:
+          suffix: global
+          enabled: true
+        drainDuration: 45s
+        connectTimeout: 10s
+        env:
+          ISTIO_META_ROUTER_MODE: "sni-dnat"
+        ports:
+          - port: 80
+            name: http2
+          - port: 443
+            name: https
+          - port: 15443
+            targetPort: 15443
+            name: tls
+        secretVolumes:
+          - name: egressgateway-certs
+            secretName: istio-egressgateway-certs
+            mountPath: /etc/istio/egressgateway-certs
+          - name: egressgateway-ca-certs
+            secretName: istio-egressgateway-ca-certs
+            mountPath: /etc/istio/egressgateway-ca-certs
+
       istio-ingressgateway:
         autoscaleEnabled: true
         rollingMaxSurge: 100%
@@ -32167,39 +32194,6 @@ spec:
             desPort: 9090
             enabled: false
             tls: false
-      istio-egressgateway:
-        ports:
-          - port: 80
-            name: http2
-          - port: 443
-            name: https
-          - port: 15443
-            targetPort: 15443
-            name: tls
-        zvpn:
-          suffix: global
-          enabled: true
-        rollingMaxSurge: 100%
-        rollingMaxUnavailable: 25%
-        autoscaleEnabled: true
-        drainDuration: 45s
-        connectTimeout: 10s
-        serviceAnnotations: {}
-        podAnnotations: {}
-        type: ClusterIP # change to NodePort or LoadBalancer if need be
-        secretVolumes:
-          - name: egressgateway-certs
-            secretName: istio-egressgateway-certs
-            mountPath: /etc/istio/egressgateway-certs
-          - name: egressgateway-ca-certs
-            secretName: istio-egressgateway-ca-certs
-            mountPath: /etc/istio/egressgateway-ca-certs
-        env:
-          ISTIO_META_ROUTER_MODE: "sni-dnat"
-        nodeSelector: {}
-        tolerations: []
-        podAntiAffinityLabelSelector: []
-        podAntiAffinityTermLabelSelector: []
 
     sidecarInjectorWebhook:
       rollingMaxSurge: 100%
@@ -32556,78 +32550,27 @@ spec:
               memory: 1024Mi
 
       egressGateway:
-<<<<<<< HEAD
         enabled: false
-=======
-        common:
-          enabled: false
-          k8s:
-            replicaCount: 1
-            hpaSpec:
-              maxReplicas: 5
-              minReplicas: 1
-              scaleTargetRef:
-                apiVersion: apps/v1
-                kind: Deployment
-                name: istio-egressgateway
-              metrics:
-                - type: Resource
-                  resource:
-                    name: cpu
-                    targetAverageUtilization: 80
-            resources:
-              requests:
-                cpu: 100m
-                memory: 128Mi
-              limits:
-                cpu: 2000m
-                memory: 256Mi
-          values:
-            autoscaleEnabled: true
-            rollingMaxSurge: 100%
-            rollingMaxUnavailable: 25%
-            # Enable cross-cluster access using SNI matching.
-            # Make sure you set suffix if deploying multiple egress gateways.
-            zvpn:
-              # Must be different for each egress namespace.
-              # Used to control the domain name suffix for zero vpn routing.
-              # Domain names ending with this suffix will be routed to this egress gateway
-              # automatically.
-              # This can be a real domain name ( istio.example.com )
-              suffix: global
-              enabled: true
-            drainDuration: 45s
-            connectTimeout: 10s
-            env:
-              # Set this to "external" if and only if you want the egress gateway to
-              # act as a transparent SNI gateway that routes mTLS/TLS traffic to
-              # external services defined using service entries, where the service
-              # entry has resolution set to DNS, has one or more endpoints with
-              # network field set to "external". By default its set to "" so that
-              # the egress gateway sees the same set of endpoints as the sidecars
-              # preserving backward compatibility
-              # ISTIO_META_REQUESTED_NETWORK_VIEW: ""
-              # A gateway with this mode ensures that pilot generates an additional
-              # set of clusters for internal services but without Istio mTLS, to
-              # enable cross cluster routing.
-              ISTIO_META_ROUTER_MODE: "sni-dnat"
-            ports:
-            - port: 80
-              name: http2
-            - port: 443
-              name: https
-              # This is the port where sni routing happens
-            - port: 15443
-              targetPort: 15443
-              name: tls
-            secretVolumes:
-            - name: egressgateway-certs
-              secretName: istio-egressgateway-certs
-              mountPath: /etc/istio/egressgateway-certs
-            - name: egressgateway-ca-certs
-              secretName: istio-egressgateway-ca-certs
-              mountPath: /etc/istio/egressgateway-ca-certs
->>>>>>> 0e53114f62ca1dafda5750c8817f10747379b0af
+        k8s:
+          hpaSpec:
+            maxReplicas: 5
+            minReplicas: 1
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: istio-egressgateway
+            metrics:
+              - type: Resource
+                resource:
+                  name: cpu
+                  targetAverageUtilization: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 2000m
+              memory: 256Mi
 
   # Global values passed through to helm global.yaml.
   values:
@@ -32843,33 +32786,6 @@ spec:
       image: node-agent-k8s
 
     gateways:
-      istio-egressgateway:
-        autoscaleEnabled: true
-        rollingMaxSurge: 100%
-        rollingMaxUnavailable: 25%
-        zvpn:
-          suffix: global
-          enabled: true
-        drainDuration: 45s
-        connectTimeout: 10s
-        env:
-          ISTIO_META_ROUTER_MODE: "sni-dnat"
-        ports:
-          - port: 80
-            name: http2
-          - port: 443
-            name: https
-          - port: 15443
-            targetPort: 15443
-            name: tls
-        secretVolumes:
-          - name: egressgateway-certs
-            secretName: istio-egressgateway-certs
-            mountPath: /etc/istio/egressgateway-certs
-          - name: egressgateway-ca-certs
-            secretName: istio-egressgateway-ca-certs
-            mountPath: /etc/istio/egressgateway-ca-certs
-
       istio-ingressgateway:
         autoscaleEnabled: true
         rollingMaxSurge: 100%
@@ -32949,6 +32865,42 @@ spec:
             desPort: 9090
             enabled: false
             tls: false
+<<<<<<< HEAD
+      istio-egressgateway:
+        ports:
+          - port: 80
+            name: http2
+          - port: 443
+            name: https
+          - port: 15443
+            targetPort: 15443
+            name: tls
+        zvpn:
+          suffix: global
+          enabled: true
+        rollingMaxSurge: 100%
+        rollingMaxUnavailable: 25%
+        autoscaleEnabled: true
+        drainDuration: 45s
+        connectTimeout: 10s
+        serviceAnnotations: {}
+        podAnnotations: {}
+        type: ClusterIP # change to NodePort or LoadBalancer if need be
+        secretVolumes:
+          - name: egressgateway-certs
+            secretName: istio-egressgateway-certs
+            mountPath: /etc/istio/egressgateway-certs
+          - name: egressgateway-ca-certs
+            secretName: istio-egressgateway-ca-certs
+            mountPath: /etc/istio/egressgateway-ca-certs
+        env:
+          ISTIO_META_ROUTER_MODE: "sni-dnat"
+        nodeSelector: {}
+        tolerations: []
+        podAntiAffinityLabelSelector: []
+        podAntiAffinityTermLabelSelector: []
+=======
+>>>>>>> 598103cf7e20c05c6aa466d2a6a30c1b4ce1f71b
 
     sidecarInjectorWebhook:
       rollingMaxSurge: 100%
@@ -33198,14 +33150,6 @@ spec:
             requests:
               cpu: 10m
               memory: 100Mi
-
-      proxy:
-        values:
-          accessLogFile: /dev/stdout
-          resources:
-            requests:
-              cpu: 10m
-              memory: 40Mi
 
   values:
     global:
