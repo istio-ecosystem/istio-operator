@@ -60,11 +60,6 @@ Base | CRDs
 Traffic Management | Pilot
 Policy | Policy
 Telemetry | Telemetry
-Telemetry | Prometheus
-Telemetry | Prometheus Operator
-Telemetry | Grafana
-Telemetry | Kiali
-Telemetry | Tracing
 Security | Citadel
 Security | Node agent
 Security | Cert manager
@@ -72,10 +67,20 @@ Configuration management | Galley
 Gateways | Ingress gateway
 Gateways | Egress gateway
 AutoInjection | Sidecar injector
-ThirdParty | CNI
 
 Features and components are defined in the
-[name](https://github.com/istio/operator/blob/master/pkg/name/name.go#L246) package.
+[name](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/name/name.go#L38) package.
+
+Note: Besides the features and the components listed in the table above, some addon features and components are as follows:
+
+| Feature | Components |
+|---------|------------|
+Telemetry | Prometheus
+Telemetry | Prometheus Operator
+Telemetry | Grafana
+Telemetry | Kiali
+Telemetry | Tracing
+ThirdParty | CNI
 
 ### Namespaces
 
@@ -111,7 +116,7 @@ citadel | istio-security
 nodeAgent | istio-security-nodeagent
 
 These rules are expressed in code in the
-[name](https://github.com/istio/operator/blob/master/pkg/name/name.go#L131) package.
+[name](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/name/name.go#L114) package.
 
 ### Enablement
 
@@ -130,7 +135,7 @@ security:
 will enable all components of the security feature except citadel.
 
 These rules are expressed in code in the
-[name](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/name/name.go#L38) package.
+[name](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/name/name.go#L70) package.
 
 ### K8s settings
 
