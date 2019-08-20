@@ -69,7 +69,7 @@ Gateways | Egress gateway
 AutoInjection | Sidecar injector
 
 Features and components are defined in the
-[name](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/name/name.go#L38) package.
+[name](https://github.com/istio/operator/blob/e9097258cb4fbe59648e7da663cdad6f16927b8f/pkg/name/name.go#L44) package.
 
 Note: Besides the features and the components listed in the table above, some addon features and components are as follows:
 
@@ -116,7 +116,7 @@ citadel | istio-security
 nodeAgent | istio-security-nodeagent
 
 These rules are expressed in code in the
-[name](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/name/name.go#L114) package.
+[name](https://github.com/istio/operator/blob/e9097258cb4fbe59648e7da663cdad6f16927b8f/pkg/name/name.go#L246) package.
 
 ### Enablement
 
@@ -135,13 +135,13 @@ security:
 will enable all components of the security feature except citadel.
 
 These rules are expressed in code in the
-[name](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/name/name.go#L70) package.
+[name](https://github.com/istio/operator/blob/e9097258cb4fbe59648e7da663cdad6f16927b8f/pkg/name/name.go#L131) package.
 
 ### K8s settings
 
 Rather than defining selective mappings from parameters to fields in K8s resources, the `IstioControlPlaneSpec` API
 contains a consistent K8s block for each Istio component. The available K8s settings are defined in
-[KubernetesResourcesSpec](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto#L411):
+[KubernetesResourcesSpec](https://github.com/istio/operator/blob/e9097258cb4fbe59648e7da663cdad6f16927b8f/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto#L395):
 
 | Field name | K8s API reference |
 | :--------- | :---------------- |
@@ -171,23 +171,23 @@ trafficManagement:
 ### Translations
 
 API translations are version specific and are expressed as a
-[table of Translators](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/translate/translate.go#L89)
+[table of Translators](https://github.com/istio/operator/blob/e9097258cb4fbe59648e7da663cdad6f16927b8f/pkg/translate/translate.go#L110)
 indexed by minor [version](https://github.com/istio/operator/blob/master/pkg/version/version.go). This is because
 mapping rules are only allowed to change between minor (not patch) versions.
 
 The `IstioControlPlaneSpec` API fields are translated to the output manifest in two ways:
 
 1. The `IstioControlPlaneSpec` API fields are mapped to the Helm values.yaml schema using the
-[APIMapping](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/translate/translate.go#L91)
-field of the [Translator](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/translate/translate.go#L48)
+[APIMapping](https://github.com/istio/operator/blob/e9097258cb4fbe59648e7da663cdad6f16927b8f/pkg/translate/translate.go#L112)
+field of the [Translator](https://github.com/istio/operator/blob/e9097258cb4fbe59648e7da663cdad6f16927b8f/pkg/translate/translate.go#L52)
 struct.
 1. The K8s settings are applied to resources in the output manifest using the
-[KubernetesMapping](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/translate/translate.go#L108)
-field in the [Translator](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/translate/translate.go#L48)
+[KubernetesMapping](https://github.com/istio/operator/blob/e9097258cb4fbe59648e7da663cdad6f16927b8f/pkg/translate/translate.go#L132)
+field in the [Translator](https://github.com/istio/operator/blob/e9097258cb4fbe59648e7da663cdad6f16927b8f/pkg/translate/translate.go#L52)
 struct.
 
 Other per-component mappings to Helm values.yaml are expressed in the
-[ComponentMaps](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/translate/translate.go#L64)
+[ComponentMaps](https://github.com/istio/operator/blob/e9097258cb4fbe59648e7da663cdad6f16927b8f/pkg/translate/translate.go#L83)
 struct.
 
 ### Validations
