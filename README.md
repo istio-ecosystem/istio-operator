@@ -17,7 +17,7 @@ architecture and a code overview, see [ARCHITECTURE.md](./ARCHITECTURE.md)
 
 This repo reorganizes the current [Helm installation parameters](https://istio.io/docs/reference/config/installation-options/) into two groups:
 
-- The new [platform level installation API](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto), for managing
+- The new [platform level installation API](https://github.com/istio/operator/blob/release-1.3/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto), for managing
 K8s settings like resources, auto scaling, pod disruption budgets and others defined in the
 [KubernetesResourceSpec](https://github.com/istio/operator/blob/905dd84e868a0b88c08d95b7ccf14d085d9a6f6b/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto#L411)
 - The configuration API that currently uses the
@@ -56,7 +56,7 @@ See [Select a specific configuration_profile](#select-a-specific-configuration-p
 
 If you don't specify a configuration profile, Istio is installed using the `default` configuration profile. All
 profiles listed in istio.io are available by default, or `profile:` can point to a local file path to reference a custom
-profile base to use as a starting point for customization. See the [API reference](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto)
+profile base to use as a starting point for customization. See the [API reference](https://github.com/istio/operator/blob/release-1.3/pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto)
 for details.
 
 ## Developer quick start
@@ -275,7 +275,7 @@ be used for reference. All K8s overlay values are also validated in the operator
 The new platform install API above deals with K8s level settings. The remaining values.yaml parameters deal with Istio
 control plane operation rather than installation. For the time being, the operator just passes these through to the Helm
 charts unmodified (but validated through a
-[schema](https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/values_types.go)). Values.yaml settings
+[schema](https://github.com/istio/operator/blob/release-1.3/pkg/apis/istio/v1alpha2/values_types.go)). Values.yaml settings
 are overridden the same way as the new API, though a customized CR overlaid over default values for the selected
 profile. Here's an example of overriding some global level default values ([samples/values-global.yaml](samples/values-global.yaml)):
 

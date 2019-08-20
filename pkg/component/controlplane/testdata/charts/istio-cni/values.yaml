@@ -1,6 +1,6 @@
 cni:
   hub: gcr.io/istio-release
-  tag: master-latest-daily
+  tag: release-1.3-latest-daily
   pullPolicy: Always
 
   logLevel: info
