@@ -29,6 +29,8 @@ const (
 )
 
 func configLogsOrExit(args *rootArgs) {
+	// Only the logs for the last command are of interest.
+	// Remove any previous log to avoid indefinite accumulation.
 	_ = os.Remove(logFilePath)
 	if err := configLogs(args); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Could not configure logs: %s", err)
@@ -84,7 +86,7 @@ func (l *logger) logAndPrint(v ...interface{}) {
 		s = fmt.Sprint(v...)
 	}
 	if !l.logToStdErr {
-		_, _ = l.stdOut.Write([]byte(s))
+		l.print(s)
 	}
 	log.Infof(s)
 }
