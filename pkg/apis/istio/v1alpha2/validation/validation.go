@@ -36,41 +36,29 @@ func ValidateConfig(failOnMissingValidation bool, values *v1alpha2.Values, icpls
 
 func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *v1alpha2.Values, icpls *v1alpha2.IstioControlPlaneSpec) util.Errors {
 	// Dealing with receiver pointer and receiver value
-	var value reflect.Value
-	var object reflect.Value
 	ptr := e
-	if e.Type().Kind() == reflect.Ptr {
-		value = ptr.Elem()
-		object = reflect.Indirect(e)
-	} else {
-		ptr = reflect.New(reflect.TypeOf(e.Interface()))
-		object = e
-		value = e
+	k := e.Kind()
+	if k == reflect.Ptr || k == reflect.Interface {
+		e = e.Elem()
 	}
-
 	// check for method on value
-	var finalMethod reflect.Value
-	method := value.MethodByName(validationMethodName)
-	if method.IsValid() {
-		finalMethod = method
-	}
-	// check for method on pointer
-	method = ptr.MethodByName(validationMethodName)
-	if method.IsValid() {
-		finalMethod = method
+	method := e.MethodByName("Validate")
+	if !method.IsValid() {
+		method = ptr.MethodByName("Validate")
 	}
 
 	var validationErrors util.Errors
-	if util.IsNilOrInvalidValue(finalMethod) {
+	if util.IsNilOrInvalidValue(method) {
 		if failOnMissingValidation {
 			validationErrors = append(validationErrors, fmt.Errorf("type %s is missing Validation method", e.Type().String()))
 		}
 	} else {
-		r := finalMethod.Call([]reflect.Value{reflect.ValueOf(failOnMissingValidation), reflect.ValueOf(values), reflect.ValueOf(icpls)})[0].Interface().(util.Errors)
+		r := method.Call([]reflect.Value{reflect.ValueOf(failOnMissingValidation), reflect.ValueOf(values), reflect.ValueOf(icpls)})[0].Interface().(util.Errors)
 		if len(r) != 0 {
 			validationErrors = append(validationErrors, r...)
 		}
 	}
+	object := e
 	// If it is not a struct nothing to do, returning previously collected validation errors
 	if object.Kind() != reflect.Struct {
 		return validationErrors
