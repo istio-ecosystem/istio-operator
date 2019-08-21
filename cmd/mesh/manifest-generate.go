@@ -71,7 +71,7 @@ func manifestGenerate(args *rootArgs, mgArgs *manifestGenerateArgs, l *logger) {
 
 	if mgArgs.outFilename == "" {
 		for _, m := range orderedManifests(manifests) {
-			l.print(m)
+			l.print(m + "\n")
 		}
 	} else {
 		if err := os.MkdirAll(mgArgs.outFilename, os.ModePerm); err != nil {
