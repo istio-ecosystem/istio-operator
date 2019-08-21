@@ -64,7 +64,7 @@ func valueFileFilter(path string) bool {
 
 // migrateFromFiles handles migration for local values.yaml files
 func migrateFromFiles(rootArgs *rootArgs, args []string, l *logger) {
-	configLogsOrExit(rootArgs)
+	initLogsOrExit(rootArgs)
 	value, err := util.ReadFiles(args[0], valueFileFilter)
 	if err != nil {
 		l.logAndFatal(err.Error())
@@ -102,7 +102,7 @@ func translateFunc(values []byte, l *logger) {
 
 // migrateFromClusterConfig handles migration for in cluster config.
 func migrateFromClusterConfig(rootArgs *rootArgs, mmArgs *manifestMigrateArgs, l *logger) {
-	configLogsOrExit(rootArgs)
+	initLogsOrExit(rootArgs)
 
 	l.logAndPrint("translating in cluster specs")
 

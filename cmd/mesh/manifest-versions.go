@@ -54,7 +54,7 @@ func manifestVersionsCmd(rootArgs *rootArgs, versionsArgs *manifestVersionsArgs)
 }
 
 func manifestVersions(args *rootArgs, mvArgs *manifestVersionsArgs, l *logger) {
-	configLogsOrExit(args)
+	initLogsOrExit(args)
 
 	var b []byte
 	var err error

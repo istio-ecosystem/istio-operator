@@ -28,7 +28,7 @@ const (
 	logFilePath = "./.mesh-cli.log"
 )
 
-func configLogsOrExit(args *rootArgs) {
+func initLogsOrExit(args *rootArgs) {
 	// Only the logs for the last command are of interest.
 	// Remove any previous log to avoid indefinite accumulation.
 	_ = os.Remove(logFilePath)

@@ -63,7 +63,7 @@ func profileDumpCmd(rootArgs *rootArgs, pdArgs *profileDumpArgs) *cobra.Command 
 }
 
 func profileDump(args []string, rootArgs *rootArgs, pdArgs *profileDumpArgs, l *logger) {
-	configLogsOrExit(rootArgs)
+	initLogsOrExit(rootArgs)
 
 	if len(args) == 1 && pdArgs.inFilename != "" {
 		l.logAndFatal("Cannot specify both profile name and filename flag.")
