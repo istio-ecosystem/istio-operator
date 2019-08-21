@@ -42,9 +42,9 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *v1a
 		e = e.Elem()
 	}
 	// check for method on value
-	method := e.MethodByName("Validate")
+	method := e.MethodByName(validationMethodName)
 	if !method.IsValid() {
-		method = ptr.MethodByName("Validate")
+		method = ptr.MethodByName(validationMethodName)
 	}
 
 	var validationErrors util.Errors
