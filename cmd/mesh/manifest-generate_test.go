@@ -16,6 +16,7 @@ package mesh
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -25,6 +26,13 @@ import (
 
 	"istio.io/operator/pkg/object"
 )
+
+type testGroup []struct {
+	desc       string
+	flags      string
+	diffSelect string
+	diffIgnore string
+}
 
 var (
 	repoRootDir string
@@ -45,22 +53,36 @@ func init() {
 }
 
 func syncCharts() error {
-	cmd := exec.Command(filepath.Join(repoRootDir, "scripts/run_update_charts.sh"))
-	return cmd.Run()
+	cmd, err := exec.Command(filepath.Join(repoRootDir, "scripts/run_update_charts.sh")).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%s:%s", err, cmd)
+	}
+	return nil
 }
 
-func TestManifestGenerate(t *testing.T) {
-	tests := []struct {
-		desc       string
-		diffSelect string
-		diffIgnore string
-	}{
+func TestManifestGenerateFlags(t *testing.T) {
+	runTestGroup(t, testGroup{
 		{
 			desc: "all_off",
 		},
 		{
+			desc:       "all_on",
+			diffIgnore: "ConfigMap:*:istio",
+		},
+		{
+			desc:       "flag_set_values",
+			diffIgnore: "ConfigMap:*:istio",
+			flags:      "-s values.global.proxy.image=myproxy",
+		},
+		// TODO: test output flag
+	})
+}
+
+func TestManifestGeneratePilot(t *testing.T) {
+	runTestGroup(t, testGroup{
+		{
 			desc: "pilot_default",
-			// TODO: remove istio-control
+			// TODO: remove istio ConfigMap
 			diffIgnore: "CustomResourceDefinition:*:*,ConfigMap:*:istio",
 		},
 		{
@@ -75,16 +97,45 @@ func TestManifestGenerate(t *testing.T) {
 			desc:       "pilot_override_kubernetes",
 			diffSelect: "Deployment:*:istio-pilot, Service:*:istio-pilot",
 		},
-	}
+	})
+}
+
+func TestManifestGenerateTelemetry(t *testing.T) {
+	runTestGroup(t, testGroup{
+		{
+			desc: "all_off",
+		},
+		{
+			desc:       "telemetry_default",
+			diffIgnore: "",
+		},
+		{
+			desc:       "telemetry_k8s_settings",
+			diffSelect: "Deployment:*:istio-telemetry, HorizontalPodAutoscaler:*:istio-telemetry",
+		},
+		{
+			desc:       "telemetry_override_values",
+			diffSelect: "handler:*:prometheus",
+		},
+		{
+			desc:       "telemetry_override_kubernetes",
+			diffSelect: "Deployment:*:istio-telemetry, handler:*:prometheus",
+		},
+	})
+}
+
+func runTestGroup(t *testing.T, tests testGroup) {
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
 			inPath := filepath.Join(testDataDir, "input", tt.desc+".yaml")
 			outPath := filepath.Join(testDataDir, "output", tt.desc+".yaml")
 
-			got, err := runManifestGenerate(inPath)
+			got, err := runManifestGenerate(inPath, tt.flags)
 			if err != nil {
 				t.Fatal(err)
 			}
+
+			fmt.Println(got)
 
 			want, err := readFile(outPath)
 			if err != nil {
@@ -118,8 +169,12 @@ func runCommand(command string) (string, error) {
 	return out.String(), nil
 }
 
-func runManifestGenerate(path string) (string, error) {
-	return runCommand("manifest generate -f " + path)
+func runManifestGenerate(path, flags string) (string, error) {
+	args := "manifest generate " + flags
+	if flags == "" {
+		args += " -f " + path
+	}
+	return runCommand(args)
 }
 
 func readFile(path string) (string, error) {
