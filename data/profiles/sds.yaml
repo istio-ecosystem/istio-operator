@@ -5,7 +5,10 @@ spec:
     components:
       nodeAgent:
         enabled: true
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0584d5d7... add back the mandiff test. (#223)
   values:
     global:
       mtls:
@@ -22,3 +25,7 @@ spec:
         CA_PROVIDER: "Citadel"
         CA_ADDR: "istio-citadel:8060"
         VALID_TOKEN: true
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0584d5d7... add back the mandiff test. (#223)
