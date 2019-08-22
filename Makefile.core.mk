@@ -20,7 +20,7 @@ test_with_coverage:
 	@curl -s https://codecov.io/bash | bash -s -- -c -F aFlag -f coverage.txt
 
 mandiff:
-	@scripts/run_mandiff.sh
+	@PATH=${PATH}:${GOPATH}/bin scripts/run_mandiff.sh
 
 build: mesh
 
