@@ -4,6 +4,7 @@
 // ../../data/charts/crds/files/crd-10.yaml
 // ../../data/charts/crds/files/crd-11.yaml
 // ../../data/charts/crds/files/crd-12.yaml
+// ../../data/charts/crds/files/crd-14.yaml
 // ../../data/charts/crds/files/crd-certmanager-10.yaml
 // ../../data/charts/crds/files/crd-certmanager-11.yaml
 // ../../data/charts/crds/kustomization.yaml
@@ -105,6 +106,7 @@
 // ../../data/charts/istio-policy/templates/serviceaccount.yaml
 // ../../data/charts/istio-policy/values.yaml
 // ../../data/charts/istio-telemetry/grafana/Chart.yaml
+// ../../data/charts/istio-telemetry/grafana/dashboards/citadel-dashboard.json
 // ../../data/charts/istio-telemetry/grafana/dashboards/galley-dashboard.json
 // ../../data/charts/istio-telemetry/grafana/dashboards/istio-mesh-dashboard.json
 // ../../data/charts/istio-telemetry/grafana/dashboards/istio-performance-dashboard.json
@@ -973,6 +975,47 @@ func chartsCrdsFilesCrd12Yaml() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "charts/crds/files/crd-12.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsFilesCrd14Yaml = []byte(`kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: authorizationpolicies.security.istio.io
+  labels:
+    app: istio-pilot
+    istio: security
+    heritage: Tiller
+    release: istio
+spec:
+  group: security.istio.io
+  names:
+    kind: AuthorizationPolicy
+    plural: authorizationpolicies
+    singular: authorizationpolicy
+    categories:
+      - istio-io
+      - security-istio-io
+  scope: Namespaced
+  versions:
+    - name: v1beta1
+      served: true
+      storage: true
+---
+`)
+
+func chartsCrdsFilesCrd14YamlBytes() ([]byte, error) {
+	return _chartsCrdsFilesCrd14Yaml, nil
+}
+
+func chartsCrdsFilesCrd14Yaml() (*asset, error) {
+	bytes, err := chartsCrdsFilesCrd14YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/files/crd-14.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2178,18 +2221,18 @@ gateways:
     ### Advanced options ############
     # TODO: convert to real options, env should not be exposed
     env:
-    # Set this to "external" if and only if you want the egress gateway to
-    # act as a transparent SNI gateway that routes mTLS/TLS traffic to
-    # external services defined using service entries, where the service
-    # entry has resolution set to DNS, has one or more endpoints with
-    # network field set to "external". By default its set to "" so that
-    # the egress gateway sees the same set of endpoints as the sidecars
-    # preserving backward compatibility
-    # ISTIO_META_REQUESTED_NETWORK_VIEW: ""
-    # A gateway with this mode ensures that pilot generates an additional
-    # set of clusters for internal services but without Istio mTLS, to
-    # enable cross cluster routing.
-    ISTIO_META_ROUTER_MODE: "sni-dnat"
+      # Set this to "external" if and only if you want the egress gateway to
+      # act as a transparent SNI gateway that routes mTLS/TLS traffic to
+      # external services defined using service entries, where the service
+      # entry has resolution set to DNS, has one or more endpoints with
+      # network field set to "external". By default its set to "" so that
+      # the egress gateway sees the same set of endpoints as the sidecars
+      # preserving backward compatibility
+      # ISTIO_META_REQUESTED_NETWORK_VIEW: ""
+      # A gateway with this mode ensures that pilot generates an additional
+      # set of clusters for internal services but without Istio mTLS, to
+      # enable cross cluster routing.
+      ISTIO_META_ROUTER_MODE: "sni-dnat"
 
     nodeSelector: {}
     tolerations: []
@@ -3231,7 +3274,7 @@ spec:
   servers:
   - port:
       number: 80
-      protocol: HTTP
+      protocol: HTTP2
       name: http
     hosts:
     - "*"
@@ -3918,7 +3961,7 @@ spec:
         # This container installs the Istio CNI binaries
         # and CNI network config file on each node.
         - name: install-cni
-          image: {{ .Values.cni.hub }}/{{ .values.cni.image | default "install-cni" }}:{{ .Values.cni.tag }}
+          image: {{ .Values.cni.hub }}/install-cni:{{ .Values.cni.tag }}
           imagePullPolicy: {{ .Values.cni.pullPolicy | default .Values.global.imagePullPolicy }}
           command: ["/install-cni.sh"]
           env:
@@ -3996,7 +4039,7 @@ func chartsIstioCniTemplatesServiceaccountYaml() (*asset, error) {
 
 var _chartsIstioCniValuesYaml = []byte(`cni:
   hub: gcr.io/istio-release
-  tag: master-latest-daily
+  tag: release-1.3-latest-daily
   pullPolicy: Always
 
   logLevel: info
@@ -4368,6 +4411,13 @@ var _chartsIstioControlIstioAutoinjectFilesInjectionTemplateYaml = []byte(`templ
     {{- if .Values.global.sds.customTokenDirectory }}
     - name: ISTIO_META_SDS_TOKEN_PATH
       value: "{{ .Values.global.sds.customTokenDirectory -}}/sdstoken"
+    {{- end }}
+    {{- if .Values.global.meshID }}
+    - name: ISTIO_META_MESH_ID
+      value: "{{ .Values.global.meshID }}"
+    {{- else if .Values.global.trustDomain }}
+    - name: ISTIO_META_MESH_ID
+      value: "{{ .Values.global.trustDomain }}"
     {{- end }}
     imagePullPolicy: "{{ valueOrDefault .Values.global.imagePullPolicy `+"`"+`Always`+"`"+` }}"
     {{ if ne (annotation .ObjectMeta `+"`"+`status.sidecar.istio.io/port`+"`"+` .Values.global.proxy.statusPort) `+"`"+`0`+"`"+` }}
@@ -8683,6 +8733,1111 @@ func chartsIstioTelemetryGrafanaChartYaml() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "charts/istio-telemetry/grafana/Chart.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsIstioTelemetryGrafanaDashboardsCitadelDashboardJson = []byte(`{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 8,
+      "panels": [],
+      "title": "Performance",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "description": "CPU usage across Citadel instances.",
+      "fill": 1,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 1
+      },
+      "id": 10,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"citadel\", pod_name=~\"istio-citadel-.*\"}[1m]))",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Citadel CPU usage rate",
+          "refId": "A"
+        },
+        {
+          "expr": "irate(process_cpu_seconds_total{job=\"citadel\"}[1m])",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Citadel CPU usage irate",
+          "refId": "C"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "CPU",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "description": "Citadel process memory statistics.",
+      "fill": 1,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 1
+      },
+      "id": 12,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "process_virtual_memory_bytes{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Virtual Memory",
+          "refId": "A"
+        },
+        {
+          "expr": "process_resident_memory_bytes{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Resident Memory",
+          "refId": "B"
+        },
+        {
+          "expr": "go_memstats_heap_sys_bytes{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Heap Memory Total",
+          "refId": "C"
+        },
+        {
+          "expr": "go_memstats_alloc_bytes{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Heap Memory Allocated",
+          "refId": "E"
+        },
+        {
+          "expr": "go_memstats_heap_inuse_bytes{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Heap Inuse",
+          "refId": "F"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Memory",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 1
+      },
+      "id": 14,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "go_goroutines{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Goroutines",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Goroutines",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 28,
+      "panels": [],
+      "title": "General",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "description": "Total number of CSR requests made to Citadel.",
+      "fill": 1,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 30,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "citadel_server_csr_count{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "CSR Request Count",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "CSR Requests",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "description": "The number of certificates issuances that have succeeded.",
+      "fill": 1,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 32,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "citadel_server_success_cert_issuance_count{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Certificates Issued",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Certificates Issued",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "id": 23,
+      "panels": [],
+      "title": "Errors",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "description": "The number of errors occurred when creating the CSR.",
+      "fill": 1,
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 14
+      },
+      "id": 20,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "citadel_secret_controller_csr_err_count{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "CSR Creation Error Count",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "CSR Creation Errors",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 14
+      },
+      "id": 24,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "citadel_server_csr_parsing_err_count{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "CSR Parse Error Count",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "CSR Parse Errors",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "description": "The number of authentication failures.",
+      "fill": 1,
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 14
+      },
+      "id": 26,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "citadel_server_authentication_failure_count{job=\"citadel\"}\t",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Authentication Failure Count",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Authentication Failures",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 4,
+      "panels": [],
+      "title": "Secret Controller",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "description": "The number of certificates created due to service account creation.",
+      "fill": 1,
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 20
+      },
+      "id": 2,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": true,
+      "targets": [
+        {
+          "expr": "citadel_secret_controller_svc_acc_created_cert_count{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "SA Secrets Created",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Service Account Secrets Created (due to SA creation)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "Certs Created",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "description": "The number of certificates deleted due to service account deletion.",
+      "fill": 1,
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 20
+      },
+      "id": 16,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": true,
+      "targets": [
+        {
+          "expr": "citadel_secret_controller_svc_acc_deleted_cert_count{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "SA Secrets Deleted",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Service Account Secrets Deleted (due to SA deletion)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "Certs Created",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "description": "The number of certificates recreated due to secret deletion (service account still exists).",
+      "fill": 1,
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 20
+      },
+      "id": 6,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": true,
+      "targets": [
+        {
+          "expr": "citadel_secret_controller_secret_deleted_cert_count{job=\"citadel\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "SA Secrets Recreated",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Service Account Secrets Recreated (due to errant deletion)",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "Certs Created",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 18,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "Istio Citadel Dashboard",
+  "uid": "OOyOqb4Wz",
+  "version": 1
+}`)
+
+func chartsIstioTelemetryGrafanaDashboardsCitadelDashboardJsonBytes() ([]byte, error) {
+	return _chartsIstioTelemetryGrafanaDashboardsCitadelDashboardJson, nil
+}
+
+func chartsIstioTelemetryGrafanaDashboardsCitadelDashboardJson() (*asset, error) {
+	bytes, err := chartsIstioTelemetryGrafanaDashboardsCitadelDashboardJsonBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-telemetry/grafana/dashboards/citadel-dashboard.json", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -24995,9 +26150,6 @@ spec:
 {{- end }}
     spec:
       serviceAccountName: istio-mixer-service-account
-{{- if .Values.global.priorityClassName }}
-      priorityClassName: "{{ .Values.global.priorityClassName }}"
-{{- end }}
       volumes:
       - name: istio-certs
         secret:
@@ -27373,7 +28525,7 @@ metadata:
   labels:
     release: {{ .Release.Name }}
 spec:
-  image: "{{ .Values.prometheus.hub }}/{{ .Values.prometheus.image | default "prometheus" }}:{{ .Values.prometheus.tag }}"
+  image: "{{ .Values.prometheus.hub }}/prometheus:{{ .Values.prometheus.tag }}"
   version: {{ .Values.prometheus.tag }}
   retention: {{ .Values.prometheus.retention }}
   scrapeInterval: {{ .Values.prometheus.scrapeInterval }}
@@ -30091,18 +31243,19 @@ func chartsSecurityCitadelTemplatesServiceYaml() (*asset, error) {
 
 var _chartsSecurityCitadelTemplatesServiceaccountYaml = []byte(`apiVersion: v1
 kind: ServiceAccount
+{{- if .Values.global.imagePullSecrets }}
+imagePullSecrets:
+{{- range .Values.global.imagePullSecrets }}
+  - name: {{ . }}
+{{- end }}
+{{- end }}
 metadata:
   name: istio-citadel-service-account
   namespace: {{ .Release.Namespace }}
+
   labels:
     release: {{ .Release.Name }}
-  {{- if .Values.global.imagePullSecrets }}
-spec:
-  imagePullSecrets:
-  {{- range .Values.global.imagePullSecrets }}
-  - name: {{ . }}
-  {{- end }}
-  {{- end }}
+
 `)
 
 func chartsSecurityCitadelTemplatesServiceaccountYamlBytes() ([]byte, error) {
@@ -30576,7 +31729,7 @@ var _profilesDefaultYaml = []byte(`apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
   hub: gcr.io/istio-release
-  tag: master-latest-daily
+  tag: release-1.3-latest-daily
   defaultNamespace: istio-system
 
   # Traffic management feature
@@ -31276,7 +32429,7 @@ spec:
   gateways:
     components:
       egressGateway:
-        enabled: false
+        enabled: true
         k8s:
           resources:
             requests:
@@ -31339,16 +32492,15 @@ spec:
       disablePolicyChecks: false
       mtls:
         enabled: true
+      proxy:
+        accessLogFile: /dev/stdout
+        resources:
+          requests:
+            cpu: 10m
+            memory: 40Mi
 
     pilot:
       autoscaleEnabled: false
-
-    proxy:
-      accessLogFile: /dev/stdout
-      resources:
-        requests:
-          cpu: 10m
-          memory: 40Mi
 
     mixer:
       adapters:
@@ -31368,7 +32520,7 @@ spec:
       telemetry:
         autoscaleEnabled: false
 
-    gateway:
+    gateways:
       istio-egressgateway:
         autoscaleEnabled: false
       istio-ingressgateway:
@@ -31406,7 +32558,7 @@ spec:
   gateways:
     components:
       egressGateway:
-        enabled: false
+        enabled: true
         k8s:
           resources:
             requests:
@@ -31468,16 +32620,16 @@ spec:
   values:
     global:
       disablePolicyChecks: false
+      controlPlaneSecurityEnabled: false
+      proxy:
+        accessLogFile: /dev/stdout
+        resources:
+          requests:
+            cpu: 10m
+            memory: 40Mi
 
     pilot:
       autoscaleEnabled: false
-
-    proxy:
-      accessLogFile: /dev/stdout
-      resources:
-        requests:
-          cpu: 10m
-          memory: 40Mi
 
     mixer:
       adapters:
@@ -31497,7 +32649,7 @@ spec:
       telemetry:
         autoscaleEnabled: false
 
-    gateway:
+    gateways:
       istio-egressgateway:
         autoscaleEnabled: false
       istio-ingressgateway:
@@ -31589,19 +32741,12 @@ spec:
     components:
       nodeAgent:
         enabled: true
-        k8s:
-          env:
-          - name: CA_PROVIDER
-            value: "Citadel"
-          - name: CA_ADDR
-            value: "istio-citadel:8060"
-          - name: VALID_TOKEN
-            value: "true"
 
   values:
     global:
       mtls:
         enabled: true
+      controlPlaneSecurityEnabled: false
       sds:
         enabled: true
         udsPath: "unix:/var/run/sds/uds_path"
@@ -31609,6 +32754,10 @@ spec:
         useTrustworthyJwt: true
     nodeagent:
       image: node-agent-k8s
+      env:
+        CA_PROVIDER: "Citadel"
+        CA_ADDR: "istio-citadel:8060"
+        VALID_TOKEN: true
 `)
 
 func profilesSdsYamlBytes() ([]byte, error) {
@@ -31682,6 +32831,7 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/crds/files/crd-10.yaml": chartsCrdsFilesCrd10Yaml,
 	"charts/crds/files/crd-11.yaml": chartsCrdsFilesCrd11Yaml,
 	"charts/crds/files/crd-12.yaml": chartsCrdsFilesCrd12Yaml,
+	"charts/crds/files/crd-14.yaml": chartsCrdsFilesCrd14Yaml,
 	"charts/crds/files/crd-certmanager-10.yaml": chartsCrdsFilesCrdCertmanager10Yaml,
 	"charts/crds/files/crd-certmanager-11.yaml": chartsCrdsFilesCrdCertmanager11Yaml,
 	"charts/crds/kustomization.yaml": chartsCrdsKustomizationYaml,
@@ -31783,6 +32933,7 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/istio-policy/templates/serviceaccount.yaml": chartsIstioPolicyTemplatesServiceaccountYaml,
 	"charts/istio-policy/values.yaml": chartsIstioPolicyValuesYaml,
 	"charts/istio-telemetry/grafana/Chart.yaml": chartsIstioTelemetryGrafanaChartYaml,
+	"charts/istio-telemetry/grafana/dashboards/citadel-dashboard.json": chartsIstioTelemetryGrafanaDashboardsCitadelDashboardJson,
 	"charts/istio-telemetry/grafana/dashboards/galley-dashboard.json": chartsIstioTelemetryGrafanaDashboardsGalleyDashboardJson,
 	"charts/istio-telemetry/grafana/dashboards/istio-mesh-dashboard.json": chartsIstioTelemetryGrafanaDashboardsIstioMeshDashboardJson,
 	"charts/istio-telemetry/grafana/dashboards/istio-performance-dashboard.json": chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson,
@@ -31940,6 +33091,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 				"crd-10.yaml": &bintree{chartsCrdsFilesCrd10Yaml, map[string]*bintree{}},
 				"crd-11.yaml": &bintree{chartsCrdsFilesCrd11Yaml, map[string]*bintree{}},
 				"crd-12.yaml": &bintree{chartsCrdsFilesCrd12Yaml, map[string]*bintree{}},
+				"crd-14.yaml": &bintree{chartsCrdsFilesCrd14Yaml, map[string]*bintree{}},
 				"crd-certmanager-10.yaml": &bintree{chartsCrdsFilesCrdCertmanager10Yaml, map[string]*bintree{}},
 				"crd-certmanager-11.yaml": &bintree{chartsCrdsFilesCrdCertmanager11Yaml, map[string]*bintree{}},
 			}},
@@ -32082,6 +33234,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"grafana": &bintree{nil, map[string]*bintree{
 				"Chart.yaml": &bintree{chartsIstioTelemetryGrafanaChartYaml, map[string]*bintree{}},
 				"dashboards": &bintree{nil, map[string]*bintree{
+					"citadel-dashboard.json": &bintree{chartsIstioTelemetryGrafanaDashboardsCitadelDashboardJson, map[string]*bintree{}},
 					"galley-dashboard.json": &bintree{chartsIstioTelemetryGrafanaDashboardsGalleyDashboardJson, map[string]*bintree{}},
 					"istio-mesh-dashboard.json": &bintree{chartsIstioTelemetryGrafanaDashboardsIstioMeshDashboardJson, map[string]*bintree{}},
 					"istio-performance-dashboard.json": &bintree{chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson, map[string]*bintree{}},
