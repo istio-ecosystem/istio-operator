@@ -58,30 +58,29 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *v1a
 			validationErrors = append(validationErrors, r...)
 		}
 	}
-	object := e
 	// If it is not a struct nothing to do, returning previously collected validation errors
-	if object.Kind() != reflect.Struct {
+	if e.Kind() != reflect.Struct {
 		return validationErrors
 	}
-	for i := 0; i < object.NumField(); i++ {
+	for i := 0; i < e.NumField(); i++ {
 		// Corner case of a slice of something, if something is defined type, then process it recursiveley.
-		if object.Field(i).Kind() == reflect.Slice {
-			validationErrors = append(validationErrors, processSlice(object.Field(i), failOnMissingValidation, values, icpls)...)
+		if e.Field(i).Kind() == reflect.Slice {
+			validationErrors = append(validationErrors, processSlice(e.Field(i), failOnMissingValidation, values, icpls)...)
 			continue
 		}
-		if object.Field(i).Kind() == reflect.Map {
-			validationErrors = append(validationErrors, processMap(object.Field(i), failOnMissingValidation, values, icpls)...)
+		if e.Field(i).Kind() == reflect.Map {
+			validationErrors = append(validationErrors, processMap(e.Field(i), failOnMissingValidation, values, icpls)...)
 			continue
 		}
 		// Validation is not required if it is not a defined type
-		if object.Field(i).Kind() != reflect.Interface && object.Field(i).Kind() != reflect.Ptr {
+		if e.Field(i).Kind() != reflect.Interface && e.Field(i).Kind() != reflect.Ptr {
 			continue
 		}
-		val := object.Field(i).Elem()
+		val := e.Field(i).Elem()
 		if util.IsNilOrInvalidValue(val) {
 			continue
 		}
-		validationErrors = append(validationErrors, validateSubTypes(object.Field(i), failOnMissingValidation, values, icpls)...)
+		validationErrors = append(validationErrors, validateSubTypes(e.Field(i), failOnMissingValidation, values, icpls)...)
 	}
 
 	return validationErrors
