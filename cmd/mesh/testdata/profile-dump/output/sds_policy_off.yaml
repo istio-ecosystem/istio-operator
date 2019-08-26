@@ -93,20 +93,6 @@ security:
       enabled: false
     nodeAgent:
       enabled: true
-      k8s:
-        env:
-        - name: CA_ADDR
-          value: istio-citadel:8060
-        - name: CA_PROVIDER
-          value: Citadel
-        - name: Plugins
-        - name: VALID_TOKEN
-          value: "true"
-        - name: Trust_Domain
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
   enabled: true
 tag: release-1.3-latest-daily
 telemetry:
@@ -542,6 +528,11 @@ values:
       useMCP: true
   nodeagent:
     image: node-agent-k8s
+    env:
+      CA_ADDR: istio-citadel:8060
+      CA_PROVIDER: Citadel
+      Plugins: ""
+      VALID_TOKEN: "true"
   pilot:
     appNamespaces: []
     autoscaleEnabled: true

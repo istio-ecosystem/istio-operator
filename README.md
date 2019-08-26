@@ -80,7 +80,7 @@ cd operator
 make mesh
 ```
 
-This will create a binary called `mesh` in ${GOPATH}/bin. Ensure this is in your PATH to run the examples below.
+This will create a binary called `mesh` in ./out/bin by default. Ensure this is in your PATH to run the examples below.
 
 ### Flags
 
