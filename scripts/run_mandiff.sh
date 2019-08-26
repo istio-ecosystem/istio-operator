@@ -20,7 +20,17 @@ WD=$(dirname "$0")
 WD=$(cd "$WD"; pwd)
 ROOT=$(dirname "$WD")
 OUT=${OUT:-/tmp/istio-mandiff-out}
-CHARTS_DIR="${GOPATH}/src/istio.io/installer"
+
+CHARTS_DIR=$(mktemp -d)
+
+git clone https://github.com/istio/installer.git "${CHARTS_DIR}"
+
+SHA=`cat ${ROOT}/installer.sha`
+
+pushd .
+cd "${CHARTS_DIR}"
+git checkout "${SHA}"
+popd
 
 ISTIO_SYSTEM_NS=${ISTIO_SYSTEM_NS:-istio-system}
 ISTIO_RELEASE=${ISTIO_RELEASE:-istio}
@@ -52,7 +62,9 @@ NAMESPACES_MAP["security/citadel"]="istio-system"
 NAMESPACES_MAP["security/nodeagent"]="istio-system"
 
 # define the ingored resource list for manifest comparison
-MANDIFF_IGNORE_RESOURCE_LIST="ConfigMap::istio,ConfigMap::istio-sidecar-injector,Deployment:istio-system:istio-pilot"
+MANDIFF_IGNORE_RESOURCE_LIST="ConfigMap::istio:data.values.yaml,\
+ConfigMap::istio-sidecar-injector:data.values,\
+Deployment::istio-pilot:metadata.annotations.checksum/config-volume"
 
 # No unset vars, print commands as they're executed, and exit on any non-zero
 # return code
@@ -66,11 +78,6 @@ mkdir -p "${OUT}"
 cd "${ROOT}"
 
 export GO111MODULE=on
-# build the istio operator binary
-go build -o "${GOPATH}/bin/mesh" ./cmd/mesh.go
-
-# download the helm binary
-${ROOT}/bin/init_helm.sh
 
 # render all the templates with helm template.
 function helm_manifest() {
@@ -102,7 +109,7 @@ function mesh_manifest() {
     local profile="${1}"
     local out_dir="${OUT}/mesh-manifest/istio-${profile}"
     mkdir -p "${out_dir}"
-    mesh manifest generate --filename "${ROOT}/data/profiles/${profile}.yaml" --dry-run=false --output "${out_dir}" 2>&1
+    go run ./cmd/mesh.go manifest generate --filename "${ROOT}/data/profiles/${profile}.yaml" --dry-run=false --output "${out_dir}" 2>&1
 #    cat $(find "${out_dir}" -name "*.yaml") > "${out_dir}/combined.yaml"
 }
 
@@ -113,7 +120,7 @@ function mesh_mandiff_with_profile() {
     helm_manifest ${ISTIO_SYSTEM_NS} ${ISTIO_RELEASE} ${CHARTS_DIR} ${profile}
     mesh_manifest ${profile}
 
-    mesh manifest diff --ignore "${MANDIFF_IGNORE_RESOURCE_LIST}" --directory "${OUT}/helm-template/istio-${profile}" "${OUT}/mesh-manifest/istio-${profile}"
+    go run ./cmd/mesh.go  manifest diff --ignore "${MANDIFF_IGNORE_RESOURCE_LIST}" --directory "${OUT}/helm-template/istio-${profile}" "${OUT}/mesh-manifest/istio-${profile}"
 }
 
 mesh_mandiff_with_profile "${ISTIO_DEFAULT_PROFILE}" > "${OUT}/mandiff-default-profile.diff" || { echo "${ISTIO_DEFAULT_PROFILE} profile has diffs"; exit 1; }

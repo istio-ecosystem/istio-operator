@@ -135,8 +135,6 @@ func runTestGroup(t *testing.T, tests testGroup) {
 				t.Fatal(err)
 			}
 
-			fmt.Println(got)
-
 			want, err := readFile(outPath)
 			if err != nil {
 				t.Fatal(err)
