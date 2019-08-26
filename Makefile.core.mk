@@ -31,7 +31,7 @@ test_with_coverage:
 	@go test -race -coverprofile=coverage.txt -covermode=atomic ./...
 	@curl -s https://codecov.io/bash | bash -s -- -c -F aFlag -f coverage.txt
 
-mandiff: update-charts
+mandiff: vfsgen
 	@PATH=${PATH}:${GOPATH}/bin scripts/run_mandiff.sh
 
 build: mesh

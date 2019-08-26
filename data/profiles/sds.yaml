@@ -5,22 +5,7 @@ spec:
     components:
       nodeAgent:
         enabled: true
-        k8s:
-          env:
-          - name: CA_ADDR
-            value: "istio-citadel:8060"
-          - name: CA_PROVIDER
-            value: Citadel
-          - name: Plugins
-            value: ""
-          - name: VALID_TOKEN
-            value: "true"
-          - name: Trust_Domain
-            value: ""
-          - name: NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
+
   values:
     global:
       controlPlaneSecurityEnabled: false
@@ -33,3 +18,11 @@ spec:
         useTrustworthyJwt: true
     nodeagent:
       image: node-agent-k8s
+      env:
+        # TODO: empty env vars can't be set in components.nodeagent.k8s.env above because default values are considered
+        # unset. Also, the k8s settings above override these as a block, so we cannot currently set env in both places.
+        Plugins: ""
+        CA_ADDR: "istio-citadel:8060"
+        CA_PROVIDER: Citadel
+        VALID_TOKEN: "true"
+
