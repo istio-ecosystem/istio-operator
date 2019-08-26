@@ -125,7 +125,7 @@ func YAMLManifestPatch(baseYAML string, namespace string, overlays []*v1alpha2.K
 			for k2 := range bom {
 				os += k2 + "\n"
 			}
-			errs = util.AppendErr(errs, fmt.Errorf("overlay for %s does not match any object in output manifest:\n%s\n\nAvailable objects are:\n%s\n",
+			errs = util.AppendErr(errs, fmt.Errorf("overlay for %s does not match any object in output manifest:\n%s\n\nAvailable objects are:\n%s",
 				k, pretty.Sprint(oo), os))
 			continue
 		}

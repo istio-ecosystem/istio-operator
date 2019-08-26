@@ -15,13 +15,7 @@
 package mesh
 
 import (
-	"bytes"
-	"fmt"
-	"io/ioutil"
-	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"istio.io/operator/pkg/object"
@@ -32,32 +26,6 @@ type testGroup []struct {
 	flags      string
 	diffSelect string
 	diffIgnore string
-}
-
-var (
-	repoRootDir string
-	testDataDir string
-)
-
-func init() {
-	wd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	repoRootDir = filepath.Join(wd, "../..")
-	testDataDir = filepath.Join(wd, "testdata/manifest-generate")
-
-	if err := syncCharts(); err != nil {
-		panic(err)
-	}
-}
-
-func syncCharts() error {
-	cmd, err := exec.Command(filepath.Join(repoRootDir, "scripts/run_update_charts.sh")).CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("%s:%s", err, cmd)
-	}
-	return nil
 }
 
 func TestManifestGenerateFlags(t *testing.T) {
@@ -125,6 +93,7 @@ func TestManifestGenerateTelemetry(t *testing.T) {
 }
 
 func runTestGroup(t *testing.T, tests testGroup) {
+	testDataDir = filepath.Join(repoRootDir, "cmd/mesh/testdata/manifest-generate")
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
 			inPath := filepath.Join(testDataDir, "input", tt.desc+".yaml")
@@ -156,26 +125,10 @@ func runTestGroup(t *testing.T, tests testGroup) {
 	}
 }
 
-func runCommand(command string) (string, error) {
-	var out bytes.Buffer
-	rootCmd := GetRootCmd(strings.Split(command, " "))
-	rootCmd.SetOutput(&out)
-
-	if err := rootCmd.Execute(); err != nil {
-		return "", err
-	}
-	return out.String(), nil
-}
-
 func runManifestGenerate(path, flags string) (string, error) {
 	args := "manifest generate " + flags
 	if flags == "" {
 		args += " -f " + path
 	}
 	return runCommand(args)
-}
-
-func readFile(path string) (string, error) {
-	b, err := ioutil.ReadFile(path)
-	return string(b), err
 }
