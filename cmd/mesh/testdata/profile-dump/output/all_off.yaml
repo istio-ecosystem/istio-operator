@@ -94,7 +94,7 @@ security:
     nodeAgent:
       enabled: false
   enabled: false
-tag: master-latest-daily
+tag: release-1.3-latest-daily
 telemetry:
   components:
     telemetry:
