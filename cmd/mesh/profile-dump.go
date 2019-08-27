@@ -66,7 +66,7 @@ func profileDump(args []string, rootArgs *rootArgs, pdArgs *profileDumpArgs, l *
 	initLogsOrExit(rootArgs)
 
 	if len(args) == 1 && pdArgs.inFilename != "" {
-		l.logAndFatal("Cannot specify both profile name and filename flag.")
+		l.lfatal("Cannot specify both profile name and filename flag.")
 	}
 
 	profile := ""
@@ -75,7 +75,7 @@ func profileDump(args []string, rootArgs *rootArgs, pdArgs *profileDumpArgs, l *
 	}
 	y, err := genProfile(pdArgs.helmValues, pdArgs.inFilename, profile, "", pdArgs.configPath)
 	if err != nil {
-		l.logAndFatal(err.Error())
+		l.lfatal(err.Error())
 	}
 
 	l.print(y + "\n")

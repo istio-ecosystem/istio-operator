@@ -63,17 +63,17 @@ func manifestVersions(args *rootArgs, mvArgs *manifestVersionsArgs, l *logger) {
 	if strings.HasPrefix(uri, "http") {
 		b, err = httprequest.Get(uri)
 		if err != nil {
-			l.logAndFatal(err.Error())
+			l.lfatal(err.Error())
 		}
 	} else {
 		b, err = ioutil.ReadFile(uri)
 		if err != nil {
-			l.logAndFatal(err.Error())
+			l.lfatal(err.Error())
 		}
 	}
 	var versions []*version.CompatibilityMapping
 	if err = yaml.Unmarshal(b, &versions); err != nil {
-		l.logAndFatal(err.Error())
+		l.lfatal(err.Error())
 	}
 
 	var myVersionMap *version.CompatibilityMapping
@@ -84,7 +84,7 @@ func manifestVersions(args *rootArgs, mvArgs *manifestVersionsArgs, l *logger) {
 	}
 
 	if myVersionMap == nil {
-		l.logAndFatal("This operator version ", binversion.OperatorBinaryGoVersion.String(), " was not found in the global manifestVersions map.")
+		l.lfatal("This operator version ", binversion.OperatorBinaryGoVersion.String(), " was not found in the global manifestVersions map.")
 	}
 
 	fmt.Print("\nOperator version is ", binversion.OperatorBinaryGoVersion.String(), ".\n\n")
