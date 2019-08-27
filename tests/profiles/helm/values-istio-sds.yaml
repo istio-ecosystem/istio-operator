@@ -1,4 +1,10 @@
 global:
+  istioNamespace: istio-system
+  configNamespace: istio-system
+  # Telemetry namespace, including tracing.
+  telemetryNamespace: istio-system
+  policyNamespace: istio-system
+
   controlPlaneSecurityEnabled: false
 
   mtls:
@@ -18,3 +24,5 @@ nodeagent:
     CA_PROVIDER: "Citadel"
     CA_ADDR: "istio-citadel:8060"
     VALID_TOKEN: true
+
+certmanager: {}

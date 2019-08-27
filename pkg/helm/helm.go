@@ -17,6 +17,7 @@ package helm
 import (
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 
 	jsonpatch "github.com/evanphx/json-patch"
@@ -34,8 +35,8 @@ const (
 	// YAMLSeparator is a separator for multi-document YAML files.
 	YAMLSeparator = "\n---\n"
 
-	// DefaultGlobalValuesFilename is the default name for a global values file if none is specified.
-	DefaultGlobalValuesFilename = "global.yaml"
+	// DefaultProfileString is the name of the default profile.
+	DefaultProfileString = "default"
 )
 
 // TemplateRenderer defines a helm template renderer interface.
@@ -50,16 +51,16 @@ type TemplateRenderer interface {
 // NewHelmRenderer creates a new helm renderer with the given parameters and returns an interface to it.
 // The format of helmBaseDir and profile strings determines the type of helm renderer returned (compiled-in, file,
 // HTTP etc.)
-func NewHelmRenderer(helmBaseDir, profile, componentName, namespace string) (TemplateRenderer, error) {
-	globalValues, err := ReadValuesYAML(profile)
-	if err != nil {
-		return nil, err
-	}
+func NewHelmRenderer(chartsRootDir, helmBaseDir, componentName, namespace string) (TemplateRenderer, error) {
+	// filepath would remove leading slash here if chartsRootDir is empty.
+	dir := chartsRootDir + "/" + helmBaseDir
 	switch {
-	case util.IsFilePath(helmBaseDir):
-		return NewFileTemplateRenderer(util.GetLocalFilePath(helmBaseDir), globalValues, componentName, namespace), nil
+	case chartsRootDir == "":
+		return NewVFSRenderer(helmBaseDir, componentName, namespace), nil
+	case util.IsFilePath(dir):
+		return NewFileTemplateRenderer(dir, componentName, namespace), nil
 	default:
-		return NewVFSRenderer(helmBaseDir, globalValues, componentName, namespace), nil
+		return nil, fmt.Errorf("unknown helm renderer with chartsRoot=%s", chartsRootDir)
 	}
 }
 
@@ -81,9 +82,8 @@ func ReadValuesYAML(profile string) (string, error) {
 			return "", err
 		}
 	case util.IsFilePath(profile):
-		path := util.GetLocalFilePath(profile)
-		log.Infof("Loading values from local filesystem at path %s", path)
-		if globalValues, err = readFile(path); err != nil {
+		log.Infof("Loading values from local filesystem at path %s", profile)
+		if globalValues, err = readFile(profile); err != nil {
 			return "", err
 		}
 	default:
@@ -94,13 +94,8 @@ func ReadValuesYAML(profile string) (string, error) {
 }
 
 // renderChart renders the given chart with the given values and returns the resulting YAML manifest string.
-func renderChart(namespace, baseValues, overlayValues string, chrt *chart.Chart) (string, error) {
-	mergedValues, err := OverlayYAML(baseValues, overlayValues)
-	if err != nil {
-		return "", err
-	}
-
-	config := &chart.Config{Raw: mergedValues, Values: map[string]*chart.Value{}}
+func renderChart(namespace, values string, chrt *chart.Chart) (string, error) {
+	config := &chart.Config{Raw: values, Values: map[string]*chart.Value{}}
 	options := chartutil.ReleaseOptions{
 		Name:      "istio",
 		Time:      timeconv.Now(),
@@ -119,6 +114,10 @@ func renderChart(namespace, baseValues, overlayValues string, chrt *chart.Chart)
 
 	var sb strings.Builder
 	for _, f := range files {
+		// add yaml separator if the rendered file doesn't have one at the end
+		if !strings.HasSuffix(strings.TrimSpace(f)+"\n", YAMLSeparator) {
+			f += YAMLSeparator
+		}
 		_, err := sb.WriteString(f)
 		if err != nil {
 			return "", err
@@ -131,6 +130,9 @@ func renderChart(namespace, baseValues, overlayValues string, chrt *chart.Chart)
 // OverlayYAML patches the overlay tree over the base tree and returns the result. All trees are expressed as YAML
 // strings.
 func OverlayYAML(base, overlay string) (string, error) {
+	if overlay == "" {
+		return base, nil
+	}
 	bj, err := yaml.YAMLToJSON([]byte(base))
 	if err != nil {
 		return "", fmt.Errorf("yamlToJSON error in base: %s\n%s", err, bj)
@@ -155,19 +157,22 @@ func OverlayYAML(base, overlay string) (string, error) {
 	return string(my), nil
 }
 
-func FilenameFromProfile(profile string) (string, error) {
+// DefaultFilenameForProfile returns the profile name of the default profile for the given profile.
+func DefaultFilenameForProfile(profile string) (string, error) {
 	switch {
-	case profile == "":
-		return DefaultProfileFilename, nil
 	case util.IsFilePath(profile):
-		return util.GetLocalFilePath(profile), nil
+		return filepath.Join(filepath.Dir(profile), DefaultProfileFilename), nil
 	default:
-		if _, ok := ProfileNames[profile]; ok {
-			return BuiltinProfileToFilename(profile), nil
+		if _, ok := ProfileNames[profile]; ok || profile == "" {
+			return DefaultProfileString, nil
 		}
+		return "", fmt.Errorf("bad profile string %s", profile)
 	}
+}
 
-	return "", fmt.Errorf("bad profile string: %s", profile)
+// IsDefaultProfile reports whether the given profile is the default profile.
+func IsDefaultProfile(profile string) bool {
+	return profile == "" || profile == DefaultProfileString || filepath.Base(profile) == DefaultProfileFilename
 }
 
 func readFile(path string) (string, error) {

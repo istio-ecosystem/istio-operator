@@ -498,34 +498,45 @@ message MixerAdaptersConfig {
 
 // MixerConfig is described in istio.io documentation.
 message MixerConfig {
-  MixerAdaptersConfig adapters = 1;
+  // MixerPolicyConfig is set of configurations for Mixer Policy
+  MixerPolicyConfig policy = 1;
 
-  bool enabled = 2;
-
-  map<string, string> env = 3;
-
-  string image = 4;
-
-  MixerPolicyConfig policy = 5;
-
-  MixerTelemetryConfig telemetry = 6;
+  // MixerTelemetryConfig is set of configurations for Mixer Telemetry
+  MixerTelemetryConfig telemetry = 2;
 }
 
-// MixerPolicyConfig is described in istio.io documentation.
+// MixerPolicyConfig is set of configurations for Mixer Policy
 message MixerPolicyConfig {
+  // Controls whether a HorizontalPodAutoscaler is installed for Mixer Policy.
   bool autoscaleEnabled = 1;
 
+  // Maximum number of replicas in the HorizontalPodAutoscaler for Mixer Policy.
   uint32 autoscaleMax = 2;
 
+  // Minimum number of replicas in the HorizontalPodAutoscaler for Mixer Policy.
   uint32 autoscaleMin = 3;
 
+  // Target CPU utilization used in HorizontalPodAutoscaler.
+  //
+  // See https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   CPUTargetUtilizationConfig cpu = 4;
 
+  // Controls whether Mixer Policy is enabled
   bool enabled = 5;
 
+  // Image name used for Mixer Policy.
+  //
+  // This can be set either to image name if hub is also set, or can be set to the full hub:name string.
+  //
+  // Examples: custom-mixer, docker.io/someuser:custom-mixer
   string image = 6;
 
-  // 	PodAnnotations   map[string]interface{}      `json:"podAnnotations,omitempty"`
+  // K8s annotations to attach to mixer policy deployment
+  //
+  // See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  // PodAnnotations   map[string]interface{}      `json:"podAnnotations,omitempty"`
+
+  // Number of replicas in the Mixer Policy Deployment
   uint32 replicaCount = 7;
 }
 
@@ -585,73 +596,159 @@ message OutboundTrafficPolicyConfig {
   }
 }
 
-// PilotConfig is described in istio.io documentation.
+// PilotConfig is a set of configuration parameters for Pilot.
 message PilotConfig {
+  // Controls whether Pilot is enabled.
   bool enabled = 1;
 
+  // Controls whether a HorizontalPodAutoscaler is installed for Pilot.
   bool autoscaleEnabled = 2;
 
+  // Minimum number of replicas in the HorizontalPodAutoscaler for Pilot.
   uint32 autoscaleMin = 3;
 
+  // Maximum number of replicas in the HorizontalPodAutoscaler for Pilot.
   uint32 autoscaleMax = 4;
 
+  // Number of replicas in the Pilot Deployment.
   uint32 replicaCount = 5;
 
+  // Image name used for Pilot.
+  //
+  // This can be set either to image name if hub is also set, or can be set to the full hub:name string.
+  //
+  // Examples: custom-pilot, docker.io/someuser:custom-pilot
   string image = 6;
 
+  // Controls whether a sidecar proxy is installed in the Pilot pod.
+  //
+  // Setting to true installs a proxy in the Pilot pod, used primarily for collecting Pilot telemetry.
   bool sidecar = 7;
 
+  // Trace sampling fraction.
+  //
+  // Used to set the fraction of time that traces are sampled. Higher values are more accurate but add CPU overhead.
+  //
+  // Allowed values: 0.0 to 1.0
   double traceSampling = 8;
 
+  // K8s resources settings.
+  //
+  // See https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container
   k8s.io.api.core.v1.ResourceRequirements resources = 9;
 
+  // Namespace that the configuration management feature is installed into, if different from Pilot namespace.
   string configNamespace = 10;
 
+  // Target CPU utilization used in HorizontalPodAutoscaler.
+  //
+  // See https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   CPUTargetUtilizationConfig cpu = 11;
 
-  // 	NodeSelector                     map[string]interface{}      `json:"nodeSelector,omitempty"`
+  // K8s node selector.
+  //
+  // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  // NodeSelector                     map[string]interface{}      `json:"nodeSelector,omitempty"`
+
+  // Maximum duration that a sidecar can be connected to a pilot.
+  //
+  // This setting balances out load across pilot instances, but adds some resource overhead.
+  //
+  // Examples: 300s, 30m, 1h
   google.protobuf.Duration keepaliveMaxServerConnectionAge = 12;
 
+  // Labels that are added to Pilot pods.
+  //
+  // See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   map<string, string> deploymentLabels = 13;
 
+  // Used to override control plane networks.
   // 	MeshNetworks                     map[string]interface{}      `json:"meshNetworks,omitempty"`
+
+  // Pod anti-affinity label selector.
+  //
+  // Specify the pod anti-affinity that allows you to constrain which nodes
+  // your pod is eligible to be scheduled based on labels on pods that are
+  // already running on the node rather than based on labels on nodes.
+  // There are currently two types of anti-affinity:
+  //    "requiredDuringSchedulingIgnoredDuringExecution"
+  //    "preferredDuringSchedulingIgnoredDuringExecution"
+  // which denote “hard” vs. “soft” requirements, you can define your values
+  // in "podAntiAffinityLabelSelector" and "podAntiAffinityTermLabelSelector"
+  // correspondingly.
+  // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  //
+  // Examples:
+  // podAntiAffinityLabelSelector:
+  //  - key: security
+  //    operator: In
+  //    values: S1,S2
+  //    topologyKey: "kubernetes.io/hostname"
+  //  This pod anti-affinity rule says that the pod requires not to be scheduled
+  //  onto a node if that node is already running a pod with label having key
+  //  “security” and value “S1”.
   // 	PodAntiAffinityLabelSelector     []map[string]interface{}    `json:"podAntiAffinityLabelSelector"`
+
+  // See PodAntiAffinityLabelSelector.
   // 	PodAntiAffinityTermLabelSelector []map[string]interface{}    `json:"podAntiAffinityTermLabelSelector"`
+
+  // Configuration settings passed to Pilot as a ConfigMap.
+  //
+  // This controls whether the mesh config map, generated from values.yaml is generated.
+  // If false, pilot wil use default values or user-supplied values, in that order of preference.
   bool configMap = 14;
 
+  // Controls legacy k8s ingress. Only one pilot profile should enable ingress support.
   PilotIngressConfig ingress = 15;
 
+  // Controls whether Pilot is configured through the Mesh Control Protocol (MCP).
+  //
+  // If set to true, Pilot requires an MCP server (like Galley) to be installed.
   bool useMCP = 16;
 
+  // Environment variables passed to the Pilot container.
+  //
+  // Examples:
+  // env:
+  //   ENV_VAR_1: value1
+  //   ENV_VAR_2: value2
   map<string, string> env = 17;
 
+  // Controls whether Istio policy is applied to Pilot.
   PilotPolicyConfig policy = 18;
 
+  // Controls whether telemetry is exported for Pilot.
   PilotTelemetryConfig telemetry = 19;
 }
 
-// PilotIngressConfig is described in istio.io documentation.
+// Controls legacy k8s ingress. Only one pilot profile should enable ingress support.
 message PilotIngressConfig {
+  // Sets the type ingress service for Pilot.
+  //
+  // If empty, node-port is assumed.
+  //
+  // Allowed values: node-port, istio-ingressgateway, ingress
   string ingressService = 1;
 
+  // Mode for the ingress controller.
   enum ingressControllerMode {
-    //all Ingress resources without annotation or with istio annotation.
+    // Selects all Ingress resources, with or without Istio annotation.
     DEFAULT = 0;
-    //only with istio annotation.
+    // Selects only resources with istio annotation.
     STRICT = 1;
-    //no ingress or sync.
+    // No ingress or sync.
     OFF = 2;
   }
-  //Value to set on "kubernetes.io/ingress.class" annotations to activate, if mode is STRICT
+  // If mode is STRICT, this value must be set on "kubernetes.io/ingress.class" annotation to activate.
   string ingressClass = 3;
 }
 
-// PilotPolicyConfig is described in istio.io documentation.
+// Controls whether Istio policy is applied to Pilot.
 message PilotPolicyConfig {
   bool enabled = 1;
 }
 
-// PilotTelemetryConfig is described in istio.io documentation.
+// Controls whether telemetry is exported for Pilot.
 message PilotTelemetryConfig {
   bool enabled = 1;
 }
@@ -890,6 +987,7 @@ message StdioMixerAdapterConfig {
   bool outputAsJson = 2;
 }
 
+
 // TracerConfig specifies the configuration for each of the supported tracers.
 message TracerConfig {
   // Specifies the configuration for the datadog tracing service.
@@ -910,7 +1008,7 @@ message TracerDatadogConfig {
 
 // TracerLightStepConfig specifies the configuration for the lightstep tracing service.
 message TracerLightStepConfig {
-  // Sets the lightstep satellite pool address.
+  // Sets the lightstep satellite pool address in host:port format for reporting trace data.
   string address = 1;
 
   // Sets the lightstep access token.
@@ -925,66 +1023,96 @@ message TracerLightStepConfig {
 
 // TracerZipkinConfig specifies the configuration for the zipkin tracing service.
 message TracerZipkinConfig {
-  // Specifies address in host:port format for reporting trace data in zipkin format.
+  // Specifies address of zipkin instance in host:port format for reporting trace data.
+  //
+  // Example: <zipkin-collector-service>.<zipkin-collector-namespace>:941
   string address = 1;
 }
 
-// TracingConfig is described in istio.io documentation.
+// TracingConfig defines configurations for different tracing system to be installed.
 message TracingConfig {
+  // Enables tracing systems to be installed.
   bool enabled = 1;
 
+  // Controls legacy k8s ingress for addon tracing components.
   TracingIngressConfig ingress = 2;
 
+  // Defines configuration for addon jaeger tracing.
   TracingJaegerConfig jaeger = 3;
 
-  // 	NodeSelector map[string]interface{} `json:"nodeSelector,omitempty"`
+  // K8s node selector.
+  //
+  // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  // NodeSelector map[string]interface{} `json:"nodeSelector,omitempty"`
+
+  // Configures which tracing system to be installed.
   string provider = 4;
 
+  // Controls K8s service for addon tracing components.
   ServiceConfig service = 5;
 
+  // Defines configuration for addon zipkin tracing.
   TracingZipkinConfig zipkin = 6;
 }
 
-// TracingIngressConfig is described in istio.io documentation.
+// Controls legacy k8s ingress for addon tracing components.
 message TracingIngressConfig {
+  // Enables k8s ingress for addon tracing components.
   bool enabled = 1;
 }
 
-// TracingJaegerConfig is described in istio.io documentation.
+// Defines configuration for addon jaeger tracing.
 message TracingJaegerConfig {
+  // Image hub for jaeger tracing deployment.
   string hub = 1;
 
+  // Image tag for jaeger tracing deployment.
   string tag = 2;
 
+  // Configures jaeger in-memory storage setting.
   TracingJaegerMemoryConfig memory = 3;
 }
 
-// TracingJaegerMemoryConfig is described in istio.io documentation.
+// Configures jaeger in-memory storage setting.
 message TracingJaegerMemoryConfig {
+  // Set limit of the amount of traces stored in memory for jaeger
   uint32 max_traces = 1;
 }
 
 // TracingZipkinConfig is described in istio.io documentation.
 message TracingZipkinConfig {
+  // Image hub for zipkin tracing deployment.
   string hub = 1;
 
+  // Image tag for zipkin tracing deployment.
   string tag = 2;
 
+  // InitialDelaySeconds of livenessProbe for zipkin deployment
   uint32 probeStartupDelay = 3;
 
+  // Container port for zipkin deployment
   uint32 queryPort = 4;
 
+  // K8s resources settings.
+  //
+  // See https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container
   k8s.io.api.core.v1.ResourceRequirements resources = 5;
 
+  // Configure java heap opts for zipkin deployment
   string javaOptsHeap = 6;
 
+  // Configures number of max spans to keep in zipkin memory storage.
+  //
+  // Example: A safe estimate is 1K of memory per span (each span with 2 annotations + 1 binary annotation), plus 100 MB for a safety buffer
   uint32 maxSpans = 7;
 
+  // Configures GC values of JAVA_OPTS for zipkin deployment
   TracingZipkinNodeConfig node = 8;
 }
 
-// TracingZipkinNodeConfig is described in istio.io documentation.
+// Configures GC values of JAVA_OPTS for zipkin deployment
 message TracingZipkinNodeConfig {
+  // Configures -XX:ConcGCThreads value of JAVA_OPTS for zipkin deployment
   uint32 cpus = 1;
 }
 

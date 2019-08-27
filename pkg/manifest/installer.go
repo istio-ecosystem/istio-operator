@@ -24,20 +24,32 @@ import (
 	"sync"
 	"time"
 
+	"istio.io/operator/pkg/util"
+
+	"github.com/ghodss/yaml"
+
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
+
 	"istio.io/operator/pkg/object"
 
 	// For kubeclient GCP auth
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
+	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	deploymentutil "k8s.io/kubernetes/pkg/controller/deployment/util"
 
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/name"
@@ -64,27 +76,28 @@ var (
 	istioVersionLabelStr = name.OperatorAPINamespace + "/version"
 )
 
-// CompositeOutput is used to capture errors and stdout/stderr outputs for a command, per component.
-type CompositeOutput struct {
+// ComponentApplyOutput is used to capture errors and stdout/stderr outputs for a command, per component.
+type ComponentApplyOutput struct {
 	// Stdout is the stdout output.
-	Stdout map[name.ComponentName]string
+	Stdout string
 	// Stderr is the stderr output.
-	Stderr map[name.ComponentName]string
+	Stderr string
 	// Error is the error output.
-	Err map[name.ComponentName]error
+	Err error
+	// Manifest is the manifest applied to the cluster.
+	Manifest string
 }
 
-// NewCompositeOutput creates a new CompositeOutput and returns a ptr to it.
-func NewCompositeOutput() *CompositeOutput {
-	return &CompositeOutput{
-		Stdout: make(map[name.ComponentName]string),
-		Stderr: make(map[name.ComponentName]string),
-		Err:    make(map[name.ComponentName]error),
-	}
-}
+type CompositeOutput map[name.ComponentName]*ComponentApplyOutput
 
 type componentNameToListMap map[name.ComponentName][]name.ComponentName
 type componentTree map[name.ComponentName]interface{}
+
+// deployment holds associated replicaSets for a deployment
+type deployment struct {
+	replicaSets *appsv1.ReplicaSet
+	deployment  *appsv1.Deployment
+}
 
 var (
 	componentDependencies = componentNameToListMap{
@@ -106,7 +119,8 @@ var (
 	dependencyWaitCh = make(map[name.ComponentName]chan struct{})
 	kubectl          = kubectlcmd.New()
 
-	k8sRESTConfig *rest.Config
+	k8sRESTConfig  *rest.Config
+	appliedObjects = object.K8sObjects{}
 )
 
 func init() {
@@ -117,6 +131,25 @@ func init() {
 		}
 	}
 
+}
+
+// ParseK8SYAMLToIstioControlPlaneSpec parses a YAML string IstioControlPlane CustomResource and unmarshals in into
+// an IstioControlPlaneSpec object. It returns the object and an API group/version with it.
+func ParseK8SYAMLToIstioControlPlaneSpec(yml string) (*v1alpha2.IstioControlPlaneSpec, *schema.GroupVersionKind, error) {
+	o, err := object.ParseYAMLToK8sObject([]byte(yml))
+	if err != nil {
+		return nil, nil, err
+	}
+	y, err := yaml.Marshal(o.UnstructuredObject().Object["spec"])
+	if err != nil {
+		return nil, nil, err
+	}
+	icp := &v1alpha2.IstioControlPlaneSpec{}
+	if err := util.UnmarshalWithJSONPB(string(y), icp); err != nil {
+		return nil, nil, err
+	}
+	gvk := o.GroupVersionKind()
+	return icp, &gvk, nil
 }
 
 // RenderToDir writes manifests to a local filesystem directory tree.
@@ -162,7 +195,7 @@ func renderRecursive(manifests name.ManifestMap, installTree componentTree, outp
 }
 
 // ApplyAll applies all given manifests using kubectl client.
-func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbose bool) (*CompositeOutput, error) {
+func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbose, wait bool, timeout time.Duration) (CompositeOutput, error) {
 	logAndPrint("Applying manifests for these components:")
 	for c := range manifests {
 		logAndPrint("- %s", c)
@@ -171,12 +204,12 @@ func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbo
 	if err := initK8SRestClient(); err != nil {
 		return nil, err
 	}
-	return applyRecursive(manifests, version, dryRun, verbose), nil
+	return applyRecursive(manifests, version, dryRun, verbose, wait, timeout)
 }
 
-func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun, verbose bool) *CompositeOutput {
+func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun, verbose, wait bool, timeout time.Duration) (CompositeOutput, error) {
 	var wg sync.WaitGroup
-	out := NewCompositeOutput()
+	out := CompositeOutput{}
 	for c, m := range manifests {
 		c := c
 		m := m
@@ -187,7 +220,7 @@ func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun,
 				<-s
 				logAndPrint("Parent dependency for %s has unblocked, proceeding.", c)
 			}
-			out.Stdout[c], out.Stderr[c], out.Err[c] = applyManifest(c, m, version, dryRun, verbose)
+			out[c] = applyManifest(c, m, version, dryRun, verbose)
 
 			// Signal all the components that depend on us.
 			for _, ch := range componentDependencies[c] {
@@ -198,33 +231,36 @@ func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun,
 		}()
 	}
 	wg.Wait()
-	return out
+	if wait {
+		return out, waitForResources(timeout, appliedObjects, dryRun)
+	}
+	return out, nil
 }
 
-func versionString(version version.Version) string {
-	return version.String()
-}
-
-func applyManifest(componentName name.ComponentName, manifestStr string, version version.Version, dryRun, verbose bool) (string, string, error) {
+func applyManifest(componentName name.ComponentName, manifestStr string, version version.Version, dryRun, verbose bool) *ComponentApplyOutput {
 	objects, err := object.ParseK8sObjectsFromYAMLManifest(manifestStr)
 	if err != nil {
-		return "", "", err
+		return &ComponentApplyOutput{
+			Err: err,
+		}
 	}
 	if len(objects) == 0 {
-		return "", "", nil
+		return &ComponentApplyOutput{}
 	}
 
 	namespace, stdoutCRD, stderrCRD := "", "", ""
 	for _, o := range objects {
 		o.AddLabels(map[string]string{istioComponentLabelStr: string(componentName)})
 		o.AddLabels(map[string]string{operatorLabelStr: operatorReconcileStr})
-		o.AddLabels(map[string]string{istioVersionLabelStr: versionString(version)})
+		o.AddLabels(map[string]string{istioVersionLabelStr: version.String()})
 		if o.Namespace != "" {
 			// All objects in a component have the same namespace.
 			namespace = o.Namespace
 		}
 	}
 	objects.Sort(defaultObjectOrder())
+
+	appliedObjects = append(appliedObjects, objects...)
 
 	// TODO; add "--prune" back
 	extraArgs := []string{"--force", "--selector", fmt.Sprintf("%s=%s", operatorLabelStr, operatorReconcileStr)}
@@ -235,27 +271,42 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 	if len(crdObjects) > 0 {
 		mcrd, err := crdObjects.JSONManifest()
 		if err != nil {
-			return "", "", err
+			return &ComponentApplyOutput{
+				Err: err,
+			}
 		}
 
 		stdoutCRD, stderrCRD, err = kubectl.Apply(dryRun, verbose, namespace, mcrd, extraArgs...)
 		if err != nil {
 			// Not all Istio components are robust to not yet created CRDs.
 			if err := waitForCRDs(objects, dryRun); err != nil {
-				return stdoutCRD, stderrCRD, err
+				return &ComponentApplyOutput{
+					Stdout: stdoutCRD,
+					Stderr: stderrCRD,
+					Err:    err,
+				}
 			}
 		}
 	}
 
-	log.Infof("Applying the following manifest:\n%s", manifestStr)
 	stdout, stderr := "", ""
 	m, err := objects.JSONManifest()
 	if err != nil {
-		return stdoutCRD, stderrCRD, err
+		return &ComponentApplyOutput{
+			Stdout: stdoutCRD,
+			Stderr: stderrCRD,
+			Err:    err,
+		}
 	}
 	stdout, stderr, err = kubectl.Apply(dryRun, verbose, namespace, m, extraArgs...)
 	logAndPrint("finished applying manifest for component %s", componentName)
-	return stdoutCRD + "\n" + stdout, stderrCRD + "\n" + stderr, err
+	ym, _ := objects.YAMLManifest()
+	return &ComponentApplyOutput{
+		Stdout:   stdoutCRD + "\n" + stdout,
+		Stderr:   stderrCRD + "\n" + stderr,
+		Manifest: ym,
+		Err:      err,
+	}
 }
 
 func defaultObjectOrder() func(o *object.K8sObject) int {
@@ -354,6 +405,166 @@ func waitForCRDs(objects object.K8sObjects, dryRun bool) error {
 
 	logAndPrint("CRDs applied.")
 	return nil
+}
+
+// waitForResources polls to get the current status of all pods, PVCs, and Services
+// until all are ready or a timeout is reached
+func waitForResources(timeout time.Duration, objects object.K8sObjects, dryRun bool) error {
+	if dryRun {
+		logAndPrint("Not waiting for resources ready in dry run mode.")
+		return nil
+	}
+
+	logAndPrint("Waiting for resources ready with timeout of %v", timeout)
+	cs, err := kubernetes.NewForConfig(k8sRESTConfig)
+	if err != nil {
+		return fmt.Errorf("k8s client error: %s", err)
+	}
+
+	errPoll := wait.Poll(2*time.Second, timeout, func() (bool, error) {
+		pods := []v1.Pod{}
+		services := []v1.Service{}
+		deployments := []deployment{}
+
+		for _, o := range objects {
+			kind := o.GroupVersionKind().Kind
+			switch kind {
+			case "Pod":
+				pod, err := cs.CoreV1().Pods(o.Namespace).Get(o.Name, metav1.GetOptions{})
+				if err != nil {
+					return false, err
+				}
+				pods = append(pods, *pod)
+			case "ReplicationController":
+				rc, err := cs.CoreV1().ReplicationControllers(o.Namespace).Get(o.Name, metav1.GetOptions{})
+				if err != nil {
+					return false, err
+				}
+				list, err := getPods(cs, rc.Namespace, rc.Spec.Selector)
+				if err != nil {
+					return false, err
+				}
+				pods = append(pods, list...)
+			case "Deployment":
+				currentDeployment, err := cs.AppsV1().Deployments(o.Namespace).Get(o.Name, metav1.GetOptions{})
+				if err != nil {
+					return false, err
+				}
+				newReplicaSet, err := deploymentutil.GetNewReplicaSet(currentDeployment, cs.AppsV1())
+				if err != nil || newReplicaSet == nil {
+					return false, err
+				}
+				newDeployment := deployment{
+					newReplicaSet,
+					currentDeployment,
+				}
+				deployments = append(deployments, newDeployment)
+			case "DaemonSet":
+				ds, err := cs.AppsV1().DaemonSets(o.Namespace).Get(o.Name, metav1.GetOptions{})
+				if err != nil {
+					return false, err
+				}
+				list, err := getPods(cs, ds.Namespace, ds.Spec.Selector.MatchLabels)
+				if err != nil {
+					return false, err
+				}
+				pods = append(pods, list...)
+			case "StatefulSet":
+				sts, err := cs.AppsV1().StatefulSets(o.Namespace).Get(o.Name, metav1.GetOptions{})
+				if err != nil {
+					return false, err
+				}
+				list, err := getPods(cs, sts.Namespace, sts.Spec.Selector.MatchLabels)
+				if err != nil {
+					return false, err
+				}
+				pods = append(pods, list...)
+			case "ReplicaSet":
+				rs, err := cs.AppsV1().ReplicaSets(o.Namespace).Get(o.Name, metav1.GetOptions{})
+				if err != nil {
+					return false, err
+				}
+				list, err := getPods(cs, rs.Namespace, rs.Spec.Selector.MatchLabels)
+				if err != nil {
+					return false, err
+				}
+				pods = append(pods, list...)
+			case "Service":
+				svc, err := cs.CoreV1().Services(o.Namespace).Get(o.Name, metav1.GetOptions{})
+				if err != nil {
+					return false, err
+				}
+				services = append(services, *svc)
+			}
+		}
+		isReady := podsReady(pods) && deploymentsReady(deployments) && servicesReady(services)
+		return isReady, nil
+	})
+
+	if errPoll != nil {
+		logAndPrint("Failed to wait for resources ready: %v", errPoll)
+		return fmt.Errorf("failed to wait for resources ready: %s", errPoll)
+	}
+
+	logAndPrint("Resources are ready.")
+	return nil
+}
+
+func getPods(client kubernetes.Interface, namespace string, selector map[string]string) ([]v1.Pod, error) {
+	list, err := client.CoreV1().Pods(namespace).List(metav1.ListOptions{
+		FieldSelector: fields.Everything().String(),
+		LabelSelector: labels.Set(selector).AsSelector().String(),
+	})
+	return list.Items, err
+}
+
+func podsReady(pods []v1.Pod) bool {
+	for _, pod := range pods {
+		if !isPodReady(&pod) {
+			logAndPrint("Pod is not ready: %s/%s", pod.GetNamespace(), pod.GetName())
+			return false
+		}
+	}
+	return true
+}
+
+func isPodReady(pod *v1.Pod) bool {
+	if len(pod.Status.Conditions) > 0 {
+		for _, condition := range pod.Status.Conditions {
+			if condition.Type == v1.PodReady &&
+				condition.Status == v1.ConditionTrue {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func deploymentsReady(deployments []deployment) bool {
+	for _, v := range deployments {
+		if !(v.replicaSets.Status.ReadyReplicas >= *v.deployment.Spec.Replicas-deploymentutil.MaxUnavailable(*v.deployment)) {
+			logAndPrint("Deployment is not ready: %s/%s", v.deployment.GetNamespace(), v.deployment.GetName())
+			return false
+		}
+	}
+	return true
+}
+
+func servicesReady(svc []v1.Service) bool {
+	for _, s := range svc {
+		if s.Spec.Type == v1.ServiceTypeExternalName {
+			continue
+		}
+		if s.Spec.ClusterIP != v1.ClusterIPNone && s.Spec.ClusterIP == "" {
+			logAndPrint("Service is not ready: %s/%s", s.GetNamespace(), s.GetName())
+			return false
+		}
+		if s.Spec.Type == v1.ServiceTypeLoadBalancer && s.Status.LoadBalancer.Ingress == nil {
+			logAndPrint("Service is not ready: %s/%s", s.GetNamespace(), s.GetName())
+			return false
+		}
+	}
+	return true
 }
 
 func buildInstallTree() {

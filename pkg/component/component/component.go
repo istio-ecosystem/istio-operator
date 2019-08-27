@@ -67,6 +67,45 @@ type CommonComponentFields struct {
 	renderer helm.TemplateRenderer
 }
 
+func NewComponent(cn name.ComponentName, opts *Options) IstioComponent {
+	var component IstioComponent
+	switch cn {
+	case name.IstioBaseComponentName:
+		component = NewCRDComponent(opts)
+	case name.PilotComponentName:
+		component = NewPilotComponent(opts)
+	case name.GalleyComponentName:
+		component = NewGalleyComponent(opts)
+	case name.SidecarInjectorComponentName:
+		component = NewSidecarInjectorComponent(opts)
+	case name.PolicyComponentName:
+		component = NewPolicyComponent(opts)
+	case name.TelemetryComponentName:
+		component = NewTelemetryComponent(opts)
+	case name.CitadelComponentName:
+		component = NewCitadelComponent(opts)
+	case name.CertManagerComponentName:
+		component = NewCertManagerComponent(opts)
+	case name.NodeAgentComponentName:
+		component = NewNodeAgentComponent(opts)
+	case name.IngressComponentName:
+		component = NewIngressComponent(opts)
+	case name.EgressComponentName:
+		component = NewEgressComponent(opts)
+	case name.PrometheusComponentName:
+		component = NewPrometheusComponent(opts)
+	case name.PrometheusOperatorComponentName:
+		component = NewPrometheusOperatorComponent(opts)
+	case name.KialiComponentName:
+		component = NewKialiComponent(opts)
+	case name.CNIComponentName:
+		component = NewCNIComponent(opts)
+	case name.TracingComponentName:
+		component = NewTracingComponent(opts)
+	}
+	return component
+}
+
 // CRDComponent is the pilot component.
 type CRDComponent struct {
 	*CommonComponentFields
@@ -430,6 +469,204 @@ func (c *EgressComponent) Name() name.ComponentName {
 	return c.CommonComponentFields.name
 }
 
+// PrometheusComponent is the egress gateway component.
+type PrometheusComponent struct {
+	*CommonComponentFields
+}
+
+// NewPrometheusComponent creates a new IngressComponent and returns a pointer to it.
+func NewPrometheusComponent(opts *Options) *PrometheusComponent {
+	return &PrometheusComponent{
+		&CommonComponentFields{
+			Options: opts,
+			name:    name.PrometheusComponentName,
+		},
+	}
+}
+
+// Run implements the IstioComponent interface.
+func (c *PrometheusComponent) Run() error {
+	return runComponent(c.CommonComponentFields)
+}
+
+// RenderManifest implements the IstioComponent interface.
+func (c *PrometheusComponent) RenderManifest() (string, error) {
+	if !c.started {
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
+	}
+	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *PrometheusComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
+}
+
+// PrometheusOperatorComponent is the egress gateway component.
+type PrometheusOperatorComponent struct {
+	*CommonComponentFields
+}
+
+// NewPrometheusOperatorComponent creates a new IngressComponent and returns a pointer to it.
+func NewPrometheusOperatorComponent(opts *Options) *PrometheusOperatorComponent {
+	return &PrometheusOperatorComponent{
+		&CommonComponentFields{
+			Options: opts,
+			name:    name.PrometheusOperatorComponentName,
+		},
+	}
+}
+
+// Run implements the IstioComponent interface.
+func (c *PrometheusOperatorComponent) Run() error {
+	return runComponent(c.CommonComponentFields)
+}
+
+// RenderManifest implements the IstioComponent interface.
+func (c *PrometheusOperatorComponent) RenderManifest() (string, error) {
+	if !c.started {
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
+	}
+	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *PrometheusOperatorComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
+}
+
+// GrafanaComponent is the egress gateway component.
+type GrafanaComponent struct {
+	*CommonComponentFields
+}
+
+// NewGrafanaComponent creates a new IngressComponent and returns a pointer to it.
+func NewGrafanaComponent(opts *Options) *GrafanaComponent {
+	return &GrafanaComponent{
+		&CommonComponentFields{
+			Options: opts,
+			name:    name.GrafanaComponentName,
+		},
+	}
+}
+
+// Run implements the IstioComponent interface.
+func (c *GrafanaComponent) Run() error {
+	return runComponent(c.CommonComponentFields)
+}
+
+// RenderManifest implements the IstioComponent interface.
+func (c *GrafanaComponent) RenderManifest() (string, error) {
+	if !c.started {
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
+	}
+	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *GrafanaComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
+}
+
+// KialiComponent is the egress gateway component.
+type KialiComponent struct {
+	*CommonComponentFields
+}
+
+// NewKialiComponent creates a new IngressComponent and returns a pointer to it.
+func NewKialiComponent(opts *Options) *KialiComponent {
+	return &KialiComponent{
+		&CommonComponentFields{
+			Options: opts,
+			name:    name.KialiComponentName,
+		},
+	}
+}
+
+// Run implements the IstioComponent interface.
+func (c *KialiComponent) Run() error {
+	return runComponent(c.CommonComponentFields)
+}
+
+// RenderManifest implements the IstioComponent interface.
+func (c *KialiComponent) RenderManifest() (string, error) {
+	if !c.started {
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
+	}
+	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *KialiComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
+}
+
+// CNIComponent is the egress gateway component.
+type CNIComponent struct {
+	*CommonComponentFields
+}
+
+// NewCNIComponent creates a new IngressComponent and returns a pointer to it.
+func NewCNIComponent(opts *Options) *CNIComponent {
+	return &CNIComponent{
+		&CommonComponentFields{
+			Options: opts,
+			name:    name.CNIComponentName,
+		},
+	}
+}
+
+// Run implements the IstioComponent interface.
+func (c *CNIComponent) Run() error {
+	return runComponent(c.CommonComponentFields)
+}
+
+// RenderManifest implements the IstioComponent interface.
+func (c *CNIComponent) RenderManifest() (string, error) {
+	if !c.started {
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
+	}
+	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *CNIComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
+}
+
+// TracingComponent is the egress gateway component.
+type TracingComponent struct {
+	*CommonComponentFields
+}
+
+// NewTracingComponent creates a new IngressComponent and returns a pointer to it.
+func NewTracingComponent(opts *Options) *TracingComponent {
+	return &TracingComponent{
+		&CommonComponentFields{
+			Options: opts,
+			name:    name.TracingComponentName,
+		},
+	}
+}
+
+// Run implements the IstioComponent interface.
+func (c *TracingComponent) Run() error {
+	return runComponent(c.CommonComponentFields)
+}
+
+// RenderManifest implements the IstioComponent interface.
+func (c *TracingComponent) RenderManifest() (string, error) {
+	if !c.started {
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
+	}
+	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *TracingComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
+}
+
 // runComponent performs startup tasks for the component defined by the given CommonComponentFields.
 func runComponent(c *CommonComponentFields) error {
 	r, err := createHelmRenderer(c)
@@ -444,9 +681,9 @@ func runComponent(c *CommonComponentFields) error {
 	return nil
 }
 
-// CompileHelmValues creates a Helm values.yaml config data tree from icp using the given translator.
-func CompileHelmValues(icp *v1alpha2.IstioControlPlaneSpec, translator *translate.Translator, componentName name.ComponentName) (string, error) {
-	globalVals, apiVals := make(map[string]interface{}), make(map[string]interface{})
+// TranslateHelmValues creates a Helm values.yaml config data tree from icp using the given translator.
+func TranslateHelmValues(icp *v1alpha2.IstioControlPlaneSpec, translator *translate.Translator, componentName name.ComponentName) (string, error) {
+	globalVals, globalUnvalidatedVals, apiVals := make(map[string]interface{}), make(map[string]interface{}), make(map[string]interface{})
 
 	// First, translate the IstioControlPlane API to helm Values.
 	apiValsStr, err := translator.ProtoToValues(icp)
@@ -464,50 +701,20 @@ func CompileHelmValues(icp *v1alpha2.IstioControlPlaneSpec, translator *translat
 	if err != nil {
 		return "", err
 	}
-	log.Infof("Untranslated values from IstioControlPlaneSpec.Values:\n%s", util.ToYAML(globalVals))
-	globalVals = translator.ValuesOverlaysToHelmValues(globalVals, name.IstioBaseComponentName)
-	log.Infof("Translated values from IstioControlPlaneSpec.Values:\n%s", util.ToYAML(globalVals))
+	_, err = name.SetFromPath(icp, "UnvalidatedValues", &globalUnvalidatedVals)
+	if err != nil {
+		return "", err
+	}
+	log.Infof("Values from IstioControlPlaneSpec.Values:\n%s", util.ToYAML(globalVals))
+	log.Infof("Values from IstioControlPlaneSpec.UnvalidatedValues:\n%s", util.ToYAML(globalUnvalidatedVals))
 
 	mergedVals, err := overlayTrees(globalVals, apiVals)
 	if err != nil {
 		return "", err
 	}
-
-	cns := []name.ComponentName{componentName}
-	if componentName == "" {
-		cns = translator.AllComponentsNames()
-	}
-
-	for _, cn := range cns {
-		componentVals, componentValsUnvalidated := make(map[string]interface{}), make(map[string]interface{})
-		// Add overlay from IstioControlPlaneSpec.<Feature>.Components.<Component>.Common.ValuesOverrides.
-		pathToValues := fmt.Sprintf("%s.Components.%s.Common.Values", translator.ToFeature[cn], cn)
-		_, err = name.SetFromPath(icp, pathToValues, &componentVals)
-		if err != nil {
-			return "", err
-		}
-
-		// Add overlay from IstioControlPlaneSpec.<Feature>.Components.<Component>.Common.UnvalidatedValuesOverrides.
-		pathToUnvalidatedValues := fmt.Sprintf("%s.Components.%s.Common.UnvalidatedValues", translator.ToFeature[cn], cn)
-		_, err = name.SetFromPath(icp, pathToUnvalidatedValues, &componentValsUnvalidated)
-		if err != nil {
-			return "", err
-		}
-
-		log.Infof("Untranslated values from %s:\n%s", pathToValues, util.ToYAML(componentVals))
-		log.Infof("Untranslated values from %s:\n%s", pathToUnvalidatedValues, util.ToYAML(componentValsUnvalidated))
-
-		// Translate from path in the API to helm paths.
-		componentVals = translator.ValuesOverlaysToHelmValues(componentVals, cn)
-		componentValsUnvalidated = translator.ValuesOverlaysToHelmValues(componentValsUnvalidated, cn)
-
-		log.Infof("Translated values from %s:\n%s", pathToValues, util.ToYAML(componentVals))
-		log.Infof("Translated values from %s:\n%s", pathToUnvalidatedValues, util.ToYAML(componentValsUnvalidated))
-
-		mergedVals, err = overlayTrees(mergedVals, componentVals, componentValsUnvalidated)
-		if err != nil {
-			return "", err
-		}
+	mergedVals, err = overlayTrees(globalUnvalidatedVals, mergedVals)
+	if err != nil {
+		return "", err
 	}
 
 	mergedYAML, err := yaml.Marshal(mergedVals)
@@ -527,7 +734,7 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 		return disabledYAMLStr(c.name), nil
 	}
 
-	mergedYAML, err := CompileHelmValues(c.InstallSpec, c.Translator, c.name)
+	mergedYAML, err := TranslateHelmValues(c.InstallSpec, c.Translator, c.name)
 	if err != nil {
 		return "", err
 	}
@@ -548,10 +755,11 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 		log.Errorf("Error in OverlayK8sSettings: %s", err)
 		return "", err
 	}
+	my = "# Resources for " + string(c.name) + " component\n\n" + my
 	log.Infof("Manifest after k8s API settings:\n%s\n", my)
 
 	// Add the k8s resource overlays from IstioControlPlaneSpec.
-	pathToK8sOverlay := fmt.Sprintf("%s.Components.%s.Common.K8S.Overlays", c.FeatureName, c.name)
+	pathToK8sOverlay := fmt.Sprintf("%s.Components.%s.K8S.Overlays", c.FeatureName, c.name)
 	var overlays []*v1alpha2.K8SObjectOverlay
 	found, err := name.SetFromPath(c.InstallSpec, pathToK8sOverlay, &overlays)
 	if err != nil {
@@ -613,8 +821,8 @@ func createHelmRenderer(c *CommonComponentFields) (helm.TemplateRenderer, error)
 	if err != nil {
 		return nil, err
 	}
-	return helm.NewHelmRenderer(icp.CustomPackagePath+"/"+c.Translator.ComponentMaps[c.name].HelmSubdir,
-		icp.Profile, string(c.name), ns)
+	return helm.NewHelmRenderer(icp.InstallPackagePath, c.Translator.ComponentMaps[c.name].HelmSubdir,
+		string(c.name), ns)
 }
 
 // disabledYAMLStr returns the YAML comment string that the given component is disabled.

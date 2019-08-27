@@ -31,12 +31,12 @@ func IsYAMLEqual(a, b string) bool {
 	}
 	ajb, err := yaml.YAMLToJSON([]byte(a))
 	if err != nil {
-		dbgPrint("bad YAML in isYAMLEqual:\n%s", a)
+		scope.Debugf("bad YAML in isYAMLEqual:\n%s", a)
 		return false
 	}
 	bjb, err := yaml.YAMLToJSON([]byte(b))
 	if err != nil {
-		dbgPrint("bad YAML in isYAMLEqual:\n%s", b)
+		scope.Debugf("bad YAML in isYAMLEqual:\n%s", b)
 		return false
 	}
 
@@ -64,6 +64,20 @@ func ToYAMLWithJSONPB(val proto.Message) string {
 		return err.Error()
 	}
 	return string(yb)
+}
+
+// MarshalWithJSONPB returns a YAML string representation of val (using jsonpb).
+func MarshalWithJSONPB(val proto.Message) (string, error) {
+	m := jsonpb.Marshaler{}
+	js, err := m.MarshalToString(val)
+	if err != nil {
+		return "", err
+	}
+	yb, err := yaml.JSONToYAML([]byte(js))
+	if err != nil {
+		return "", err
+	}
+	return string(yb), nil
 }
 
 // UnmarshalWithJSONPB unmarshals y into out using jsonpb (required for many proto defined structs).

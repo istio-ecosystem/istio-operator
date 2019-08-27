@@ -29,6 +29,11 @@ prometheus:
 
 # Common settings.
 global:
+  istioNamespace: istio-system
+  configNamespace: istio-system
+  # Telemetry namespace, including tracing.
+  telemetryNamespace: istio-system
+  policyNamespace: istio-system
 
   proxy:
     # Sets the destination Statsd in envoy (the value of the "--statsdUdpAddress" proxy argument
@@ -40,5 +45,7 @@ global:
       enabled: false
       host: # example: statsd-svc.istio-system
       port: # example: 9125
-  
+
   useMCP: false
+
+certmanager: {}

@@ -1,128 +1,88 @@
-export GO111MODULE=on
+# WARNING: DO NOT EDIT, THIS FILE IS PROBABLY A COPY
+#
+# The original version of this file is located in the https://github.com/istio/common-files repo.
+# If you're looking at this file in a different repo and want to make a change, please go to the
+# common-files repo, make the change there and check it in. Then come back to this repo and run
+# "make update-common".
 
-gen_img := gcr.io/istio-testing/protoc:2019-03-29
-pwd := $(shell pwd)
-mount_dir := /src
-uid := $(shell id -u)
-docker_gen := docker run --rm --user $(uid) -v /etc/passwd:/etc/passwd:ro -v $(pwd):$(mount_dir) -w $(mount_dir) $(gen_img) -I.
-out_path = .
+# Copyright Istio Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-########################
-# protoc_gen_gogo*
-########################
+# allow optional per-repo overrides
+-include Makefile.overrides.mk
 
-#gofast_plugin_prefix := --gofast_out=plugins=grpc,
-gogofast_plugin_prefix := --gogofast_out=plugins=grpc,
+# Set the environment variable BUILD_WITH_CONTAINER to use a container
+# to build the repo. The only dependencies in this mode are to have make and
+# docker. If you'd rather build with a local tool chain instead, you'll need to
+# figure out all the tools you need in your environment to make that work.
+export BUILD_WITH_CONTAINER ?= 0
 
-comma := ,
-empty:=
-space := $(empty) $(empty)
+ifeq ($(BUILD_WITH_CONTAINER),1)
+IMG = gcr.io/istio-testing/build-tools:2019-08-26T16-04-46
+UID = $(shell id -u)
+PWD = $(shell pwd)
+GOBIN_SOURCE ?= $(GOPATH)/bin
+GOBIN ?= /work/out/bin
 
-importmaps := \
-	gogoproto/gogo.proto=github.com/gogo/protobuf/gogoproto \
-	google/protobuf/any.proto=github.com/gogo/protobuf/types \
-	google/protobuf/descriptor.proto=github.com/gogo/protobuf/protoc-gen-gogo/descriptor \
-	google/protobuf/duration.proto=github.com/gogo/protobuf/types \
-	google/protobuf/struct.proto=github.com/gogo/protobuf/types \
-	google/protobuf/timestamp.proto=github.com/gogo/protobuf/types \
-	google/protobuf/wrappers.proto=github.com/gogo/protobuf/types \
-	google/rpc/status.proto=github.com/gogo/googleapis/google/rpc \
-	google/rpc/code.proto=github.com/gogo/googleapis/google/rpc \
-	google/rpc/error_details.proto=github.com/gogo/googleapis/google/rpc \
+LOCAL_ARCH := $(shell uname -m)
+ifeq ($(LOCAL_ARCH),x86_64)
+GOARCH_LOCAL := amd64
+else ifeq ($(shell echo $(LOCAL_ARCH) | head -c 5),armv8)
+GOARCH_LOCAL := arm64
+else ifeq ($(shell echo $(LOCAL_ARCH) | head -c 4),armv)
+GOARCH_LOCAL := arm
+else
+GOARCH_LOCAL := $(LOCAL_ARCH)
+endif
 
-# generate mapping directive with M<proto>:<go pkg>, format for each proto file
-mapping_with_spaces := $(foreach map,$(importmaps),M$(map),)
-gogo_mapping := $(subst $(space),$(empty),$(mapping_with_spaces))
+GOARCH ?= $(GOARCH_LOCAL)
 
-#gofast_plugin := $(gofast_plugin_prefix)$(gogo_mapping):$(out_path)
-gogofast_plugin := $(gogofast_plugin_prefix)$(gogo_mapping):$(out_path)
+LOCAL_OS := $(shell uname)
+ifeq ($(LOCAL_OS),Linux)
+   GOOS_LOCAL = linux
+else ifeq ($(LOCAL_OS),Darwin)
+   GOOS_LOCAL = darwin
+else
+   $(error "This system's OS $(LOCAL_OS) isn't recognized/supported")
+endif
 
-#####################
-# Generation Rules
-#####################
+GOOS ?= $(GOOS_LOCAL)
 
-api_path := pkg/apis/istio/v1alpha2
-api_protos := $(shell find $(api_path) -type f -name '*.proto' | sort)
-api_pb_gos := $(api_protos:.proto=.pb.go)
+RUN = docker run -t -i --sig-proxy=true -u $(UID) --rm \
+	-e GOOS="$(GOOS)" \
+	-e GOARCH="$(GOARCH)" \
+	-e GOBIN="$(GOBIN)" \
+	-e BUILD_WITH_CONTAINER="$(BUILD_WITH_CONTAINER)" \
+	-v /etc/passwd:/etc/passwd:ro \
+	-v $(readlink /etc/localtime):/etc/localtime:ro \
+	$(CONTAINER_OPTIONS) \
+	--mount type=bind,source="$(PWD)",destination="/work" \
+	--mount type=volume,source=istio-go-mod,destination="/go/pkg/mod" \
+	--mount type=volume,source=istio-go-cache,destination="/gocache" \
+	--mount type=bind,source="$(GOBIN_SOURCE)",destination="/go/out/bin" \
+	-w /work $(IMG)
+else
+export GOBIN ?= ./out/bin
+RUN =
+endif
 
-.PHONY: default lint mandiff coverage test build
+MAKE = $(RUN) make --no-print-directory -e -f Makefile.core.mk
 
-default: iop
+%:
+	@$(MAKE) $@
 
-generate-api-go: $(api_pb_gos)
-	patch pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go < pkg/apis/istio/v1alpha2/fixup_go_structs.patch
+default:
+	@$(MAKE)
 
-$(api_pb_gos): $(api_protos)
-	@$(docker_gen) $(gogofast_plugin) $^
-
-clean-proto:
-	rm -f $(api_pb_gos)
-
-fmt:
-	@scripts/run_gofmt.sh
-
-
-include Makefile.common.mk
-
-# CI Targets
-lint:
-	# These PATH hacks are temporary until prow properly sets its paths
-	@PATH=${PATH}:${GOPATH}/bin scripts/check_license.sh
-	@PATH=${PATH}:${GOPATH}/bin scripts/run_golangci.sh
-
-mandiff:
-	# These PATH hacks are temporary until prow properly sets its paths
-	@PATH=${PATH}:${GOPATH}/bin scripts/run_mandiff.sh
-
-coverage:
-	@scripts/codecov.sh
-
-test:
-	GO111MODULE=on go test -race ./...
-
-build: iop
-
-# get imported protos to $GOPATH
-get_dep_proto:
-	GO111MODULE=off go get k8s.io/api/core/v1 k8s.io/api/autoscaling/v2beta1 k8s.io/apimachinery/pkg/apis/meta/v1/ github.com/gogo/protobuf/...
-
-proto_iscp:
-	protoc -I=${GOPATH}/src -I./pkg/apis/istio/v1alpha2/ --proto_path=pkg/apis/istio/v1alpha2/ --gofast_out=pkg/apis/istio/v1alpha2/ pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto
-	sed -i -e 's|github.com/gogo/protobuf/protobuf/google/protobuf|github.com/gogo/protobuf/types|g' pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go
-	patch pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go < pkg/apis/istio/v1alpha2/fixup_go_structs.patch
-
-proto_iscp_orig:
-	protoc -I=${GOPATH}/src -I./pkg/apis/istio/v1alpha2/ --proto_path=pkg/apis/istio/v1alpha2/ --gofast_out=pkg/apis/istio/v1alpha2/ pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto
-	sed -i -e 's|github.com/gogo/protobuf/protobuf/google/protobuf|github.com/gogo/protobuf/types|g' pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go
-	cp pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go.orig
-
-proto_values:
-	protoc -I=${GOPATH}/src -I./pkg/apis/istio/v1alpha2/values --proto_path=pkg/apis/istio/v1alpha2/values --go_out=pkg/apis/istio/v1alpha2/values pkg/apis/istio/v1alpha2/values/values_types.proto
-	sed -i -e 's|github.com/gogo/protobuf/protobuf/google/protobuf|github.com/gogo/protobuf/types|g' pkg/apis/istio/v1alpha2/values/values_types.pb.go
-	patch pkg/apis/istio/v1alpha2/values/values_types.pb.go < pkg/apis/istio/v1alpha2/values/fix_values_structs.patch
-
-proto_values_orig:
-	protoc -I=${GOPATH}/src -I./pkg/apis/istio/v1alpha2/values --proto_path=pkg/apis/istio/v1alpha2/values --go_out=pkg/apis/istio/v1alpha2/values pkg/apis/istio/v1alpha2/values/values_types.proto
-	sed -i -e 's|github.com/gogo/protobuf/protobuf/google/protobuf|github.com/gogo/protobuf/types|g' pkg/apis/istio/v1alpha2/values/values_types.pb.go
-	cp pkg/apis/istio/v1alpha2/values/values_types.pb.go pkg/apis/istio/v1alpha2/values/values_types.pb.go.orig
-
-proto_iscporig_setup: get_dep_proto proto_iscp_orig
-
-proto_iscp_setup: get_dep_proto proto_iscp
-
-proto_values_setup: get_dep_proto proto_values
-
-proto_valuesorig_setup: get_dep_proto proto_values_orig
-
-gen_patch_iscp:
-	diff -u pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go.orig pkg/apis/istio/v1alpha2/istiocontrolplane_types.pb.go > pkg/apis/istio/v1alpha2/fixup_go_structs.patch || true
-
-gen_patch_values:
-	diff -u pkg/apis/istio/v1alpha2/values/values_types.pb.go.orig pkg/apis/istio/v1alpha2/values/values_types.pb.go > pkg/apis/istio/v1alpha2/values/fix_values_structs.patch || true
-
-vfsgen: data/
-	go get github.com/shurcooL/vfsgen
-	go generate ./cmd/iop.go
-
-iop: vfsgen
-	go build -o ${GOPATH}/bin/iop ./cmd/iop.go
+.PHONY: default

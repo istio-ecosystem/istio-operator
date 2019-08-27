@@ -22,6 +22,8 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -30,7 +32,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 
-	"istio.io/operator/pkg/util"
+	"istio.io/operator/pkg/compare"
 	"istio.io/pkg/log"
 )
 
@@ -238,8 +240,8 @@ func ParseK8sObjectsFromYAMLManifest(manifest string) (K8sObjects, error) {
 	var objects K8sObjects
 
 	for _, yaml := range yamls {
-		if strings.TrimSpace(yaml) == "" {
-			// helm charts sometimes emits blank objects with just a "disabled" comment.
+		yaml = removeNonYAMLLines(yaml)
+		if yaml == "" {
 			continue
 		}
 		o, err := ParseYAMLToK8sObject([]byte(yaml))
@@ -252,6 +254,19 @@ func ParseK8sObjectsFromYAMLManifest(manifest string) (K8sObjects, error) {
 	}
 
 	return objects, nil
+}
+
+func removeNonYAMLLines(yms string) string {
+	out := ""
+	for _, s := range strings.Split(yms, "\n") {
+		if strings.HasPrefix(s, "#") {
+			continue
+		}
+		out += s + "\n"
+	}
+
+	// helm charts sometimes emits blank objects with just a "disabled" comment.
+	return strings.TrimSpace(out)
 }
 
 // JSONManifest returns a JSON representation of K8sObjects os.
@@ -273,6 +288,32 @@ func (os K8sObjects) JSONManifest() (string, error) {
 		if _, err := b.Write(json); err != nil {
 			return "", err
 		}
+	}
+
+	return b.String(), nil
+}
+
+// YAMLManifest returns a YAML representation of K8sObjects os.
+func (os K8sObjects) YAMLManifest() (string, error) {
+	var b bytes.Buffer
+
+	for i, item := range os {
+		if i != 0 {
+			if _, err := b.WriteString("\n\n"); err != nil {
+				return "", err
+			}
+		}
+		ym, err := item.YAML()
+		if err != nil {
+			return "", fmt.Errorf("error building yaml: %v", err)
+		}
+		if _, err := b.Write(ym); err != nil {
+			return "", err
+		}
+		if _, err := b.Write([]byte(YAMLSeparator)); err != nil {
+			return "", err
+		}
+
 	}
 
 	return b.String(), nil
@@ -301,7 +342,9 @@ func (os K8sObjects) Sort(score func(o *K8sObject) int) {
 func (os K8sObjects) ToMap() map[string]*K8sObject {
 	ret := make(map[string]*K8sObject)
 	for _, oo := range os {
-		ret[oo.Hash()] = oo
+		if oo.Valid() {
+			ret[oo.Hash()] = oo
+		}
 	}
 	return ret
 }
@@ -310,29 +353,19 @@ func (os K8sObjects) ToMap() map[string]*K8sObject {
 func (os K8sObjects) ToNameKindMap() map[string]*K8sObject {
 	ret := make(map[string]*K8sObject)
 	for _, oo := range os {
-		ret[oo.HashNameKind()] = oo
+		if oo.Valid() {
+			ret[oo.HashNameKind()] = oo
+		}
 	}
 	return ret
 }
 
-// YAML returns a YAML representation of os, using an internal cache.
-func (os K8sObjects) YAML() (string, error) {
-	var sb strings.Builder
-	for _, o := range os {
-		oy, err := o.YAML()
-		if err != nil {
-			return "", err
-		}
-		_, err = sb.Write(oy)
-		if err != nil {
-			return "", err
-		}
-		_, err = sb.WriteString(YAMLSeparator)
-		if err != nil {
-			return "", err
-		}
+// Valid checks returns true if Kind and Name of K8sObject are both not empty.
+func (o *K8sObject) Valid() bool {
+	if o.Kind == "" || o.Name == "" {
+		return false
 	}
-	return sb.String(), nil
+	return true
 }
 
 func ManifestDiff(a, b string) (string, error) {
@@ -344,40 +377,146 @@ func ManifestDiff(a, b string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	aom, bom := ao.ToMap(), bo.ToMap()
+	return manifestDiff(aom, bom, nil)
+}
+
+// ManifestDiffWithSelect checks the manifest differences with selected and ignored resources.
+// The selected filter will apply before the ignored filter.
+func ManifestDiffWithSelectAndIgnore(a, b, selectResources, ignoreResources string) (string, error) {
+	sm := getObjPathMap(selectResources)
+	im := getObjPathMap(ignoreResources)
+	aosm, err := filterResourceWithSelectAndIgnore(a, sm, im)
+	if err != nil {
+		return "", err
+	}
+	bosm, err := filterResourceWithSelectAndIgnore(b, sm, im)
+	if err != nil {
+		return "", err
+	}
+
+	return manifestDiff(aosm, bosm, im)
+}
+
+// filterResourceWithSelectAndIgnore filter the input resources with selected and ignored filter.
+func filterResourceWithSelectAndIgnore(a string, sm, im map[string]string) (map[string]*K8sObject, error) {
+	ao, err := ParseK8sObjectsFromYAMLManifest(a)
+	if err != nil {
+		return nil, err
+	}
+	aom := ao.ToMap()
+	aosm := make(map[string]*K8sObject)
+	for ak, av := range aom {
+		for selected := range sm {
+			re, err := buildResourceRegexp(strings.TrimSpace(selected))
+			if err != nil {
+				return nil, fmt.Errorf("error building the resource regexp: %v", err)
+			}
+			if re.MatchString(ak) {
+				aosm[ak] = av
+			}
+		}
+		for ignored := range im {
+			re, err := buildResourceRegexp(strings.TrimSpace(ignored))
+			if err != nil {
+				return nil, fmt.Errorf("error building the resource regexp: %v", err)
+			}
+			if re.MatchString(ak) {
+				if _, ok := aosm[ak]; ok {
+					delete(aosm, ak)
+				}
+			}
+		}
+	}
+	return aosm, nil
+}
+
+// buildResourceRegexp translates the resource indicator to regexp.
+func buildResourceRegexp(s string) (*regexp.Regexp, error) {
+	hash := strings.Split(s, ":")
+	for i, v := range hash {
+		if v == "" || v == "*" {
+			hash[i] = ".*"
+		}
+	}
+	return regexp.Compile(strings.Join(hash, ":"))
+}
+
+// manifestDiff an internal function to compare the manifests difference specified in the input.
+func manifestDiff(aom, bom map[string]*K8sObject, im map[string]string) (string, error) {
 	var sb strings.Builder
 	for ak, av := range aom {
 		ay, err := av.YAML()
 		if err != nil {
 			return "", err
 		}
-		by, err := bom[ak].YAML()
+		bo := bom[ak]
+		if bo == nil {
+			writeStringSafe(&sb, "\n\nObject "+ak+" is missing in B:\n\n")
+			continue
+		}
+		by, err := bo.YAML()
 		if err != nil {
 			return "", err
 		}
-		diff := util.YAMLDiff(string(ay), string(by))
+
+		ignorePaths := objectIgnorePaths(ak, im)
+		diff := compare.YAMLCmpWithIgnore(string(ay), string(by), ignorePaths)
+
 		if diff != "" {
-			writeStringSafe(sb, "\n\nObject "+ak+" has diffs:\n\n")
-			writeStringSafe(sb, diff)
+			writeStringSafe(&sb, "\n\nObject "+ak+" has diffs:\n\n")
+			writeStringSafe(&sb, diff)
 		}
 	}
-	for bk, bv := range bom {
-		if aom[bk] == nil {
-			by, err := bv.YAML()
-			if err != nil {
-				return "", err
-			}
-			diff := util.YAMLDiff(string(by), "")
-			if diff != "" {
-				writeStringSafe(sb, "\n\nObject "+bk+" is missing:\n\n")
-				writeStringSafe(sb, diff)
-			}
+	for bk := range bom {
+		ao := aom[bk]
+		if ao == nil {
+			writeStringSafe(&sb, "\n\nObject "+bk+" is missing in A:\n\n")
+			continue
 		}
 	}
-	return sb.String(), err
+	return sb.String(), nil
 }
 
-func writeStringSafe(sb strings.Builder, s string) {
+func getObjPathMap(rs string) map[string]string {
+	rm := make(map[string]string)
+	if len(rs) == 0 {
+		return rm
+	}
+	for _, r := range strings.Split(rs, ",") {
+		split := strings.Split(r, ":")
+		if len(split) < 4 {
+			rm[r] = ""
+			continue
+		}
+		kind, namespace, name, path := split[0], split[1], split[2], split[3]
+		obj := fmt.Sprintf("%v:%v:%v", kind, namespace, name)
+		rm[obj] = path
+	}
+	return rm
+}
+
+func objectIgnorePaths(objectName string, im map[string]string) (ignorePaths []string) {
+	if im == nil {
+		im = make(map[string]string)
+	}
+	for obj, path := range im {
+		if path == "" {
+			continue
+		}
+		re, err := buildResourceRegexp(strings.TrimSpace(obj))
+		if err != nil {
+			continue
+		}
+		if re.MatchString(objectName) {
+			ignorePaths = append(ignorePaths, path)
+		}
+	}
+	return ignorePaths
+}
+
+func writeStringSafe(sb io.StringWriter, s string) {
 	_, err := sb.WriteString(s)
 	if err != nil {
 		log.Error(err.Error())

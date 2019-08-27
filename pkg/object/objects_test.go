@@ -15,16 +15,9 @@
 package object
 
 import (
-	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/gogo/protobuf/types"
-	"github.com/golang/protobuf/proto"
-	v2beta1 "k8s.io/api/autoscaling/v2beta1"
-	v1 "k8s.io/api/core/v1"
-
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
 )
 
@@ -510,224 +503,325 @@ spec:
 	}
 }
 
-var (
-	icp = &v1alpha2.IstioControlPlaneSpec{
-		DefaultNamespacePrefix: "istio-system",
-		Hub:                    "docker.io/istio",
-		Tag:                    "1.1.4",
-		Profile:                "default",
-		TrafficManagement: &v1alpha2.TrafficManagementFeatureSpec{
-			Enabled: &types.BoolValue{Value: true},
-			Components: &v1alpha2.TrafficManagementFeatureSpec_Components{
-				Namespace: "istio-control",
-				Pilot: &v1alpha2.PilotComponentSpec{
-					Common: &v1alpha2.CommonComponentSpec{
-						K8S: &v1alpha2.KubernetesResourcesSpec{
-							Env: []*v1.EnvVar{
-								{Name: "GODEBUG", Value: "gctrace=1"},
-							},
-							HpaSpec: &v2beta1.HorizontalPodAutoscalerSpec{
-								MaxReplicas: 5,
-								MinReplicas: proto.Int32(1),
-								ScaleTargetRef: v2beta1.CrossVersionObjectReference{
-									Kind:       "Deployment",
-									Name:       "istio-pilot",
-									APIVersion: "apps/v1",
-								},
-								Metrics: []v2beta1.MetricSpec{
-									{
-										Type:     v2beta1.ResourceMetricSourceType,
-										Resource: &v2beta1.ResourceMetricSource{Name: v1.ResourceCPU, TargetAverageUtilization: proto.Int32(80)},
-									},
-								},
-							},
-							ReplicaCount: 1,
-							ReadinessProbe: &v1alpha2.ReadinessProbe{
-								HttpGet: &v1alpha2.HTTPGetAction{
-									Path: "/ready",
-									Port: v1alpha2.FromInt(8080),
-								},
-								InitialDelaySeconds: 5,
-								PeriodSeconds:       30,
-								TimeoutSeconds:      5,
-							},
-							Resources: &v1alpha2.Resources{
-								Requests: map[string]string{
-									"cpu":    "500m",
-									"memory": "2048Mi",
-								},
-							},
-						},
-						Values: map[string]interface{}{
-							"image":                           "pilot",
-							"traceSampling":                   1.0,
-							"configNamespace":                 "istio-config",
-							"keepaliveMaxServerConnectionAge": "30m",
-							"configMap":                       true,
-							"ingress": map[string]interface{}{
-								"ingressService":        "istio-ingressgateway",
-								"ingressControllerMode": "OFF",
-								"ingressClass":          "istio",
-							},
-							"telemetry": map[string]interface{}{
-								"enabled": true,
-							},
-							"policy": map[string]interface{}{
-								"enabled": false,
-							},
-							"useMCP": true,
-						},
-					},
-				},
-				Proxy: &v1alpha2.ProxyComponentSpec{
-					Common: &v1alpha2.CommonComponentSpec{
-						Values: map[string]interface{}{
-							"image":         "proxyv2",
-							"clusterDomain": "cluster.local",
-							"resources": map[string]interface{}{
-								"requests": map[string]interface{}{
-									"cpu":    "100m",
-									"memory": "128Mi",
-								},
-								"limits": map[string]interface{}{
-									"cpu":    "2000m",
-									"memory": "128Mi",
-								},
-							},
-							"accessLogEncoding": "TEXT",
-							"logLevel":          "warning",
-							"componentLogLevel": "misc:error",
-							"dnsRefreshRate":    "300s",
-							"privileged":        false,
-							"enableCoreDump":    false,
-							"includeIPRanges":   "*",
-							"autoInject":        "enabled",
-							"tracer":            "zipkin",
-						},
-					},
-				},
-			},
+func TestManifestDiff(t *testing.T) {
+	testDeploymentYaml1 := `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: istio-citadel
+  namespace: istio-system
+  labels:
+    istio: citadel
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        istio: citadel
+    spec:
+      containers:
+      - name: citadel
+        image: docker.io/istio/citadel:1.1.8
+`
+
+	testDeploymentYaml2 := `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: istio-citadel
+  namespace: istio-system
+  labels:
+    istio: citadel
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        istio: citadel
+    spec:
+      containers:
+      - name: citadel
+        image: docker.io/istio/citadel:1.2.2
+`
+
+	testPodYaml1 := `apiVersion: v1
+kind: Pod
+metadata:
+  name: istio-galley-75bcd59768-hpt5t
+  namespace: istio-system
+  labels:
+    istio: galley
+spec:
+  containers:
+  - name: galley
+    image: docker.io/istio/galley:1.1.8
+    ports:
+    - containerPort: 443
+      protocol: TCP
+    - containerPort: 15014
+      protocol: TCP
+    - containerPort: 9901
+      protocol: TCP
+`
+
+	testServiceYaml1 := `apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: pilot
+  name: istio-pilot
+  namespace: istio-system
+spec:
+  type: ClusterIP
+  ports:
+  - name: grpc-xds
+    port: 15010
+    protocol: TCP
+    targetPort: 15010
+  - name: http-monitoring
+    port: 15014
+    protocol: TCP
+    targetPort: 15014
+  selector:
+    istio: pilot
+`
+
+	manifestDiffTests := []struct {
+		desc        string
+		yamlStringA string
+		yamlStringB string
+		want        string
+	}{
+		{
+			"ManifestDiffWithIdenticalResource",
+			testDeploymentYaml1 + YAMLSeparator,
+			testDeploymentYaml1,
+			"",
+		},
+		{
+			"ManifestDiffWithIdenticalMultipleResources",
+			testDeploymentYaml1 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			testPodYaml1 + YAMLSeparator + testServiceYaml1 + YAMLSeparator + testDeploymentYaml1,
+			"",
+		},
+		{
+			"ManifestDiffWithDifferentResource",
+			testDeploymentYaml1,
+			testDeploymentYaml2,
+			"Object Deployment:istio-system:istio-citadel has diffs",
+		},
+		{
+			"ManifestDiffWithDifferentMultipleResources",
+			testDeploymentYaml1 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			testDeploymentYaml2 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			"Object Deployment:istio-system:istio-citadel has diffs",
+		},
+		{
+			"ManifestDiffMissingResourcesInA",
+			testPodYaml1 + YAMLSeparator + testDeploymentYaml1 + YAMLSeparator,
+			testDeploymentYaml1 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			"Object Service:istio-system:istio-pilot is missing in A",
+		},
+		{
+			"ManifestDiffMissingResourcesInB",
+			testDeploymentYaml1 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			testServiceYaml1 + YAMLSeparator + testPodYaml1,
+			"Object Deployment:istio-system:istio-citadel is missing in B",
 		},
 	}
 
-	icpYaml = `
-defaultNamespacePrefix: istio-system
-hub: docker.io/istio
-tag: 1.1.4
-defaultNamespacePrefix: istio-system
-profile: default
-trafficManagement:
-  enabled: true
-  components:
-    namespace: istio-control
-    pilot:
-      common:
-        k8s:
-          env:
-          - name: GODEBUG
-            value: "gctrace=1"
-          hpaSpec:
-            maxReplicas: 5
-            minReplicas: 1
-            scaleTargetRef:
-              apiVersion: apps/v1
-              kind: Deployment
-              name: istio-pilot
-            metrics:
-              - type: Resource
-                resource:
-                  name: cpu
-                  targetAverageUtilization: 80
-          replicaCount: 1
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 30
-            timeoutSeconds: 5
-          resources:
-            requests:
-              cpu: 500m
-              memory: 2048Mi
-        values:
-          image: pilot
-          traceSampling: 1.0
-          configNamespace: istio-config
-          keepaliveMaxServerConnectionAge: 30m
-          configMap: true
-          ingress:
-            ingressService: istio-ingressgateway
-            ingressControllerMode: "OFF"
-            ingressClass: istio
-          telemetry:
-            enabled: true
-          policy:
-            enabled: false
-          useMCP: true
-    proxy:
-      common:
-        values:
-          image: proxyv2
-          clusterDomain: "cluster.local"
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 2000m
-              memory: 128Mi
-          accessLogEncoding: TEXT
-          logLevel: warning
-          componentLogLevel: "misc:error"
-          dnsRefreshRate: 300s
-          privileged: false
-          enableCoreDump: false
-          includeIPRanges: "*"
-          autoInject: enabled
-          tracer: "zipkin"
-`
-)
-
-// TODO: this test may be redundant. It cannot exist in util because that creates a dependency on istio/v1alpha2.
-func TestToYAMLWithJSONPB(t *testing.T) {
-	toYAMLWithJSONPBTests := []struct {
-		desc string
-		pb   *v1alpha2.IstioControlPlaneSpec
-		want string
-	}{
-		{"TranslateICPToYAMLWithJSONPB", icp, icpYaml},
-	}
-
-	for _, tt := range toYAMLWithJSONPBTests {
+	for _, tt := range manifestDiffTests {
 		t.Run(tt.desc, func(t *testing.T) {
-			got := util.ToYAMLWithJSONPB(tt.pb)
-			if !util.IsYAMLEqual(got, tt.want) || util.YAMLDiff(got, tt.want) != "" {
-				t.Errorf("%s:\ngot:\n%s\n\nwant:\n%s\nDiff:\n%s\n", tt.desc, got, tt.want, util.YAMLDiff(got, tt.want))
+			got, err := ManifestDiff(tt.yamlStringA, tt.yamlStringB)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !strings.Contains(got, tt.want) {
+				t.Errorf("%s:\ngot:\n%v\ndoes't contains\nwant:\n%v", tt.desc, got, tt.want)
 			}
 		})
 	}
 }
 
-// TODO: this test may be redundant. It cannot exist in util because that creates a dependency on istio/v1alpha2.
-func TestUnmarshalWithJSONPB(t *testing.T) {
-	unmarshalWithJSONPBTests := []struct {
-		desc string
-		yaml string
-		want *v1alpha2.IstioControlPlaneSpec
+func TestManifestDiffWithSelectAndIgnore(t *testing.T) {
+	testDeploymentYaml1 := `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: istio-citadel
+  namespace: istio-system
+  labels:
+    istio: citadel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      istio: citadel
+  template:
+    metadata:
+      labels:
+        istio: citadel
+    spec:
+      containers:
+      - name: citadel
+        image: docker.io/istio/citadel:1.1.8
+---
+`
+
+	testDeploymentYaml2 := `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: istio-citadel
+  namespace: istio-system
+  labels:
+    istio: citadel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      istio: citadel
+  template:
+    metadata:
+      labels:
+        istio: citadel
+    spec:
+      containers:
+      - name: citadel
+        image: docker.io/istio/citadel:1.2.2
+---
+`
+
+	testPodYaml1 := `apiVersion: v1
+kind: Pod
+metadata:
+  name: istio-galley-75bcd59768-hpt5t
+  namespace: istio-system
+  labels:
+    istio: galley
+spec:
+  containers:
+  - name: galley
+    image: docker.io/istio/galley:1.1.8
+    ports:
+    - containerPort: 443
+      protocol: TCP
+    - containerPort: 15014
+      protocol: TCP
+    - containerPort: 9901
+      protocol: TCP
+---
+`
+
+	testServiceYaml1 := `apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: pilot
+  name: istio-pilot
+  namespace: istio-system
+spec:
+  type: ClusterIP
+  ports:
+  - name: grpc-xds
+    port: 15010
+    protocol: TCP
+    targetPort: 15010
+  - name: http-monitoring
+    port: 15014
+    protocol: TCP
+    targetPort: 15014
+  selector:
+    istio: pilot
+---
+`
+
+	manifestDiffWithSelectAndIgnoreTests := []struct {
+		desc            string
+		yamlStringA     string
+		yamlStringB     string
+		selectResources string
+		ignoreResources string
+		want            string
 	}{
-		{"UnmarshalWithJSONPBToYAML", icpYaml, icp},
+		{
+			"ManifestDiffWithSelectAndIgnoreForIdenticalResource",
+			testDeploymentYaml1 + YAMLSeparator,
+			testDeploymentYaml1,
+			"::",
+			"",
+			"",
+		},
+		{
+			"ManifestDiffWithSelectAndIgnoreForDifferentResourcesIgnoreSingle",
+			testDeploymentYaml1 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			testDeploymentYaml1 + YAMLSeparator,
+			"Deployment:*:istio-citadel",
+			"Service:*:",
+			"",
+		},
+		{
+			"ManifestDiffWithSelectAndIgnoreForDifferentResourcesIgnoreMultiple",
+			testDeploymentYaml1 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			testDeploymentYaml1,
+			"Deployment:*:istio-citadel",
+			"Pod::*,Service:istio-system:*",
+			"",
+		},
+		{
+			"ManifestDiffWithSelectAndIgnoreForDifferentResourcesSelectSingle",
+			testDeploymentYaml1 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			testServiceYaml1 + YAMLSeparator + testDeploymentYaml1,
+			"Deployment::istio-citadel",
+			"Pod:*:*",
+			"",
+		},
+		{
+			"ManifestDiffWithSelectAndIgnoreForDifferentResourcesSelectSingle",
+			testDeploymentYaml1 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			testServiceYaml1 + YAMLSeparator + testDeploymentYaml1,
+			"Deployment::istio-citadel,Service:istio-system:istio-pilot,Pod:*:*",
+			"Pod:*:*",
+			"",
+		},
+		{
+			"ManifestDiffWithSelectAndIgnoreForDifferentResourceForDefault",
+			testDeploymentYaml1,
+			testDeploymentYaml2 + YAMLSeparator,
+			"::",
+			"",
+			"Object Deployment:istio-system:istio-citadel has diffs",
+		},
+		{
+			"ManifestDiffWithSelectAndIgnoreForDifferentResourceForSingleSelectAndIgnore",
+			testDeploymentYaml1 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			testDeploymentYaml2 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			"Deployment:*:*",
+			"Pod:*:*",
+			"Object Deployment:istio-system:istio-citadel has diffs",
+		},
+		{
+			"ManifestDiffWithSelectAndIgnoreForMissingResourcesInA",
+			testPodYaml1 + YAMLSeparator + testDeploymentYaml1,
+			testDeploymentYaml1 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			"Pod:istio-system:Citadel,Service:istio-system:",
+			"Pod:*:*",
+			"Object Service:istio-system:istio-pilot is missing in A",
+		},
+		{
+			"ManifestDiffWithSelectAndIgnoreForMissingResourcesInB",
+			testDeploymentYaml1 + YAMLSeparator + testPodYaml1 + YAMLSeparator + testServiceYaml1,
+			testServiceYaml1 + YAMLSeparator + testPodYaml1 + YAMLSeparator,
+			"*:istio-system:*",
+			"Pod::",
+			"Object Deployment:istio-system:istio-citadel is missing in B",
+		},
 	}
 
-	for _, tt := range unmarshalWithJSONPBTests {
+	for _, tt := range manifestDiffWithSelectAndIgnoreTests {
 		t.Run(tt.desc, func(t *testing.T) {
-			got := &v1alpha2.IstioControlPlaneSpec{}
-			err := util.UnmarshalWithJSONPB(tt.yaml, got)
+			got, err := ManifestDiffWithSelectAndIgnore(tt.yamlStringA, tt.yamlStringB, tt.selectResources, tt.ignoreResources)
 			if err != nil {
-				t.Errorf("unexpected error: %v", err)
+				t.Fatalf("unexpected error: %v", err)
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("%s:\ngot:\n%v\n\nwant:\n%v", tt.desc, got, tt.want)
+			if !strings.Contains(got, tt.want) {
+				t.Errorf("%s:\ngot:\n%v\ndoes't contains\nwant:\n%v", tt.desc, got, tt.want)
 			}
 		})
 	}

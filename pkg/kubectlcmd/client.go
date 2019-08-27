@@ -70,6 +70,7 @@ func (c *Client) Apply(dryRun, verbose bool, namespace string, manifest string, 
 
 	cmdStr := strings.Join(cmd.Args, " ")
 	if verbose {
+
 		cmdStr += "\n" + manifest
 	} else {
 		cmdStr += " <use --verbose to see manifest string> \n"
@@ -88,6 +89,35 @@ func (c *Client) Apply(dryRun, verbose bool, namespace string, manifest string, 
 	}
 
 	logAndPrint("kubectl apply success")
+
+	return stdout.String(), stderr.String(), nil
+}
+
+// GetConfig runs the kubectl get cm command with the provided argument
+func (c *Client) GetConfig(name, namespace, output string, extraArgs ...string) (string, string, error) {
+	args := []string{"get", "cm", name}
+	if namespace != "" {
+		args = append(args, "-n", namespace)
+	}
+	if output != "" {
+		args = append(args, "-o", output)
+	}
+	args = append(args, extraArgs...)
+
+	cmd := exec.Command("kubectl", args...)
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := c.cmdSite.Run(cmd)
+	if err != nil {
+		logAndPrint("error running kubectl get cm: %s", err)
+		return stdout.String(), stderr.String(), fmt.Errorf("error from running kubectl get cm: %s", err)
+	}
+
+	logAndPrint("kubectl get cm success")
 
 	return stdout.String(), stderr.String(), nil
 }

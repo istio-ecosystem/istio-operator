@@ -21,8 +21,8 @@ import (
 var (
 	// defaultValidations maps a data path to a validation function.
 	defaultValuesValidations = map[string]ValidatorFunc{
-		"global.proxy.includeIpRanges":     validateStringList(validateCIDR),
-		"global.proxy.excludeIpRanges":     validateStringList(validateCIDR),
+		"global.proxy.includeIpRanges":     validateIPRangesOrStar,
+		"global.proxy.excludeIpRanges":     validateIPRangesOrStar,
 		"global.proxy.includeInboundPorts": validateStringList(validatePortNumberString),
 		"global.proxy.excludeInboundPorts": validateStringList(validatePortNumberString),
 	}
@@ -35,7 +35,7 @@ func CheckValues(root map[string]interface{}) util.Errors {
 
 func validateValues(validations map[string]ValidatorFunc, node interface{}, path util.Path) (errs util.Errors) {
 	pstr := path.String()
-	dbgPrint("validateValues %s", pstr)
+	scope.Debugf("validateValues %s", pstr)
 	vf := defaultValuesValidations[pstr]
 	if vf != nil {
 		errs = util.AppendErrs(errs, vf(path, node))

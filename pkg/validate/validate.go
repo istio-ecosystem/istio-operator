@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"net/url"
 	"reflect"
-	"strings"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
@@ -27,16 +26,16 @@ import (
 var (
 	// defaultValidations maps a data path to a validation function.
 	defaultValidations = map[string]ValidatorFunc{
-		"Hub":                    validateHub,
-		"Tag":                    validateTag,
-		"BaseSpecPath":           validateInstallPackagePath,
-		"CustomPackagePath":      validateInstallPackagePath,
-		"DefaultNamespacePrefix": validateDefaultNamespacePrefix,
+		"Hub":               validateHub,
+		"Tag":               validateTag,
+		"BaseSpecPath":      validateInstallPackagePath,
+		"CustomPackagePath": validateInstallPackagePath,
+		"DefaultNamespace":  validateDefaultNamespace,
 	}
 
 	// requiredValues lists all the values that must be non-empty.
 	requiredValues = map[string]bool{
-		"DefaultNamespacePrefix": true,
+		"DefaultNamespace": true,
 	}
 )
 
@@ -47,19 +46,19 @@ func CheckIstioControlPlaneSpec(is *v1alpha2.IstioControlPlaneSpec, checkRequire
 }
 
 func validate(validations map[string]ValidatorFunc, structPtr interface{}, path util.Path, checkRequired bool) (errs util.Errors) {
-	dbgPrint("validate with path %s, %v (%T)", path, structPtr, structPtr)
+	scope.Debugf("validate with path %s, %v (%T)", path, structPtr, structPtr)
 	if structPtr == nil {
 		return nil
 	}
-	if reflect.TypeOf(structPtr).Kind() == reflect.Struct {
-		dbgPrint("validate path %s, skipping struct type %T", path, structPtr)
+	if util.IsStruct(structPtr) {
+		scope.Debugf("validate path %s, skipping struct type %T", path, structPtr)
 		return nil
 	}
-	if reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
+	if !util.IsPtr(structPtr) {
 		return util.NewErrs(fmt.Errorf("validate path %s, value: %v, expected ptr, got %T", path, structPtr, structPtr))
 	}
 	structElems := reflect.ValueOf(structPtr).Elem()
-	if reflect.TypeOf(structElems).Kind() != reflect.Struct {
+	if !util.IsStruct(structElems) {
 		return util.NewErrs(fmt.Errorf("validate path %s, value: %v, expected struct, got %T", path, structElems, structElems))
 	}
 
@@ -75,7 +74,7 @@ func validate(validations map[string]ValidatorFunc, structPtr interface{}, path 
 			continue
 		}
 
-		dbgPrint("Checking field %s", fieldName)
+		scope.Debugf("Checking field %s", fieldName)
 		switch kind {
 		case reflect.Struct:
 			errs = util.AppendErrs(errs, validate(validations, fieldValue.Addr().Interface(), append(path, fieldName), checkRequired))
@@ -110,21 +109,24 @@ func validate(validations map[string]ValidatorFunc, structPtr interface{}, path 
 
 func validateLeaf(validations map[string]ValidatorFunc, path util.Path, val interface{}, checkRequired bool) util.Errors {
 	pstr := path.String()
-	dbgPrintC("validate %s:%v(%T) ", pstr, val, val)
+	msg := fmt.Sprintf("validate %s:%v(%T) ", pstr, val, val)
 	if util.IsValueNil(val) || util.IsEmptyString(val) {
 		if checkRequired && requiredValues[pstr] {
 			return util.NewErrs(fmt.Errorf("field %s is required but not set", util.ToYAMLPathString(pstr)))
 		}
-		dbgPrint("validate %s: OK (empty value)", pstr)
+		msg += fmt.Sprintf("validate %s: OK (empty value)", pstr)
+		scope.Debug(msg)
 		return nil
 	}
 
 	vf, ok := validations[pstr]
 	if !ok {
-		dbgPrint("validate %s: OK (no validation)", pstr)
+		msg += fmt.Sprintf("validate %s: OK (no validation)", pstr)
+		scope.Debug(msg)
 		// No validation defined.
 		return nil
 	}
+	scope.Debug(msg)
 	return vf(path, val)
 }
 
@@ -136,7 +138,7 @@ func validateTag(path util.Path, val interface{}) util.Errors {
 	return validateWithRegex(path, val, TagRegexp)
 }
 
-func validateDefaultNamespacePrefix(path util.Path, val interface{}) util.Errors {
+func validateDefaultNamespace(path util.Path, val interface{}) util.Errors {
 	return validateWithRegex(path, val, ObjectNameRegexp)
 }
 
@@ -155,20 +157,5 @@ func validateInstallPackagePath(path util.Path, val interface{}) util.Errors {
 		return util.NewErrs(fmt.Errorf("invalid value %s: %s", path, valStr))
 	}
 
-	validPrefixes := []string{util.LocalFilePrefix}
-	validPrefixDesc := map[string]string{
-		util.LocalFilePrefix: "RFC 8089 absolute path to file e.g. file:///var/istio/config.yaml",
-	}
-
-	for _, vp := range validPrefixes {
-		if strings.HasPrefix(valStr, vp) {
-			return nil
-		}
-	}
-
-	errStr := fmt.Sprintf("Invalid path prefix for %s: %s. \nMust be one of the following:\n", path, valStr)
-	for _, vp := range validPrefixes {
-		errStr += fmt.Sprintf("%-15s %s", vp, validPrefixDesc[vp])
-	}
-	return util.NewErrs(fmt.Errorf(errStr))
+	return nil
 }

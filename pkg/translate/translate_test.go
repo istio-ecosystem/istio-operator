@@ -15,12 +15,8 @@
 package translate
 
 import (
-	"bytes"
 	"testing"
 
-	"github.com/ghodss/yaml"
-	"github.com/gogo/protobuf/proto"
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/kr/pretty"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
@@ -28,7 +24,7 @@ import (
 	"istio.io/operator/pkg/version"
 )
 
-func TestProtoToValuesV12(t *testing.T) {
+func TestProtoToValuesV13(t *testing.T) {
 	tests := []struct {
 		desc    string
 		yamlStr string
@@ -38,13 +34,13 @@ func TestProtoToValuesV12(t *testing.T) {
 		{
 			desc: "default success",
 			yamlStr: `
-defaultNamespacePrefix: istio-system
+defaultNamespace: istio-system
 `,
 			want: `
 certmanager:
   enabled: false
   namespace: istio-system
-citadel:
+security:
   enabled: false
   namespace: istio-system
 galley:
@@ -61,6 +57,12 @@ global:
   enabled: true
   namespace: istio-system
   istioNamespace: istio-system
+  configNamespace: istio-system
+  policyNamespace: istio-system
+  prometheusNamespace: istio-system
+  securityNamespace: istio-system
+  telemetryNamespace: istio-system
+
 mixer:
   policy:
     enabled: false
@@ -85,13 +87,13 @@ sidecarInjectorWebhook:
 			yamlStr: `
 hub: docker.io/istio
 tag: 1.2.3
-defaultNamespacePrefix: istio-system
+defaultNamespace: istio-system
 `,
 			want: `
 certmanager:
   enabled: false
   namespace: istio-system
-citadel:
+security:
   enabled: false
   namespace: istio-system
 galley:
@@ -108,6 +110,11 @@ global:
   enabled: true
   hub: docker.io/istio
   istioNamespace: istio-system
+  configNamespace: istio-system
+  policyNamespace: istio-system
+  prometheusNamespace: istio-system
+  securityNamespace: istio-system
+  telemetryNamespace: istio-system
   namespace: istio-system
   tag: 1.2.3
 mixer:
@@ -129,91 +136,29 @@ sidecarInjectorWebhook:
 
 `,
 		},
-		{
-			desc: "security",
-			yamlStr: `
-defaultNamespacePrefix: istio-system
-security:
-  enabled: true
-  controlPlaneMtls: true
-  dataPlaneMtlsStrict: false
-`,
-			want: `
-certmanager:
-  enabled: true
-  namespace: istio-system
-citadel:
-  enabled: true
-  namespace: istio-system
-galley:
-  enabled: false
-  namespace: istio-system
-gateways:
-  istio-egressgateway:
-    enabled: false
-    namespace: istio-system
-  istio-ingressgateway:
-    enabled: false
-    namespace: istio-system
-global:
-  controlPlaneSecurityEnabled: true
-  enabled: true
-  istioNamespace: istio-system
-  mtls:
-    enabled: false
-  namespace: istio-system
-mixer:
-  policy:
-    enabled: false
-    namespace: istio-system
-  telemetry:
-    enabled: false
-    namespace: istio-system
-nodeagent:
-  enabled: true
-  namespace: istio-system
-pilot:
-  enabled: false
-  namespace: istio-system
-sidecarInjectorWebhook:
-  enabled: false
-  namespace: istio-system
-`,
-		},
 	}
 
-	tr := Translators[version.NewMinorVersion(1, 2)]
+	tr, err := NewTranslator(version.NewMinorVersion(1, 3))
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
 			ispec := &v1alpha2.IstioControlPlaneSpec{}
-			err := unmarshalWithJSONPB(tt.yamlStr, ispec)
+			err := util.UnmarshalWithJSONPB(tt.yamlStr, ispec)
 			if err != nil {
 				t.Fatalf("unmarshalWithJSONPB(%s): got error %s", tt.desc, err)
 			}
-			dbgPrint("ispec: \n%s\n", pretty.Sprint(ispec))
+			scope.Debugf("ispec: \n%s\n", pretty.Sprint(ispec))
 			got, err := tr.ProtoToValues(ispec)
 			if gotErr, wantErr := errToString(err), tt.wantErr; gotErr != wantErr {
-				t.Errorf("ProtoToValues(%s)(%v): gotErr:%s, wantErr:%s", tt.desc, tt.yamlStr, gotErr, wantErr)
+				t.Fatalf("ProtoToValues(%s)(%v): gotErr:%s, wantErr:%s", tt.desc, tt.yamlStr, gotErr, wantErr)
 			}
 			if want := tt.want; !util.IsYAMLEqual(got, want) {
 				t.Errorf("ProtoToValues(%s): got:\n%s\n\nwant:\n%s\nDiff:\n%s\n", tt.desc, got, want, util.YAMLDiff(got, want))
 			}
 		})
 	}
-}
-
-func unmarshalWithJSONPB(y string, out proto.Message) error {
-	jb, err := yaml.YAMLToJSON([]byte(y))
-	if err != nil {
-		return err
-	}
-
-	u := jsonpb.Unmarshaler{}
-	err = u.Unmarshal(bytes.NewReader(jb), out)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // errToString returns the string representation of err and the empty string if

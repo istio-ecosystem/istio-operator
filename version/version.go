@@ -14,6 +14,39 @@
 
 package version
 
-var (
-	Version = "0.0.1"
+import (
+	goversion "github.com/hashicorp/go-version"
+
+	pkgversion "istio.io/operator/pkg/version"
 )
+
+const (
+	// OperatorVersionString is the version string of this operator binary.
+	OperatorVersionString = "1.3.0"
+)
+
+var (
+	// SupportedVersions is a list of chart versions supported by this version of the operator.
+	// It must be synced with the versions.yaml file.
+	SupportedVersions = []string{
+		"1.3.0",
+	}
+
+	// OperatorBinaryVersion is the Istio operator version.
+	OperatorBinaryVersion pkgversion.Version
+	// OperatorBinaryGoVersion is the Istio operator version in go-version format.
+	OperatorBinaryGoVersion *goversion.Version
+)
+
+func init() {
+	var err error
+	OperatorBinaryGoVersion, err = goversion.NewVersion(OperatorVersionString)
+	if err != nil {
+		panic(err)
+	}
+	v, err := pkgversion.NewVersionFromString(OperatorVersionString)
+	if err != nil {
+		panic(err)
+	}
+	OperatorBinaryVersion = *v
+}

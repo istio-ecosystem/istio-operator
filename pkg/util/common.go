@@ -15,19 +15,16 @@
 package util
 
 import (
+	"net/url"
 	"strings"
 
 	"github.com/ghodss/yaml"
-)
 
-const (
-	// LocalFilePrefix is a prefix for local files.
-	LocalFilePrefix = "file:///"
+	"istio.io/pkg/log"
 )
 
 var (
-	// DebugPackage controls verbose debugging in this package. Used for offline debugging.
-	DebugPackage = false
+	scope = log.RegisterScope("util", "util", 0)
 )
 
 // Tree is a tree.
@@ -44,11 +41,11 @@ func (t Tree) String() string {
 
 // IsFilePath reports whether the given URL is a local file path.
 func IsFilePath(path string) bool {
-	return strings.HasPrefix(path, LocalFilePrefix)
+	return strings.Contains(path, "/") || strings.Contains(path, ".")
 }
 
-// GetLocalFilePath returns the local file path string of the form /a/b/c, given a file URL of the form file:///a/b/c
-func GetLocalFilePath(path string) string {
-	// LocalFilePrefix always starts with file:/// but this includes the absolute path leading slash, preserve that.
-	return "/" + strings.TrimPrefix(path, LocalFilePrefix)
+// IsHTTPURL checks whether the given URL is a HTTP URL, empty path or relative URLs would be rejected.
+func IsHTTPURL(path string) bool {
+	u, err := url.Parse(path)
+	return err == nil && u.Host != "" && (u.Scheme == "http" || u.Scheme == "https")
 }

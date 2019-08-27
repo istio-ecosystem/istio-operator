@@ -22,7 +22,8 @@ import (
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
-	"istio.io/operator/pkg/vfsgen"
+	"istio.io/operator/pkg/util"
+	"istio.io/operator/pkg/vfs"
 
 	"istio.io/pkg/log"
 )
@@ -31,8 +32,8 @@ const (
 	// DefaultProfileFilename is the name of the default profile yaml file.
 	DefaultProfileFilename = "default.yaml"
 
-	chartsRoot   = "/charts"
-	profilesRoot = "/profiles"
+	chartsRoot   = "charts"
+	profilesRoot = "profiles"
 )
 
 var (
@@ -41,7 +42,7 @@ var (
 )
 
 func init() {
-	profilePaths, err := vfsgen.ReadDir(profilesRoot)
+	profilePaths, err := vfs.ReadDir(profilesRoot)
 	if err != nil {
 		panic(err)
 	}
@@ -58,24 +59,22 @@ type VFSRenderer struct {
 	helmChartDirPath string
 	chart            *chart.Chart
 	started          bool
-	valuesYAML       string
 }
 
 // NewVFSRenderer creates a VFSRenderer with the given relative path to helm charts, component name and namespace and
 // a base values YAML string.
-func NewVFSRenderer(helmChartDirPath, valuesYAML, componentName, namespace string) *VFSRenderer {
-	log.Infof("NewVFSRenderer with helmChart=%s, componentName=%s", helmChartDirPath, componentName)
+func NewVFSRenderer(helmChartDirPath, componentName, namespace string) *VFSRenderer {
+	log.Infof("NewVFSRenderer with helmChart=%s, componentName=%s, namespace=%s", helmChartDirPath, componentName, namespace)
 	return &VFSRenderer{
 		namespace:        namespace,
 		componentName:    componentName,
 		helmChartDirPath: helmChartDirPath,
-		valuesYAML:       valuesYAML,
 	}
 }
 
 // Run implements the TemplateRenderer interface.
 func (h *VFSRenderer) Run() error {
-	log.Infof("Run FileTemplateRenderer with helmChart=%s, componentName=%s", h.helmChartDirPath, h.componentName)
+	log.Infof("Run VFSRenderer with helmChart=%s, componentName=%s, namespace=%s", h.helmChartDirPath, h.componentName, h.namespace)
 	if err := h.loadChart(); err != nil {
 		return err
 	}
@@ -89,14 +88,14 @@ func (h *VFSRenderer) RenderManifest(values string) (string, error) {
 	if !h.started {
 		return "", fmt.Errorf("VFSRenderer for %s not started in renderChart", h.componentName)
 	}
-	return renderChart(h.namespace, h.valuesYAML, values, h.chart)
+	return renderChart(h.namespace, values, h.chart)
 }
 
 // LoadValuesVFS loads the compiled in file corresponding to the given profile name.
 func LoadValuesVFS(profileName string) (string, error) {
 	path := filepath.Join(profilesRoot, BuiltinProfileToFilename(profileName))
 	log.Infof("Loading values from compiled in VFS at path %s", path)
-	b, err := vfsgen.ReadFile(path)
+	b, err := vfs.ReadFile(path)
 	return string(b), err
 }
 
@@ -110,13 +109,13 @@ func isBuiltinProfileName(name string) bool {
 // loadChart implements the TemplateRenderer interface.
 func (h *VFSRenderer) loadChart() error {
 	prefix := filepath.Join(chartsRoot, h.helmChartDirPath)
-	fnames, err := vfsgen.GetFilesRecursive(prefix)
+	fnames, err := vfs.GetFilesRecursive(prefix)
 	if err != nil {
 		return err
 	}
 	var bfs []*chartutil.BufferedFile
 	for _, fname := range fnames {
-		b, err := vfsgen.ReadFile(fname)
+		b, err := vfs.ReadFile(fname)
 		if err != nil {
 			return err
 		}
@@ -144,4 +143,9 @@ func stripPrefix(path, prefix string) string {
 	pl := len(strings.Split(prefix, "/"))
 	pv := strings.Split(path, "/")
 	return strings.Join(pv[pl:], "/")
+}
+
+// list all the builtin profiles.
+func ListBuiltinProfiles() []string {
+	return util.StringBoolMapToSlice(ProfileNames)
 }

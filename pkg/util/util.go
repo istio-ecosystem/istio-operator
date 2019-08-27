@@ -18,10 +18,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
-
-	"istio.io/pkg/log"
 )
 
 func init() {
@@ -31,6 +34,8 @@ func init() {
 var (
 	letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 )
+
+type FileFilter func(fileName string) bool
 
 // RandomString returns a random string of length n.
 func RandomString(n int) string {
@@ -51,11 +56,66 @@ func PrettyJSON(b []byte) []byte {
 	return out.Bytes()
 }
 
-// dbgPrint prints v if the package global variable DebugPackage is set.
-// v has the same format as Printf. A trailing newline is added to the output.
-func dbgPrint(v ...interface{}) {
-	if !DebugPackage {
-		return
+// StringBoolMapToSlice creates and returns a slice of all the map keys with true.
+func StringBoolMapToSlice(m map[string]bool) []string {
+	s := make([]string, 0, len(m))
+	for k, v := range m {
+		if v {
+			s = append(s, k)
+		}
 	}
-	log.Infof(fmt.Sprintf(v[0].(string), v[1:]...))
+	return s
+}
+
+// ReadFilesWithFilter reads files from path, for a directory it recursively reads files and filters the results
+// for single file it directly reads the file. It returns a concatenated output of all matching files' content.
+func ReadFilesWithFilter(path string, filter FileFilter) (string, error) {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return "", err
+	}
+	var fileList []string
+	if fi.IsDir() {
+		err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() || !filter(path) {
+				return nil
+			}
+			fileList = append(fileList, path)
+			return nil
+		})
+		if err != nil {
+			return "", err
+		}
+	} else {
+		fileList = append(fileList, path)
+	}
+	var sb strings.Builder
+	for _, file := range fileList {
+		a, err := ioutil.ReadFile(file)
+		if err != nil {
+			return "", err
+		}
+		if _, err := sb.WriteString(string(a) + "\n"); err != nil {
+			return "", err
+		}
+	}
+	return sb.String(), nil
+}
+
+// ParseValue parses string into a value
+func ParseValue(valueStr string) interface{} {
+	var value interface{}
+	if v, err := strconv.Atoi(valueStr); err == nil {
+		value = v
+	} else if v, err := strconv.ParseFloat(valueStr, 64); err == nil {
+		value = v
+	} else if v, err := strconv.ParseBool(valueStr); err == nil {
+		value = v
+	} else {
+		value = valueStr
+	}
+	return value
 }
