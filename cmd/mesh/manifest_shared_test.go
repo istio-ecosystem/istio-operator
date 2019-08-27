@@ -61,9 +61,3 @@ func readFile(path string) (string, error) {
 	return string(b), err
 }
 
-func refreshGoldenFiles() bool {
-	if os.Getenv("REFRESH_GOLDEN") == "true" {
-		return true
-	}
-	return false
-}
