@@ -32,7 +32,9 @@ if [[ "$#" -eq 1 ]]; then
     SHA="${1}"
 fi
 
-git clone https://github.com/istio/installer.git "${INSTALLER_DIR}"
+if [[ ! -d "${INSTALLER_DIR}/installer" ]] ; then
+    git clone https://github.com/istio/installer.git "${INSTALLER_DIR}"
+fi
 
 pushd .
 cd "${INSTALLER_DIR}"

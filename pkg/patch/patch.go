@@ -139,7 +139,6 @@ func YAMLManifestPatch(baseYAML string, namespace string, overlays []*v1alpha2.K
 		}
 		if _, err := ret.WriteString("\n---\n"); err != nil {
 			errs = util.AppendErr(errs, fmt.Errorf("patch WriteString error: %s", err))
-			continue
 		}
 	}
 	// Render the remaining objects with no overlays.
