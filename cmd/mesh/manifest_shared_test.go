@@ -60,3 +60,10 @@ func readFile(path string) (string, error) {
 	b, err := ioutil.ReadFile(path)
 	return string(b), err
 }
+
+func refreshGoldenFiles() bool {
+	if os.Getenv("REFRESH_GOLDEN") == "true" {
+		return true
+	}
+	return false
+}

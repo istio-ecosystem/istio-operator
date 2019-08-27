@@ -35,15 +35,15 @@ gateways:
             preferredDuringSchedulingIgnoredDuringExecution: []
             requiredDuringSchedulingIgnoredDuringExecution: []
         env:
-          - name: ISTIO_META_ROUTER_MODE
-            value: sni-dnat
+        - name: ISTIO_META_ROUTER_MODE
+          value: sni-dnat
         hpaSpec:
           maxReplicas: 5
           metrics:
-            - resource:
-                name: cpu
-                targetAverageUtilization: 80
-              type: Resource
+          - resource:
+              name: cpu
+              targetAverageUtilization: 80
+            type: Resource
           minReplicas: 1
           scaleTargetRef:
             apiVersion: apps/v1
@@ -66,15 +66,15 @@ gateways:
             preferredDuringSchedulingIgnoredDuringExecution: []
             requiredDuringSchedulingIgnoredDuringExecution: []
         env:
-          - name: ISTIO_META_ROUTER_MODE
-            value: sni-dnat
+        - name: ISTIO_META_ROUTER_MODE
+          value: sni-dnat
         hpaSpec:
           maxReplicas: 5
           metrics:
-            - resource:
-                name: cpu
-                targetAverageUtilization: 80
-              type: Resource
+          - resource:
+              name: cpu
+              targetAverageUtilization: 80
+            type: Resource
           minReplicas: 1
           scaleTargetRef:
             apiVersion: apps/v1
@@ -101,15 +101,15 @@ policy:
             preferredDuringSchedulingIgnoredDuringExecution: []
             requiredDuringSchedulingIgnoredDuringExecution: []
         env:
-          - name: GODEBUG
-            value: gctrace=1
+        - name: GODEBUG
+          value: gctrace=1
         hpaSpec:
           maxReplicas: 5
           metrics:
-            - resource:
-                name: cpu
-                targetAverageUtilization: 80
-              type: Resource
+          - resource:
+              name: cpu
+              targetAverageUtilization: 80
+            type: Resource
           minReplicas: 1
           scaleTargetRef:
             apiVersion: apps/v1
@@ -148,10 +148,10 @@ telemetry:
         hpaSpec:
           maxReplicas: 5
           metrics:
-            - resource:
-                name: cpu
-                targetAverageUtilization: 80
-              type: Resource
+          - resource:
+              name: cpu
+              targetAverageUtilization: 80
+            type: Resource
           minReplicas: 1
           scaleTargetRef:
             apiVersion: apps/v1
@@ -177,15 +177,15 @@ trafficManagement:
             preferredDuringSchedulingIgnoredDuringExecution: []
             requiredDuringSchedulingIgnoredDuringExecution: []
         env:
-          - name: GODEBUG
-            value: gctrace=1
+        - name: GODEBUG
+          value: gctrace=1
         hpaSpec:
           maxReplicas: 5
           metrics:
-            - resource:
-                name: cpu
-                targetAverageUtilization: 80
-              type: Resource
+          - resource:
+              name: cpu
+              targetAverageUtilization: 80
+            type: Resource
           minReplicas: 1
           scaleTargetRef:
             apiVersion: apps/v1
@@ -367,7 +367,7 @@ values:
     ingress:
       enabled: false
       hosts:
-        - grafana.local
+      - grafana.local
     persist: false
     replicaCount: 1
     security:
@@ -385,7 +385,7 @@ values:
     cniConfDir: /etc/cni/net.d
     enabled: false
     excludeNamespaces:
-      - istio-system
+    - istio-system
     hub: gcr.io/istio-release
     logLevel: info
     pullPolicy: Always
@@ -411,7 +411,7 @@ values:
     ingress:
       enabled: false
       hosts:
-        - kiali.local
+      - kiali.local
     prometheusAddr: http://prometheus:9090
     replicaCount: 1
     security:
@@ -466,7 +466,7 @@ values:
     ingress:
       enabled: false
       hosts:
-        - prometheus.local
+      - prometheus.local
     replicaCount: 1
     retention: 6h
     scrapeInterval: 15s
@@ -609,3 +609,4 @@ values:
           cpu: 150m
           memory: 900Mi
       tag: 2.14.2
+
