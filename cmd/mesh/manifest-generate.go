@@ -62,11 +62,11 @@ func manifestGenerate(args *rootArgs, mgArgs *manifestGenerateArgs, l *logger) {
 
 	overlayFromSet, err := makeTreeFromSetList(mgArgs.set)
 	if err != nil {
-		l.lfatal(err.Error())
+		l.logAndFatal(err.Error())
 	}
 	manifests, err := genManifests(mgArgs.inFilename, overlayFromSet)
 	if err != nil {
-		l.lfatal(err.Error())
+		l.logAndFatal(err.Error())
 	}
 
 	if mgArgs.outFilename == "" {
@@ -75,10 +75,10 @@ func manifestGenerate(args *rootArgs, mgArgs *manifestGenerateArgs, l *logger) {
 		}
 	} else {
 		if err := os.MkdirAll(mgArgs.outFilename, os.ModePerm); err != nil {
-			l.lfatal(err.Error())
+			l.logAndFatal(err.Error())
 		}
 		if err := manifest.RenderToDir(manifests, mgArgs.outFilename, args.dryRun, args.verbose); err != nil {
-			l.lfatal(err.Error())
+			l.logAndFatal(err.Error())
 		}
 	}
 }

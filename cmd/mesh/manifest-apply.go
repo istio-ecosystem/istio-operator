@@ -70,32 +70,32 @@ func manifestApply(args *rootArgs, maArgs *manifestApplyArgs, l *logger) {
 
 	overlayFromSet, err := makeTreeFromSetList(maArgs.set)
 	if err != nil {
-		l.lfatal(err.Error())
+		l.logAndFatal(err.Error())
 	}
 	manifests, err := genManifests(maArgs.inFilename, overlayFromSet)
 	if err != nil {
-		l.lfatal("Could not generate manifest: ", err)
+		l.logAndFatal("Could not generate manifest: ", err)
 	}
 
 	out, err := manifest.ApplyAll(manifests, opversion.OperatorBinaryVersion, args.dryRun, args.verbose, maArgs.wait, maArgs.readinessTimeout)
 	if err != nil {
-		l.lfatal("Failed to apply manifest with kubectl client: ", err)
+		l.logAndFatal("Failed to apply manifest with kubectl client: ", err)
 	}
 
 	for cn := range manifests {
 		cs := fmt.Sprintf("Output for component %s:", cn)
-		l.lprint(fmt.Sprintf("\n%s\n%s\n", cs, strings.Repeat("=", len(cs))))
+		l.logAndPrint(fmt.Sprintf("\n%s\n%s\n", cs, strings.Repeat("=", len(cs))))
 		if out[cn].Err != nil {
-			l.lprint("Error: ", out[cn].Err, "\n")
+			l.logAndPrint("Error: ", out[cn].Err, "\n")
 		}
 		if strings.TrimSpace(out[cn].Stderr) != "" {
-			l.lprint("Error detail:\n", out[cn].Stderr, "\n")
+			l.logAndPrint("Error detail:\n", out[cn].Stderr, "\n")
 		}
 		if strings.TrimSpace(out[cn].Stdout) != "" {
-			l.lprint("Stdout:\n", out[cn].Stdout, "\n")
+			l.logAndPrint("Stdout:\n", out[cn].Stdout, "\n")
 		}
 		if args.verbose {
-			l.lprint("Manifest:\n\n", out[cn].Manifest, "\n")
+			l.logAndPrint("Manifest:\n\n", out[cn].Manifest, "\n")
 		}
 	}
 }

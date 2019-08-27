@@ -62,7 +62,7 @@ func newLogger(logToStdErr bool, stdOut, stdErr io.Writer) *logger {
 }
 
 // TODO: this really doesn't belong here. Figure out if it's generally needed and possibly move to istio.io/pkg/log.
-func (l *logger) lprint(v ...interface{}) {
+func (l *logger) logAndPrint(v ...interface{}) {
 	if len(v) == 0 {
 		return
 	}
@@ -73,8 +73,8 @@ func (l *logger) lprint(v ...interface{}) {
 	log.Infof(s)
 }
 
-func (l *logger) lfatal(v ...interface{}) {
-	l.lprint(v...)
+func (l *logger) logAndFatal(v ...interface{}) {
+	l.logAndPrint(v...)
 	os.Exit(-1)
 }
 
