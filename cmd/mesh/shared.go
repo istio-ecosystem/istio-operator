@@ -73,22 +73,6 @@ func (l *logger) lprint(v ...interface{}) {
 	log.Infof(s)
 }
 
-func (l *logger) lprintf(v ...interface{}) {
-	if len(v) == 0 {
-		return
-	}
-	s := ""
-	if fmtStr, ok := v[0].(string); ok {
-		s = fmt.Sprintf(fmtStr, v[1:]...)
-	} else {
-		s = fmt.Sprint(v...)
-	}
-	if !l.logToStdErr {
-		l.print(s)
-	}
-	log.Infof(s)
-}
-
 func (l *logger) lfatal(v ...interface{}) {
 	l.lprint(v...)
 	os.Exit(-1)
