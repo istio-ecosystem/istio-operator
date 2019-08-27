@@ -60,4 +60,3 @@ func readFile(path string) (string, error) {
 	b, err := ioutil.ReadFile(path)
 	return string(b), err
 }
-
