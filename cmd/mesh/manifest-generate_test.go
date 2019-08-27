@@ -125,6 +125,8 @@ func runTestGroup(t *testing.T, tests testGroup) {
 	}
 }
 
+// runManifestGenerate runs the manifest generate command. If flags is not set, passes the given path as a -f flag,
+// otherwise flags is passed to the command verbatim. Both path and flags should not be simultaneously set.
 func runManifestGenerate(path, flags string) (string, error) {
 	args := "manifest generate " + flags
 	if flags == "" {
