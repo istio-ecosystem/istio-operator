@@ -41,6 +41,8 @@ galley:
   enabled: false
 pilot:
   enabled: true
+  rollingMaxSurge: 100%
+  rollingMaxUnavailable: 25%
   resources:
     requests:
       cpu: 1000m
@@ -69,6 +71,10 @@ global:
   telemetryNamespace: istio-telemetry
   proxy:
     readinessInitialDelaySeconds: 2
+  controlPlaneSecurityEnabled: false
+  mtls:
+    enabled:
+      false
 mixer:
   policy:
     enabled: true
@@ -150,6 +156,10 @@ trafficManagement:
           requests:
             cpu: 1000m
             memory: 1G
+       strategy:
+         rollingUpdate:
+           maxSurge: 100%
+           maxUnavailable: 25%
  enabled: true
 autoInjection:
  components:
@@ -157,6 +167,10 @@ autoInjection:
      enabled: false
  enabled: false
 values:
+  global:
+    controlPlaneSecurityEnabled: false
+    mtls:
+      enabled: false
   pilot:
     image: pilot
     traceSampling: 1
@@ -192,6 +206,8 @@ nodeagent:
 gateways:
   enabled: true
   istio-ingressgateway:
+    rollingMaxSurge: 4
+    rollingMaxUnavailable: 1
     resources:
       requests:
         cpu: 1000m
@@ -249,7 +265,11 @@ gateways:
         resources:
           requests:
             cpu: 1000m
-            memory: 1G 
+            memory: 1G
+        strategy:
+          rollingUpdate:
+            maxSurge: 4
+            maxUnavailable: 1
     egressGateway:
           enabled: false
   enabled: true
@@ -271,7 +291,7 @@ global:
 mixer:
   policy:
     enabled: true
-telemetry:
+  telemetry:
     enabled: false
 `,
 			want: `

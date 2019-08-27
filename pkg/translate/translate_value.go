@@ -53,16 +53,18 @@ var (
 					"Affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution",
 				"{{.ValueComponentName}}.podAntiAffinityTermLabelSelector": "{{.FeatureName}}.Components.{{.ComponentName}}.K8s." +
 					"Affinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution",
-				"{{.ValueComponentName}}.env":                 "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Env",
-				"{{.ValueComponentName}}.autoscaleEnabled":    "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.HpaSpec",
-				"{{.ValueComponentName}}.imagePullPolicy":     "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ImagePullPolicy",
-				"{{.ValueComponentName}}.nodeSelector":        "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.NodeSelector",
-				"{{.ValueComponentName}}.podDisruptionBudget": "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PodDisruptionBudget",
-				"{{.ValueComponentName}}.podAnnotations":      "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PodAnnotations",
-				"{{.ValueComponentName}}.priorityClassName":   "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PriorityClassName",
-				"{{.ValueComponentName}}.readinessProbe":      "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ReadinessProbe",
-				"{{.ValueComponentName}}.replicaCount":        "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ReplicaCount",
-				"{{.ValueComponentName}}.resources":           "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Resources",
+				"{{.ValueComponentName}}.env":                   "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Env",
+				"{{.ValueComponentName}}.autoscaleEnabled":      "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.HpaSpec",
+				"{{.ValueComponentName}}.imagePullPolicy":       "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ImagePullPolicy",
+				"{{.ValueComponentName}}.nodeSelector":          "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.NodeSelector",
+				"{{.ValueComponentName}}.podDisruptionBudget":   "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PodDisruptionBudget",
+				"{{.ValueComponentName}}.podAnnotations":        "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PodAnnotations",
+				"{{.ValueComponentName}}.priorityClassName":     "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PriorityClassName",
+				"{{.ValueComponentName}}.readinessProbe":        "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ReadinessProbe",
+				"{{.ValueComponentName}}.replicaCount":          "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ReplicaCount",
+				"{{.ValueComponentName}}.resources":             "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Resources",
+				"{{.ValueComponentName}}.rollingMaxSurge":       "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Strategy",
+				"{{.ValueComponentName}}.rollingMaxUnavailable": "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Strategy",
 			},
 			KubernetesMapping:     map[string]*Translation{},
 			ValuesToComponentName: map[string]name.ComponentName{},
@@ -88,9 +90,6 @@ func (t *ReverseTranslator) initAPIAndComponentMapping(vs version.MinorVersion) 
 	for valKey, outVal := range ts.APIMapping {
 		t.APIMapping[outVal.outPath] = &Translation{valKey, nil}
 	}
-	// Override for special mapping
-	t.APIMapping["global.controlPlaneSecurityEnabled"] = &Translation{"Security.ControlPlaneMtls", nil}
-	t.APIMapping["global.mtls.enabled"] = &Translation{"Security.DataPlaneMtlsStrict", nil}
 
 	for cn, cm := range ts.ComponentMaps {
 		if cn != name.IstioBaseComponentName {
@@ -236,6 +235,10 @@ func (t *ReverseTranslator) setEnablementAndNamespacesFromValue(valueSpec map[st
 				return err
 			}
 		}
+		//vep := util.ToYAMLPath(cnv + ".enabled")
+		//if _, err := tpath.DeleteFromTree(valueSpec, vep, vep); err != nil {
+		//	return err
+		//}
 	}
 
 	// set namespace
@@ -249,6 +252,25 @@ func (t *ReverseTranslator) setEnablementAndNamespacesFromValue(valueSpec map[st
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+// translateStrategy translates Deployment Strategy related configurations from helm values.yaml tree.
+func translateStrategy(fieldName string, outPath string, value interface{}, cpSpecTree map[string]interface{}) error {
+	fieldMap := map[string]string{
+		"rollingMaxSurge":       "maxSurge",
+		"rollingMaxUnavailable": "maxUnavailable",
+	}
+	newFieldName, ok := fieldMap[fieldName]
+	if !ok {
+		return fmt.Errorf("expected field name found in values.yaml: %s", fieldName)
+	}
+	outPath += ".rollingUpdate." + newFieldName
+
+	log.Infof("path has value in helm Value.yaml tree, mapping to output path %s", outPath)
+	if err := tpath.WriteNode(cpSpecTree, util.ToYAMLPath(outPath), value); err != nil {
+		return err
 	}
 	return nil
 }
@@ -415,6 +437,12 @@ func (t *ReverseTranslator) translateK8sTree(valueTree map[string]interface{},
 				return fmt.Errorf("error in translating k8s Affinity: %s", err)
 			}
 
+		case "rollingMaxSurge", "rollingMaxUnavailable":
+			err := translateStrategy(k8sSettingName, v.outPath, m, cpSpecTree)
+			if err != nil {
+				return fmt.Errorf("error in translating k8s Strategy: %s", err)
+			}
+
 		default:
 			output := util.ToYAMLPath(v.outPath)
 			log.Infof("path has value in helm Value.yaml tree, mapping to output path %s", output)
@@ -449,18 +477,22 @@ func (t *ReverseTranslator) translateRemainingPaths(valueTree map[string]interfa
 		case []interface{}:
 			errs := util.Errors{}
 			for _, newNode := range node {
-				newMap, ok := newNode.(map[string]interface{})
-				if !ok {
-					return fmt.Errorf("fail to convert node to map[string] interface")
+				if newMap, ok := newNode.(map[string]interface{}); ok {
+					errs = util.AppendErr(errs, t.translateRemainingPaths(newMap, cpSpecTree, newPath))
+					continue
 				}
-				errs = util.AppendErr(errs, t.translateRemainingPaths(newMap, cpSpecTree, newPath))
+				if _, ok := newNode.(string); ok {
+					errs = util.AppendErr(errs,
+						tpath.WriteNode(cpSpecTree, util.ToYAMLPath("Values."+newPath.String()), node))
+					break
+				}
 			}
 			if err := errs.ToError(); err != nil {
 				return err
 			}
 		// remaining leaf need to be put into root.values
 		default:
-			if newPath[len(newPath)-1] == "enabled" {
+			if t.isEnablementPath(newPath) {
 				continue
 			}
 			if err := tpath.WriteNode(cpSpecTree, util.ToYAMLPath("Values."+newPath.String()), val); err != nil {
@@ -507,6 +539,17 @@ func (t *ReverseTranslator) translateTree(valueTree map[string]interface{},
 		}
 	}
 	return nil
+}
+
+// isEnablementPath is helper function to check whether paths represent enablement of components in values.yaml
+func (t *ReverseTranslator) isEnablementPath(path util.Path) bool {
+	if len(path) < 2 || path[len(path)-1] != "enabled" {
+		return false
+	}
+	pf := path[:len(path)-1].String()
+	_, exist := t.ValuesToComponentName[pf]
+
+	return exist || path[0] == "gateways" || path[0] == "mixer"
 }
 
 // renderComponentName renders a template of the form <path>{{.ComponentName}}<path> with
