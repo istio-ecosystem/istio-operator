@@ -16,7 +16,6 @@ package mesh
 
 import (
 	"encoding/json"
-	"fmt"
 	"path/filepath"
 
 	"github.com/ghodss/yaml"
@@ -65,7 +64,7 @@ func valueFileFilter(path string) bool {
 // migrateFromFiles handles migration for local values.yaml files
 func migrateFromFiles(rootArgs *rootArgs, args []string, l *logger) {
 	initLogsOrExit(rootArgs)
-	value, err := util.ReadFiles(args[0], valueFileFilter)
+	value, err := util.ReadFilesWithFilter(args[0], valueFileFilter)
 	if err != nil {
 		l.lfatal(err.Error())
 	}
@@ -73,7 +72,6 @@ func migrateFromFiles(rootArgs *rootArgs, args []string, l *logger) {
 		l.lprint("no valid value.yaml file specified")
 		return
 	}
-	l.lprint("translating input values.yaml file at: ", args[0], " to new API")
 	translateFunc([]byte(value), l)
 }
 
@@ -97,7 +95,7 @@ func translateFunc(values []byte, l *logger) {
 	if err != nil {
 		l.lfatal("error converting json: ", gotString, "\n", err.Error())
 	}
-	fmt.Println(string(cpYaml))
+	l.print(string(cpYaml) + "\n")
 }
 
 // migrateFromClusterConfig handles migration for in cluster config.

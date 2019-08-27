@@ -84,7 +84,7 @@ func manifestApply(args *rootArgs, maArgs *manifestApplyArgs, l *logger) {
 
 	for cn := range manifests {
 		cs := fmt.Sprintf("Output for component %s:", cn)
-		l.lprintf("\n%s\n%s\n", cs, strings.Repeat("=", len(cs)))
+		l.lprint(fmt.Sprintf("\n%s\n%s\n", cs, strings.Repeat("=", len(cs))))
 		if out[cn].Err != nil {
 			l.lprint("Error: ", out[cn].Err, "\n")
 		}
