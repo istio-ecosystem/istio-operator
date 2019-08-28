@@ -194,20 +194,36 @@ func renderRecursive(manifests name.ManifestMap, installTree componentTree, outp
 	return nil
 }
 
+// InstallOptions contains the startup options for applying the manifest.
+type InstallOptions struct {
+	// DryRun performs all steps except actually applying the manifests or creating output dirs/files.
+	DryRun bool
+	// Verbose enables verbose debug output.
+	Verbose bool
+	// Wait for resources to be ready after install.
+	Wait bool
+	// Maximum amount of time to wait for resources to be ready after install when Wait=true.
+	WaitTimeout time.Duration
+	// Path to the kubeconfig file.
+	Kubeconfig string
+	// Name of the kubeconfig context to use.
+	Context string
+}
+
 // ApplyAll applies all given manifests using kubectl client.
-func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbose, wait bool, timeout time.Duration, kubeconfig, context string) (CompositeOutput, error) {
+func ApplyAll(manifests name.ManifestMap, version version.Version, opts *InstallOptions) (CompositeOutput, error) {
 	logAndPrint("Applying manifests for these components:")
 	for c := range manifests {
 		logAndPrint("- %s", c)
 	}
 	logAndPrint("Component dependencies tree: \n%s", installTreeString())
-	if err := initK8SRestClient(kubeconfig, context); err != nil {
+	if err := initK8SRestClient(opts.Kubeconfig, opts.Context); err != nil {
 		return nil, err
 	}
-	return applyRecursive(manifests, version, dryRun, verbose, wait, timeout, kubeconfig, context)
+	return applyRecursive(manifests, version, opts)
 }
 
-func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun, verbose, wait bool, timeout time.Duration, kubeconfig, context string) (CompositeOutput, error) {
+func applyRecursive(manifests name.ManifestMap, version version.Version, opts *InstallOptions) (CompositeOutput, error) {
 	var wg sync.WaitGroup
 	out := CompositeOutput{}
 	for c, m := range manifests {
@@ -220,7 +236,7 @@ func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun,
 				<-s
 				logAndPrint("Parent dependency for %s has unblocked, proceeding.", c)
 			}
-			out[c] = applyManifest(c, m, version, dryRun, verbose, kubeconfig, context)
+			out[c] = applyManifest(c, m, version, opts)
 
 			// Signal all the components that depend on us.
 			for _, ch := range componentDependencies[c] {
@@ -231,13 +247,13 @@ func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun,
 		}()
 	}
 	wg.Wait()
-	if wait {
-		return out, waitForResources(timeout, appliedObjects, dryRun, kubeconfig, context)
+	if opts.Wait {
+		return out, waitForResources(appliedObjects, opts)
 	}
 	return out, nil
 }
 
-func applyManifest(componentName name.ComponentName, manifestStr string, version version.Version, dryRun, verbose bool, kubeconfig, context string) *ComponentApplyOutput {
+func applyManifest(componentName name.ComponentName, manifestStr string, version version.Version, opts *InstallOptions) *ComponentApplyOutput {
 	objects, err := object.ParseK8sObjectsFromYAMLManifest(manifestStr)
 	if err != nil {
 		return &ComponentApplyOutput{
@@ -276,10 +292,10 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 			}
 		}
 
-		stdoutCRD, stderrCRD, err = kubectl.Apply(dryRun, verbose, kubeconfig, context, namespace, mcrd, extraArgs...)
+		stdoutCRD, stderrCRD, err = kubectl.Apply(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, namespace, mcrd, extraArgs...)
 		if err != nil {
 			// Not all Istio components are robust to not yet created CRDs.
-			if err := waitForCRDs(objects, dryRun); err != nil {
+			if err := waitForCRDs(objects, opts.DryRun); err != nil {
 				return &ComponentApplyOutput{
 					Stdout: stdoutCRD,
 					Stderr: stderrCRD,
@@ -298,7 +314,7 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 			Err:    err,
 		}
 	}
-	stdout, stderr, err = kubectl.Apply(dryRun, verbose, kubeconfig, context, namespace, m, extraArgs...)
+	stdout, stderr, err = kubectl.Apply(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, namespace, m, extraArgs...)
 	logAndPrint("finished applying manifest for component %s", componentName)
 	ym, _ := objects.YAMLManifest()
 	return &ComponentApplyOutput{
@@ -410,19 +426,19 @@ func waitForCRDs(objects object.K8sObjects, dryRun bool) error {
 // waitForResources polls to get the current status of all pods, PVCs, and Services
 // until all are ready or a timeout is reached
 // TODO - plumb through k8s client and remove global `k8sRESTConfig`
-func waitForResources(timeout time.Duration, objects object.K8sObjects, dryRun bool, _, _ string) error {
-	if dryRun {
+func waitForResources(objects object.K8sObjects, opts *InstallOptions) error {
+	if opts.DryRun {
 		logAndPrint("Not waiting for resources ready in dry run mode.")
 		return nil
 	}
 
-	logAndPrint("Waiting for resources ready with timeout of %v", timeout)
+	logAndPrint("Waiting for resources ready with timeout of %v", opts.WaitTimeout)
 	cs, err := kubernetes.NewForConfig(k8sRESTConfig)
 	if err != nil {
 		return fmt.Errorf("k8s client error: %s", err)
 	}
 
-	errPoll := wait.Poll(2*time.Second, timeout, func() (bool, error) {
+	errPoll := wait.Poll(2*time.Second, opts.WaitTimeout, func() (bool, error) {
 		pods := []v1.Pod{}
 		services := []v1.Service{}
 		deployments := []deployment{}

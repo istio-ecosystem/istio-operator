@@ -80,15 +80,14 @@ func manifestApply(args *rootArgs, maArgs *manifestApplyArgs, l *logger) {
 		l.logAndFatal("Could not generate manifest: ", err)
 	}
 
-	out, err := manifest.ApplyAll(
-		manifests,
-		opversion.OperatorBinaryVersion,
-		args.dryRun,
-		args.verbose,
-		maArgs.wait,
-		maArgs.readinessTimeout,
-		maArgs.kubeConfigPath,
-		maArgs.context)
+	opts := &manifest.InstallOptions{
+		DryRun:      args.dryRun,
+		Verbose:     args.verbose,
+		WaitTimeout: maArgs.readinessTimeout,
+		Kubeconfig:  maArgs.kubeConfigPath,
+		Context:     maArgs.context,
+	}
+	out, err := manifest.ApplyAll(manifests, opversion.OperatorBinaryVersion, opts)
 	if err != nil {
 		l.logAndFatal("Failed to apply manifest with kubectl client: ", err)
 	}
