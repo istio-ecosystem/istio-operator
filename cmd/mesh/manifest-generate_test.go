@@ -15,6 +15,7 @@
 package mesh
 
 import (
+	"io/ioutil"
 	"path/filepath"
 	"testing"
 
@@ -102,6 +103,13 @@ func runTestGroup(t *testing.T, tests testGroup) {
 			got, err := runManifestGenerate(inPath, tt.flags)
 			if err != nil {
 				t.Fatal(err)
+			}
+
+			if refreshGoldenFiles() {
+				t.Logf("Refreshing golden file for %s", outPath)
+				if err := ioutil.WriteFile(outPath, []byte(got), 0644); err != nil {
+					t.Error(err)
+				}
 			}
 
 			want, err := readFile(outPath)

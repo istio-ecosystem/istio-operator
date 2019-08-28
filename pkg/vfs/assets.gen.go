@@ -33646,43 +33646,36 @@ spec:
   security:
     components:
       nodeAgent:
-<<<<<<< HEAD
         enabled: true
+<<<<<<< HEAD
+<<<<<<< HEAD
+
+=======
+>>>>>>> 0584d5d7... add back the mandiff test. (#223)
+=======
         k8s:
           env:
-          - name: CA_PROVIDER
-            value: "Citadel"
           - name: CA_ADDR
             value: "istio-citadel:8060"
+          - name: CA_PROVIDER
+            value: Citadel
+          - name: Plugins
+            value: ""
           - name: VALID_TOKEN
             value: "true"
-=======
-        common:
-          enabled: true
-          k8s:
-            env:
-            - name: CA_ADDR
-              value: "istio-citadel:8060"
-            - name: CA_PROVIDER
-              value: "Citadel"
-            - name: Plugins
-              value: ""
-            - name: VALID_TOKEN
-              value: "true"
-            - name: Trust_Domain
-              value: ""
-            - name: NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-          values:
-            image: node-agent-k8s
->>>>>>> 0e53114f62ca1dafda5750c8817f10747379b0af
-
+          - name: Trust_Domain
+            value: ""
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+>>>>>>> a119f421... fix mandiff gaps. (#222)
   values:
     global:
+      controlPlaneSecurityEnabled: false
       mtls:
         enabled: true
+      controlPlaneSecurityEnabled: false
       sds:
         enabled: true
         udsPath: "unix:/var/run/sds/uds_path"
@@ -33690,6 +33683,14 @@ spec:
         useTrustworthyJwt: true
     nodeagent:
       image: node-agent-k8s
+      env:
+        CA_PROVIDER: "Citadel"
+        CA_ADDR: "istio-citadel:8060"
+        VALID_TOKEN: true
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0584d5d7... add back the mandiff test. (#223)
 `)
 
 func profilesSdsYamlOrigBytes() ([]byte, error) {
