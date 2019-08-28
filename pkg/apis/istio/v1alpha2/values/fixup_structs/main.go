@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -50,5 +51,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println(strings.Join(out, "\n"))
+	if err := ioutil.WriteFile(filePath, []byte(strings.Join(out, "\n")), 0644); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
