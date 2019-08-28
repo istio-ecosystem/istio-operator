@@ -195,19 +195,19 @@ func renderRecursive(manifests name.ManifestMap, installTree componentTree, outp
 }
 
 // ApplyAll applies all given manifests using kubectl client.
-func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbose, wait bool, timeout time.Duration) (CompositeOutput, error) {
+func ApplyAll(manifests name.ManifestMap, version version.Version, dryRun, verbose, wait bool, timeout time.Duration, kubeconfig, context string) (CompositeOutput, error) {
 	logAndPrint("Applying manifests for these components:")
 	for c := range manifests {
 		logAndPrint("- %s", c)
 	}
 	logAndPrint("Component dependencies tree: \n%s", installTreeString())
-	if err := initK8SRestClient(); err != nil {
+	if err := initK8SRestClient(kubeconfig, context); err != nil {
 		return nil, err
 	}
-	return applyRecursive(manifests, version, dryRun, verbose, wait, timeout)
+	return applyRecursive(manifests, version, dryRun, verbose, wait, timeout, kubeconfig, context)
 }
 
-func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun, verbose, wait bool, timeout time.Duration) (CompositeOutput, error) {
+func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun, verbose, wait bool, timeout time.Duration, kubeconfig, context string) (CompositeOutput, error) {
 	var wg sync.WaitGroup
 	out := CompositeOutput{}
 	for c, m := range manifests {
@@ -220,7 +220,7 @@ func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun,
 				<-s
 				logAndPrint("Parent dependency for %s has unblocked, proceeding.", c)
 			}
-			out[c] = applyManifest(c, m, version, dryRun, verbose)
+			out[c] = applyManifest(c, m, version, dryRun, verbose, kubeconfig, context)
 
 			// Signal all the components that depend on us.
 			for _, ch := range componentDependencies[c] {
@@ -232,12 +232,12 @@ func applyRecursive(manifests name.ManifestMap, version version.Version, dryRun,
 	}
 	wg.Wait()
 	if wait {
-		return out, waitForResources(timeout, appliedObjects, dryRun)
+		return out, waitForResources(timeout, appliedObjects, dryRun, kubeconfig, context)
 	}
 	return out, nil
 }
 
-func applyManifest(componentName name.ComponentName, manifestStr string, version version.Version, dryRun, verbose bool) *ComponentApplyOutput {
+func applyManifest(componentName name.ComponentName, manifestStr string, version version.Version, dryRun, verbose bool, kubeconfig, context string) *ComponentApplyOutput {
 	objects, err := object.ParseK8sObjectsFromYAMLManifest(manifestStr)
 	if err != nil {
 		return &ComponentApplyOutput{
@@ -276,7 +276,7 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 			}
 		}
 
-		stdoutCRD, stderrCRD, err = kubectl.Apply(dryRun, verbose, namespace, mcrd, extraArgs...)
+		stdoutCRD, stderrCRD, err = kubectl.Apply(dryRun, verbose, kubeconfig, context, namespace, mcrd, extraArgs...)
 		if err != nil {
 			// Not all Istio components are robust to not yet created CRDs.
 			if err := waitForCRDs(objects, dryRun); err != nil {
@@ -298,7 +298,7 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 			Err:    err,
 		}
 	}
-	stdout, stderr, err = kubectl.Apply(dryRun, verbose, namespace, m, extraArgs...)
+	stdout, stderr, err = kubectl.Apply(dryRun, verbose, kubeconfig, context, namespace, m, extraArgs...)
 	logAndPrint("finished applying manifest for component %s", componentName)
 	ym, _ := objects.YAMLManifest()
 	return &ComponentApplyOutput{
@@ -409,7 +409,8 @@ func waitForCRDs(objects object.K8sObjects, dryRun bool) error {
 
 // waitForResources polls to get the current status of all pods, PVCs, and Services
 // until all are ready or a timeout is reached
-func waitForResources(timeout time.Duration, objects object.K8sObjects, dryRun bool) error {
+// TODO - plumb through k8s client and remove global `k8sRESTConfig`
+func waitForResources(timeout time.Duration, objects object.K8sObjects, dryRun bool, _, _ string) error {
 	if dryRun {
 		logAndPrint("Not waiting for resources ready in dry run mode.")
 		return nil
@@ -595,12 +596,12 @@ func buildInstallTreeString(componentName name.ComponentName, prefix string, sb 
 	}
 }
 
-func initK8SRestClient() error {
+func initK8SRestClient(kubeconfig, context string) error {
 	var err error
 	if k8sRESTConfig != nil {
 		return nil
 	}
-	k8sRESTConfig, err = defaultRestConfig("", "")
+	k8sRESTConfig, err = defaultRestConfig(kubeconfig, context)
 	if err != nil {
 		return err
 	}
