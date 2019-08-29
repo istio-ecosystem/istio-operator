@@ -2,7 +2,7 @@
 title: values
 layout: protoc-gen-docs
 generator: protoc-gen-docs
-number_of_entries: 71
+number_of_entries: 70
 ---
 <h2 id="AddonIngressConfig">AddonIngressConfig</h2>
 <section>
@@ -454,7 +454,7 @@ podAntiAffinityLabelSelector:
 </tr>
 <tr id="EgressGatewayConfig-type">
 <td><code>type</code></td>
-<td><code><a href="#TypeServiceType">TypeServiceType</a></code></td>
+<td><code>string</code></td>
 <td>
 <p>Service type.</p>
 
@@ -1242,7 +1242,7 @@ If empty, default scope and level will be used as configured in code</p>
 </tr>
 <tr id="IngressGatewayConfig-type">
 <td><code>type</code></td>
-<td><code><a href="#TypeServiceType">TypeServiceType</a></code></td>
+<td><code>string</code></td>
 <td>
 <p>Service type.</p>
 
@@ -3103,7 +3103,7 @@ The default depends on the environment.
 </tr>
 <tr id="ServiceConfig-type">
 <td><code>type</code></td>
-<td><code><a href="#TypeServiceType">TypeServiceType</a></code></td>
+<td><code>string</code></td>
 <td>
 </td>
 </tr>
@@ -3669,11 +3669,6 @@ See https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/#m
 <h2 id="TypeMapStringInterface">TypeMapStringInterface</h2>
 <section>
 <p>GOTYPE: map[string]interface&lbrace;}</p>
-
-</section>
-<h2 id="TypeServiceType">TypeServiceType</h2>
-<section>
-<p>GOTYPE: v1.ServiceType</p>
 
 </section>
 <h2 id="TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</h2>

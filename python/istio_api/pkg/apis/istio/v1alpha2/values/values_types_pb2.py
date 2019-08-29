@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='values',
   syntax='proto3',
   serialized_options=_b('Z\010v1alpha2'),
-  serialized_pb=_b('\n1pkg/apis/istio/v1alpha2/values/values_types.proto\x12\x06values\x1a\x1egoogle/protobuf/duration.proto\x1a\"k8s.io/api/core/v1/generated.proto\"4\n\x12\x41\x64\x64onIngressConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\r\n\x05hosts\x18\x02 \x03(\t\";\n\nArchConfig\x12\r\n\x05\x61md64\x18\x01 \x01(\r\x12\x0f\n\x07ppc64le\x18\x02 \x01(\r\x12\r\n\x05s390x\x18\x03 \x01(\r\"\x1c\n\tCNIConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\">\n\x1a\x43PUTargetUtilizationConfig\x12 \n\x18targetAverageUtilization\x18\x01 \x01(\x05\"\xb1\x01\n\x11\x43\x65rtManagerConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0b\n\x03hub\x18\x02 \x01(\t\x12\x0b\n\x03tag\x18\x03 \x01(\t\x12\x34\n\x0cnodeSelector\x18\x04 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12;\n\tresources\x18\x05 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\"\x9e\x01\n\rCoreDNSConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x63oreDNSImage\x18\x02 \x01(\t\x12\x1a\n\x12\x63oreDNSPluginImage\x18\x03 \x01(\t\x12\x34\n\x0cnodeSelector\x18\x04 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x14\n\x0creplicaCount\x18\x05 \x01(\r\"3\n DefaultPodDisruptionBudgetConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"K\n\x16\x44\x65\x66\x61ultResourcesConfig\x12\x31\n\x08requests\x18\x01 \x01(\x0b\x32\x1f.values.ResourcesRequestsConfig\"\xcb\x06\n\x13\x45gressGatewayConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x02 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12/\n\x03\x63pu\x18\x05 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x0f\n\x07\x65nabled\x18\x07 \x01(\x08\x12\x31\n\x03\x65nv\x18\x08 \x03(\x0b\x32$.values.EgressGatewayConfig.EnvEntry\x12+\n\x06labels\x18\t \x01(\x0b\x32\x1b.values.GatewayLabelsConfig\x12\x34\n\x0cnodeSelector\x18\n \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x36\n\x0epodAnnotations\x18\x0b \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12K\n\x1cpodAntiAffinityLabelSelector\x18\x0c \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\r \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\"\n\x05ports\x18\x0e \x03(\x0b\x32\x13.values.PortsConfig\x12;\n\tresources\x18\x0f \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12+\n\rsecretVolumes\x18\x10 \x03(\x0b\x32\x14.values.SecretVolume\x12:\n\x12serviceAnnotations\x18\x11 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12%\n\x04type\x18\x12 \x01(\x0b\x32\x17.values.TypeServiceType\x12#\n\x04zvpn\x18\x13 \x01(\x0b\x32\x15.values.ZeroVPNConfig\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"A\n\x12\x45nvoyMetricsConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\"\xfa\x02\n\x0cGalleyConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\r\n\x05image\x18\x02 \x01(\t\x12,\n\x04mesh\x18\x03 \x03(\x0b\x32\x1e.values.GalleyConfig.MeshEntry\x12K\n\x1cpodAntiAffinityLabelSelector\x18\x04 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\x05 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\x14\n\x0creplicaCount\x18\x06 \x01(\r\x12;\n\tresources\x18\x07 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x1a+\n\tMeshEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"1\n\x13GatewayLabelsConfig\x12\x0b\n\x03\x61pp\x18\x01 \x01(\t\x12\r\n\x05istio\x18\x02 \x01(\t\"\x95\x01\n\x0eGatewaysConfig\x12\x37\n\x12istioEgressgateway\x18\x01 \x01(\x0b\x32\x1b.values.EgressGatewayConfig\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x12\x39\n\x13istioIngressgateway\x18\x04 \x01(\x0b\x32\x1c.values.IngressGatewayConfig\"\xa1\n\n\x0cGlobalConfig\x12 \n\x04\x61rch\x18\x01 \x01(\x0b\x32\x12.values.ArchConfig\x12\x17\n\x0f\x63onfigNamespace\x18\x02 \x01(\t\x12\x18\n\x10\x63onfigValidation\x18\x03 \x01(\x08\x12#\n\x1b\x63ontrolPlaneSecurityEnabled\x18\x04 \x01(\x08\x12;\n\x13\x64\x65\x66\x61ultNodeSelector\x18\x06 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12L\n\x1a\x64\x65\x66\x61ultPodDisruptionBudget\x18\x07 \x01(\x0b\x32(.values.DefaultPodDisruptionBudgetConfig\x12\x1b\n\x13\x64isablePolicyChecks\x18\x08 \x01(\x08\x12\x38\n\x10\x64\x65\x66\x61ultResources\x18\t \x01(\x0b\x32\x1e.values.DefaultResourcesConfig\x12\x16\n\x0e\x65nableHelmTest\x18\n \x01(\x08\x12\x15\n\renableTracing\x18\x0b \x01(\x08\x12\x0b\n\x03hub\x18\x0c \x01(\t\x12\x17\n\x0fimagePullPolicy\x18\r \x01(\t\x12\x16\n\x0eistioNamespace\x18\x0e \x01(\t\x12\x46\n\x11localityLbSetting\x18\x0f \x03(\x0b\x32+.values.GlobalConfig.LocalityLbSettingEntry\x12\x33\n\nk8sIngress\x18\x10 \x01(\x0b\x32\x1f.values.KubernetesIngressConfig\x12,\n\x07logging\x18\x11 \x01(\x0b\x32\x1b.values.GlobalLoggingConfig\x12\x32\n\rmeshExpansion\x18\x12 \x01(\x0b\x32\x1b.values.MeshExpansionConfig\x12\x34\n\x0cmeshNetworks\x18\x13 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x16\n\x0emonitoringPort\x18\x14 \x01(\r\x12 \n\x04mtls\x18\x15 \x01(\x0b\x32\x12.values.MTLSConfig\x12\x30\n\x0cmultiCluster\x18\x16 \x01(\x0b\x32\x1a.values.MultiClusterConfig\x12\x14\n\x0coneNamespace\x18\x17 \x01(\x08\x12\x42\n\x15outboundTrafficPolicy\x18\x18 \x01(\x0b\x32#.values.OutboundTrafficPolicyConfig\x12\x1b\n\x13policyCheckFailOpen\x18\x19 \x01(\x08\x12\x17\n\x0fpolicyNamespace\x18\x1a \x01(\t\x12\x19\n\x11priorityClassName\x18\x1b \x01(\t\x12\"\n\x05proxy\x18\x1c \x01(\x0b\x32\x13.values.ProxyConfig\x12*\n\tproxyInit\x18\x1d \x01(\x0b\x32\x17.values.ProxyInitConfig\x12\x1e\n\x03sds\x18\x1e \x01(\x0b\x32\x11.values.SDSConfig\x12\x0b\n\x03tag\x18\x1f \x01(\t\x12\x1a\n\x12telemetryNamespace\x18  \x01(\t\x12$\n\x06tracer\x18! \x01(\x0b\x32\x14.values.TracerConfig\x12\x13\n\x0btrustDomain\x18\" \x01(\t\x12\x0e\n\x06useMCP\x18# \x01(\x08\x1a\x38\n\x16LocalityLbSettingEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"$\n\x13GlobalLoggingConfig\x12\r\n\x05level\x18\x01 \x01(\t\"\xf5\x08\n\x14IngressGatewayConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x02 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12/\n\x03\x63pu\x18\x05 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x15\n\rcustomService\x18\x06 \x01(\x08\x12\r\n\x05\x64\x65\x62ug\x18\x07 \x01(\t\x12\x0e\n\x06\x64omain\x18\x08 \x01(\t\x12\x0f\n\x07\x65nabled\x18\n \x01(\x08\x12\x32\n\x03\x65nv\x18\x0b \x03(\x0b\x32%.values.IngressGatewayConfig.EnvEntry\x12\x13\n\x0b\x65xternalIPs\x18\x0c \x03(\t\x12\x12\n\nk8sIngress\x18\r \x01(\x08\x12\x17\n\x0fk8sIngressHttps\x18\x0e \x01(\x08\x12+\n\x06labels\x18\x0f \x01(\x0b\x32\x1b.values.GatewayLabelsConfig\x12\x16\n\x0eloadBalancerIP\x18\x10 \x01(\t\x12 \n\x18loadBalancerSourceRanges\x18\x11 \x03(\t\x12/\n\x12meshExpansionPorts\x18\x12 \x03(\x0b\x32\x13.values.PortsConfig\x12\x34\n\x0cnodeSelector\x18\x13 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x36\n\x0epodAnnotations\x18\x14 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12K\n\x1cpodAntiAffinityLabelSelector\x18\x15 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\x16 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\"\n\x05ports\x18\x17 \x03(\x0b\x32\x13.values.PortsConfig\x12\x14\n\x0creplicaCount\x18\x18 \x01(\r\x12\x31\n\tresources\x18\x19 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12,\n\x03sds\x18\x1a \x01(\x0b\x32\x1f.values.IngressGatewaySdsConfig\x12+\n\rsecretVolumes\x18\x1b \x03(\x0b\x32\x14.values.SecretVolume\x12:\n\x12serviceAnnotations\x18\x1c \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12%\n\x04type\x18\x1d \x01(\x0b\x32\x17.values.TypeServiceType\x12.\n\x04zvpn\x18\x1e \x01(\x0b\x32 .values.IngressGatewayZvpnConfig\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"9\n\x17IngressGatewaySdsConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\r\n\x05image\x18\x02 \x01(\t\";\n\x18IngressGatewayZvpnConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0e\n\x06suffix\x18\x02 \x01(\t\"2\n\x1fKubernetesEnvMixerAdapterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"T\n\x17KubernetesIngressConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x13\n\x0b\x65nableHttps\x18\x02 \x01(\x08\x12\x13\n\x0bgatewayName\x18\x03 \x01(\t\"_\n\x12LoadSheddingConfig\x12\x18\n\x10latencyThreshold\x18\x01 \x01(\t\"/\n\x04mode\x12\x0c\n\x08\x44ISABLED\x10\x00\x12\x0c\n\x08LOG_ONLY\x10\x01\x12\x0b\n\x07\x45NFORCE\x10\x02\"\x1d\n\nMTLSConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"6\n\x13MeshExpansionConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0e\n\x06useILB\x18\x02 \x01(\x08\"\xd7\x01\n\x13MixerAdaptersConfig\x12>\n\rkubernetesenv\x18\x01 \x01(\x0b\x32\'.values.KubernetesEnvMixerAdapterConfig\x12\x38\n\nprometheus\x18\x02 \x01(\x0b\x32$.values.PrometheusMixerAdapterConfig\x12.\n\x05stdio\x18\x03 \x01(\x0b\x32\x1f.values.StdioMixerAdapterConfig\x12\x16\n\x0euseAdapterCRDs\x18\x04 \x01(\x08\"i\n\x0bMixerConfig\x12)\n\x06policy\x18\x01 \x01(\x0b\x32\x19.values.MixerPolicyConfig\x12/\n\ttelemetry\x18\x02 \x01(\x0b\x32\x1c.values.MixerTelemetryConfig\"\xf8\x01\n\x11MixerPolicyConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x02 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12/\n\x03\x63pu\x18\x04 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x0f\n\x07\x65nabled\x18\x05 \x01(\x08\x12\r\n\x05image\x18\x06 \x01(\t\x12\x36\n\x0epodAnnotations\x18\x07 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x14\n\x0creplicaCount\x18\x08 \x01(\r\"\xcf\x04\n\x14MixerTelemetryConfig\x12-\n\x08\x61\x64\x61pters\x18\x01 \x01(\x0b\x32\x1b.values.MixerAdaptersConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x02 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x03 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x04 \x01(\r\x12/\n\x03\x63pu\x18\x05 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x0f\n\x07\x65nabled\x18\x06 \x01(\x08\x12\x32\n\x03\x65nv\x18\x07 \x03(\x0b\x32%.values.MixerTelemetryConfig.EnvEntry\x12\r\n\x05image\x18\x08 \x01(\t\x12\x30\n\x0cloadshedding\x18\t \x01(\x0b\x32\x1a.values.LoadSheddingConfig\x12\x34\n\x0cnodeSelector\x18\n \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x36\n\x0epodAnnotations\x18\x0b \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x14\n\x0creplicaCount\x18\x0c \x01(\r\x12;\n\tresources\x18\r \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12\x1e\n\x16sessionAffinityEnabled\x18\x0e \x01(\x08\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"%\n\x12MultiClusterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"\x94\x01\n\x0fNodeAgentConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12+\n\x03\x65nv\x18\x02 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\r\n\x05image\x18\x03 \x01(\t\x12\x34\n\x0cnodeSelector\x18\x04 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\"G\n\x1bOutboundTrafficPolicyConfig\"(\n\x04mode\x12\r\n\tALLOW_ANY\x10\x00\x12\x11\n\rREGISTRY_ONLY\x10\x01\"\xc3\x07\n\x0bPilotConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x18\n\x10\x61utoscaleEnabled\x18\x02 \x01(\x08\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12\x14\n\x0c\x61utoscaleMax\x18\x04 \x01(\r\x12\x14\n\x0creplicaCount\x18\x05 \x01(\r\x12\r\n\x05image\x18\x06 \x01(\t\x12\x0f\n\x07sidecar\x18\x07 \x01(\x08\x12\x15\n\rtraceSampling\x18\x08 \x01(\x01\x12;\n\tresources\x18\t \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12\x17\n\x0f\x63onfigNamespace\x18\n \x01(\t\x12/\n\x03\x63pu\x18\x0b \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x34\n\x0cnodeSelector\x18\x0c \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x42\n\x1fkeepaliveMaxServerConnectionAge\x18\r \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x38\n\x10\x64\x65ploymentLabels\x18\x0e \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x34\n\x0cmeshNetworks\x18\x0f \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12K\n\x1cpodAntiAffinityLabelSelector\x18\x10 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\x11 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\x11\n\tconfigMap\x18\x12 \x01(\x08\x12+\n\x07ingress\x18\x13 \x01(\x0b\x32\x1a.values.PilotIngressConfig\x12\x0e\n\x06useMCP\x18\x14 \x01(\x08\x12)\n\x03\x65nv\x18\x15 \x03(\x0b\x32\x1c.values.PilotConfig.EnvEntry\x12)\n\x06policy\x18\x16 \x01(\x0b\x32\x19.values.PilotPolicyConfig\x12/\n\ttelemetry\x18\x17 \x01(\x0b\x32\x1c.values.PilotTelemetryConfig\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"}\n\x12PilotIngressConfig\x12\x16\n\x0eingressService\x18\x01 \x01(\t\x12\x14\n\x0cingressClass\x18\x03 \x01(\t\"9\n\x15ingressControllerMode\x12\x0b\n\x07\x44\x45\x46\x41ULT\x10\x00\x12\n\n\x06STRICT\x10\x01\x12\x07\n\x03OFF\x10\x02\"$\n\x11PilotPolicyConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"\'\n\x14PilotTelemetryConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"O\n\x0bPortsConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x12\x10\n\x08nodePort\x18\x03 \x01(\x05\x12\x12\n\ntargetPort\x18\x04 \x01(\x05\"\x99\x03\n\x10PrometheusConfig\x12 \n\x18\x63reatePrometheusResource\x18\x01 \x01(\x08\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x12\x14\n\x0creplicaCount\x18\x03 \x01(\r\x12\x0b\n\x03hub\x18\x04 \x01(\t\x12\x0b\n\x03tag\x18\x05 \x01(\t\x12\x11\n\tretention\x18\x06 \x01(\t\x12\x34\n\x0cnodeSelector\x18\x07 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x31\n\x0escrapeInterval\x18\x08 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x13\n\x0b\x63ontextPath\x18\t \x01(\t\x12+\n\x07ingress\x18\n \x01(\x0b\x32\x1a.values.AddonIngressConfig\x12\x30\n\x07service\x18\x0b \x01(\x0b\x32\x1f.values.PrometheusServiceConfig\x12\x32\n\x08security\x18\x0c \x01(\x0b\x32 .values.PrometheusSecurityConfig\"i\n\x1cPrometheusMixerAdapterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x38\n\x15metricsExpiryDuration\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\"+\n\x18PrometheusSecurityConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"\x89\x01\n\x17PrometheusServiceConfig\x12\x33\n\x0b\x61nnotations\x18\x01 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x39\n\x08nodePort\x18\x02 \x01(\x0b\x32\'.values.PrometheusServiceNodePortConfig\"@\n\x1fPrometheusServiceNodePortConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0c\n\x04port\x18\x02 \x01(\r\"\xb4\x06\n\x0bProxyConfig\x12\x15\n\raccessLogFile\x18\x01 \x01(\t\x12\x17\n\x0f\x61\x63\x63\x65ssLogFormat\x18\x02 \x01(\t\x12\x15\n\rclusterDomain\x18\x05 \x01(\t\x12\x19\n\x11\x63omponentLogLevel\x18\x06 \x01(\t\x12\x13\n\x0b\x63oncurrency\x18\x07 \x01(\r\x12\x31\n\x0e\x64nsRefreshRate\x18\x08 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x16\n\x0e\x65nableCoreDump\x18\t \x01(\x08\x12\x37\n\x13\x65nvoyMetricsService\x18\n \x01(\x0b\x32\x1a.values.EnvoyMetricsConfig\x12/\n\x0b\x65nvoyStatsd\x18\x0b \x01(\x0b\x32\x1a.values.EnvoyMetricsConfig\x12\x1b\n\x13\x65xcludeInboundPorts\x18\x0c \x01(\t\x12\x17\n\x0f\x65xcludeIPRanges\x18\r \x01(\t\x12\r\n\x05image\x18\x0e \x01(\t\x12\x1b\n\x13includeInboundPorts\x18\x0f \x01(\t\x12\x17\n\x0fincludeIPRanges\x18\x10 \x01(\t\x12\x1a\n\x12kubevirtInterfaces\x18\x11 \x01(\t\x12\x10\n\x08logLevel\x18\x12 \x01(\t\x12\x12\n\nprivileged\x18\x13 \x01(\x08\x12$\n\x1creadinessInitialDelaySeconds\x18\x14 \x01(\r\x12\x1e\n\x16readinessPeriodSeconds\x18\x15 \x01(\r\x12!\n\x19readinessFailureThreshold\x18\x16 \x01(\r\x12\x12\n\nstatusPort\x18\x17 \x01(\r\x12;\n\tresources\x18\x18 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\"\'\n\x11\x61\x63\x63\x65ssLogEncoding\x12\x08\n\x04JSON\x10\x00\x12\x08\n\x04TEXT\x10\x01\"\'\n\nautoInject\x12\x0b\n\x07\x45NABLED\x10\x00\x12\x0c\n\x08\x44ISABLED\x10\x01\"0\n\x06tracer\x12\n\n\x06ZIPKIN\x10\x00\x12\r\n\tLIGHTSTEP\x10\x01\x12\x0b\n\x07\x44\x41TADOG\x10\x02\" \n\x0fProxyInitConfig\x12\r\n\x05image\x18\x01 \x01(\t\"6\n\x17ResourcesRequestsConfig\x12\x0b\n\x03\x63pu\x18\x01 \x01(\t\x12\x0e\n\x06memory\x18\x02 \x01(\t\"^\n\tSDSConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0f\n\x07udsPath\x18\x02 \x01(\t\x12\x14\n\x0cuseNormalJwt\x18\x03 \x01(\x08\x12\x19\n\x11useTrustworthyJwt\x18\x04 \x01(\x08\"C\n\x0cSecretVolume\x12\x11\n\tmountPath\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nsecretName\x18\x03 \x01(\t\"\xa8\x02\n\x0eSecurityConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x14\n\x0creplicaCount\x18\x02 \x01(\r\x12\r\n\x05image\x18\x03 \x01(\t\x12\x12\n\nselfSigned\x18\x04 \x01(\x08\x12\x13\n\x0btrustDomain\x18\x05 \x01(\t\x12\x36\n\x08\x64nsCerts\x18\x06 \x03(\x0b\x32$.values.SecurityConfig.DnsCertsEntry\x12\x18\n\x10\x63reateMeshPolicy\x18\x07 \x01(\x08\x12\x34\n\x0cnodeSelector\x18\x08 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x1a/\n\rDnsCertsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x8f\x01\n\rServiceConfig\x12\x33\n\x0b\x61nnotations\x18\x01 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x14\n\x0c\x65xternalPort\x18\x02 \x01(\r\x12\x0c\n\x04name\x18\x03 \x01(\t\x12%\n\x04type\x18\x12 \x01(\x0b\x32\x17.values.TypeServiceType\"\xfe\x03\n\x15SidecarInjectorConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12!\n\x19\x65nableNamespacesByDefault\x18\x02 \x01(\x08\x12\r\n\x05image\x18\x03 \x01(\t\x12\x34\n\x0cnodeSelector\x18\n \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x42\n\x13neverInjectSelector\x18\x0b \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\x43\n\x14\x61lwaysInjectSelector\x18\x0c \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12K\n\x1cpodAntiAffinityLabelSelector\x18\r \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\x0e \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\x14\n\x0creplicaCount\x18\x0f \x01(\r\x12\x1b\n\x13rewriteAppHTTPProbe\x18\x10 \x01(\x08\x12\x12\n\nselfSigned\x18\x11 \x01(\x08\"@\n\x17StdioMixerAdapterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x14\n\x0coutputAsJson\x18\x02 \x01(\x08\"\x9a\x01\n\x0cTracerConfig\x12,\n\x07\x64\x61tadog\x18\x01 \x01(\x0b\x32\x1b.values.TracerDatadogConfig\x12\x30\n\tlightstep\x18\x02 \x01(\x0b\x32\x1d.values.TracerLightStepConfig\x12*\n\x06zipkin\x18\x03 \x01(\x0b\x32\x1a.values.TracerZipkinConfig\"&\n\x13TracerDatadogConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\"a\n\x15TracerLightStepConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x02 \x01(\t\x12\x12\n\ncacertPath\x18\x03 \x01(\t\x12\x0e\n\x06secure\x18\x04 \x01(\x08\"%\n\x12TracerZipkinConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\"\x99\x02\n\rTracingConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12-\n\x07ingress\x18\x02 \x01(\x0b\x32\x1c.values.TracingIngressConfig\x12+\n\x06jaeger\x18\x03 \x01(\x0b\x32\x1b.values.TracingJaegerConfig\x12\x34\n\x0cnodeSelector\x18\x04 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x10\n\x08provider\x18\x05 \x01(\t\x12&\n\x07service\x18\x06 \x01(\x0b\x32\x15.values.ServiceConfig\x12+\n\x06zipkin\x18\x07 \x01(\x0b\x32\x1b.values.TracingZipkinConfig\"\'\n\x14TracingIngressConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"b\n\x13TracingJaegerConfig\x12\x0b\n\x03hub\x18\x01 \x01(\t\x12\x0b\n\x03tag\x18\x02 \x01(\t\x12\x31\n\x06memory\x18\x03 \x01(\x0b\x32!.values.TracingJaegerMemoryConfig\"/\n\x19TracingJaegerMemoryConfig\x12\x12\n\nmax_traces\x18\x01 \x01(\r\"\xf1\x01\n\x13TracingZipkinConfig\x12\x0b\n\x03hub\x18\x01 \x01(\t\x12\x0b\n\x03tag\x18\x02 \x01(\t\x12\x19\n\x11probeStartupDelay\x18\x03 \x01(\r\x12\x11\n\tqueryPort\x18\x04 \x01(\r\x12;\n\tresources\x18\x05 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12\x14\n\x0cjavaOptsHeap\x18\x06 \x01(\t\x12\x10\n\x08maxSpans\x18\x07 \x01(\r\x12-\n\x04node\x18\x08 \x01(\x0b\x32\x1f.values.TracingZipkinNodeConfig\"\'\n\x17TracingZipkinNodeConfig\x12\x0c\n\x04\x63pus\x18\x01 \x01(\r\"\xb4\x04\n\x06Values\x12.\n\x0b\x63\x65rtmanager\x18\x01 \x01(\x0b\x32\x19.values.CertManagerConfig\x12$\n\tistio_cni\x18\x02 \x01(\x0b\x32\x11.values.CNIConfig\x12+\n\x0cistiocoredns\x18\x03 \x01(\x0b\x32\x15.values.CoreDNSConfig\x12$\n\x06galley\x18\x04 \x01(\x0b\x32\x14.values.GalleyConfig\x12(\n\x08gateways\x18\x05 \x01(\x0b\x32\x16.values.GatewaysConfig\x12$\n\x06global\x18\x06 \x01(\x0b\x32\x14.values.GlobalConfig\x12\"\n\x05mixer\x18\x07 \x01(\x0b\x32\x13.values.MixerConfig\x12*\n\tnodeagent\x18\x08 \x01(\x0b\x32\x17.values.NodeAgentConfig\x12\"\n\x05pilot\x18\t \x01(\x0b\x32\x13.values.PilotConfig\x12,\n\nprometheus\x18\n \x01(\x0b\x32\x18.values.PrometheusConfig\x12(\n\x08security\x18\x0b \x01(\x0b\x32\x16.values.SecurityConfig\x12=\n\x16sidecarInjectorWebhook\x18\x0c \x01(\x0b\x32\x1d.values.SidecarInjectorConfig\x12&\n\x07tracing\x18\r \x01(\x0b\x32\x15.values.TracingConfig\"\x18\n\x16TypeMapStringInterface\"\x1f\n\x1dTypeSliceOfMapStringInterface\"\x11\n\x0fTypeServiceType\"0\n\rZeroVPNConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0e\n\x06suffix\x18\x02 \x01(\tB\nZ\x08v1alpha2b\x06proto3')
+  serialized_pb=_b('\n1pkg/apis/istio/v1alpha2/values/values_types.proto\x12\x06values\x1a\x1egoogle/protobuf/duration.proto\x1a\"k8s.io/api/core/v1/generated.proto\"4\n\x12\x41\x64\x64onIngressConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\r\n\x05hosts\x18\x02 \x03(\t\";\n\nArchConfig\x12\r\n\x05\x61md64\x18\x01 \x01(\r\x12\x0f\n\x07ppc64le\x18\x02 \x01(\r\x12\r\n\x05s390x\x18\x03 \x01(\r\"\x1c\n\tCNIConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\">\n\x1a\x43PUTargetUtilizationConfig\x12 \n\x18targetAverageUtilization\x18\x01 \x01(\x05\"\xb1\x01\n\x11\x43\x65rtManagerConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0b\n\x03hub\x18\x02 \x01(\t\x12\x0b\n\x03tag\x18\x03 \x01(\t\x12\x34\n\x0cnodeSelector\x18\x04 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12;\n\tresources\x18\x05 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\"\x9e\x01\n\rCoreDNSConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x63oreDNSImage\x18\x02 \x01(\t\x12\x1a\n\x12\x63oreDNSPluginImage\x18\x03 \x01(\t\x12\x34\n\x0cnodeSelector\x18\x04 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x14\n\x0creplicaCount\x18\x05 \x01(\r\"3\n DefaultPodDisruptionBudgetConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"K\n\x16\x44\x65\x66\x61ultResourcesConfig\x12\x31\n\x08requests\x18\x01 \x01(\x0b\x32\x1f.values.ResourcesRequestsConfig\"\xb2\x06\n\x13\x45gressGatewayConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x02 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12/\n\x03\x63pu\x18\x05 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x0f\n\x07\x65nabled\x18\x07 \x01(\x08\x12\x31\n\x03\x65nv\x18\x08 \x03(\x0b\x32$.values.EgressGatewayConfig.EnvEntry\x12+\n\x06labels\x18\t \x01(\x0b\x32\x1b.values.GatewayLabelsConfig\x12\x34\n\x0cnodeSelector\x18\n \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x36\n\x0epodAnnotations\x18\x0b \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12K\n\x1cpodAntiAffinityLabelSelector\x18\x0c \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\r \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\"\n\x05ports\x18\x0e \x03(\x0b\x32\x13.values.PortsConfig\x12;\n\tresources\x18\x0f \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12+\n\rsecretVolumes\x18\x10 \x03(\x0b\x32\x14.values.SecretVolume\x12:\n\x12serviceAnnotations\x18\x11 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x0c\n\x04type\x18\x12 \x01(\t\x12#\n\x04zvpn\x18\x13 \x01(\x0b\x32\x15.values.ZeroVPNConfig\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"A\n\x12\x45nvoyMetricsConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\"\xfa\x02\n\x0cGalleyConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\r\n\x05image\x18\x02 \x01(\t\x12,\n\x04mesh\x18\x03 \x03(\x0b\x32\x1e.values.GalleyConfig.MeshEntry\x12K\n\x1cpodAntiAffinityLabelSelector\x18\x04 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\x05 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\x14\n\x0creplicaCount\x18\x06 \x01(\r\x12;\n\tresources\x18\x07 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x1a+\n\tMeshEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"1\n\x13GatewayLabelsConfig\x12\x0b\n\x03\x61pp\x18\x01 \x01(\t\x12\r\n\x05istio\x18\x02 \x01(\t\"\x95\x01\n\x0eGatewaysConfig\x12\x37\n\x12istioEgressgateway\x18\x01 \x01(\x0b\x32\x1b.values.EgressGatewayConfig\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x12\x39\n\x13istioIngressgateway\x18\x04 \x01(\x0b\x32\x1c.values.IngressGatewayConfig\"\xa1\n\n\x0cGlobalConfig\x12 \n\x04\x61rch\x18\x01 \x01(\x0b\x32\x12.values.ArchConfig\x12\x17\n\x0f\x63onfigNamespace\x18\x02 \x01(\t\x12\x18\n\x10\x63onfigValidation\x18\x03 \x01(\x08\x12#\n\x1b\x63ontrolPlaneSecurityEnabled\x18\x04 \x01(\x08\x12;\n\x13\x64\x65\x66\x61ultNodeSelector\x18\x06 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12L\n\x1a\x64\x65\x66\x61ultPodDisruptionBudget\x18\x07 \x01(\x0b\x32(.values.DefaultPodDisruptionBudgetConfig\x12\x1b\n\x13\x64isablePolicyChecks\x18\x08 \x01(\x08\x12\x38\n\x10\x64\x65\x66\x61ultResources\x18\t \x01(\x0b\x32\x1e.values.DefaultResourcesConfig\x12\x16\n\x0e\x65nableHelmTest\x18\n \x01(\x08\x12\x15\n\renableTracing\x18\x0b \x01(\x08\x12\x0b\n\x03hub\x18\x0c \x01(\t\x12\x17\n\x0fimagePullPolicy\x18\r \x01(\t\x12\x16\n\x0eistioNamespace\x18\x0e \x01(\t\x12\x46\n\x11localityLbSetting\x18\x0f \x03(\x0b\x32+.values.GlobalConfig.LocalityLbSettingEntry\x12\x33\n\nk8sIngress\x18\x10 \x01(\x0b\x32\x1f.values.KubernetesIngressConfig\x12,\n\x07logging\x18\x11 \x01(\x0b\x32\x1b.values.GlobalLoggingConfig\x12\x32\n\rmeshExpansion\x18\x12 \x01(\x0b\x32\x1b.values.MeshExpansionConfig\x12\x34\n\x0cmeshNetworks\x18\x13 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x16\n\x0emonitoringPort\x18\x14 \x01(\r\x12 \n\x04mtls\x18\x15 \x01(\x0b\x32\x12.values.MTLSConfig\x12\x30\n\x0cmultiCluster\x18\x16 \x01(\x0b\x32\x1a.values.MultiClusterConfig\x12\x14\n\x0coneNamespace\x18\x17 \x01(\x08\x12\x42\n\x15outboundTrafficPolicy\x18\x18 \x01(\x0b\x32#.values.OutboundTrafficPolicyConfig\x12\x1b\n\x13policyCheckFailOpen\x18\x19 \x01(\x08\x12\x17\n\x0fpolicyNamespace\x18\x1a \x01(\t\x12\x19\n\x11priorityClassName\x18\x1b \x01(\t\x12\"\n\x05proxy\x18\x1c \x01(\x0b\x32\x13.values.ProxyConfig\x12*\n\tproxyInit\x18\x1d \x01(\x0b\x32\x17.values.ProxyInitConfig\x12\x1e\n\x03sds\x18\x1e \x01(\x0b\x32\x11.values.SDSConfig\x12\x0b\n\x03tag\x18\x1f \x01(\t\x12\x1a\n\x12telemetryNamespace\x18  \x01(\t\x12$\n\x06tracer\x18! \x01(\x0b\x32\x14.values.TracerConfig\x12\x13\n\x0btrustDomain\x18\" \x01(\t\x12\x0e\n\x06useMCP\x18# \x01(\x08\x1a\x38\n\x16LocalityLbSettingEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"$\n\x13GlobalLoggingConfig\x12\r\n\x05level\x18\x01 \x01(\t\"\xdc\x08\n\x14IngressGatewayConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x02 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12/\n\x03\x63pu\x18\x05 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x15\n\rcustomService\x18\x06 \x01(\x08\x12\r\n\x05\x64\x65\x62ug\x18\x07 \x01(\t\x12\x0e\n\x06\x64omain\x18\x08 \x01(\t\x12\x0f\n\x07\x65nabled\x18\n \x01(\x08\x12\x32\n\x03\x65nv\x18\x0b \x03(\x0b\x32%.values.IngressGatewayConfig.EnvEntry\x12\x13\n\x0b\x65xternalIPs\x18\x0c \x03(\t\x12\x12\n\nk8sIngress\x18\r \x01(\x08\x12\x17\n\x0fk8sIngressHttps\x18\x0e \x01(\x08\x12+\n\x06labels\x18\x0f \x01(\x0b\x32\x1b.values.GatewayLabelsConfig\x12\x16\n\x0eloadBalancerIP\x18\x10 \x01(\t\x12 \n\x18loadBalancerSourceRanges\x18\x11 \x03(\t\x12/\n\x12meshExpansionPorts\x18\x12 \x03(\x0b\x32\x13.values.PortsConfig\x12\x34\n\x0cnodeSelector\x18\x13 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x36\n\x0epodAnnotations\x18\x14 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12K\n\x1cpodAntiAffinityLabelSelector\x18\x15 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\x16 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\"\n\x05ports\x18\x17 \x03(\x0b\x32\x13.values.PortsConfig\x12\x14\n\x0creplicaCount\x18\x18 \x01(\r\x12\x31\n\tresources\x18\x19 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12,\n\x03sds\x18\x1a \x01(\x0b\x32\x1f.values.IngressGatewaySdsConfig\x12+\n\rsecretVolumes\x18\x1b \x03(\x0b\x32\x14.values.SecretVolume\x12:\n\x12serviceAnnotations\x18\x1c \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x0c\n\x04type\x18\x1d \x01(\t\x12.\n\x04zvpn\x18\x1e \x01(\x0b\x32 .values.IngressGatewayZvpnConfig\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"9\n\x17IngressGatewaySdsConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\r\n\x05image\x18\x02 \x01(\t\";\n\x18IngressGatewayZvpnConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0e\n\x06suffix\x18\x02 \x01(\t\"2\n\x1fKubernetesEnvMixerAdapterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"T\n\x17KubernetesIngressConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x13\n\x0b\x65nableHttps\x18\x02 \x01(\x08\x12\x13\n\x0bgatewayName\x18\x03 \x01(\t\"_\n\x12LoadSheddingConfig\x12\x18\n\x10latencyThreshold\x18\x01 \x01(\t\"/\n\x04mode\x12\x0c\n\x08\x44ISABLED\x10\x00\x12\x0c\n\x08LOG_ONLY\x10\x01\x12\x0b\n\x07\x45NFORCE\x10\x02\"\x1d\n\nMTLSConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"6\n\x13MeshExpansionConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0e\n\x06useILB\x18\x02 \x01(\x08\"\xd7\x01\n\x13MixerAdaptersConfig\x12>\n\rkubernetesenv\x18\x01 \x01(\x0b\x32\'.values.KubernetesEnvMixerAdapterConfig\x12\x38\n\nprometheus\x18\x02 \x01(\x0b\x32$.values.PrometheusMixerAdapterConfig\x12.\n\x05stdio\x18\x03 \x01(\x0b\x32\x1f.values.StdioMixerAdapterConfig\x12\x16\n\x0euseAdapterCRDs\x18\x04 \x01(\x08\"i\n\x0bMixerConfig\x12)\n\x06policy\x18\x01 \x01(\x0b\x32\x19.values.MixerPolicyConfig\x12/\n\ttelemetry\x18\x02 \x01(\x0b\x32\x1c.values.MixerTelemetryConfig\"\xf8\x01\n\x11MixerPolicyConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x02 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12/\n\x03\x63pu\x18\x04 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x0f\n\x07\x65nabled\x18\x05 \x01(\x08\x12\r\n\x05image\x18\x06 \x01(\t\x12\x36\n\x0epodAnnotations\x18\x07 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x14\n\x0creplicaCount\x18\x08 \x01(\r\"\xcf\x04\n\x14MixerTelemetryConfig\x12-\n\x08\x61\x64\x61pters\x18\x01 \x01(\x0b\x32\x1b.values.MixerAdaptersConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x02 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x03 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x04 \x01(\r\x12/\n\x03\x63pu\x18\x05 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x0f\n\x07\x65nabled\x18\x06 \x01(\x08\x12\x32\n\x03\x65nv\x18\x07 \x03(\x0b\x32%.values.MixerTelemetryConfig.EnvEntry\x12\r\n\x05image\x18\x08 \x01(\t\x12\x30\n\x0cloadshedding\x18\t \x01(\x0b\x32\x1a.values.LoadSheddingConfig\x12\x34\n\x0cnodeSelector\x18\n \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x36\n\x0epodAnnotations\x18\x0b \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x14\n\x0creplicaCount\x18\x0c \x01(\r\x12;\n\tresources\x18\r \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12\x1e\n\x16sessionAffinityEnabled\x18\x0e \x01(\x08\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"%\n\x12MultiClusterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"\x94\x01\n\x0fNodeAgentConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12+\n\x03\x65nv\x18\x02 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\r\n\x05image\x18\x03 \x01(\t\x12\x34\n\x0cnodeSelector\x18\x04 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\"G\n\x1bOutboundTrafficPolicyConfig\"(\n\x04mode\x12\r\n\tALLOW_ANY\x10\x00\x12\x11\n\rREGISTRY_ONLY\x10\x01\"\xc3\x07\n\x0bPilotConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x18\n\x10\x61utoscaleEnabled\x18\x02 \x01(\x08\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12\x14\n\x0c\x61utoscaleMax\x18\x04 \x01(\r\x12\x14\n\x0creplicaCount\x18\x05 \x01(\r\x12\r\n\x05image\x18\x06 \x01(\t\x12\x0f\n\x07sidecar\x18\x07 \x01(\x08\x12\x15\n\rtraceSampling\x18\x08 \x01(\x01\x12;\n\tresources\x18\t \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12\x17\n\x0f\x63onfigNamespace\x18\n \x01(\t\x12/\n\x03\x63pu\x18\x0b \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x34\n\x0cnodeSelector\x18\x0c \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x42\n\x1fkeepaliveMaxServerConnectionAge\x18\r \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x38\n\x10\x64\x65ploymentLabels\x18\x0e \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x34\n\x0cmeshNetworks\x18\x0f \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12K\n\x1cpodAntiAffinityLabelSelector\x18\x10 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\x11 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\x11\n\tconfigMap\x18\x12 \x01(\x08\x12+\n\x07ingress\x18\x13 \x01(\x0b\x32\x1a.values.PilotIngressConfig\x12\x0e\n\x06useMCP\x18\x14 \x01(\x08\x12)\n\x03\x65nv\x18\x15 \x03(\x0b\x32\x1c.values.PilotConfig.EnvEntry\x12)\n\x06policy\x18\x16 \x01(\x0b\x32\x19.values.PilotPolicyConfig\x12/\n\ttelemetry\x18\x17 \x01(\x0b\x32\x1c.values.PilotTelemetryConfig\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"}\n\x12PilotIngressConfig\x12\x16\n\x0eingressService\x18\x01 \x01(\t\x12\x14\n\x0cingressClass\x18\x03 \x01(\t\"9\n\x15ingressControllerMode\x12\x0b\n\x07\x44\x45\x46\x41ULT\x10\x00\x12\n\n\x06STRICT\x10\x01\x12\x07\n\x03OFF\x10\x02\"$\n\x11PilotPolicyConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"\'\n\x14PilotTelemetryConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"O\n\x0bPortsConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x12\x10\n\x08nodePort\x18\x03 \x01(\x05\x12\x12\n\ntargetPort\x18\x04 \x01(\x05\"\x99\x03\n\x10PrometheusConfig\x12 \n\x18\x63reatePrometheusResource\x18\x01 \x01(\x08\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x12\x14\n\x0creplicaCount\x18\x03 \x01(\r\x12\x0b\n\x03hub\x18\x04 \x01(\t\x12\x0b\n\x03tag\x18\x05 \x01(\t\x12\x11\n\tretention\x18\x06 \x01(\t\x12\x34\n\x0cnodeSelector\x18\x07 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x31\n\x0escrapeInterval\x18\x08 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x13\n\x0b\x63ontextPath\x18\t \x01(\t\x12+\n\x07ingress\x18\n \x01(\x0b\x32\x1a.values.AddonIngressConfig\x12\x30\n\x07service\x18\x0b \x01(\x0b\x32\x1f.values.PrometheusServiceConfig\x12\x32\n\x08security\x18\x0c \x01(\x0b\x32 .values.PrometheusSecurityConfig\"i\n\x1cPrometheusMixerAdapterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x38\n\x15metricsExpiryDuration\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\"+\n\x18PrometheusSecurityConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"\x89\x01\n\x17PrometheusServiceConfig\x12\x33\n\x0b\x61nnotations\x18\x01 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x39\n\x08nodePort\x18\x02 \x01(\x0b\x32\'.values.PrometheusServiceNodePortConfig\"@\n\x1fPrometheusServiceNodePortConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0c\n\x04port\x18\x02 \x01(\r\"\xb4\x06\n\x0bProxyConfig\x12\x15\n\raccessLogFile\x18\x01 \x01(\t\x12\x17\n\x0f\x61\x63\x63\x65ssLogFormat\x18\x02 \x01(\t\x12\x15\n\rclusterDomain\x18\x05 \x01(\t\x12\x19\n\x11\x63omponentLogLevel\x18\x06 \x01(\t\x12\x13\n\x0b\x63oncurrency\x18\x07 \x01(\r\x12\x31\n\x0e\x64nsRefreshRate\x18\x08 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x16\n\x0e\x65nableCoreDump\x18\t \x01(\x08\x12\x37\n\x13\x65nvoyMetricsService\x18\n \x01(\x0b\x32\x1a.values.EnvoyMetricsConfig\x12/\n\x0b\x65nvoyStatsd\x18\x0b \x01(\x0b\x32\x1a.values.EnvoyMetricsConfig\x12\x1b\n\x13\x65xcludeInboundPorts\x18\x0c \x01(\t\x12\x17\n\x0f\x65xcludeIPRanges\x18\r \x01(\t\x12\r\n\x05image\x18\x0e \x01(\t\x12\x1b\n\x13includeInboundPorts\x18\x0f \x01(\t\x12\x17\n\x0fincludeIPRanges\x18\x10 \x01(\t\x12\x1a\n\x12kubevirtInterfaces\x18\x11 \x01(\t\x12\x10\n\x08logLevel\x18\x12 \x01(\t\x12\x12\n\nprivileged\x18\x13 \x01(\x08\x12$\n\x1creadinessInitialDelaySeconds\x18\x14 \x01(\r\x12\x1e\n\x16readinessPeriodSeconds\x18\x15 \x01(\r\x12!\n\x19readinessFailureThreshold\x18\x16 \x01(\r\x12\x12\n\nstatusPort\x18\x17 \x01(\r\x12;\n\tresources\x18\x18 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\"\'\n\x11\x61\x63\x63\x65ssLogEncoding\x12\x08\n\x04JSON\x10\x00\x12\x08\n\x04TEXT\x10\x01\"\'\n\nautoInject\x12\x0b\n\x07\x45NABLED\x10\x00\x12\x0c\n\x08\x44ISABLED\x10\x01\"0\n\x06tracer\x12\n\n\x06ZIPKIN\x10\x00\x12\r\n\tLIGHTSTEP\x10\x01\x12\x0b\n\x07\x44\x41TADOG\x10\x02\" \n\x0fProxyInitConfig\x12\r\n\x05image\x18\x01 \x01(\t\"6\n\x17ResourcesRequestsConfig\x12\x0b\n\x03\x63pu\x18\x01 \x01(\t\x12\x0e\n\x06memory\x18\x02 \x01(\t\"^\n\tSDSConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0f\n\x07udsPath\x18\x02 \x01(\t\x12\x14\n\x0cuseNormalJwt\x18\x03 \x01(\x08\x12\x19\n\x11useTrustworthyJwt\x18\x04 \x01(\x08\"C\n\x0cSecretVolume\x12\x11\n\tmountPath\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nsecretName\x18\x03 \x01(\t\"\xa8\x02\n\x0eSecurityConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x14\n\x0creplicaCount\x18\x02 \x01(\r\x12\r\n\x05image\x18\x03 \x01(\t\x12\x12\n\nselfSigned\x18\x04 \x01(\x08\x12\x13\n\x0btrustDomain\x18\x05 \x01(\t\x12\x36\n\x08\x64nsCerts\x18\x06 \x03(\x0b\x32$.values.SecurityConfig.DnsCertsEntry\x12\x18\n\x10\x63reateMeshPolicy\x18\x07 \x01(\x08\x12\x34\n\x0cnodeSelector\x18\x08 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x1a/\n\rDnsCertsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"v\n\rServiceConfig\x12\x33\n\x0b\x61nnotations\x18\x01 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x14\n\x0c\x65xternalPort\x18\x02 \x01(\r\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0c\n\x04type\x18\x12 \x01(\t\"\xfe\x03\n\x15SidecarInjectorConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12!\n\x19\x65nableNamespacesByDefault\x18\x02 \x01(\x08\x12\r\n\x05image\x18\x03 \x01(\t\x12\x34\n\x0cnodeSelector\x18\n \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x42\n\x13neverInjectSelector\x18\x0b \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\x43\n\x14\x61lwaysInjectSelector\x18\x0c \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12K\n\x1cpodAntiAffinityLabelSelector\x18\r \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\x0e \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\x14\n\x0creplicaCount\x18\x0f \x01(\r\x12\x1b\n\x13rewriteAppHTTPProbe\x18\x10 \x01(\x08\x12\x12\n\nselfSigned\x18\x11 \x01(\x08\"@\n\x17StdioMixerAdapterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x14\n\x0coutputAsJson\x18\x02 \x01(\x08\"\x9a\x01\n\x0cTracerConfig\x12,\n\x07\x64\x61tadog\x18\x01 \x01(\x0b\x32\x1b.values.TracerDatadogConfig\x12\x30\n\tlightstep\x18\x02 \x01(\x0b\x32\x1d.values.TracerLightStepConfig\x12*\n\x06zipkin\x18\x03 \x01(\x0b\x32\x1a.values.TracerZipkinConfig\"&\n\x13TracerDatadogConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\"a\n\x15TracerLightStepConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x02 \x01(\t\x12\x12\n\ncacertPath\x18\x03 \x01(\t\x12\x0e\n\x06secure\x18\x04 \x01(\x08\"%\n\x12TracerZipkinConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\"\x99\x02\n\rTracingConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12-\n\x07ingress\x18\x02 \x01(\x0b\x32\x1c.values.TracingIngressConfig\x12+\n\x06jaeger\x18\x03 \x01(\x0b\x32\x1b.values.TracingJaegerConfig\x12\x34\n\x0cnodeSelector\x18\x04 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x10\n\x08provider\x18\x05 \x01(\t\x12&\n\x07service\x18\x06 \x01(\x0b\x32\x15.values.ServiceConfig\x12+\n\x06zipkin\x18\x07 \x01(\x0b\x32\x1b.values.TracingZipkinConfig\"\'\n\x14TracingIngressConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"b\n\x13TracingJaegerConfig\x12\x0b\n\x03hub\x18\x01 \x01(\t\x12\x0b\n\x03tag\x18\x02 \x01(\t\x12\x31\n\x06memory\x18\x03 \x01(\x0b\x32!.values.TracingJaegerMemoryConfig\"/\n\x19TracingJaegerMemoryConfig\x12\x12\n\nmax_traces\x18\x01 \x01(\r\"\xf1\x01\n\x13TracingZipkinConfig\x12\x0b\n\x03hub\x18\x01 \x01(\t\x12\x0b\n\x03tag\x18\x02 \x01(\t\x12\x19\n\x11probeStartupDelay\x18\x03 \x01(\r\x12\x11\n\tqueryPort\x18\x04 \x01(\r\x12;\n\tresources\x18\x05 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12\x14\n\x0cjavaOptsHeap\x18\x06 \x01(\t\x12\x10\n\x08maxSpans\x18\x07 \x01(\r\x12-\n\x04node\x18\x08 \x01(\x0b\x32\x1f.values.TracingZipkinNodeConfig\"\'\n\x17TracingZipkinNodeConfig\x12\x0c\n\x04\x63pus\x18\x01 \x01(\r\"\xb4\x04\n\x06Values\x12.\n\x0b\x63\x65rtmanager\x18\x01 \x01(\x0b\x32\x19.values.CertManagerConfig\x12$\n\tistio_cni\x18\x02 \x01(\x0b\x32\x11.values.CNIConfig\x12+\n\x0cistiocoredns\x18\x03 \x01(\x0b\x32\x15.values.CoreDNSConfig\x12$\n\x06galley\x18\x04 \x01(\x0b\x32\x14.values.GalleyConfig\x12(\n\x08gateways\x18\x05 \x01(\x0b\x32\x16.values.GatewaysConfig\x12$\n\x06global\x18\x06 \x01(\x0b\x32\x14.values.GlobalConfig\x12\"\n\x05mixer\x18\x07 \x01(\x0b\x32\x13.values.MixerConfig\x12*\n\tnodeagent\x18\x08 \x01(\x0b\x32\x17.values.NodeAgentConfig\x12\"\n\x05pilot\x18\t \x01(\x0b\x32\x13.values.PilotConfig\x12,\n\nprometheus\x18\n \x01(\x0b\x32\x18.values.PrometheusConfig\x12(\n\x08security\x18\x0b \x01(\x0b\x32\x16.values.SecurityConfig\x12=\n\x16sidecarInjectorWebhook\x18\x0c \x01(\x0b\x32\x1d.values.SidecarInjectorConfig\x12&\n\x07tracing\x18\r \x01(\x0b\x32\x15.values.TracingConfig\"\x18\n\x16TypeMapStringInterface\"\x1f\n\x1dTypeSliceOfMapStringInterface\"0\n\rZeroVPNConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0e\n\x06suffix\x18\x02 \x01(\tB\nZ\x08v1alpha2b\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_duration__pb2.DESCRIPTOR,k8s_dot_io_dot_api_dot_core_dot_v1_dot_generated__pb2.DESCRIPTOR,])
 
@@ -49,8 +49,8 @@ _LOADSHEDDINGCONFIG_MODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=5110,
-  serialized_end=5157,
+  serialized_start=5060,
+  serialized_end=5107,
 )
 _sym_db.RegisterEnumDescriptor(_LOADSHEDDINGCONFIG_MODE)
 
@@ -71,8 +71,8 @@ _OUTBOUNDTRAFFICPOLICYCONFIG_MODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=6637,
-  serialized_end=6677,
+  serialized_start=6587,
+  serialized_end=6627,
 )
 _sym_db.RegisterEnumDescriptor(_OUTBOUNDTRAFFICPOLICYCONFIG_MODE)
 
@@ -97,8 +97,8 @@ _PILOTINGRESSCONFIG_INGRESSCONTROLLERMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=7713,
-  serialized_end=7770,
+  serialized_start=7663,
+  serialized_end=7720,
 )
 _sym_db.RegisterEnumDescriptor(_PILOTINGRESSCONFIG_INGRESSCONTROLLERMODE)
 
@@ -119,8 +119,8 @@ _PROXYCONFIG_ACCESSLOGENCODING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=9393,
-  serialized_end=9432,
+  serialized_start=9343,
+  serialized_end=9382,
 )
 _sym_db.RegisterEnumDescriptor(_PROXYCONFIG_ACCESSLOGENCODING)
 
@@ -141,8 +141,8 @@ _PROXYCONFIG_AUTOINJECT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=9434,
-  serialized_end=9473,
+  serialized_start=9384,
+  serialized_end=9423,
 )
 _sym_db.RegisterEnumDescriptor(_PROXYCONFIG_AUTOINJECT)
 
@@ -167,8 +167,8 @@ _PROXYCONFIG_TRACER = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=9475,
-  serialized_end=9523,
+  serialized_start=9425,
+  serialized_end=9473,
 )
 _sym_db.RegisterEnumDescriptor(_PROXYCONFIG_TRACER)
 
@@ -531,8 +531,8 @@ _EGRESSGATEWAYCONFIG_ENVENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1611,
-  serialized_end=1653,
+  serialized_start=1586,
+  serialized_end=1628,
 )
 
 _EGRESSGATEWAYCONFIG = _descriptor.Descriptor(
@@ -649,8 +649,8 @@ _EGRESSGATEWAYCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='type', full_name='values.EgressGatewayConfig.type', index=15,
-      number=18, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      number=18, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -674,7 +674,7 @@ _EGRESSGATEWAYCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=810,
-  serialized_end=1653,
+  serialized_end=1628,
 )
 
 
@@ -718,8 +718,8 @@ _ENVOYMETRICSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1655,
-  serialized_end=1720,
+  serialized_start=1630,
+  serialized_end=1695,
 )
 
 
@@ -756,8 +756,8 @@ _GALLEYCONFIG_MESHENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2058,
-  serialized_end=2101,
+  serialized_start=2033,
+  serialized_end=2076,
 )
 
 _GALLEYCONFIG = _descriptor.Descriptor(
@@ -828,8 +828,8 @@ _GALLEYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1723,
-  serialized_end=2101,
+  serialized_start=1698,
+  serialized_end=2076,
 )
 
 
@@ -866,8 +866,8 @@ _GATEWAYLABELSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2103,
-  serialized_end=2152,
+  serialized_start=2078,
+  serialized_end=2127,
 )
 
 
@@ -911,8 +911,8 @@ _GATEWAYSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2155,
-  serialized_end=2304,
+  serialized_start=2130,
+  serialized_end=2279,
 )
 
 
@@ -949,8 +949,8 @@ _GLOBALCONFIG_LOCALITYLBSETTINGENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3564,
-  serialized_end=3620,
+  serialized_start=3539,
+  serialized_end=3595,
 )
 
 _GLOBALCONFIG = _descriptor.Descriptor(
@@ -1210,8 +1210,8 @@ _GLOBALCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2307,
-  serialized_end=3620,
+  serialized_start=2282,
+  serialized_end=3595,
 )
 
 
@@ -1241,8 +1241,8 @@ _GLOBALLOGGINGCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3622,
-  serialized_end=3658,
+  serialized_start=3597,
+  serialized_end=3633,
 )
 
 
@@ -1279,8 +1279,8 @@ _INGRESSGATEWAYCONFIG_ENVENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1611,
-  serialized_end=1653,
+  serialized_start=1586,
+  serialized_end=1628,
 )
 
 _INGRESSGATEWAYCONFIG = _descriptor.Descriptor(
@@ -1474,8 +1474,8 @@ _INGRESSGATEWAYCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='type', full_name='values.IngressGatewayConfig.type', index=26,
-      number=29, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      number=29, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -1498,8 +1498,8 @@ _INGRESSGATEWAYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3661,
-  serialized_end=4802,
+  serialized_start=3636,
+  serialized_end=4752,
 )
 
 
@@ -1536,8 +1536,8 @@ _INGRESSGATEWAYSDSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4804,
-  serialized_end=4861,
+  serialized_start=4754,
+  serialized_end=4811,
 )
 
 
@@ -1574,8 +1574,8 @@ _INGRESSGATEWAYZVPNCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4863,
-  serialized_end=4922,
+  serialized_start=4813,
+  serialized_end=4872,
 )
 
 
@@ -1605,8 +1605,8 @@ _KUBERNETESENVMIXERADAPTERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4924,
-  serialized_end=4974,
+  serialized_start=4874,
+  serialized_end=4924,
 )
 
 
@@ -1650,8 +1650,8 @@ _KUBERNETESINGRESSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4976,
-  serialized_end=5060,
+  serialized_start=4926,
+  serialized_end=5010,
 )
 
 
@@ -1682,8 +1682,8 @@ _LOADSHEDDINGCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5062,
-  serialized_end=5157,
+  serialized_start=5012,
+  serialized_end=5107,
 )
 
 
@@ -1713,8 +1713,8 @@ _MTLSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5159,
-  serialized_end=5188,
+  serialized_start=5109,
+  serialized_end=5138,
 )
 
 
@@ -1751,8 +1751,8 @@ _MESHEXPANSIONCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5190,
-  serialized_end=5244,
+  serialized_start=5140,
+  serialized_end=5194,
 )
 
 
@@ -1803,8 +1803,8 @@ _MIXERADAPTERSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5247,
-  serialized_end=5462,
+  serialized_start=5197,
+  serialized_end=5412,
 )
 
 
@@ -1841,8 +1841,8 @@ _MIXERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5464,
-  serialized_end=5569,
+  serialized_start=5414,
+  serialized_end=5519,
 )
 
 
@@ -1921,8 +1921,8 @@ _MIXERPOLICYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5572,
-  serialized_end=5820,
+  serialized_start=5522,
+  serialized_end=5770,
 )
 
 
@@ -1959,8 +1959,8 @@ _MIXERTELEMETRYCONFIG_ENVENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1611,
-  serialized_end=1653,
+  serialized_start=1586,
+  serialized_end=1628,
 )
 
 _MIXERTELEMETRYCONFIG = _descriptor.Descriptor(
@@ -2080,8 +2080,8 @@ _MIXERTELEMETRYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5823,
-  serialized_end=6414,
+  serialized_start=5773,
+  serialized_end=6364,
 )
 
 
@@ -2111,8 +2111,8 @@ _MULTICLUSTERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6416,
-  serialized_end=6453,
+  serialized_start=6366,
+  serialized_end=6403,
 )
 
 
@@ -2163,8 +2163,8 @@ _NODEAGENTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6456,
-  serialized_end=6604,
+  serialized_start=6406,
+  serialized_end=6554,
 )
 
 
@@ -2188,8 +2188,8 @@ _OUTBOUNDTRAFFICPOLICYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6606,
-  serialized_end=6677,
+  serialized_start=6556,
+  serialized_end=6627,
 )
 
 
@@ -2226,8 +2226,8 @@ _PILOTCONFIG_ENVENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1611,
-  serialized_end=1653,
+  serialized_start=1586,
+  serialized_end=1628,
 )
 
 _PILOTCONFIG = _descriptor.Descriptor(
@@ -2410,8 +2410,8 @@ _PILOTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6680,
-  serialized_end=7643,
+  serialized_start=6630,
+  serialized_end=7593,
 )
 
 
@@ -2449,8 +2449,8 @@ _PILOTINGRESSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7645,
-  serialized_end=7770,
+  serialized_start=7595,
+  serialized_end=7720,
 )
 
 
@@ -2480,8 +2480,8 @@ _PILOTPOLICYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7772,
-  serialized_end=7808,
+  serialized_start=7722,
+  serialized_end=7758,
 )
 
 
@@ -2511,8 +2511,8 @@ _PILOTTELEMETRYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7810,
-  serialized_end=7849,
+  serialized_start=7760,
+  serialized_end=7799,
 )
 
 
@@ -2563,8 +2563,8 @@ _PORTSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7851,
-  serialized_end=7930,
+  serialized_start=7801,
+  serialized_end=7880,
 )
 
 
@@ -2671,8 +2671,8 @@ _PROMETHEUSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7933,
-  serialized_end=8342,
+  serialized_start=7883,
+  serialized_end=8292,
 )
 
 
@@ -2709,8 +2709,8 @@ _PROMETHEUSMIXERADAPTERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8344,
-  serialized_end=8449,
+  serialized_start=8294,
+  serialized_end=8399,
 )
 
 
@@ -2740,8 +2740,8 @@ _PROMETHEUSSECURITYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8451,
-  serialized_end=8494,
+  serialized_start=8401,
+  serialized_end=8444,
 )
 
 
@@ -2778,8 +2778,8 @@ _PROMETHEUSSERVICECONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8497,
-  serialized_end=8634,
+  serialized_start=8447,
+  serialized_end=8584,
 )
 
 
@@ -2816,8 +2816,8 @@ _PROMETHEUSSERVICENODEPORTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8636,
-  serialized_end=8700,
+  serialized_start=8586,
+  serialized_end=8650,
 )
 
 
@@ -2997,8 +2997,8 @@ _PROXYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8703,
-  serialized_end=9523,
+  serialized_start=8653,
+  serialized_end=9473,
 )
 
 
@@ -3028,8 +3028,8 @@ _PROXYINITCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9525,
-  serialized_end=9557,
+  serialized_start=9475,
+  serialized_end=9507,
 )
 
 
@@ -3066,8 +3066,8 @@ _RESOURCESREQUESTSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9559,
-  serialized_end=9613,
+  serialized_start=9509,
+  serialized_end=9563,
 )
 
 
@@ -3118,8 +3118,8 @@ _SDSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9615,
-  serialized_end=9709,
+  serialized_start=9565,
+  serialized_end=9659,
 )
 
 
@@ -3163,8 +3163,8 @@ _SECRETVOLUME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9711,
-  serialized_end=9778,
+  serialized_start=9661,
+  serialized_end=9728,
 )
 
 
@@ -3201,8 +3201,8 @@ _SECURITYCONFIG_DNSCERTSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10030,
-  serialized_end=10077,
+  serialized_start=9980,
+  serialized_end=10027,
 )
 
 _SECURITYCONFIG = _descriptor.Descriptor(
@@ -3280,8 +3280,8 @@ _SECURITYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9781,
-  serialized_end=10077,
+  serialized_start=9731,
+  serialized_end=10027,
 )
 
 
@@ -3315,8 +3315,8 @@ _SERVICECONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='type', full_name='values.ServiceConfig.type', index=3,
-      number=18, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      number=18, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -3332,8 +3332,8 @@ _SERVICECONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10080,
-  serialized_end=10223,
+  serialized_start=10029,
+  serialized_end=10147,
 )
 
 
@@ -3433,8 +3433,8 @@ _SIDECARINJECTORCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10226,
-  serialized_end=10736,
+  serialized_start=10150,
+  serialized_end=10660,
 )
 
 
@@ -3471,8 +3471,8 @@ _STDIOMIXERADAPTERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10738,
-  serialized_end=10802,
+  serialized_start=10662,
+  serialized_end=10726,
 )
 
 
@@ -3516,8 +3516,8 @@ _TRACERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10805,
-  serialized_end=10959,
+  serialized_start=10729,
+  serialized_end=10883,
 )
 
 
@@ -3547,8 +3547,8 @@ _TRACERDATADOGCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10961,
-  serialized_end=10999,
+  serialized_start=10885,
+  serialized_end=10923,
 )
 
 
@@ -3599,8 +3599,8 @@ _TRACERLIGHTSTEPCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11001,
-  serialized_end=11098,
+  serialized_start=10925,
+  serialized_end=11022,
 )
 
 
@@ -3630,8 +3630,8 @@ _TRACERZIPKINCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11100,
-  serialized_end=11137,
+  serialized_start=11024,
+  serialized_end=11061,
 )
 
 
@@ -3703,8 +3703,8 @@ _TRACINGCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11140,
-  serialized_end=11421,
+  serialized_start=11064,
+  serialized_end=11345,
 )
 
 
@@ -3734,8 +3734,8 @@ _TRACINGINGRESSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11423,
-  serialized_end=11462,
+  serialized_start=11347,
+  serialized_end=11386,
 )
 
 
@@ -3779,8 +3779,8 @@ _TRACINGJAEGERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11464,
-  serialized_end=11562,
+  serialized_start=11388,
+  serialized_end=11486,
 )
 
 
@@ -3810,8 +3810,8 @@ _TRACINGJAEGERMEMORYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11564,
-  serialized_end=11611,
+  serialized_start=11488,
+  serialized_end=11535,
 )
 
 
@@ -3890,8 +3890,8 @@ _TRACINGZIPKINCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11614,
-  serialized_end=11855,
+  serialized_start=11538,
+  serialized_end=11779,
 )
 
 
@@ -3921,8 +3921,8 @@ _TRACINGZIPKINNODECONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11857,
-  serialized_end=11896,
+  serialized_start=11781,
+  serialized_end=11820,
 )
 
 
@@ -4036,8 +4036,8 @@ _VALUES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11899,
-  serialized_end=12463,
+  serialized_start=11823,
+  serialized_end=12387,
 )
 
 
@@ -4060,8 +4060,8 @@ _TYPEMAPSTRINGINTERFACE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12465,
-  serialized_end=12489,
+  serialized_start=12389,
+  serialized_end=12413,
 )
 
 
@@ -4084,32 +4084,8 @@ _TYPESLICEOFMAPSTRINGINTERFACE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12491,
-  serialized_end=12522,
-)
-
-
-_TYPESERVICETYPE = _descriptor.Descriptor(
-  name='TypeServiceType',
-  full_name='values.TypeServiceType',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=12524,
-  serialized_end=12541,
+  serialized_start=12415,
+  serialized_end=12446,
 )
 
 
@@ -4146,8 +4122,8 @@ _ZEROVPNCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12543,
-  serialized_end=12591,
+  serialized_start=12448,
+  serialized_end=12496,
 )
 
 _CERTMANAGERCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
@@ -4166,7 +4142,6 @@ _EGRESSGATEWAYCONFIG.fields_by_name['ports'].message_type = _PORTSCONFIG
 _EGRESSGATEWAYCONFIG.fields_by_name['resources'].message_type = k8s_dot_io_dot_api_dot_core_dot_v1_dot_generated__pb2._RESOURCEREQUIREMENTS
 _EGRESSGATEWAYCONFIG.fields_by_name['secretVolumes'].message_type = _SECRETVOLUME
 _EGRESSGATEWAYCONFIG.fields_by_name['serviceAnnotations'].message_type = _TYPEMAPSTRINGINTERFACE
-_EGRESSGATEWAYCONFIG.fields_by_name['type'].message_type = _TYPESERVICETYPE
 _EGRESSGATEWAYCONFIG.fields_by_name['zvpn'].message_type = _ZEROVPNCONFIG
 _GALLEYCONFIG_MESHENTRY.containing_type = _GALLEYCONFIG
 _GALLEYCONFIG.fields_by_name['mesh'].message_type = _GALLEYCONFIG_MESHENTRY
@@ -4206,7 +4181,6 @@ _INGRESSGATEWAYCONFIG.fields_by_name['resources'].message_type = _TYPEMAPSTRINGI
 _INGRESSGATEWAYCONFIG.fields_by_name['sds'].message_type = _INGRESSGATEWAYSDSCONFIG
 _INGRESSGATEWAYCONFIG.fields_by_name['secretVolumes'].message_type = _SECRETVOLUME
 _INGRESSGATEWAYCONFIG.fields_by_name['serviceAnnotations'].message_type = _TYPEMAPSTRINGINTERFACE
-_INGRESSGATEWAYCONFIG.fields_by_name['type'].message_type = _TYPESERVICETYPE
 _INGRESSGATEWAYCONFIG.fields_by_name['zvpn'].message_type = _INGRESSGATEWAYZVPNCONFIG
 _LOADSHEDDINGCONFIG_MODE.containing_type = _LOADSHEDDINGCONFIG
 _MIXERADAPTERSCONFIG.fields_by_name['kubernetesenv'].message_type = _KUBERNETESENVMIXERADAPTERCONFIG
@@ -4260,7 +4234,6 @@ _SECURITYCONFIG_DNSCERTSENTRY.containing_type = _SECURITYCONFIG
 _SECURITYCONFIG.fields_by_name['dnsCerts'].message_type = _SECURITYCONFIG_DNSCERTSENTRY
 _SECURITYCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
 _SERVICECONFIG.fields_by_name['annotations'].message_type = _TYPEMAPSTRINGINTERFACE
-_SERVICECONFIG.fields_by_name['type'].message_type = _TYPESERVICETYPE
 _SIDECARINJECTORCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
 _SIDECARINJECTORCONFIG.fields_by_name['neverInjectSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
 _SIDECARINJECTORCONFIG.fields_by_name['alwaysInjectSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
@@ -4352,7 +4325,6 @@ DESCRIPTOR.message_types_by_name['TracingZipkinNodeConfig'] = _TRACINGZIPKINNODE
 DESCRIPTOR.message_types_by_name['Values'] = _VALUES
 DESCRIPTOR.message_types_by_name['TypeMapStringInterface'] = _TYPEMAPSTRINGINTERFACE
 DESCRIPTOR.message_types_by_name['TypeSliceOfMapStringInterface'] = _TYPESLICEOFMAPSTRINGINTERFACE
-DESCRIPTOR.message_types_by_name['TypeServiceType'] = _TYPESERVICETYPE
 DESCRIPTOR.message_types_by_name['ZeroVPNConfig'] = _ZEROVPNCONFIG
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -4845,13 +4817,6 @@ TypeSliceOfMapStringInterface = _reflection.GeneratedProtocolMessageType('TypeSl
   # @@protoc_insertion_point(class_scope:values.TypeSliceOfMapStringInterface)
   })
 _sym_db.RegisterMessage(TypeSliceOfMapStringInterface)
-
-TypeServiceType = _reflection.GeneratedProtocolMessageType('TypeServiceType', (_message.Message,), {
-  'DESCRIPTOR' : _TYPESERVICETYPE,
-  '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-  # @@protoc_insertion_point(class_scope:values.TypeServiceType)
-  })
-_sym_db.RegisterMessage(TypeServiceType)
 
 ZeroVPNConfig = _reflection.GeneratedProtocolMessageType('ZeroVPNConfig', (_message.Message,), {
   'DESCRIPTOR' : _ZEROVPNCONFIG,

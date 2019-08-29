@@ -192,7 +192,7 @@ message EgressGatewayConfig {
   // Service type.
   //
   // See https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-  TypeServiceType type = 18;
+  string type = 18;
 
   // Enables cross-cluster access using SNI matching.
   ZeroVPNConfig zvpn = 19;
@@ -513,7 +513,7 @@ message IngressGatewayConfig {
   // Service type.
   //
   // See https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-  TypeServiceType type = 29;
+  string type = 29;
 
  // Enables cross-cluster access using SNI matching.
  IngressGatewayZvpnConfig zvpn = 30;
@@ -1167,7 +1167,7 @@ message ServiceConfig {
 
   string name = 3;
 
-  TypeServiceType type = 18;
+  string type = 18;
 }
 
 // SidecarInjectorConfig is described in istio.io documentation.
@@ -1391,9 +1391,6 @@ message TypeMapStringInterface {}
 
 // GOTYPE: []map[string]interface{}
 message TypeSliceOfMapStringInterface {}
-
-// GOTYPE: v1.ServiceType
-message TypeServiceType {}
 
 // ZeroVPNConfig enables cross-cluster access using SNI matching.
 message ZeroVPNConfig {
