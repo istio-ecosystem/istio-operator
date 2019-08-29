@@ -47,18 +47,14 @@ const (
 	goTypeToken = "// GOTYPE: "
 )
 
-func usage() {
-	fmt.Println("Usage: fixup-structs -f <filename>")
-	os.Exit(1)
-}
-
 func main() {
 	var filePath string
 	flag.StringVar(&filePath, "f", "", "path to input file")
 	flag.Parse()
 
 	if filePath == "" {
-		usage()
+		fmt.Println("-f flag is required.")
+		os.Exit(1)
 	}
 
 	lines, err := getFileLines(filePath)
