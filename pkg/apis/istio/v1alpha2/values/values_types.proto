@@ -1369,21 +1369,21 @@ message Values {
 
   GlobalConfig global = 6;
 
-  // GOSTRUCT: Grafana         map[string]interface{} `json:"grafana,omitempty"`
+  TypeMapStringInterface grafana = 7;
 
-  MixerConfig mixer = 7;
+  MixerConfig mixer = 8;
 
-  NodeAgentConfig nodeagent = 8;
+  NodeAgentConfig nodeagent = 9;
 
-  PilotConfig pilot = 9;
+  PilotConfig pilot = 10;
 
-  PrometheusConfig prometheus = 10;
+  PrometheusConfig prometheus = 11;
 
-  SecurityConfig security = 11;
+  SecurityConfig security = 12;
 
-  SidecarInjectorConfig sidecarInjectorWebhook = 12;
+  SidecarInjectorConfig sidecarInjectorWebhook = 13;
 
-  TracingConfig tracing = 13;
+  TracingConfig tracing = 14;
 }
 
 // GOTYPE: map[string]interface{}
