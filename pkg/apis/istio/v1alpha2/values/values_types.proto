@@ -71,8 +71,7 @@ message CertManagerConfig {
   // K8s node selector.
   //
   // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  // GOSTRUCT: NodeSelector map[string]interface{} `json:"nodeSelector"`
-  map<string, string> nodeSelector = 4;
+  TypeMapStringInterface nodeSelector = 4;
 
   // K8s resources settings.
   //
@@ -93,8 +92,7 @@ message CoreDNSConfig {
   // K8s node selector.
   //
   // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  // GOSTRUCT: NodeSelector       map[string]interface{} `json:"nodeSelector,omitempty"`
-  map<string, string> nodeSelector = 4;
+  TypeMapStringInterface nodeSelector = 4;
 
   // Number of replicas for Core DNS.
   uint32 replicaCount = 5;
@@ -143,14 +141,12 @@ message EgressGatewayConfig {
   // K8s node selector.
   //
   // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  // GOSTRUCT: NodeSelector                     map[string]interface{}      `json:"nodeSelector,omitempty"`
-  map<string, string> nodeSelector = 10;
+  TypeMapStringInterface nodeSelector = 10;
 
   // K8s annotations for pods.
   //
   // See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  // GOSTRUCT: PodAnnotations                   map[string]interface{}      `json:"podAnnotations,omitempty"`
-  map<string, string> podAnnotations = 11;
+  TypeMapStringInterface podAnnotations = 11;
 
   // Pod anti-affinity label selector.
   //
@@ -174,12 +170,10 @@ message EgressGatewayConfig {
   //  This pod anti-affinity rule says that the pod requires not to be scheduled
   //  onto a node if that node is already running a pod with label having key
   //  “security” and value “S1”.
-  // GOSTRUCT: PodAntiAffinityLabelSelector     []map[string]interface{}    `json:"podAntiAffinityLabelSelector"`
-  repeated string podAntiAffinityLabelSelector = 12;
+  TypeSliceOfMapStringInterface podAntiAffinityLabelSelector = 12;
 
   // See PodAntiAffinityLabelSelector.
-  // GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface{}    `json:"podAntiAffinityTermLabelSelector"`
-  repeated string podAntiAffinityTermLabelSelector = 13;
+  TypeSliceOfMapStringInterface podAntiAffinityTermLabelSelector = 13;
 
   // Ports Configuration for the egress gateway service.
   repeated PortsConfig ports = 14;
@@ -193,14 +187,12 @@ message EgressGatewayConfig {
   repeated SecretVolume secretVolumes = 16;
 
   // Annotations to add to the egress gateway service.
-  // GOSTRUCT: ServiceAnnotations               map[string]interface{}      `json:"serviceAnnotations,omitempty"`
-  map<string, string> serviceAnnotations = 17;
+  TypeMapStringInterface serviceAnnotations = 17;
 
   // Service type.
   //
   // See https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-  // GOSTRUCT: Type                             v1.ServiceType          `json:"type,omitempty"`
-  string type = 18;
+  TypeServiceType type = 18;
 
   // Enables cross-cluster access using SNI matching.
   ZeroVPNConfig zvpn = 19;
@@ -234,12 +226,10 @@ message GalleyConfig {
   map<string, string> mesh = 3;
 
   // See EgressGatewayConfig.
-  // GOSTRUCT: PodAntiAffinityLabelSelector     []map[string]interface{}    `json:"podAntiAffinityLabelSelector"`
-  repeated string podAntiAffinityLabelSelector = 4;
+  TypeSliceOfMapStringInterface podAntiAffinityLabelSelector = 4;
 
   // See EgressGatewayConfig.
-  // GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface{}    `json:"podAntiAffinityTermLabelSelector"`
-  repeated string podAntiAffinityTermLabelSelector = 5;
+  TypeSliceOfMapStringInterface podAntiAffinityTermLabelSelector = 5;
 
   // Number of replicas in the Galley Deployment.
   uint32 replicaCount = 6;
@@ -289,8 +279,7 @@ message GlobalConfig {
   // Default k8s node selector for all the Istio control plane components
   //
   // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  // GOSTRUCT: DefaultNodeSelector                     map[string]interface{}      `json:"defaultNodeSelector,omitempty"`
-  map<string, string> defaultNodeSelector = 6;
+  TypeMapStringInterface defaultNodeSelector = 6;
 
   // Specifies the default pod disruption budget configuration.
   DefaultPodDisruptionBudgetConfig defaultPodDisruptionBudget = 7;
@@ -381,8 +370,7 @@ message GlobalConfig {
   //     - registryServiceName: istio-ingressgateway.istio-system.svc.cluster.local
   //       port: 443
   //
-  // GOSTRUCT: MeshNetworks map[string]interface{}    `json:"meshNetworks"`
-  map<string, string> meshNetworks = 19;
+  TypeMapStringInterface meshNetworks = 19;
 
   // Specifies the monitor port number for all Istio control plane components.
   uint32 monitoringPort = 20;
@@ -489,22 +477,18 @@ message IngressGatewayConfig {
   // K8s node selector.
   //
   // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  // GOSTRUCT: NodeSelector                     map[string]interface{}      `json:"nodeSelector,omitempty"`
-  map<string, string> nodeSelector = 19;
+  TypeMapStringInterface nodeSelector = 19;
 
   // K8s annotations for pods.
   //
   // See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  // GOSTRUCT: PodAnnotations                   map[string]interface{}      `json:"podAnnotations,omitempty"`
-  map<string, string> podAnnotations = 20;
+  TypeMapStringInterface podAnnotations = 20;
 
   // See EgressGatewayConfig.
-  // GOSTRUCT: PodAntiAffinityLabelSelector     []map[string]interface{}    `json:"podAntiAffinityLabelSelector"`
-  repeated string podAntiAffinityLabelSelector = 21;
+  TypeSliceOfMapStringInterface podAntiAffinityLabelSelector = 21;
 
   // See EgressGatewayConfig.
-  // GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface{}    `json:"podAntiAffinityTermLabelSelector"`
-  repeated string podAntiAffinityTermLabelSelector = 22;
+  TypeSliceOfMapStringInterface podAntiAffinityTermLabelSelector = 22;
 
   // Port Configuration for the ingress gateway.
   repeated PortsConfig ports = 23;
@@ -515,8 +499,7 @@ message IngressGatewayConfig {
   // K8s resources settings.
   //
   // See https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container
-  // GOSTRUCT: Resources                        map[string]interface{}      `json:"resources,omitempty"`
-  map<string, string> resources = 25;
+  TypeMapStringInterface resources = 25;
 
   // Secret Discovery Service (SDS) Configuration for ingress gateway.
   IngressGatewaySdsConfig sds = 26;
@@ -525,14 +508,12 @@ message IngressGatewayConfig {
   repeated SecretVolume secretVolumes = 27;
 
   // Annotations to add to the egress gateway service.
-  // GOSTRUCT: ServiceAnnotations               map[string]interface{}      `json:"serviceAnnotations,omitempty"`
-  map<string, string> serviceAnnotations = 28;
+  TypeMapStringInterface serviceAnnotations = 28;
 
   // Service type.
   //
   // See https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-  // GOSTRUCT: Type                             v1.ServiceType          `json:"type,omitempty"`
-  string type = 29;
+  TypeServiceType type = 29;
 
  // Enables cross-cluster access using SNI matching.
  IngressGatewayZvpnConfig zvpn = 30;
@@ -659,8 +640,7 @@ message MixerPolicyConfig {
   // K8s annotations to attach to mixer policy deployment
   //
   // See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  // GOSTRUCT: PodAnnotations   map[string]interface{}      `json:"podAnnotations,omitempty"`
-  map<string, string> podAnnotations = 7;
+  TypeMapStringInterface podAnnotations = 7;
 
   // Number of replicas in the Mixer Policy Deployment
   uint32 replicaCount = 8;
@@ -709,14 +689,12 @@ message MixerTelemetryConfig {
   // K8s node selector.
   //
   // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  // GOSTRUCT: NodeSelector           map[string]interface{}     `json:"nodeSelector,omitempty"`
-  map<string, string> nodeSelector = 10;
+  TypeMapStringInterface nodeSelector = 10;
 
   // K8s annotations to attach to mixer telemetry deployment
   //
   // See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  // GOSTRUCT: PodAnnotations         map[string]interface{}     `json:"podAnnotations,omitempty"`
-  map<string, string> podAnnotations = 11;
+  TypeMapStringInterface podAnnotations = 11;
 
   // Number of replicas in the Mixer Telemetry Deployment.
   uint32 replicaCount = 12;
@@ -748,8 +726,7 @@ message NodeAgentConfig {
   // env:
   //   ENV_VAR_1: value1
   //   ENV_VAR_2: value2
-  // GOSTRUCT: Env          map[string]interface{} `json:"env,omitempty"`
-  map<string, string> env = 2;
+  TypeMapStringInterface env = 2;
 
   // Image name for the Node Agent DaemonSet.
   string image = 3;
@@ -757,8 +734,7 @@ message NodeAgentConfig {
   // K8s node selector.
   //
   // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  // GOSTRUCT: NodeSelector map[string]interface{} `json:"nodeSelector,omitempty"`
-  map<string, string> nodeSelector = 4;
+  TypeMapStringInterface nodeSelector = 4;
 }
 
 // OutboundTrafficPolicyConfig controls the default behavior of the sidecar for handling outbound traffic from the application.
@@ -824,8 +800,7 @@ message PilotConfig {
   // K8s node selector.
   //
   // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  map<string, string> nodeSelector = 12;
-  // GOSTRUCT: NodeSelector                     map[string]interface{}      `json:"nodeSelector,omitempty"`
+  TypeMapStringInterface nodeSelector = 12;
 
   // Maximum duration that a sidecar can be connected to a pilot.
   //
@@ -837,20 +812,16 @@ message PilotConfig {
   // Labels that are added to Pilot pods.
   //
   // See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  // GOSTRUCT: deploymentLabels               map[string]interface{}      `json:"deploymentLabels,omitempty"`
-  map<string, string> deploymentLabels = 14;
+  TypeMapStringInterface deploymentLabels = 14;
 
   // Used to override control plane networks.
-  // GOSTRUCT: MeshNetworks                     map[string]interface{}      `json:"meshNetworks,omitempty"`
-  map<string, string> meshNetworks = 15;
+  TypeMapStringInterface meshNetworks = 15;
 
   // See EgressGatewayConfig.
-  // GOSTRUCT: PodAntiAffinityLabelSelector     []map[string]interface{}    `json:"podAntiAffinityLabelSelector"`
-  repeated string podAntiAffinityLabelSelector = 16;
+  TypeSliceOfMapStringInterface podAntiAffinityLabelSelector = 16;
 
   // See EgressGatewayConfig.
-  // GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface{}    `json:"podAntiAffinityTermLabelSelector"`
-  repeated string podAntiAffinityTermLabelSelector = 17;
+  TypeSliceOfMapStringInterface podAntiAffinityTermLabelSelector = 17;
 
   // Configuration settings passed to Pilot as a ConfigMap.
   //
@@ -944,7 +915,7 @@ message PrometheusConfig {
 
   string retention = 6;
 
-  map<string, string> nodeSelector = 7;
+  TypeMapStringInterface nodeSelector = 7;
   // GOSTRUCT: NodeSelector             map[string]interface{}    `json:"nodeSelector,omitempty"`
 
   google.protobuf.Duration scrapeInterval = 8;
@@ -977,8 +948,7 @@ message PrometheusSecurityConfig {
 
 // Configuration for Prometheus adapter service.
 message PrometheusServiceConfig {
-  map<string, string> annotations = 1;
-  // GOSTRUCT: Annotations map[string]interface{}           `json:"annotations,omitempty"`
+  TypeMapStringInterface annotations = 1;
   PrometheusServiceNodePortConfig nodePort = 2;
 }
 
@@ -1186,21 +1156,18 @@ message SecurityConfig {
   // K8s node selector.
   //
   // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  // GOSTRUCT: NodeSelector     map[string]interface{} `json:"nodeSelector,omitempty"`
-  map<string, string> nodeSelector = 8;
+  TypeMapStringInterface nodeSelector = 8;
 }
 
 // ServiceConfig is described in istio.io documentation.
 message ServiceConfig {
-  // GOSTRUCT: Annotations  map[string]interface{} `json:"annotations,omitempty"`
-  map<string, string> annotations = 1;
+  TypeMapStringInterface annotations = 1;
 
   uint32 externalPort = 2;
 
   string name = 3;
 
-  // GOSTRUCT: Type                             v1.ServiceType          `json:"type,omitempty"`
-  string type = 18;
+  TypeServiceType type = 18;
 }
 
 // SidecarInjectorConfig is described in istio.io documentation.
@@ -1221,28 +1188,23 @@ message SidecarInjectorConfig {
   // K8s node selector. Each component can overwrite the default values by adding its node selector block in the relevant section and setting the desired values.
   //
   // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  // GOSTRUCT: NodeSelector                     map[string]interface{}   `json:"nodeSelector,omitempty"`
-  map<string, string> nodeSelector = 10;
+  TypeMapStringInterface nodeSelector = 10;
 
   // Instructs Istio to not inject the sidecar on those pods, based on labels that are present in those pods.
   //
   // Annotations in the pods have higher precedence than the label selectors.
   // Order of evaluation: Pod Annotations → NeverInjectSelector → AlwaysInjectSelector → Default Policy.
   // See https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/#more-control-adding-exceptions
-  // GOSTRUCT: NeverInjectSelector              []map[string]interface{} `json:"neverInjectSelector,omitempty"`
-  repeated string neverInjectSelector = 11;
+  TypeSliceOfMapStringInterface neverInjectSelector = 11;
 
   // See NeverInjectSelector.
-  //  GOSTRUCT: AlwaysInjectSelector             []map[string]interface{} `json:"alwaysInjectSelector,omitempty"`
-  repeated string alwaysInjectSelector = 12;
+  TypeSliceOfMapStringInterface alwaysInjectSelector = 12;
 
   // See EgressGatewayConfig.
-  // GOSTRUCT: PodAntiAffinityLabelSelector     []map[string]interface{}    `json:"podAntiAffinityLabelSelector"`
-  repeated string podAntiAffinityLabelSelector = 13;
+  TypeSliceOfMapStringInterface podAntiAffinityLabelSelector = 13;
 
   // See EgressGatewayConfig.
-  // GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface{}    `json:"podAntiAffinityTermLabelSelector"`
-  repeated string podAntiAffinityTermLabelSelector = 14;
+  TypeSliceOfMapStringInterface podAntiAffinityTermLabelSelector = 14;
 
   // Number of replicas in the Sidecar Injector Deployment.
   uint32 replicaCount = 15;
@@ -1321,8 +1283,7 @@ message TracingConfig {
   // K8s node selector.
   //
   // See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  // GOSTRUCT: NodeSelector map[string]interface{} `json:"nodeSelector,omitempty"`
-  map<string, string> nodeSelector = 4;
+  TypeMapStringInterface nodeSelector = 4;
 
   // Configures which tracing system to be installed.
   string provider = 5;
@@ -1424,6 +1385,15 @@ message Values {
 
   TracingConfig tracing = 13;
 }
+
+// GOTYPE: map[string]interface{}
+message TypeMapStringInterface {}
+
+// GOTYPE: []map[string]interface{}
+message TypeSliceOfMapStringInterface {}
+
+// GOTYPE: v1.ServiceType
+message TypeServiceType {}
 
 // ZeroVPNConfig enables cross-cluster access using SNI matching.
 message ZeroVPNConfig {

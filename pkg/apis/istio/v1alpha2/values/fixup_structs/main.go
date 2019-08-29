@@ -23,13 +23,43 @@ import (
 	"strings"
 )
 
+/*
+// GOTYPE: map[string]interface{}
+type TypeMapStringInterface struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+*/
+
 const (
-	replaceStructToken = "// GOSTRUCT: "
+	goTypeToken = "// GOTYPE: "
 )
 
 func usage() {
 	fmt.Println("Usage: fixup-structs -f <filename>")
 	os.Exit(1)
+}
+
+func getFileLines(filePath string) ([]string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer file.Close()
+
+	var out []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		out = append(out, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }
 
 func main() {
@@ -41,32 +71,49 @@ func main() {
 		usage()
 	}
 
-	file, err := os.Open(filePath)
+	lines, err := getFileLines(filePath)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	defer file.Close()
 
-	var out []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		l := scanner.Text()
-		newLine := l
-		if strings.Contains(l, replaceStructToken) {
-			newLine = strings.ReplaceAll(l, replaceStructToken, "")
-			scanner.Scan()
+	subs := make(map[string]string)
+
+	var tmp []string
+
+	for i, l := range lines {
+		if strings.Contains(l, goTypeToken) {
+			v := strings.ReplaceAll(l, goTypeToken, "")
+			nl := lines[i+1]
+			nlv := strings.Split(nl, " ")
+			if len(nlv) != 4 || nlv[0] != "type" || nlv[2] != "struct" || nlv[3] != "{" {
+				fmt.Printf("Bad GOTYPE target: %s\n", nl)
+				os.Exit(1)
+			}
+			subs[nlv[1]] = v
+			for ; lines[i] != ""; i++ {
+			}
+			l = lines[i]
 		}
-		out = append(out, newLine)
+
+		tmp = append(tmp, l)
 	}
 
-	if err := scanner.Err(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	lines = tmp
+	var out []string
+
+	for _, l := range lines {
+		for k, v := range subs {
+			if strings.Contains(l, v) {
+				l = strings.ReplaceAll(l, v, k)
+			}
+		}
+		out = append(out, l)
 	}
 
 	if err := ioutil.WriteFile(filePath, []byte(strings.Join(out, "\n")), 0644); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
 }

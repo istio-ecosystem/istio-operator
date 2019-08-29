@@ -2,7 +2,7 @@
 title: values
 layout: protoc-gen-docs
 generator: protoc-gen-docs
-number_of_entries: 68
+number_of_entries: 71
 ---
 <h2 id="AddonIngressConfig">AddonIngressConfig</h2>
 <section>
@@ -163,12 +163,11 @@ number_of_entries: 68
 </tr>
 <tr id="CertManagerConfig-nodeSelector">
 <td><code>nodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s node selector.</p>
 
-<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-GOSTRUCT: NodeSelector map[string]interface&lbrace;} <code>json:&quot;nodeSelector&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector</p>
 
 </td>
 </tr>
@@ -222,12 +221,11 @@ GOSTRUCT: NodeSelector map[string]interface&lbrace;} <code>json:&quot;nodeSelect
 </tr>
 <tr id="CoreDNSConfig-nodeSelector">
 <td><code>nodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s node selector.</p>
 
-<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-GOSTRUCT: NodeSelector       map[string]interface&lbrace;} <code>json:&quot;nodeSelector,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector</p>
 
 </td>
 </tr>
@@ -365,29 +363,27 @@ GOSTRUCT: NodeSelector       map[string]interface&lbrace;} <code>json:&quot;node
 </tr>
 <tr id="EgressGatewayConfig-nodeSelector">
 <td><code>nodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s node selector.</p>
 
-<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-GOSTRUCT: NodeSelector                     map[string]interface&lbrace;}      <code>json:&quot;nodeSelector,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector</p>
 
 </td>
 </tr>
 <tr id="EgressGatewayConfig-podAnnotations">
 <td><code>podAnnotations</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s annotations for pods.</p>
 
-<p>See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-GOSTRUCT: PodAnnotations                   map[string]interface&lbrace;}      <code>json:&quot;podAnnotations,omitempty&quot;</code></p>
+<p>See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/</p>
 
 </td>
 </tr>
 <tr id="EgressGatewayConfig-podAntiAffinityLabelSelector">
 <td><code>podAntiAffinityLabelSelector</code></td>
-<td><code>string[]</code></td>
+<td><code><a href="#TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</a></code></td>
 <td>
 <p>Pod anti-affinity label selector.</p>
 
@@ -410,17 +406,15 @@ podAntiAffinityLabelSelector:
    topologyKey: &ldquo;kubernetes.io/hostname&rdquo;
  This pod anti-affinity rule says that the pod requires not to be scheduled
  onto a node if that node is already running a pod with label having key
- “security” and value “S1”.
-GOSTRUCT: PodAntiAffinityLabelSelector     []map[string]interface&lbrace;}    <code>json:&quot;podAntiAffinityLabelSelector&quot;</code></p>
+ “security” and value “S1”.</p>
 
 </td>
 </tr>
 <tr id="EgressGatewayConfig-podAntiAffinityTermLabelSelector">
 <td><code>podAntiAffinityTermLabelSelector</code></td>
-<td><code>string[]</code></td>
+<td><code><a href="#TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</a></code></td>
 <td>
-<p>See PodAntiAffinityLabelSelector.
-GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface&lbrace;}    <code>json:&quot;podAntiAffinityTermLabelSelector&quot;</code></p>
+<p>See PodAntiAffinityLabelSelector.</p>
 
 </td>
 </tr>
@@ -452,21 +446,19 @@ GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface&lbrace;}    <c
 </tr>
 <tr id="EgressGatewayConfig-serviceAnnotations">
 <td><code>serviceAnnotations</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
-<p>Annotations to add to the egress gateway service.
-GOSTRUCT: ServiceAnnotations               map[string]interface&lbrace;}      <code>json:&quot;serviceAnnotations,omitempty&quot;</code></p>
+<p>Annotations to add to the egress gateway service.</p>
 
 </td>
 </tr>
 <tr id="EgressGatewayConfig-type">
 <td><code>type</code></td>
-<td><code>string</code></td>
+<td><code><a href="#TypeServiceType">TypeServiceType</a></code></td>
 <td>
 <p>Service type.</p>
 
-<p>See https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-GOSTRUCT: Type                             v1.ServiceType          <code>json:&quot;type,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types</p>
 
 </td>
 </tr>
@@ -564,19 +556,17 @@ GOSTRUCT: Type                             v1.ServiceType          <code>json:&q
 </tr>
 <tr id="GalleyConfig-podAntiAffinityLabelSelector">
 <td><code>podAntiAffinityLabelSelector</code></td>
-<td><code>string[]</code></td>
+<td><code><a href="#TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</a></code></td>
 <td>
-<p>See EgressGatewayConfig.
-GOSTRUCT: PodAntiAffinityLabelSelector     []map[string]interface&lbrace;}    <code>json:&quot;podAntiAffinityLabelSelector&quot;</code></p>
+<p>See EgressGatewayConfig.</p>
 
 </td>
 </tr>
 <tr id="GalleyConfig-podAntiAffinityTermLabelSelector">
 <td><code>podAntiAffinityTermLabelSelector</code></td>
-<td><code>string[]</code></td>
+<td><code><a href="#TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</a></code></td>
 <td>
-<p>See EgressGatewayConfig.
-GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface&lbrace;}    <code>json:&quot;podAntiAffinityTermLabelSelector&quot;</code></p>
+<p>See EgressGatewayConfig.</p>
 
 </td>
 </tr>
@@ -720,12 +710,11 @@ GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface&lbrace;}    <c
 </tr>
 <tr id="GlobalConfig-defaultNodeSelector">
 <td><code>defaultNodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>Default k8s node selector for all the Istio control plane components</p>
 
-<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-GOSTRUCT: DefaultNodeSelector                     map[string]interface&lbrace;}      <code>json:&quot;defaultNodeSelector,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector</p>
 
 </td>
 </tr>
@@ -851,7 +840,7 @@ Please set either failover or distribute configuration but not both.</p>
 </tr>
 <tr id="GlobalConfig-meshNetworks">
 <td><code>meshNetworks</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>Configure the mesh networks to be used by the Split Horizon EDS.</p>
 
@@ -879,8 +868,6 @@ it still need to be configured manually).</p>
     gateways:
     - registryServiceName: istio-ingressgateway.istio-system.svc.cluster.local
       port: 443</p>
-
-<p>GOSTRUCT: MeshNetworks map[string]interface&lbrace;}    <code>json:&quot;meshNetworks&quot;</code></p>
 
 </td>
 </tr>
@@ -1169,41 +1156,37 @@ If empty, default scope and level will be used as configured in code</p>
 </tr>
 <tr id="IngressGatewayConfig-nodeSelector">
 <td><code>nodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s node selector.</p>
 
-<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-GOSTRUCT: NodeSelector                     map[string]interface&lbrace;}      <code>json:&quot;nodeSelector,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector</p>
 
 </td>
 </tr>
 <tr id="IngressGatewayConfig-podAnnotations">
 <td><code>podAnnotations</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s annotations for pods.</p>
 
-<p>See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-GOSTRUCT: PodAnnotations                   map[string]interface&lbrace;}      <code>json:&quot;podAnnotations,omitempty&quot;</code></p>
+<p>See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/</p>
 
 </td>
 </tr>
 <tr id="IngressGatewayConfig-podAntiAffinityLabelSelector">
 <td><code>podAntiAffinityLabelSelector</code></td>
-<td><code>string[]</code></td>
+<td><code><a href="#TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</a></code></td>
 <td>
-<p>See EgressGatewayConfig.
-GOSTRUCT: PodAntiAffinityLabelSelector     []map[string]interface&lbrace;}    <code>json:&quot;podAntiAffinityLabelSelector&quot;</code></p>
+<p>See EgressGatewayConfig.</p>
 
 </td>
 </tr>
 <tr id="IngressGatewayConfig-podAntiAffinityTermLabelSelector">
 <td><code>podAntiAffinityTermLabelSelector</code></td>
-<td><code>string[]</code></td>
+<td><code><a href="#TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</a></code></td>
 <td>
-<p>See EgressGatewayConfig.
-GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface&lbrace;}    <code>json:&quot;podAntiAffinityTermLabelSelector&quot;</code></p>
+<p>See EgressGatewayConfig.</p>
 
 </td>
 </tr>
@@ -1225,12 +1208,11 @@ GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface&lbrace;}    <c
 </tr>
 <tr id="IngressGatewayConfig-resources">
 <td><code>resources</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s resources settings.</p>
 
-<p>See https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container
-GOSTRUCT: Resources                        map[string]interface&lbrace;}      <code>json:&quot;resources,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container</p>
 
 </td>
 </tr>
@@ -1252,21 +1234,19 @@ GOSTRUCT: Resources                        map[string]interface&lbrace;}      <c
 </tr>
 <tr id="IngressGatewayConfig-serviceAnnotations">
 <td><code>serviceAnnotations</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
-<p>Annotations to add to the egress gateway service.
-GOSTRUCT: ServiceAnnotations               map[string]interface&lbrace;}      <code>json:&quot;serviceAnnotations,omitempty&quot;</code></p>
+<p>Annotations to add to the egress gateway service.</p>
 
 </td>
 </tr>
 <tr id="IngressGatewayConfig-type">
 <td><code>type</code></td>
-<td><code>string</code></td>
+<td><code><a href="#TypeServiceType">TypeServiceType</a></code></td>
 <td>
 <p>Service type.</p>
 
-<p>See https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-GOSTRUCT: Type                             v1.ServiceType          <code>json:&quot;type,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types</p>
 
 </td>
 </tr>
@@ -1673,12 +1653,11 @@ This server runs in the same pod as ingress gateway.</p>
 </tr>
 <tr id="MixerPolicyConfig-podAnnotations">
 <td><code>podAnnotations</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s annotations to attach to mixer policy deployment</p>
 
-<p>See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-GOSTRUCT: PodAnnotations   map[string]interface&lbrace;}      <code>json:&quot;podAnnotations,omitempty&quot;</code></p>
+<p>See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/</p>
 
 </td>
 </tr>
@@ -1791,23 +1770,21 @@ env:
 </tr>
 <tr id="MixerTelemetryConfig-nodeSelector">
 <td><code>nodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s node selector.</p>
 
-<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-GOSTRUCT: NodeSelector           map[string]interface&lbrace;}     <code>json:&quot;nodeSelector,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector</p>
 
 </td>
 </tr>
 <tr id="MixerTelemetryConfig-podAnnotations">
 <td><code>podAnnotations</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s annotations to attach to mixer telemetry deployment</p>
 
-<p>See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-GOSTRUCT: PodAnnotations         map[string]interface&lbrace;}     <code>json:&quot;podAnnotations,omitempty&quot;</code></p>
+<p>See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/</p>
 
 </td>
 </tr>
@@ -1888,15 +1865,14 @@ Use if the pods in each cluster cannot directly talk to one another.</p>
 </tr>
 <tr id="NodeAgentConfig-env">
 <td><code>env</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>Environment variables passed to the Node Agent container.</p>
 
 <p>Examples:
 env:
   ENV<em>VAR</em>1: value1
-  ENV<em>VAR</em>2: value2
-GOSTRUCT: Env          map[string]interface&lbrace;} <code>json:&quot;env,omitempty&quot;</code></p>
+  ENV<em>VAR</em>2: value2</p>
 
 </td>
 </tr>
@@ -1910,12 +1886,11 @@ GOSTRUCT: Env          map[string]interface&lbrace;} <code>json:&quot;env,omitem
 </tr>
 <tr id="NodeAgentConfig-nodeSelector">
 <td><code>nodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s node selector.</p>
 
-<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-GOSTRUCT: NodeSelector map[string]interface&lbrace;} <code>json:&quot;nodeSelector,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector</p>
 
 </td>
 </tr>
@@ -2073,7 +2048,7 @@ GOSTRUCT: NodeSelector map[string]interface&lbrace;} <code>json:&quot;nodeSelect
 </tr>
 <tr id="PilotConfig-nodeSelector">
 <td><code>nodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s node selector.</p>
 
@@ -2095,39 +2070,35 @@ GOSTRUCT: NodeSelector map[string]interface&lbrace;} <code>json:&quot;nodeSelect
 </tr>
 <tr id="PilotConfig-deploymentLabels">
 <td><code>deploymentLabels</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>Labels that are added to Pilot pods.</p>
 
-<p>See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-GOSTRUCT: deploymentLabels               map[string]interface&lbrace;}      <code>json:&quot;deploymentLabels,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/</p>
 
 </td>
 </tr>
 <tr id="PilotConfig-meshNetworks">
 <td><code>meshNetworks</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
-<p>Used to override control plane networks.
-GOSTRUCT: MeshNetworks                     map[string]interface&lbrace;}      <code>json:&quot;meshNetworks,omitempty&quot;</code></p>
+<p>Used to override control plane networks.</p>
 
 </td>
 </tr>
 <tr id="PilotConfig-podAntiAffinityLabelSelector">
 <td><code>podAntiAffinityLabelSelector</code></td>
-<td><code>string[]</code></td>
+<td><code><a href="#TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</a></code></td>
 <td>
-<p>See EgressGatewayConfig.
-GOSTRUCT: PodAntiAffinityLabelSelector     []map[string]interface&lbrace;}    <code>json:&quot;podAntiAffinityLabelSelector&quot;</code></p>
+<p>See EgressGatewayConfig.</p>
 
 </td>
 </tr>
 <tr id="PilotConfig-podAntiAffinityTermLabelSelector">
 <td><code>podAntiAffinityTermLabelSelector</code></td>
-<td><code>string[]</code></td>
+<td><code><a href="#TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</a></code></td>
 <td>
-<p>See EgressGatewayConfig.
-GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface&lbrace;}    <code>json:&quot;podAntiAffinityTermLabelSelector&quot;</code></p>
+<p>See EgressGatewayConfig.</p>
 
 </td>
 </tr>
@@ -2411,7 +2382,7 @@ env:
 </tr>
 <tr id="PrometheusConfig-nodeSelector">
 <td><code>nodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>GOSTRUCT: NodeSelector             map[string]interface&lbrace;}    <code>json:&quot;nodeSelector,omitempty&quot;</code></p>
 
@@ -2523,7 +2494,7 @@ env:
 <tbody>
 <tr id="PrometheusServiceConfig-annotations">
 <td><code>annotations</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 </td>
 </tr>
@@ -2531,8 +2502,6 @@ env:
 <td><code>nodePort</code></td>
 <td><code><a href="#PrometheusServiceNodePortConfig">PrometheusServiceNodePortConfig</a></code></td>
 <td>
-<p>GOSTRUCT: Annotations map[string]interface&lbrace;}           <code>json:&quot;annotations,omitempty&quot;</code></p>
-
 </td>
 </tr>
 </tbody>
@@ -3090,12 +3059,11 @@ The default depends on the environment.
 </tr>
 <tr id="SecurityConfig-nodeSelector">
 <td><code>nodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s node selector.</p>
 
-<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-GOSTRUCT: NodeSelector     map[string]interface&lbrace;} <code>json:&quot;nodeSelector,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector</p>
 
 </td>
 </tr>
@@ -3117,10 +3085,8 @@ GOSTRUCT: NodeSelector     map[string]interface&lbrace;} <code>json:&quot;nodeSe
 <tbody>
 <tr id="ServiceConfig-annotations">
 <td><code>annotations</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
-<p>GOSTRUCT: Annotations  map[string]interface&lbrace;} <code>json:&quot;annotations,omitempty&quot;</code></p>
-
 </td>
 </tr>
 <tr id="ServiceConfig-externalPort">
@@ -3137,10 +3103,8 @@ GOSTRUCT: NodeSelector     map[string]interface&lbrace;} <code>json:&quot;nodeSe
 </tr>
 <tr id="ServiceConfig-type">
 <td><code>type</code></td>
-<td><code>string</code></td>
+<td><code><a href="#TypeServiceType">TypeServiceType</a></code></td>
 <td>
-<p>GOSTRUCT: Type                             v1.ServiceType          <code>json:&quot;type,omitempty&quot;</code></p>
-
 </td>
 </tr>
 </tbody>
@@ -3189,52 +3153,47 @@ GOSTRUCT: NodeSelector     map[string]interface&lbrace;} <code>json:&quot;nodeSe
 </tr>
 <tr id="SidecarInjectorConfig-nodeSelector">
 <td><code>nodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s node selector. Each component can overwrite the default values by adding its node selector block in the relevant section and setting the desired values.</p>
 
-<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-GOSTRUCT: NodeSelector                     map[string]interface&lbrace;}   <code>json:&quot;nodeSelector,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector</p>
 
 </td>
 </tr>
 <tr id="SidecarInjectorConfig-neverInjectSelector">
 <td><code>neverInjectSelector</code></td>
-<td><code>string[]</code></td>
+<td><code><a href="#TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</a></code></td>
 <td>
 <p>Instructs Istio to not inject the sidecar on those pods, based on labels that are present in those pods.</p>
 
 <p>Annotations in the pods have higher precedence than the label selectors.
 Order of evaluation: Pod Annotations → NeverInjectSelector → AlwaysInjectSelector → Default Policy.
-See https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/#more-control-adding-exceptions
-GOSTRUCT: NeverInjectSelector              []map[string]interface&lbrace;} <code>json:&quot;neverInjectSelector,omitempty&quot;</code></p>
+See https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/#more-control-adding-exceptions</p>
 
 </td>
 </tr>
 <tr id="SidecarInjectorConfig-alwaysInjectSelector">
 <td><code>alwaysInjectSelector</code></td>
-<td><code>string[]</code></td>
+<td><code><a href="#TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</a></code></td>
 <td>
-<p>See NeverInjectSelector.
- GOSTRUCT: AlwaysInjectSelector             []map[string]interface&lbrace;} <code>json:&quot;alwaysInjectSelector,omitempty&quot;</code></p>
+<p>See NeverInjectSelector.</p>
 
 </td>
 </tr>
 <tr id="SidecarInjectorConfig-podAntiAffinityLabelSelector">
 <td><code>podAntiAffinityLabelSelector</code></td>
-<td><code>string[]</code></td>
+<td><code><a href="#TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</a></code></td>
 <td>
-<p>See EgressGatewayConfig.
-GOSTRUCT: PodAntiAffinityLabelSelector     []map[string]interface&lbrace;}    <code>json:&quot;podAntiAffinityLabelSelector&quot;</code></p>
+<p>See EgressGatewayConfig.</p>
 
 </td>
 </tr>
 <tr id="SidecarInjectorConfig-podAntiAffinityTermLabelSelector">
 <td><code>podAntiAffinityTermLabelSelector</code></td>
-<td><code>string[]</code></td>
+<td><code><a href="#TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</a></code></td>
 <td>
-<p>See EgressGatewayConfig.
-GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface&lbrace;}    <code>json:&quot;podAntiAffinityTermLabelSelector&quot;</code></p>
+<p>See EgressGatewayConfig.</p>
 
 </td>
 </tr>
@@ -3476,12 +3435,11 @@ GOSTRUCT: PodAntiAffinityTermLabelSelector []map[string]interface&lbrace;}    <c
 </tr>
 <tr id="TracingConfig-nodeSelector">
 <td><code>nodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
 <td>
 <p>K8s node selector.</p>
 
-<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-GOSTRUCT: NodeSelector map[string]interface&lbrace;} <code>json:&quot;nodeSelector,omitempty&quot;</code></p>
+<p>See https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector</p>
 
 </td>
 </tr>
@@ -3707,6 +3665,21 @@ GOSTRUCT: NodeSelector map[string]interface&lbrace;} <code>json:&quot;nodeSelect
 </tr>
 </tbody>
 </table>
+</section>
+<h2 id="TypeMapStringInterface">TypeMapStringInterface</h2>
+<section>
+<p>GOTYPE: map[string]interface&lbrace;}</p>
+
+</section>
+<h2 id="TypeServiceType">TypeServiceType</h2>
+<section>
+<p>GOTYPE: v1.ServiceType</p>
+
+</section>
+<h2 id="TypeSliceOfMapStringInterface">TypeSliceOfMapStringInterface</h2>
+<section>
+<p>GOTYPE: []map[string]interface&lbrace;}</p>
+
 </section>
 <h2 id="Values">Values</h2>
 <section>

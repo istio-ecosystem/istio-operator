@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='values',
   syntax='proto3',
   serialized_options=_b('Z\010v1alpha2'),
-  serialized_pb=_b('\n1pkg/apis/istio/v1alpha2/values/values_types.proto\x12\x06values\x1a\x1egoogle/protobuf/duration.proto\x1a\"k8s.io/api/core/v1/generated.proto\"4\n\x12\x41\x64\x64onIngressConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\r\n\x05hosts\x18\x02 \x03(\t\";\n\nArchConfig\x12\r\n\x05\x61md64\x18\x01 \x01(\r\x12\x0f\n\x07ppc64le\x18\x02 \x01(\r\x12\r\n\x05s390x\x18\x03 \x01(\r\"\x1c\n\tCNIConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\">\n\x1a\x43PUTargetUtilizationConfig\x12 \n\x18targetAverageUtilization\x18\x01 \x01(\x05\"\xf3\x01\n\x11\x43\x65rtManagerConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0b\n\x03hub\x18\x02 \x01(\t\x12\x0b\n\x03tag\x18\x03 \x01(\t\x12\x41\n\x0cnodeSelector\x18\x04 \x03(\x0b\x32+.values.CertManagerConfig.NodeSelectorEntry\x12;\n\tresources\x18\x05 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x1a\x33\n\x11NodeSelectorEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xdc\x01\n\rCoreDNSConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x63oreDNSImage\x18\x02 \x01(\t\x12\x1a\n\x12\x63oreDNSPluginImage\x18\x03 \x01(\t\x12=\n\x0cnodeSelector\x18\x04 \x03(\x0b\x32\'.values.CoreDNSConfig.NodeSelectorEntry\x12\x14\n\x0creplicaCount\x18\x05 \x01(\r\x1a\x33\n\x11NodeSelectorEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"3\n DefaultPodDisruptionBudgetConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"K\n\x16\x44\x65\x66\x61ultResourcesConfig\x12\x31\n\x08requests\x18\x01 \x01(\x0b\x32\x1f.values.ResourcesRequestsConfig\"\xc0\x07\n\x13\x45gressGatewayConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x02 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12/\n\x03\x63pu\x18\x05 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x0f\n\x07\x65nabled\x18\x07 \x01(\x08\x12\x31\n\x03\x65nv\x18\x08 \x03(\x0b\x32$.values.EgressGatewayConfig.EnvEntry\x12+\n\x06labels\x18\t \x01(\x0b\x32\x1b.values.GatewayLabelsConfig\x12\x43\n\x0cnodeSelector\x18\n \x03(\x0b\x32-.values.EgressGatewayConfig.NodeSelectorEntry\x12G\n\x0epodAnnotations\x18\x0b \x03(\x0b\x32/.values.EgressGatewayConfig.PodAnnotationsEntry\x12$\n\x1cpodAntiAffinityLabelSelector\x18\x0c \x03(\t\x12(\n podAntiAffinityTermLabelSelector\x18\r \x03(\t\x12\"\n\x05ports\x18\x0e \x03(\x0b\x32\x13.values.PortsConfig\x12;\n\tresources\x18\x0f \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12+\n\rsecretVolumes\x18\x10 \x03(\x0b\x32\x14.values.SecretVolume\x12O\n\x12serviceAnnotations\x18\x11 \x03(\x0b\x32\x33.values.EgressGatewayConfig.ServiceAnnotationsEntry\x12\x0c\n\x04type\x18\x12 \x01(\t\x12#\n\x04zvpn\x18\x13 \x01(\x0b\x32\x15.values.ZeroVPNConfig\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x33\n\x11NodeSelectorEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x35\n\x13PodAnnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x39\n\x17ServiceAnnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"A\n\x12\x45nvoyMetricsConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\"\xac\x02\n\x0cGalleyConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\r\n\x05image\x18\x02 \x01(\t\x12,\n\x04mesh\x18\x03 \x03(\x0b\x32\x1e.values.GalleyConfig.MeshEntry\x12$\n\x1cpodAntiAffinityLabelSelector\x18\x04 \x03(\t\x12(\n podAntiAffinityTermLabelSelector\x18\x05 \x03(\t\x12\x14\n\x0creplicaCount\x18\x06 \x01(\r\x12;\n\tresources\x18\x07 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x1a+\n\tMeshEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"1\n\x13GatewayLabelsConfig\x12\x0b\n\x03\x61pp\x18\x01 \x01(\t\x12\r\n\x05istio\x18\x02 \x01(\t\"\x95\x01\n\x0eGatewaysConfig\x12\x37\n\x12istioEgressgateway\x18\x01 \x01(\x0b\x32\x1b.values.EgressGatewayConfig\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x12\x39\n\x13istioIngressgateway\x18\x04 \x01(\x0b\x32\x1c.values.IngressGatewayConfig\"\xa9\x0b\n\x0cGlobalConfig\x12 \n\x04\x61rch\x18\x01 \x01(\x0b\x32\x12.values.ArchConfig\x12\x17\n\x0f\x63onfigNamespace\x18\x02 \x01(\t\x12\x18\n\x10\x63onfigValidation\x18\x03 \x01(\x08\x12#\n\x1b\x63ontrolPlaneSecurityEnabled\x18\x04 \x01(\x08\x12J\n\x13\x64\x65\x66\x61ultNodeSelector\x18\x06 \x03(\x0b\x32-.values.GlobalConfig.DefaultNodeSelectorEntry\x12L\n\x1a\x64\x65\x66\x61ultPodDisruptionBudget\x18\x07 \x01(\x0b\x32(.values.DefaultPodDisruptionBudgetConfig\x12\x1b\n\x13\x64isablePolicyChecks\x18\x08 \x01(\x08\x12\x38\n\x10\x64\x65\x66\x61ultResources\x18\t \x01(\x0b\x32\x1e.values.DefaultResourcesConfig\x12\x16\n\x0e\x65nableHelmTest\x18\n \x01(\x08\x12\x15\n\renableTracing\x18\x0b \x01(\x08\x12\x0b\n\x03hub\x18\x0c \x01(\t\x12\x17\n\x0fimagePullPolicy\x18\r \x01(\t\x12\x16\n\x0eistioNamespace\x18\x0e \x01(\t\x12\x46\n\x11localityLbSetting\x18\x0f \x03(\x0b\x32+.values.GlobalConfig.LocalityLbSettingEntry\x12\x33\n\nk8sIngress\x18\x10 \x01(\x0b\x32\x1f.values.KubernetesIngressConfig\x12,\n\x07logging\x18\x11 \x01(\x0b\x32\x1b.values.GlobalLoggingConfig\x12\x32\n\rmeshExpansion\x18\x12 \x01(\x0b\x32\x1b.values.MeshExpansionConfig\x12<\n\x0cmeshNetworks\x18\x13 \x03(\x0b\x32&.values.GlobalConfig.MeshNetworksEntry\x12\x16\n\x0emonitoringPort\x18\x14 \x01(\r\x12 \n\x04mtls\x18\x15 \x01(\x0b\x32\x12.values.MTLSConfig\x12\x30\n\x0cmultiCluster\x18\x16 \x01(\x0b\x32\x1a.values.MultiClusterConfig\x12\x14\n\x0coneNamespace\x18\x17 \x01(\x08\x12\x42\n\x15outboundTrafficPolicy\x18\x18 \x01(\x0b\x32#.values.OutboundTrafficPolicyConfig\x12\x1b\n\x13policyCheckFailOpen\x18\x19 \x01(\x08\x12\x17\n\x0fpolicyNamespace\x18\x1a \x01(\t\x12\x19\n\x11priorityClassName\x18\x1b \x01(\t\x12\"\n\x05proxy\x18\x1c \x01(\x0b\x32\x13.values.ProxyConfig\x12*\n\tproxyInit\x18\x1d \x01(\x0b\x32\x17.values.ProxyInitConfig\x12\x1e\n\x03sds\x18\x1e \x01(\x0b\x32\x11.values.SDSConfig\x12\x0b\n\x03tag\x18\x1f \x01(\t\x12\x1a\n\x12telemetryNamespace\x18  \x01(\t\x12$\n\x06tracer\x18! \x01(\x0b\x32\x14.values.TracerConfig\x12\x13\n\x0btrustDomain\x18\" \x01(\t\x12\x0e\n\x06useMCP\x18# \x01(\x08\x1a:\n\x18\x44\x65\x66\x61ultNodeSelectorEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x38\n\x16LocalityLbSettingEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x33\n\x11MeshNetworksEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"$\n\x13GlobalLoggingConfig\x12\r\n\x05level\x18\x01 \x01(\t\"\xac\n\n\x14IngressGatewayConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x02 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12/\n\x03\x63pu\x18\x05 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x15\n\rcustomService\x18\x06 \x01(\x08\x12\r\n\x05\x64\x65\x62ug\x18\x07 \x01(\t\x12\x0e\n\x06\x64omain\x18\x08 \x01(\t\x12\x0f\n\x07\x65nabled\x18\n \x01(\x08\x12\x32\n\x03\x65nv\x18\x0b \x03(\x0b\x32%.values.IngressGatewayConfig.EnvEntry\x12\x13\n\x0b\x65xternalIPs\x18\x0c \x03(\t\x12\x12\n\nk8sIngress\x18\r \x01(\x08\x12\x17\n\x0fk8sIngressHttps\x18\x0e \x01(\x08\x12+\n\x06labels\x18\x0f \x01(\x0b\x32\x1b.values.GatewayLabelsConfig\x12\x16\n\x0eloadBalancerIP\x18\x10 \x01(\t\x12 \n\x18loadBalancerSourceRanges\x18\x11 \x03(\t\x12/\n\x12meshExpansionPorts\x18\x12 \x03(\x0b\x32\x13.values.PortsConfig\x12\x44\n\x0cnodeSelector\x18\x13 \x03(\x0b\x32..values.IngressGatewayConfig.NodeSelectorEntry\x12H\n\x0epodAnnotations\x18\x14 \x03(\x0b\x32\x30.values.IngressGatewayConfig.PodAnnotationsEntry\x12$\n\x1cpodAntiAffinityLabelSelector\x18\x15 \x03(\t\x12(\n podAntiAffinityTermLabelSelector\x18\x16 \x03(\t\x12\"\n\x05ports\x18\x17 \x03(\x0b\x32\x13.values.PortsConfig\x12\x14\n\x0creplicaCount\x18\x18 \x01(\r\x12>\n\tresources\x18\x19 \x03(\x0b\x32+.values.IngressGatewayConfig.ResourcesEntry\x12,\n\x03sds\x18\x1a \x01(\x0b\x32\x1f.values.IngressGatewaySdsConfig\x12+\n\rsecretVolumes\x18\x1b \x03(\x0b\x32\x14.values.SecretVolume\x12P\n\x12serviceAnnotations\x18\x1c \x03(\x0b\x32\x34.values.IngressGatewayConfig.ServiceAnnotationsEntry\x12\x0c\n\x04type\x18\x1d \x01(\t\x12.\n\x04zvpn\x18\x1e \x01(\x0b\x32 .values.IngressGatewayZvpnConfig\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x33\n\x11NodeSelectorEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x35\n\x13PodAnnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x30\n\x0eResourcesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x39\n\x17ServiceAnnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"9\n\x17IngressGatewaySdsConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\r\n\x05image\x18\x02 \x01(\t\";\n\x18IngressGatewayZvpnConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0e\n\x06suffix\x18\x02 \x01(\t\"2\n\x1fKubernetesEnvMixerAdapterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"T\n\x17KubernetesIngressConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x13\n\x0b\x65nableHttps\x18\x02 \x01(\x08\x12\x13\n\x0bgatewayName\x18\x03 \x01(\t\"_\n\x12LoadSheddingConfig\x12\x18\n\x10latencyThreshold\x18\x01 \x01(\t\"/\n\x04mode\x12\x0c\n\x08\x44ISABLED\x10\x00\x12\x0c\n\x08LOG_ONLY\x10\x01\x12\x0b\n\x07\x45NFORCE\x10\x02\"\x1d\n\nMTLSConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"6\n\x13MeshExpansionConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0e\n\x06useILB\x18\x02 \x01(\x08\"\xd7\x01\n\x13MixerAdaptersConfig\x12>\n\rkubernetesenv\x18\x01 \x01(\x0b\x32\'.values.KubernetesEnvMixerAdapterConfig\x12\x38\n\nprometheus\x18\x02 \x01(\x0b\x32$.values.PrometheusMixerAdapterConfig\x12.\n\x05stdio\x18\x03 \x01(\x0b\x32\x1f.values.StdioMixerAdapterConfig\x12\x16\n\x0euseAdapterCRDs\x18\x04 \x01(\x08\"i\n\x0bMixerConfig\x12)\n\x06policy\x18\x01 \x01(\x0b\x32\x19.values.MixerPolicyConfig\x12/\n\ttelemetry\x18\x02 \x01(\x0b\x32\x1c.values.MixerTelemetryConfig\"\xbe\x02\n\x11MixerPolicyConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x02 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12/\n\x03\x63pu\x18\x04 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x0f\n\x07\x65nabled\x18\x05 \x01(\x08\x12\r\n\x05image\x18\x06 \x01(\t\x12\x45\n\x0epodAnnotations\x18\x07 \x03(\x0b\x32-.values.MixerPolicyConfig.PodAnnotationsEntry\x12\x14\n\x0creplicaCount\x18\x08 \x01(\r\x1a\x35\n\x13PodAnnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xdd\x05\n\x14MixerTelemetryConfig\x12-\n\x08\x61\x64\x61pters\x18\x01 \x01(\x0b\x32\x1b.values.MixerAdaptersConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x02 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x03 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x04 \x01(\r\x12/\n\x03\x63pu\x18\x05 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x0f\n\x07\x65nabled\x18\x06 \x01(\x08\x12\x32\n\x03\x65nv\x18\x07 \x03(\x0b\x32%.values.MixerTelemetryConfig.EnvEntry\x12\r\n\x05image\x18\x08 \x01(\t\x12\x30\n\x0cloadshedding\x18\t \x01(\x0b\x32\x1a.values.LoadSheddingConfig\x12\x44\n\x0cnodeSelector\x18\n \x03(\x0b\x32..values.MixerTelemetryConfig.NodeSelectorEntry\x12H\n\x0epodAnnotations\x18\x0b \x03(\x0b\x32\x30.values.MixerTelemetryConfig.PodAnnotationsEntry\x12\x14\n\x0creplicaCount\x18\x0c \x01(\r\x12;\n\tresources\x18\r \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12\x1e\n\x16sessionAffinityEnabled\x18\x0e \x01(\x08\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x33\n\x11NodeSelectorEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x35\n\x13PodAnnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"%\n\x12MultiClusterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"\x82\x02\n\x0fNodeAgentConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12-\n\x03\x65nv\x18\x02 \x03(\x0b\x32 .values.NodeAgentConfig.EnvEntry\x12\r\n\x05image\x18\x03 \x01(\t\x12?\n\x0cnodeSelector\x18\x04 \x03(\x0b\x32).values.NodeAgentConfig.NodeSelectorEntry\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x33\n\x11NodeSelectorEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"G\n\x1bOutboundTrafficPolicyConfig\"(\n\x04mode\x12\r\n\tALLOW_ANY\x10\x00\x12\x11\n\rREGISTRY_ONLY\x10\x01\"\xb1\x08\n\x0bPilotConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x18\n\x10\x61utoscaleEnabled\x18\x02 \x01(\x08\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12\x14\n\x0c\x61utoscaleMax\x18\x04 \x01(\r\x12\x14\n\x0creplicaCount\x18\x05 \x01(\r\x12\r\n\x05image\x18\x06 \x01(\t\x12\x0f\n\x07sidecar\x18\x07 \x01(\x08\x12\x15\n\rtraceSampling\x18\x08 \x01(\x01\x12;\n\tresources\x18\t \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12\x17\n\x0f\x63onfigNamespace\x18\n \x01(\t\x12/\n\x03\x63pu\x18\x0b \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12;\n\x0cnodeSelector\x18\x0c \x03(\x0b\x32%.values.PilotConfig.NodeSelectorEntry\x12\x42\n\x1fkeepaliveMaxServerConnectionAge\x18\r \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x43\n\x10\x64\x65ploymentLabels\x18\x0e \x03(\x0b\x32).values.PilotConfig.DeploymentLabelsEntry\x12;\n\x0cmeshNetworks\x18\x0f \x03(\x0b\x32%.values.PilotConfig.MeshNetworksEntry\x12$\n\x1cpodAntiAffinityLabelSelector\x18\x10 \x03(\t\x12(\n podAntiAffinityTermLabelSelector\x18\x11 \x03(\t\x12\x11\n\tconfigMap\x18\x12 \x01(\x08\x12+\n\x07ingress\x18\x13 \x01(\x0b\x32\x1a.values.PilotIngressConfig\x12\x0e\n\x06useMCP\x18\x14 \x01(\x08\x12)\n\x03\x65nv\x18\x15 \x03(\x0b\x32\x1c.values.PilotConfig.EnvEntry\x12)\n\x06policy\x18\x16 \x01(\x0b\x32\x19.values.PilotPolicyConfig\x12/\n\ttelemetry\x18\x17 \x01(\x0b\x32\x1c.values.PilotTelemetryConfig\x1a\x33\n\x11NodeSelectorEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x37\n\x15\x44\x65ploymentLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x33\n\x11MeshNetworksEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"}\n\x12PilotIngressConfig\x12\x16\n\x0eingressService\x18\x01 \x01(\t\x12\x14\n\x0cingressClass\x18\x03 \x01(\t\"9\n\x15ingressControllerMode\x12\x0b\n\x07\x44\x45\x46\x41ULT\x10\x00\x12\n\n\x06STRICT\x10\x01\x12\x07\n\x03OFF\x10\x02\"$\n\x11PilotPolicyConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"\'\n\x14PilotTelemetryConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"O\n\x0bPortsConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x12\x10\n\x08nodePort\x18\x03 \x01(\x05\x12\x12\n\ntargetPort\x18\x04 \x01(\x05\"\xda\x03\n\x10PrometheusConfig\x12 \n\x18\x63reatePrometheusResource\x18\x01 \x01(\x08\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x12\x14\n\x0creplicaCount\x18\x03 \x01(\r\x12\x0b\n\x03hub\x18\x04 \x01(\t\x12\x0b\n\x03tag\x18\x05 \x01(\t\x12\x11\n\tretention\x18\x06 \x01(\t\x12@\n\x0cnodeSelector\x18\x07 \x03(\x0b\x32*.values.PrometheusConfig.NodeSelectorEntry\x12\x31\n\x0escrapeInterval\x18\x08 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x13\n\x0b\x63ontextPath\x18\t \x01(\t\x12+\n\x07ingress\x18\n \x01(\x0b\x32\x1a.values.AddonIngressConfig\x12\x30\n\x07service\x18\x0b \x01(\x0b\x32\x1f.values.PrometheusServiceConfig\x12\x32\n\x08security\x18\x0c \x01(\x0b\x32 .values.PrometheusSecurityConfig\x1a\x33\n\x11NodeSelectorEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"i\n\x1cPrometheusMixerAdapterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x38\n\x15metricsExpiryDuration\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\"+\n\x18PrometheusSecurityConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"\xcf\x01\n\x17PrometheusServiceConfig\x12\x45\n\x0b\x61nnotations\x18\x01 \x03(\x0b\x32\x30.values.PrometheusServiceConfig.AnnotationsEntry\x12\x39\n\x08nodePort\x18\x02 \x01(\x0b\x32\'.values.PrometheusServiceNodePortConfig\x1a\x32\n\x10\x41nnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x1fPrometheusServiceNodePortConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0c\n\x04port\x18\x02 \x01(\r\"\xb4\x06\n\x0bProxyConfig\x12\x15\n\raccessLogFile\x18\x01 \x01(\t\x12\x17\n\x0f\x61\x63\x63\x65ssLogFormat\x18\x02 \x01(\t\x12\x15\n\rclusterDomain\x18\x05 \x01(\t\x12\x19\n\x11\x63omponentLogLevel\x18\x06 \x01(\t\x12\x13\n\x0b\x63oncurrency\x18\x07 \x01(\r\x12\x31\n\x0e\x64nsRefreshRate\x18\x08 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x16\n\x0e\x65nableCoreDump\x18\t \x01(\x08\x12\x37\n\x13\x65nvoyMetricsService\x18\n \x01(\x0b\x32\x1a.values.EnvoyMetricsConfig\x12/\n\x0b\x65nvoyStatsd\x18\x0b \x01(\x0b\x32\x1a.values.EnvoyMetricsConfig\x12\x1b\n\x13\x65xcludeInboundPorts\x18\x0c \x01(\t\x12\x17\n\x0f\x65xcludeIPRanges\x18\r \x01(\t\x12\r\n\x05image\x18\x0e \x01(\t\x12\x1b\n\x13includeInboundPorts\x18\x0f \x01(\t\x12\x17\n\x0fincludeIPRanges\x18\x10 \x01(\t\x12\x1a\n\x12kubevirtInterfaces\x18\x11 \x01(\t\x12\x10\n\x08logLevel\x18\x12 \x01(\t\x12\x12\n\nprivileged\x18\x13 \x01(\x08\x12$\n\x1creadinessInitialDelaySeconds\x18\x14 \x01(\r\x12\x1e\n\x16readinessPeriodSeconds\x18\x15 \x01(\r\x12!\n\x19readinessFailureThreshold\x18\x16 \x01(\r\x12\x12\n\nstatusPort\x18\x17 \x01(\r\x12;\n\tresources\x18\x18 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\"\'\n\x11\x61\x63\x63\x65ssLogEncoding\x12\x08\n\x04JSON\x10\x00\x12\x08\n\x04TEXT\x10\x01\"\'\n\nautoInject\x12\x0b\n\x07\x45NABLED\x10\x00\x12\x0c\n\x08\x44ISABLED\x10\x01\"0\n\x06tracer\x12\n\n\x06ZIPKIN\x10\x00\x12\r\n\tLIGHTSTEP\x10\x01\x12\x0b\n\x07\x44\x41TADOG\x10\x02\" \n\x0fProxyInitConfig\x12\r\n\x05image\x18\x01 \x01(\t\"6\n\x17ResourcesRequestsConfig\x12\x0b\n\x03\x63pu\x18\x01 \x01(\t\x12\x0e\n\x06memory\x18\x02 \x01(\t\"^\n\tSDSConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0f\n\x07udsPath\x18\x02 \x01(\t\x12\x14\n\x0cuseNormalJwt\x18\x03 \x01(\x08\x12\x19\n\x11useTrustworthyJwt\x18\x04 \x01(\x08\"C\n\x0cSecretVolume\x12\x11\n\tmountPath\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nsecretName\x18\x03 \x01(\t\"\xe7\x02\n\x0eSecurityConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x14\n\x0creplicaCount\x18\x02 \x01(\r\x12\r\n\x05image\x18\x03 \x01(\t\x12\x12\n\nselfSigned\x18\x04 \x01(\x08\x12\x13\n\x0btrustDomain\x18\x05 \x01(\t\x12\x36\n\x08\x64nsCerts\x18\x06 \x03(\x0b\x32$.values.SecurityConfig.DnsCertsEntry\x12\x18\n\x10\x63reateMeshPolicy\x18\x07 \x01(\x08\x12>\n\x0cnodeSelector\x18\x08 \x03(\x0b\x32(.values.SecurityConfig.NodeSelectorEntry\x1a/\n\rDnsCertsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x33\n\x11NodeSelectorEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xb2\x01\n\rServiceConfig\x12;\n\x0b\x61nnotations\x18\x01 \x03(\x0b\x32&.values.ServiceConfig.AnnotationsEntry\x12\x14\n\x0c\x65xternalPort\x18\x02 \x01(\r\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0c\n\x04type\x18\x12 \x01(\t\x1a\x32\n\x10\x41nnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xa8\x03\n\x15SidecarInjectorConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12!\n\x19\x65nableNamespacesByDefault\x18\x02 \x01(\x08\x12\r\n\x05image\x18\x03 \x01(\t\x12\x45\n\x0cnodeSelector\x18\n \x03(\x0b\x32/.values.SidecarInjectorConfig.NodeSelectorEntry\x12\x1b\n\x13neverInjectSelector\x18\x0b \x03(\t\x12\x1c\n\x14\x61lwaysInjectSelector\x18\x0c \x03(\t\x12$\n\x1cpodAntiAffinityLabelSelector\x18\r \x03(\t\x12(\n podAntiAffinityTermLabelSelector\x18\x0e \x03(\t\x12\x14\n\x0creplicaCount\x18\x0f \x01(\r\x12\x1b\n\x13rewriteAppHTTPProbe\x18\x10 \x01(\x08\x12\x12\n\nselfSigned\x18\x11 \x01(\x08\x1a\x33\n\x11NodeSelectorEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x17StdioMixerAdapterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x14\n\x0coutputAsJson\x18\x02 \x01(\x08\"\x9a\x01\n\x0cTracerConfig\x12,\n\x07\x64\x61tadog\x18\x01 \x01(\x0b\x32\x1b.values.TracerDatadogConfig\x12\x30\n\tlightstep\x18\x02 \x01(\x0b\x32\x1d.values.TracerLightStepConfig\x12*\n\x06zipkin\x18\x03 \x01(\x0b\x32\x1a.values.TracerZipkinConfig\"&\n\x13TracerDatadogConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\"a\n\x15TracerLightStepConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x02 \x01(\t\x12\x12\n\ncacertPath\x18\x03 \x01(\t\x12\x0e\n\x06secure\x18\x04 \x01(\x08\"%\n\x12TracerZipkinConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\"\xd7\x02\n\rTracingConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12-\n\x07ingress\x18\x02 \x01(\x0b\x32\x1c.values.TracingIngressConfig\x12+\n\x06jaeger\x18\x03 \x01(\x0b\x32\x1b.values.TracingJaegerConfig\x12=\n\x0cnodeSelector\x18\x04 \x03(\x0b\x32\'.values.TracingConfig.NodeSelectorEntry\x12\x10\n\x08provider\x18\x05 \x01(\t\x12&\n\x07service\x18\x06 \x01(\x0b\x32\x15.values.ServiceConfig\x12+\n\x06zipkin\x18\x07 \x01(\x0b\x32\x1b.values.TracingZipkinConfig\x1a\x33\n\x11NodeSelectorEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\'\n\x14TracingIngressConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"b\n\x13TracingJaegerConfig\x12\x0b\n\x03hub\x18\x01 \x01(\t\x12\x0b\n\x03tag\x18\x02 \x01(\t\x12\x31\n\x06memory\x18\x03 \x01(\x0b\x32!.values.TracingJaegerMemoryConfig\"/\n\x19TracingJaegerMemoryConfig\x12\x12\n\nmax_traces\x18\x01 \x01(\r\"\xf1\x01\n\x13TracingZipkinConfig\x12\x0b\n\x03hub\x18\x01 \x01(\t\x12\x0b\n\x03tag\x18\x02 \x01(\t\x12\x19\n\x11probeStartupDelay\x18\x03 \x01(\r\x12\x11\n\tqueryPort\x18\x04 \x01(\r\x12;\n\tresources\x18\x05 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12\x14\n\x0cjavaOptsHeap\x18\x06 \x01(\t\x12\x10\n\x08maxSpans\x18\x07 \x01(\r\x12-\n\x04node\x18\x08 \x01(\x0b\x32\x1f.values.TracingZipkinNodeConfig\"\'\n\x17TracingZipkinNodeConfig\x12\x0c\n\x04\x63pus\x18\x01 \x01(\r\"\xb4\x04\n\x06Values\x12.\n\x0b\x63\x65rtmanager\x18\x01 \x01(\x0b\x32\x19.values.CertManagerConfig\x12$\n\tistio_cni\x18\x02 \x01(\x0b\x32\x11.values.CNIConfig\x12+\n\x0cistiocoredns\x18\x03 \x01(\x0b\x32\x15.values.CoreDNSConfig\x12$\n\x06galley\x18\x04 \x01(\x0b\x32\x14.values.GalleyConfig\x12(\n\x08gateways\x18\x05 \x01(\x0b\x32\x16.values.GatewaysConfig\x12$\n\x06global\x18\x06 \x01(\x0b\x32\x14.values.GlobalConfig\x12\"\n\x05mixer\x18\x07 \x01(\x0b\x32\x13.values.MixerConfig\x12*\n\tnodeagent\x18\x08 \x01(\x0b\x32\x17.values.NodeAgentConfig\x12\"\n\x05pilot\x18\t \x01(\x0b\x32\x13.values.PilotConfig\x12,\n\nprometheus\x18\n \x01(\x0b\x32\x18.values.PrometheusConfig\x12(\n\x08security\x18\x0b \x01(\x0b\x32\x16.values.SecurityConfig\x12=\n\x16sidecarInjectorWebhook\x18\x0c \x01(\x0b\x32\x1d.values.SidecarInjectorConfig\x12&\n\x07tracing\x18\r \x01(\x0b\x32\x15.values.TracingConfig\"0\n\rZeroVPNConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0e\n\x06suffix\x18\x02 \x01(\tB\nZ\x08v1alpha2b\x06proto3')
+  serialized_pb=_b('\n1pkg/apis/istio/v1alpha2/values/values_types.proto\x12\x06values\x1a\x1egoogle/protobuf/duration.proto\x1a\"k8s.io/api/core/v1/generated.proto\"4\n\x12\x41\x64\x64onIngressConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\r\n\x05hosts\x18\x02 \x03(\t\";\n\nArchConfig\x12\r\n\x05\x61md64\x18\x01 \x01(\r\x12\x0f\n\x07ppc64le\x18\x02 \x01(\r\x12\r\n\x05s390x\x18\x03 \x01(\r\"\x1c\n\tCNIConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\">\n\x1a\x43PUTargetUtilizationConfig\x12 \n\x18targetAverageUtilization\x18\x01 \x01(\x05\"\xb1\x01\n\x11\x43\x65rtManagerConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0b\n\x03hub\x18\x02 \x01(\t\x12\x0b\n\x03tag\x18\x03 \x01(\t\x12\x34\n\x0cnodeSelector\x18\x04 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12;\n\tresources\x18\x05 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\"\x9e\x01\n\rCoreDNSConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x63oreDNSImage\x18\x02 \x01(\t\x12\x1a\n\x12\x63oreDNSPluginImage\x18\x03 \x01(\t\x12\x34\n\x0cnodeSelector\x18\x04 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x14\n\x0creplicaCount\x18\x05 \x01(\r\"3\n DefaultPodDisruptionBudgetConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"K\n\x16\x44\x65\x66\x61ultResourcesConfig\x12\x31\n\x08requests\x18\x01 \x01(\x0b\x32\x1f.values.ResourcesRequestsConfig\"\xcb\x06\n\x13\x45gressGatewayConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x02 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12/\n\x03\x63pu\x18\x05 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x0f\n\x07\x65nabled\x18\x07 \x01(\x08\x12\x31\n\x03\x65nv\x18\x08 \x03(\x0b\x32$.values.EgressGatewayConfig.EnvEntry\x12+\n\x06labels\x18\t \x01(\x0b\x32\x1b.values.GatewayLabelsConfig\x12\x34\n\x0cnodeSelector\x18\n \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x36\n\x0epodAnnotations\x18\x0b \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12K\n\x1cpodAntiAffinityLabelSelector\x18\x0c \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\r \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\"\n\x05ports\x18\x0e \x03(\x0b\x32\x13.values.PortsConfig\x12;\n\tresources\x18\x0f \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12+\n\rsecretVolumes\x18\x10 \x03(\x0b\x32\x14.values.SecretVolume\x12:\n\x12serviceAnnotations\x18\x11 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12%\n\x04type\x18\x12 \x01(\x0b\x32\x17.values.TypeServiceType\x12#\n\x04zvpn\x18\x13 \x01(\x0b\x32\x15.values.ZeroVPNConfig\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"A\n\x12\x45nvoyMetricsConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0c\n\x04host\x18\x02 \x01(\t\x12\x0c\n\x04port\x18\x03 \x01(\x05\"\xfa\x02\n\x0cGalleyConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\r\n\x05image\x18\x02 \x01(\t\x12,\n\x04mesh\x18\x03 \x03(\x0b\x32\x1e.values.GalleyConfig.MeshEntry\x12K\n\x1cpodAntiAffinityLabelSelector\x18\x04 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\x05 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\x14\n\x0creplicaCount\x18\x06 \x01(\r\x12;\n\tresources\x18\x07 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x1a+\n\tMeshEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"1\n\x13GatewayLabelsConfig\x12\x0b\n\x03\x61pp\x18\x01 \x01(\t\x12\r\n\x05istio\x18\x02 \x01(\t\"\x95\x01\n\x0eGatewaysConfig\x12\x37\n\x12istioEgressgateway\x18\x01 \x01(\x0b\x32\x1b.values.EgressGatewayConfig\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x12\x39\n\x13istioIngressgateway\x18\x04 \x01(\x0b\x32\x1c.values.IngressGatewayConfig\"\xa1\n\n\x0cGlobalConfig\x12 \n\x04\x61rch\x18\x01 \x01(\x0b\x32\x12.values.ArchConfig\x12\x17\n\x0f\x63onfigNamespace\x18\x02 \x01(\t\x12\x18\n\x10\x63onfigValidation\x18\x03 \x01(\x08\x12#\n\x1b\x63ontrolPlaneSecurityEnabled\x18\x04 \x01(\x08\x12;\n\x13\x64\x65\x66\x61ultNodeSelector\x18\x06 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12L\n\x1a\x64\x65\x66\x61ultPodDisruptionBudget\x18\x07 \x01(\x0b\x32(.values.DefaultPodDisruptionBudgetConfig\x12\x1b\n\x13\x64isablePolicyChecks\x18\x08 \x01(\x08\x12\x38\n\x10\x64\x65\x66\x61ultResources\x18\t \x01(\x0b\x32\x1e.values.DefaultResourcesConfig\x12\x16\n\x0e\x65nableHelmTest\x18\n \x01(\x08\x12\x15\n\renableTracing\x18\x0b \x01(\x08\x12\x0b\n\x03hub\x18\x0c \x01(\t\x12\x17\n\x0fimagePullPolicy\x18\r \x01(\t\x12\x16\n\x0eistioNamespace\x18\x0e \x01(\t\x12\x46\n\x11localityLbSetting\x18\x0f \x03(\x0b\x32+.values.GlobalConfig.LocalityLbSettingEntry\x12\x33\n\nk8sIngress\x18\x10 \x01(\x0b\x32\x1f.values.KubernetesIngressConfig\x12,\n\x07logging\x18\x11 \x01(\x0b\x32\x1b.values.GlobalLoggingConfig\x12\x32\n\rmeshExpansion\x18\x12 \x01(\x0b\x32\x1b.values.MeshExpansionConfig\x12\x34\n\x0cmeshNetworks\x18\x13 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x16\n\x0emonitoringPort\x18\x14 \x01(\r\x12 \n\x04mtls\x18\x15 \x01(\x0b\x32\x12.values.MTLSConfig\x12\x30\n\x0cmultiCluster\x18\x16 \x01(\x0b\x32\x1a.values.MultiClusterConfig\x12\x14\n\x0coneNamespace\x18\x17 \x01(\x08\x12\x42\n\x15outboundTrafficPolicy\x18\x18 \x01(\x0b\x32#.values.OutboundTrafficPolicyConfig\x12\x1b\n\x13policyCheckFailOpen\x18\x19 \x01(\x08\x12\x17\n\x0fpolicyNamespace\x18\x1a \x01(\t\x12\x19\n\x11priorityClassName\x18\x1b \x01(\t\x12\"\n\x05proxy\x18\x1c \x01(\x0b\x32\x13.values.ProxyConfig\x12*\n\tproxyInit\x18\x1d \x01(\x0b\x32\x17.values.ProxyInitConfig\x12\x1e\n\x03sds\x18\x1e \x01(\x0b\x32\x11.values.SDSConfig\x12\x0b\n\x03tag\x18\x1f \x01(\t\x12\x1a\n\x12telemetryNamespace\x18  \x01(\t\x12$\n\x06tracer\x18! \x01(\x0b\x32\x14.values.TracerConfig\x12\x13\n\x0btrustDomain\x18\" \x01(\t\x12\x0e\n\x06useMCP\x18# \x01(\x08\x1a\x38\n\x16LocalityLbSettingEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"$\n\x13GlobalLoggingConfig\x12\r\n\x05level\x18\x01 \x01(\t\"\xf5\x08\n\x14IngressGatewayConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x02 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12/\n\x03\x63pu\x18\x05 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x15\n\rcustomService\x18\x06 \x01(\x08\x12\r\n\x05\x64\x65\x62ug\x18\x07 \x01(\t\x12\x0e\n\x06\x64omain\x18\x08 \x01(\t\x12\x0f\n\x07\x65nabled\x18\n \x01(\x08\x12\x32\n\x03\x65nv\x18\x0b \x03(\x0b\x32%.values.IngressGatewayConfig.EnvEntry\x12\x13\n\x0b\x65xternalIPs\x18\x0c \x03(\t\x12\x12\n\nk8sIngress\x18\r \x01(\x08\x12\x17\n\x0fk8sIngressHttps\x18\x0e \x01(\x08\x12+\n\x06labels\x18\x0f \x01(\x0b\x32\x1b.values.GatewayLabelsConfig\x12\x16\n\x0eloadBalancerIP\x18\x10 \x01(\t\x12 \n\x18loadBalancerSourceRanges\x18\x11 \x03(\t\x12/\n\x12meshExpansionPorts\x18\x12 \x03(\x0b\x32\x13.values.PortsConfig\x12\x34\n\x0cnodeSelector\x18\x13 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x36\n\x0epodAnnotations\x18\x14 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12K\n\x1cpodAntiAffinityLabelSelector\x18\x15 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\x16 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\"\n\x05ports\x18\x17 \x03(\x0b\x32\x13.values.PortsConfig\x12\x14\n\x0creplicaCount\x18\x18 \x01(\r\x12\x31\n\tresources\x18\x19 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12,\n\x03sds\x18\x1a \x01(\x0b\x32\x1f.values.IngressGatewaySdsConfig\x12+\n\rsecretVolumes\x18\x1b \x03(\x0b\x32\x14.values.SecretVolume\x12:\n\x12serviceAnnotations\x18\x1c \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12%\n\x04type\x18\x1d \x01(\x0b\x32\x17.values.TypeServiceType\x12.\n\x04zvpn\x18\x1e \x01(\x0b\x32 .values.IngressGatewayZvpnConfig\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"9\n\x17IngressGatewaySdsConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\r\n\x05image\x18\x02 \x01(\t\";\n\x18IngressGatewayZvpnConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0e\n\x06suffix\x18\x02 \x01(\t\"2\n\x1fKubernetesEnvMixerAdapterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"T\n\x17KubernetesIngressConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x13\n\x0b\x65nableHttps\x18\x02 \x01(\x08\x12\x13\n\x0bgatewayName\x18\x03 \x01(\t\"_\n\x12LoadSheddingConfig\x12\x18\n\x10latencyThreshold\x18\x01 \x01(\t\"/\n\x04mode\x12\x0c\n\x08\x44ISABLED\x10\x00\x12\x0c\n\x08LOG_ONLY\x10\x01\x12\x0b\n\x07\x45NFORCE\x10\x02\"\x1d\n\nMTLSConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"6\n\x13MeshExpansionConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0e\n\x06useILB\x18\x02 \x01(\x08\"\xd7\x01\n\x13MixerAdaptersConfig\x12>\n\rkubernetesenv\x18\x01 \x01(\x0b\x32\'.values.KubernetesEnvMixerAdapterConfig\x12\x38\n\nprometheus\x18\x02 \x01(\x0b\x32$.values.PrometheusMixerAdapterConfig\x12.\n\x05stdio\x18\x03 \x01(\x0b\x32\x1f.values.StdioMixerAdapterConfig\x12\x16\n\x0euseAdapterCRDs\x18\x04 \x01(\x08\"i\n\x0bMixerConfig\x12)\n\x06policy\x18\x01 \x01(\x0b\x32\x19.values.MixerPolicyConfig\x12/\n\ttelemetry\x18\x02 \x01(\x0b\x32\x1c.values.MixerTelemetryConfig\"\xf8\x01\n\x11MixerPolicyConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x01 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x02 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12/\n\x03\x63pu\x18\x04 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x0f\n\x07\x65nabled\x18\x05 \x01(\x08\x12\r\n\x05image\x18\x06 \x01(\t\x12\x36\n\x0epodAnnotations\x18\x07 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x14\n\x0creplicaCount\x18\x08 \x01(\r\"\xcf\x04\n\x14MixerTelemetryConfig\x12-\n\x08\x61\x64\x61pters\x18\x01 \x01(\x0b\x32\x1b.values.MixerAdaptersConfig\x12\x18\n\x10\x61utoscaleEnabled\x18\x02 \x01(\x08\x12\x14\n\x0c\x61utoscaleMax\x18\x03 \x01(\r\x12\x14\n\x0c\x61utoscaleMin\x18\x04 \x01(\r\x12/\n\x03\x63pu\x18\x05 \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x0f\n\x07\x65nabled\x18\x06 \x01(\x08\x12\x32\n\x03\x65nv\x18\x07 \x03(\x0b\x32%.values.MixerTelemetryConfig.EnvEntry\x12\r\n\x05image\x18\x08 \x01(\t\x12\x30\n\x0cloadshedding\x18\t \x01(\x0b\x32\x1a.values.LoadSheddingConfig\x12\x34\n\x0cnodeSelector\x18\n \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x36\n\x0epodAnnotations\x18\x0b \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x14\n\x0creplicaCount\x18\x0c \x01(\r\x12;\n\tresources\x18\r \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12\x1e\n\x16sessionAffinityEnabled\x18\x0e \x01(\x08\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"%\n\x12MultiClusterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"\x94\x01\n\x0fNodeAgentConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12+\n\x03\x65nv\x18\x02 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\r\n\x05image\x18\x03 \x01(\t\x12\x34\n\x0cnodeSelector\x18\x04 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\"G\n\x1bOutboundTrafficPolicyConfig\"(\n\x04mode\x12\r\n\tALLOW_ANY\x10\x00\x12\x11\n\rREGISTRY_ONLY\x10\x01\"\xc3\x07\n\x0bPilotConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x18\n\x10\x61utoscaleEnabled\x18\x02 \x01(\x08\x12\x14\n\x0c\x61utoscaleMin\x18\x03 \x01(\r\x12\x14\n\x0c\x61utoscaleMax\x18\x04 \x01(\r\x12\x14\n\x0creplicaCount\x18\x05 \x01(\r\x12\r\n\x05image\x18\x06 \x01(\t\x12\x0f\n\x07sidecar\x18\x07 \x01(\x08\x12\x15\n\rtraceSampling\x18\x08 \x01(\x01\x12;\n\tresources\x18\t \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12\x17\n\x0f\x63onfigNamespace\x18\n \x01(\t\x12/\n\x03\x63pu\x18\x0b \x01(\x0b\x32\".values.CPUTargetUtilizationConfig\x12\x34\n\x0cnodeSelector\x18\x0c \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x42\n\x1fkeepaliveMaxServerConnectionAge\x18\r \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x38\n\x10\x64\x65ploymentLabels\x18\x0e \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x34\n\x0cmeshNetworks\x18\x0f \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12K\n\x1cpodAntiAffinityLabelSelector\x18\x10 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\x11 \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\x11\n\tconfigMap\x18\x12 \x01(\x08\x12+\n\x07ingress\x18\x13 \x01(\x0b\x32\x1a.values.PilotIngressConfig\x12\x0e\n\x06useMCP\x18\x14 \x01(\x08\x12)\n\x03\x65nv\x18\x15 \x03(\x0b\x32\x1c.values.PilotConfig.EnvEntry\x12)\n\x06policy\x18\x16 \x01(\x0b\x32\x19.values.PilotPolicyConfig\x12/\n\ttelemetry\x18\x17 \x01(\x0b\x32\x1c.values.PilotTelemetryConfig\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"}\n\x12PilotIngressConfig\x12\x16\n\x0eingressService\x18\x01 \x01(\t\x12\x14\n\x0cingressClass\x18\x03 \x01(\t\"9\n\x15ingressControllerMode\x12\x0b\n\x07\x44\x45\x46\x41ULT\x10\x00\x12\n\n\x06STRICT\x10\x01\x12\x07\n\x03OFF\x10\x02\"$\n\x11PilotPolicyConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"\'\n\x14PilotTelemetryConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"O\n\x0bPortsConfig\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x12\x10\n\x08nodePort\x18\x03 \x01(\x05\x12\x12\n\ntargetPort\x18\x04 \x01(\x05\"\x99\x03\n\x10PrometheusConfig\x12 \n\x18\x63reatePrometheusResource\x18\x01 \x01(\x08\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x12\x14\n\x0creplicaCount\x18\x03 \x01(\r\x12\x0b\n\x03hub\x18\x04 \x01(\t\x12\x0b\n\x03tag\x18\x05 \x01(\t\x12\x11\n\tretention\x18\x06 \x01(\t\x12\x34\n\x0cnodeSelector\x18\x07 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x31\n\x0escrapeInterval\x18\x08 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x13\n\x0b\x63ontextPath\x18\t \x01(\t\x12+\n\x07ingress\x18\n \x01(\x0b\x32\x1a.values.AddonIngressConfig\x12\x30\n\x07service\x18\x0b \x01(\x0b\x32\x1f.values.PrometheusServiceConfig\x12\x32\n\x08security\x18\x0c \x01(\x0b\x32 .values.PrometheusSecurityConfig\"i\n\x1cPrometheusMixerAdapterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x38\n\x15metricsExpiryDuration\x18\x02 \x01(\x0b\x32\x19.google.protobuf.Duration\"+\n\x18PrometheusSecurityConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"\x89\x01\n\x17PrometheusServiceConfig\x12\x33\n\x0b\x61nnotations\x18\x01 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x39\n\x08nodePort\x18\x02 \x01(\x0b\x32\'.values.PrometheusServiceNodePortConfig\"@\n\x1fPrometheusServiceNodePortConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0c\n\x04port\x18\x02 \x01(\r\"\xb4\x06\n\x0bProxyConfig\x12\x15\n\raccessLogFile\x18\x01 \x01(\t\x12\x17\n\x0f\x61\x63\x63\x65ssLogFormat\x18\x02 \x01(\t\x12\x15\n\rclusterDomain\x18\x05 \x01(\t\x12\x19\n\x11\x63omponentLogLevel\x18\x06 \x01(\t\x12\x13\n\x0b\x63oncurrency\x18\x07 \x01(\r\x12\x31\n\x0e\x64nsRefreshRate\x18\x08 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x16\n\x0e\x65nableCoreDump\x18\t \x01(\x08\x12\x37\n\x13\x65nvoyMetricsService\x18\n \x01(\x0b\x32\x1a.values.EnvoyMetricsConfig\x12/\n\x0b\x65nvoyStatsd\x18\x0b \x01(\x0b\x32\x1a.values.EnvoyMetricsConfig\x12\x1b\n\x13\x65xcludeInboundPorts\x18\x0c \x01(\t\x12\x17\n\x0f\x65xcludeIPRanges\x18\r \x01(\t\x12\r\n\x05image\x18\x0e \x01(\t\x12\x1b\n\x13includeInboundPorts\x18\x0f \x01(\t\x12\x17\n\x0fincludeIPRanges\x18\x10 \x01(\t\x12\x1a\n\x12kubevirtInterfaces\x18\x11 \x01(\t\x12\x10\n\x08logLevel\x18\x12 \x01(\t\x12\x12\n\nprivileged\x18\x13 \x01(\x08\x12$\n\x1creadinessInitialDelaySeconds\x18\x14 \x01(\r\x12\x1e\n\x16readinessPeriodSeconds\x18\x15 \x01(\r\x12!\n\x19readinessFailureThreshold\x18\x16 \x01(\r\x12\x12\n\nstatusPort\x18\x17 \x01(\r\x12;\n\tresources\x18\x18 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\"\'\n\x11\x61\x63\x63\x65ssLogEncoding\x12\x08\n\x04JSON\x10\x00\x12\x08\n\x04TEXT\x10\x01\"\'\n\nautoInject\x12\x0b\n\x07\x45NABLED\x10\x00\x12\x0c\n\x08\x44ISABLED\x10\x01\"0\n\x06tracer\x12\n\n\x06ZIPKIN\x10\x00\x12\r\n\tLIGHTSTEP\x10\x01\x12\x0b\n\x07\x44\x41TADOG\x10\x02\" \n\x0fProxyInitConfig\x12\r\n\x05image\x18\x01 \x01(\t\"6\n\x17ResourcesRequestsConfig\x12\x0b\n\x03\x63pu\x18\x01 \x01(\t\x12\x0e\n\x06memory\x18\x02 \x01(\t\"^\n\tSDSConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0f\n\x07udsPath\x18\x02 \x01(\t\x12\x14\n\x0cuseNormalJwt\x18\x03 \x01(\x08\x12\x19\n\x11useTrustworthyJwt\x18\x04 \x01(\x08\"C\n\x0cSecretVolume\x12\x11\n\tmountPath\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nsecretName\x18\x03 \x01(\t\"\xa8\x02\n\x0eSecurityConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x14\n\x0creplicaCount\x18\x02 \x01(\r\x12\r\n\x05image\x18\x03 \x01(\t\x12\x12\n\nselfSigned\x18\x04 \x01(\x08\x12\x13\n\x0btrustDomain\x18\x05 \x01(\t\x12\x36\n\x08\x64nsCerts\x18\x06 \x03(\x0b\x32$.values.SecurityConfig.DnsCertsEntry\x12\x18\n\x10\x63reateMeshPolicy\x18\x07 \x01(\x08\x12\x34\n\x0cnodeSelector\x18\x08 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x1a/\n\rDnsCertsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x8f\x01\n\rServiceConfig\x12\x33\n\x0b\x61nnotations\x18\x01 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x14\n\x0c\x65xternalPort\x18\x02 \x01(\r\x12\x0c\n\x04name\x18\x03 \x01(\t\x12%\n\x04type\x18\x12 \x01(\x0b\x32\x17.values.TypeServiceType\"\xfe\x03\n\x15SidecarInjectorConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12!\n\x19\x65nableNamespacesByDefault\x18\x02 \x01(\x08\x12\r\n\x05image\x18\x03 \x01(\t\x12\x34\n\x0cnodeSelector\x18\n \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x42\n\x13neverInjectSelector\x18\x0b \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\x43\n\x14\x61lwaysInjectSelector\x18\x0c \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12K\n\x1cpodAntiAffinityLabelSelector\x18\r \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12O\n podAntiAffinityTermLabelSelector\x18\x0e \x01(\x0b\x32%.values.TypeSliceOfMapStringInterface\x12\x14\n\x0creplicaCount\x18\x0f \x01(\r\x12\x1b\n\x13rewriteAppHTTPProbe\x18\x10 \x01(\x08\x12\x12\n\nselfSigned\x18\x11 \x01(\x08\"@\n\x17StdioMixerAdapterConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x14\n\x0coutputAsJson\x18\x02 \x01(\x08\"\x9a\x01\n\x0cTracerConfig\x12,\n\x07\x64\x61tadog\x18\x01 \x01(\x0b\x32\x1b.values.TracerDatadogConfig\x12\x30\n\tlightstep\x18\x02 \x01(\x0b\x32\x1d.values.TracerLightStepConfig\x12*\n\x06zipkin\x18\x03 \x01(\x0b\x32\x1a.values.TracerZipkinConfig\"&\n\x13TracerDatadogConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\"a\n\x15TracerLightStepConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x13\n\x0b\x61\x63\x63\x65ssToken\x18\x02 \x01(\t\x12\x12\n\ncacertPath\x18\x03 \x01(\t\x12\x0e\n\x06secure\x18\x04 \x01(\x08\"%\n\x12TracerZipkinConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\"\x99\x02\n\rTracingConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12-\n\x07ingress\x18\x02 \x01(\x0b\x32\x1c.values.TracingIngressConfig\x12+\n\x06jaeger\x18\x03 \x01(\x0b\x32\x1b.values.TracingJaegerConfig\x12\x34\n\x0cnodeSelector\x18\x04 \x01(\x0b\x32\x1e.values.TypeMapStringInterface\x12\x10\n\x08provider\x18\x05 \x01(\t\x12&\n\x07service\x18\x06 \x01(\x0b\x32\x15.values.ServiceConfig\x12+\n\x06zipkin\x18\x07 \x01(\x0b\x32\x1b.values.TracingZipkinConfig\"\'\n\x14TracingIngressConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"b\n\x13TracingJaegerConfig\x12\x0b\n\x03hub\x18\x01 \x01(\t\x12\x0b\n\x03tag\x18\x02 \x01(\t\x12\x31\n\x06memory\x18\x03 \x01(\x0b\x32!.values.TracingJaegerMemoryConfig\"/\n\x19TracingJaegerMemoryConfig\x12\x12\n\nmax_traces\x18\x01 \x01(\r\"\xf1\x01\n\x13TracingZipkinConfig\x12\x0b\n\x03hub\x18\x01 \x01(\t\x12\x0b\n\x03tag\x18\x02 \x01(\t\x12\x19\n\x11probeStartupDelay\x18\x03 \x01(\r\x12\x11\n\tqueryPort\x18\x04 \x01(\r\x12;\n\tresources\x18\x05 \x01(\x0b\x32(.k8s.io.api.core.v1.ResourceRequirements\x12\x14\n\x0cjavaOptsHeap\x18\x06 \x01(\t\x12\x10\n\x08maxSpans\x18\x07 \x01(\r\x12-\n\x04node\x18\x08 \x01(\x0b\x32\x1f.values.TracingZipkinNodeConfig\"\'\n\x17TracingZipkinNodeConfig\x12\x0c\n\x04\x63pus\x18\x01 \x01(\r\"\xb4\x04\n\x06Values\x12.\n\x0b\x63\x65rtmanager\x18\x01 \x01(\x0b\x32\x19.values.CertManagerConfig\x12$\n\tistio_cni\x18\x02 \x01(\x0b\x32\x11.values.CNIConfig\x12+\n\x0cistiocoredns\x18\x03 \x01(\x0b\x32\x15.values.CoreDNSConfig\x12$\n\x06galley\x18\x04 \x01(\x0b\x32\x14.values.GalleyConfig\x12(\n\x08gateways\x18\x05 \x01(\x0b\x32\x16.values.GatewaysConfig\x12$\n\x06global\x18\x06 \x01(\x0b\x32\x14.values.GlobalConfig\x12\"\n\x05mixer\x18\x07 \x01(\x0b\x32\x13.values.MixerConfig\x12*\n\tnodeagent\x18\x08 \x01(\x0b\x32\x17.values.NodeAgentConfig\x12\"\n\x05pilot\x18\t \x01(\x0b\x32\x13.values.PilotConfig\x12,\n\nprometheus\x18\n \x01(\x0b\x32\x18.values.PrometheusConfig\x12(\n\x08security\x18\x0b \x01(\x0b\x32\x16.values.SecurityConfig\x12=\n\x16sidecarInjectorWebhook\x18\x0c \x01(\x0b\x32\x1d.values.SidecarInjectorConfig\x12&\n\x07tracing\x18\r \x01(\x0b\x32\x15.values.TracingConfig\"\x18\n\x16TypeMapStringInterface\"\x1f\n\x1dTypeSliceOfMapStringInterface\"\x11\n\x0fTypeServiceType\"0\n\rZeroVPNConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x0e\n\x06suffix\x18\x02 \x01(\tB\nZ\x08v1alpha2b\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_duration__pb2.DESCRIPTOR,k8s_dot_io_dot_api_dot_core_dot_v1_dot_generated__pb2.DESCRIPTOR,])
 
@@ -49,8 +49,8 @@ _LOADSHEDDINGCONFIG_MODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=5596,
-  serialized_end=5643,
+  serialized_start=5110,
+  serialized_end=5157,
 )
 _sym_db.RegisterEnumDescriptor(_LOADSHEDDINGCONFIG_MODE)
 
@@ -71,8 +71,8 @@ _OUTBOUNDTRAFFICPOLICYCONFIG_MODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=7445,
-  serialized_end=7485,
+  serialized_start=6637,
+  serialized_end=6677,
 )
 _sym_db.RegisterEnumDescriptor(_OUTBOUNDTRAFFICPOLICYCONFIG_MODE)
 
@@ -97,8 +97,8 @@ _PILOTINGRESSCONFIG_INGRESSCONTROLLERMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=8631,
-  serialized_end=8688,
+  serialized_start=7713,
+  serialized_end=7770,
 )
 _sym_db.RegisterEnumDescriptor(_PILOTINGRESSCONFIG_INGRESSCONTROLLERMODE)
 
@@ -119,8 +119,8 @@ _PROXYCONFIG_ACCESSLOGENCODING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=10446,
-  serialized_end=10485,
+  serialized_start=9393,
+  serialized_end=9432,
 )
 _sym_db.RegisterEnumDescriptor(_PROXYCONFIG_ACCESSLOGENCODING)
 
@@ -141,8 +141,8 @@ _PROXYCONFIG_AUTOINJECT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=10487,
-  serialized_end=10526,
+  serialized_start=9434,
+  serialized_end=9473,
 )
 _sym_db.RegisterEnumDescriptor(_PROXYCONFIG_AUTOINJECT)
 
@@ -167,8 +167,8 @@ _PROXYCONFIG_TRACER = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=10528,
-  serialized_end=10576,
+  serialized_start=9475,
+  serialized_end=9523,
 )
 _sym_db.RegisterEnumDescriptor(_PROXYCONFIG_TRACER)
 
@@ -318,43 +318,6 @@ _CPUTARGETUTILIZATIONCONFIG = _descriptor.Descriptor(
 )
 
 
-_CERTMANAGERCONFIG_NODESELECTORENTRY = _descriptor.Descriptor(
-  name='NodeSelectorEntry',
-  full_name='values.CertManagerConfig.NodeSelectorEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.CertManagerConfig.NodeSelectorEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.CertManagerConfig.NodeSelectorEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=531,
-  serialized_end=582,
-)
-
 _CERTMANAGERCONFIG = _descriptor.Descriptor(
   name='CertManagerConfig',
   full_name='values.CertManagerConfig',
@@ -385,8 +348,8 @@ _CERTMANAGERCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='nodeSelector', full_name='values.CertManagerConfig.nodeSelector', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -400,7 +363,7 @@ _CERTMANAGERCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_CERTMANAGERCONFIG_NODESELECTORENTRY, ],
+  nested_types=[],
   enum_types=[
   ],
   serialized_options=None,
@@ -410,46 +373,9 @@ _CERTMANAGERCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=339,
-  serialized_end=582,
+  serialized_end=516,
 )
 
-
-_COREDNSCONFIG_NODESELECTORENTRY = _descriptor.Descriptor(
-  name='NodeSelectorEntry',
-  full_name='values.CoreDNSConfig.NodeSelectorEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.CoreDNSConfig.NodeSelectorEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.CoreDNSConfig.NodeSelectorEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=531,
-  serialized_end=582,
-)
 
 _COREDNSCONFIG = _descriptor.Descriptor(
   name='CoreDNSConfig',
@@ -481,8 +407,8 @@ _COREDNSCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='nodeSelector', full_name='values.CoreDNSConfig.nodeSelector', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -496,7 +422,7 @@ _COREDNSCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_COREDNSCONFIG_NODESELECTORENTRY, ],
+  nested_types=[],
   enum_types=[
   ],
   serialized_options=None,
@@ -505,8 +431,8 @@ _COREDNSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=585,
-  serialized_end=805,
+  serialized_start=519,
+  serialized_end=677,
 )
 
 
@@ -536,8 +462,8 @@ _DEFAULTPODDISRUPTIONBUDGETCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=807,
-  serialized_end=858,
+  serialized_start=679,
+  serialized_end=730,
 )
 
 
@@ -567,8 +493,8 @@ _DEFAULTRESOURCESCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=860,
-  serialized_end=935,
+  serialized_start=732,
+  serialized_end=807,
 )
 
 
@@ -605,119 +531,8 @@ _EGRESSGATEWAYCONFIG_ENVENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1689,
-  serialized_end=1731,
-)
-
-_EGRESSGATEWAYCONFIG_NODESELECTORENTRY = _descriptor.Descriptor(
-  name='NodeSelectorEntry',
-  full_name='values.EgressGatewayConfig.NodeSelectorEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.EgressGatewayConfig.NodeSelectorEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.EgressGatewayConfig.NodeSelectorEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=531,
-  serialized_end=582,
-)
-
-_EGRESSGATEWAYCONFIG_PODANNOTATIONSENTRY = _descriptor.Descriptor(
-  name='PodAnnotationsEntry',
-  full_name='values.EgressGatewayConfig.PodAnnotationsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.EgressGatewayConfig.PodAnnotationsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.EgressGatewayConfig.PodAnnotationsEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1786,
-  serialized_end=1839,
-)
-
-_EGRESSGATEWAYCONFIG_SERVICEANNOTATIONSENTRY = _descriptor.Descriptor(
-  name='ServiceAnnotationsEntry',
-  full_name='values.EgressGatewayConfig.ServiceAnnotationsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.EgressGatewayConfig.ServiceAnnotationsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.EgressGatewayConfig.ServiceAnnotationsEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1841,
-  serialized_end=1898,
+  serialized_start=1611,
+  serialized_end=1653,
 )
 
 _EGRESSGATEWAYCONFIG = _descriptor.Descriptor(
@@ -778,29 +593,29 @@ _EGRESSGATEWAYCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='nodeSelector', full_name='values.EgressGatewayConfig.nodeSelector', index=7,
-      number=10, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAnnotations', full_name='values.EgressGatewayConfig.podAnnotations', index=8,
-      number=11, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=11, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAntiAffinityLabelSelector', full_name='values.EgressGatewayConfig.podAntiAffinityLabelSelector', index=9,
-      number=12, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      number=12, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAntiAffinityTermLabelSelector', full_name='values.EgressGatewayConfig.podAntiAffinityTermLabelSelector', index=10,
-      number=13, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      number=13, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -827,15 +642,15 @@ _EGRESSGATEWAYCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='serviceAnnotations', full_name='values.EgressGatewayConfig.serviceAnnotations', index=14,
-      number=17, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=17, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='type', full_name='values.EgressGatewayConfig.type', index=15,
-      number=18, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      number=18, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -849,7 +664,7 @@ _EGRESSGATEWAYCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_EGRESSGATEWAYCONFIG_ENVENTRY, _EGRESSGATEWAYCONFIG_NODESELECTORENTRY, _EGRESSGATEWAYCONFIG_PODANNOTATIONSENTRY, _EGRESSGATEWAYCONFIG_SERVICEANNOTATIONSENTRY, ],
+  nested_types=[_EGRESSGATEWAYCONFIG_ENVENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -858,8 +673,8 @@ _EGRESSGATEWAYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=938,
-  serialized_end=1898,
+  serialized_start=810,
+  serialized_end=1653,
 )
 
 
@@ -903,8 +718,8 @@ _ENVOYMETRICSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1900,
-  serialized_end=1965,
+  serialized_start=1655,
+  serialized_end=1720,
 )
 
 
@@ -941,8 +756,8 @@ _GALLEYCONFIG_MESHENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2225,
-  serialized_end=2268,
+  serialized_start=2058,
+  serialized_end=2101,
 )
 
 _GALLEYCONFIG = _descriptor.Descriptor(
@@ -975,15 +790,15 @@ _GALLEYCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAntiAffinityLabelSelector', full_name='values.GalleyConfig.podAntiAffinityLabelSelector', index=3,
-      number=4, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAntiAffinityTermLabelSelector', full_name='values.GalleyConfig.podAntiAffinityTermLabelSelector', index=4,
-      number=5, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -1013,8 +828,8 @@ _GALLEYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1968,
-  serialized_end=2268,
+  serialized_start=1723,
+  serialized_end=2101,
 )
 
 
@@ -1051,8 +866,8 @@ _GATEWAYLABELSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2270,
-  serialized_end=2319,
+  serialized_start=2103,
+  serialized_end=2152,
 )
 
 
@@ -1096,47 +911,10 @@ _GATEWAYSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2322,
-  serialized_end=2471,
+  serialized_start=2155,
+  serialized_end=2304,
 )
 
-
-_GLOBALCONFIG_DEFAULTNODESELECTORENTRY = _descriptor.Descriptor(
-  name='DefaultNodeSelectorEntry',
-  full_name='values.GlobalConfig.DefaultNodeSelectorEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.GlobalConfig.DefaultNodeSelectorEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.GlobalConfig.DefaultNodeSelectorEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3754,
-  serialized_end=3812,
-)
 
 _GLOBALCONFIG_LOCALITYLBSETTINGENTRY = _descriptor.Descriptor(
   name='LocalityLbSettingEntry',
@@ -1171,45 +949,8 @@ _GLOBALCONFIG_LOCALITYLBSETTINGENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3814,
-  serialized_end=3870,
-)
-
-_GLOBALCONFIG_MESHNETWORKSENTRY = _descriptor.Descriptor(
-  name='MeshNetworksEntry',
-  full_name='values.GlobalConfig.MeshNetworksEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.GlobalConfig.MeshNetworksEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.GlobalConfig.MeshNetworksEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3872,
-  serialized_end=3923,
+  serialized_start=3564,
+  serialized_end=3620,
 )
 
 _GLOBALCONFIG = _descriptor.Descriptor(
@@ -1249,8 +990,8 @@ _GLOBALCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='defaultNodeSelector', full_name='values.GlobalConfig.defaultNodeSelector', index=4,
-      number=6, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -1340,8 +1081,8 @@ _GLOBALCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='meshNetworks', full_name='values.GlobalConfig.meshNetworks', index=17,
-      number=19, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=19, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -1460,7 +1201,7 @@ _GLOBALCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_GLOBALCONFIG_DEFAULTNODESELECTORENTRY, _GLOBALCONFIG_LOCALITYLBSETTINGENTRY, _GLOBALCONFIG_MESHNETWORKSENTRY, ],
+  nested_types=[_GLOBALCONFIG_LOCALITYLBSETTINGENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -1469,8 +1210,8 @@ _GLOBALCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2474,
-  serialized_end=3923,
+  serialized_start=2307,
+  serialized_end=3620,
 )
 
 
@@ -1500,8 +1241,8 @@ _GLOBALLOGGINGCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3925,
-  serialized_end=3961,
+  serialized_start=3622,
+  serialized_end=3658,
 )
 
 
@@ -1538,156 +1279,8 @@ _INGRESSGATEWAYCONFIG_ENVENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1689,
-  serialized_end=1731,
-)
-
-_INGRESSGATEWAYCONFIG_NODESELECTORENTRY = _descriptor.Descriptor(
-  name='NodeSelectorEntry',
-  full_name='values.IngressGatewayConfig.NodeSelectorEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.IngressGatewayConfig.NodeSelectorEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.IngressGatewayConfig.NodeSelectorEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=531,
-  serialized_end=582,
-)
-
-_INGRESSGATEWAYCONFIG_PODANNOTATIONSENTRY = _descriptor.Descriptor(
-  name='PodAnnotationsEntry',
-  full_name='values.IngressGatewayConfig.PodAnnotationsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.IngressGatewayConfig.PodAnnotationsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.IngressGatewayConfig.PodAnnotationsEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1786,
-  serialized_end=1839,
-)
-
-_INGRESSGATEWAYCONFIG_RESOURCESENTRY = _descriptor.Descriptor(
-  name='ResourcesEntry',
-  full_name='values.IngressGatewayConfig.ResourcesEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.IngressGatewayConfig.ResourcesEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.IngressGatewayConfig.ResourcesEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=5181,
-  serialized_end=5229,
-)
-
-_INGRESSGATEWAYCONFIG_SERVICEANNOTATIONSENTRY = _descriptor.Descriptor(
-  name='ServiceAnnotationsEntry',
-  full_name='values.IngressGatewayConfig.ServiceAnnotationsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.IngressGatewayConfig.ServiceAnnotationsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.IngressGatewayConfig.ServiceAnnotationsEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1841,
-  serialized_end=1898,
+  serialized_start=1611,
+  serialized_end=1653,
 )
 
 _INGRESSGATEWAYCONFIG = _descriptor.Descriptor(
@@ -1811,29 +1404,29 @@ _INGRESSGATEWAYCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='nodeSelector', full_name='values.IngressGatewayConfig.nodeSelector', index=16,
-      number=19, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=19, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAnnotations', full_name='values.IngressGatewayConfig.podAnnotations', index=17,
-      number=20, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=20, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAntiAffinityLabelSelector', full_name='values.IngressGatewayConfig.podAntiAffinityLabelSelector', index=18,
-      number=21, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      number=21, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAntiAffinityTermLabelSelector', full_name='values.IngressGatewayConfig.podAntiAffinityTermLabelSelector', index=19,
-      number=22, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      number=22, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -1853,8 +1446,8 @@ _INGRESSGATEWAYCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='resources', full_name='values.IngressGatewayConfig.resources', index=22,
-      number=25, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=25, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -1874,15 +1467,15 @@ _INGRESSGATEWAYCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='serviceAnnotations', full_name='values.IngressGatewayConfig.serviceAnnotations', index=25,
-      number=28, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=28, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='type', full_name='values.IngressGatewayConfig.type', index=26,
-      number=29, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      number=29, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -1896,7 +1489,7 @@ _INGRESSGATEWAYCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_INGRESSGATEWAYCONFIG_ENVENTRY, _INGRESSGATEWAYCONFIG_NODESELECTORENTRY, _INGRESSGATEWAYCONFIG_PODANNOTATIONSENTRY, _INGRESSGATEWAYCONFIG_RESOURCESENTRY, _INGRESSGATEWAYCONFIG_SERVICEANNOTATIONSENTRY, ],
+  nested_types=[_INGRESSGATEWAYCONFIG_ENVENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -1905,8 +1498,8 @@ _INGRESSGATEWAYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3964,
-  serialized_end=5288,
+  serialized_start=3661,
+  serialized_end=4802,
 )
 
 
@@ -1943,8 +1536,8 @@ _INGRESSGATEWAYSDSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5290,
-  serialized_end=5347,
+  serialized_start=4804,
+  serialized_end=4861,
 )
 
 
@@ -1981,8 +1574,8 @@ _INGRESSGATEWAYZVPNCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5349,
-  serialized_end=5408,
+  serialized_start=4863,
+  serialized_end=4922,
 )
 
 
@@ -2012,8 +1605,8 @@ _KUBERNETESENVMIXERADAPTERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5410,
-  serialized_end=5460,
+  serialized_start=4924,
+  serialized_end=4974,
 )
 
 
@@ -2057,8 +1650,8 @@ _KUBERNETESINGRESSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5462,
-  serialized_end=5546,
+  serialized_start=4976,
+  serialized_end=5060,
 )
 
 
@@ -2089,8 +1682,8 @@ _LOADSHEDDINGCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5548,
-  serialized_end=5643,
+  serialized_start=5062,
+  serialized_end=5157,
 )
 
 
@@ -2120,8 +1713,8 @@ _MTLSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5645,
-  serialized_end=5674,
+  serialized_start=5159,
+  serialized_end=5188,
 )
 
 
@@ -2158,8 +1751,8 @@ _MESHEXPANSIONCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5676,
-  serialized_end=5730,
+  serialized_start=5190,
+  serialized_end=5244,
 )
 
 
@@ -2210,8 +1803,8 @@ _MIXERADAPTERSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5733,
-  serialized_end=5948,
+  serialized_start=5247,
+  serialized_end=5462,
 )
 
 
@@ -2248,47 +1841,10 @@ _MIXERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5950,
-  serialized_end=6055,
+  serialized_start=5464,
+  serialized_end=5569,
 )
 
-
-_MIXERPOLICYCONFIG_PODANNOTATIONSENTRY = _descriptor.Descriptor(
-  name='PodAnnotationsEntry',
-  full_name='values.MixerPolicyConfig.PodAnnotationsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.MixerPolicyConfig.PodAnnotationsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.MixerPolicyConfig.PodAnnotationsEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1786,
-  serialized_end=1839,
-)
 
 _MIXERPOLICYCONFIG = _descriptor.Descriptor(
   name='MixerPolicyConfig',
@@ -2341,8 +1897,8 @@ _MIXERPOLICYCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAnnotations', full_name='values.MixerPolicyConfig.podAnnotations', index=6,
-      number=7, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -2356,7 +1912,7 @@ _MIXERPOLICYCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_MIXERPOLICYCONFIG_PODANNOTATIONSENTRY, ],
+  nested_types=[],
   enum_types=[
   ],
   serialized_options=None,
@@ -2365,8 +1921,8 @@ _MIXERPOLICYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6058,
-  serialized_end=6376,
+  serialized_start=5572,
+  serialized_end=5820,
 )
 
 
@@ -2403,82 +1959,8 @@ _MIXERTELEMETRYCONFIG_ENVENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1689,
-  serialized_end=1731,
-)
-
-_MIXERTELEMETRYCONFIG_NODESELECTORENTRY = _descriptor.Descriptor(
-  name='NodeSelectorEntry',
-  full_name='values.MixerTelemetryConfig.NodeSelectorEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.MixerTelemetryConfig.NodeSelectorEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.MixerTelemetryConfig.NodeSelectorEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=531,
-  serialized_end=582,
-)
-
-_MIXERTELEMETRYCONFIG_PODANNOTATIONSENTRY = _descriptor.Descriptor(
-  name='PodAnnotationsEntry',
-  full_name='values.MixerTelemetryConfig.PodAnnotationsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.MixerTelemetryConfig.PodAnnotationsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.MixerTelemetryConfig.PodAnnotationsEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1786,
-  serialized_end=1839,
+  serialized_start=1611,
+  serialized_end=1653,
 )
 
 _MIXERTELEMETRYCONFIG = _descriptor.Descriptor(
@@ -2553,15 +2035,15 @@ _MIXERTELEMETRYCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='nodeSelector', full_name='values.MixerTelemetryConfig.nodeSelector', index=9,
-      number=10, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAnnotations', full_name='values.MixerTelemetryConfig.podAnnotations', index=10,
-      number=11, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=11, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -2589,7 +2071,7 @@ _MIXERTELEMETRYCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_MIXERTELEMETRYCONFIG_ENVENTRY, _MIXERTELEMETRYCONFIG_NODESELECTORENTRY, _MIXERTELEMETRYCONFIG_PODANNOTATIONSENTRY, ],
+  nested_types=[_MIXERTELEMETRYCONFIG_ENVENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -2598,8 +2080,8 @@ _MIXERTELEMETRYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6379,
-  serialized_end=7112,
+  serialized_start=5823,
+  serialized_end=6414,
 )
 
 
@@ -2629,84 +2111,10 @@ _MULTICLUSTERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7114,
-  serialized_end=7151,
+  serialized_start=6416,
+  serialized_end=6453,
 )
 
-
-_NODEAGENTCONFIG_ENVENTRY = _descriptor.Descriptor(
-  name='EnvEntry',
-  full_name='values.NodeAgentConfig.EnvEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.NodeAgentConfig.EnvEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.NodeAgentConfig.EnvEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1689,
-  serialized_end=1731,
-)
-
-_NODEAGENTCONFIG_NODESELECTORENTRY = _descriptor.Descriptor(
-  name='NodeSelectorEntry',
-  full_name='values.NodeAgentConfig.NodeSelectorEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.NodeAgentConfig.NodeSelectorEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.NodeAgentConfig.NodeSelectorEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=531,
-  serialized_end=582,
-)
 
 _NODEAGENTCONFIG = _descriptor.Descriptor(
   name='NodeAgentConfig',
@@ -2724,8 +2132,8 @@ _NODEAGENTCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='env', full_name='values.NodeAgentConfig.env', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -2738,15 +2146,15 @@ _NODEAGENTCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='nodeSelector', full_name='values.NodeAgentConfig.nodeSelector', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
-  nested_types=[_NODEAGENTCONFIG_ENVENTRY, _NODEAGENTCONFIG_NODESELECTORENTRY, ],
+  nested_types=[],
   enum_types=[
   ],
   serialized_options=None,
@@ -2755,8 +2163,8 @@ _NODEAGENTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7154,
-  serialized_end=7412,
+  serialized_start=6456,
+  serialized_end=6604,
 )
 
 
@@ -2780,121 +2188,10 @@ _OUTBOUNDTRAFFICPOLICYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7414,
-  serialized_end=7485,
+  serialized_start=6606,
+  serialized_end=6677,
 )
 
-
-_PILOTCONFIG_NODESELECTORENTRY = _descriptor.Descriptor(
-  name='NodeSelectorEntry',
-  full_name='values.PilotConfig.NodeSelectorEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.PilotConfig.NodeSelectorEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.PilotConfig.NodeSelectorEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=531,
-  serialized_end=582,
-)
-
-_PILOTCONFIG_DEPLOYMENTLABELSENTRY = _descriptor.Descriptor(
-  name='DeploymentLabelsEntry',
-  full_name='values.PilotConfig.DeploymentLabelsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.PilotConfig.DeploymentLabelsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.PilotConfig.DeploymentLabelsEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=8409,
-  serialized_end=8464,
-)
-
-_PILOTCONFIG_MESHNETWORKSENTRY = _descriptor.Descriptor(
-  name='MeshNetworksEntry',
-  full_name='values.PilotConfig.MeshNetworksEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.PilotConfig.MeshNetworksEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.PilotConfig.MeshNetworksEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3872,
-  serialized_end=3923,
-)
 
 _PILOTCONFIG_ENVENTRY = _descriptor.Descriptor(
   name='EnvEntry',
@@ -2929,8 +2226,8 @@ _PILOTCONFIG_ENVENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1689,
-  serialized_end=1731,
+  serialized_start=1611,
+  serialized_end=1653,
 )
 
 _PILOTCONFIG = _descriptor.Descriptor(
@@ -3019,8 +2316,8 @@ _PILOTCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='nodeSelector', full_name='values.PilotConfig.nodeSelector', index=11,
-      number=12, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=12, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -3033,29 +2330,29 @@ _PILOTCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='deploymentLabels', full_name='values.PilotConfig.deploymentLabels', index=13,
-      number=14, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=14, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='meshNetworks', full_name='values.PilotConfig.meshNetworks', index=14,
-      number=15, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=15, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAntiAffinityLabelSelector', full_name='values.PilotConfig.podAntiAffinityLabelSelector', index=15,
-      number=16, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      number=16, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAntiAffinityTermLabelSelector', full_name='values.PilotConfig.podAntiAffinityTermLabelSelector', index=16,
-      number=17, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      number=17, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -3104,7 +2401,7 @@ _PILOTCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_PILOTCONFIG_NODESELECTORENTRY, _PILOTCONFIG_DEPLOYMENTLABELSENTRY, _PILOTCONFIG_MESHNETWORKSENTRY, _PILOTCONFIG_ENVENTRY, ],
+  nested_types=[_PILOTCONFIG_ENVENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -3113,8 +2410,8 @@ _PILOTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7488,
-  serialized_end=8561,
+  serialized_start=6680,
+  serialized_end=7643,
 )
 
 
@@ -3152,8 +2449,8 @@ _PILOTINGRESSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8563,
-  serialized_end=8688,
+  serialized_start=7645,
+  serialized_end=7770,
 )
 
 
@@ -3183,8 +2480,8 @@ _PILOTPOLICYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8690,
-  serialized_end=8726,
+  serialized_start=7772,
+  serialized_end=7808,
 )
 
 
@@ -3214,8 +2511,8 @@ _PILOTTELEMETRYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8728,
-  serialized_end=8767,
+  serialized_start=7810,
+  serialized_end=7849,
 )
 
 
@@ -3266,47 +2563,10 @@ _PORTSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8769,
-  serialized_end=8848,
+  serialized_start=7851,
+  serialized_end=7930,
 )
 
-
-_PROMETHEUSCONFIG_NODESELECTORENTRY = _descriptor.Descriptor(
-  name='NodeSelectorEntry',
-  full_name='values.PrometheusConfig.NodeSelectorEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.PrometheusConfig.NodeSelectorEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.PrometheusConfig.NodeSelectorEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=531,
-  serialized_end=582,
-)
 
 _PROMETHEUSCONFIG = _descriptor.Descriptor(
   name='PrometheusConfig',
@@ -3359,8 +2619,8 @@ _PROMETHEUSCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='nodeSelector', full_name='values.PrometheusConfig.nodeSelector', index=6,
-      number=7, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -3402,7 +2662,7 @@ _PROMETHEUSCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_PROMETHEUSCONFIG_NODESELECTORENTRY, ],
+  nested_types=[],
   enum_types=[
   ],
   serialized_options=None,
@@ -3411,8 +2671,8 @@ _PROMETHEUSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8851,
-  serialized_end=9325,
+  serialized_start=7933,
+  serialized_end=8342,
 )
 
 
@@ -3449,8 +2709,8 @@ _PROMETHEUSMIXERADAPTERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9327,
-  serialized_end=9432,
+  serialized_start=8344,
+  serialized_end=8449,
 )
 
 
@@ -3480,47 +2740,10 @@ _PROMETHEUSSECURITYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9434,
-  serialized_end=9477,
+  serialized_start=8451,
+  serialized_end=8494,
 )
 
-
-_PROMETHEUSSERVICECONFIG_ANNOTATIONSENTRY = _descriptor.Descriptor(
-  name='AnnotationsEntry',
-  full_name='values.PrometheusServiceConfig.AnnotationsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.PrometheusServiceConfig.AnnotationsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.PrometheusServiceConfig.AnnotationsEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=9637,
-  serialized_end=9687,
-)
 
 _PROMETHEUSSERVICECONFIG = _descriptor.Descriptor(
   name='PrometheusServiceConfig',
@@ -3531,8 +2754,8 @@ _PROMETHEUSSERVICECONFIG = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='annotations', full_name='values.PrometheusServiceConfig.annotations', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -3546,7 +2769,7 @@ _PROMETHEUSSERVICECONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_PROMETHEUSSERVICECONFIG_ANNOTATIONSENTRY, ],
+  nested_types=[],
   enum_types=[
   ],
   serialized_options=None,
@@ -3555,8 +2778,8 @@ _PROMETHEUSSERVICECONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9480,
-  serialized_end=9687,
+  serialized_start=8497,
+  serialized_end=8634,
 )
 
 
@@ -3593,8 +2816,8 @@ _PROMETHEUSSERVICENODEPORTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9689,
-  serialized_end=9753,
+  serialized_start=8636,
+  serialized_end=8700,
 )
 
 
@@ -3774,8 +2997,8 @@ _PROXYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9756,
-  serialized_end=10576,
+  serialized_start=8703,
+  serialized_end=9523,
 )
 
 
@@ -3805,8 +3028,8 @@ _PROXYINITCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10578,
-  serialized_end=10610,
+  serialized_start=9525,
+  serialized_end=9557,
 )
 
 
@@ -3843,8 +3066,8 @@ _RESOURCESREQUESTSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10612,
-  serialized_end=10666,
+  serialized_start=9559,
+  serialized_end=9613,
 )
 
 
@@ -3895,8 +3118,8 @@ _SDSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10668,
-  serialized_end=10762,
+  serialized_start=9615,
+  serialized_end=9709,
 )
 
 
@@ -3940,8 +3163,8 @@ _SECRETVOLUME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10764,
-  serialized_end=10831,
+  serialized_start=9711,
+  serialized_end=9778,
 )
 
 
@@ -3978,45 +3201,8 @@ _SECURITYCONFIG_DNSCERTSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11093,
-  serialized_end=11140,
-)
-
-_SECURITYCONFIG_NODESELECTORENTRY = _descriptor.Descriptor(
-  name='NodeSelectorEntry',
-  full_name='values.SecurityConfig.NodeSelectorEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.SecurityConfig.NodeSelectorEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.SecurityConfig.NodeSelectorEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=531,
-  serialized_end=582,
+  serialized_start=10030,
+  serialized_end=10077,
 )
 
 _SECURITYCONFIG = _descriptor.Descriptor(
@@ -4077,15 +3263,15 @@ _SECURITYCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='nodeSelector', full_name='values.SecurityConfig.nodeSelector', index=7,
-      number=8, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
-  nested_types=[_SECURITYCONFIG_DNSCERTSENTRY, _SECURITYCONFIG_NODESELECTORENTRY, ],
+  nested_types=[_SECURITYCONFIG_DNSCERTSENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -4094,47 +3280,10 @@ _SECURITYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10834,
-  serialized_end=11193,
+  serialized_start=9781,
+  serialized_end=10077,
 )
 
-
-_SERVICECONFIG_ANNOTATIONSENTRY = _descriptor.Descriptor(
-  name='AnnotationsEntry',
-  full_name='values.ServiceConfig.AnnotationsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.ServiceConfig.AnnotationsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.ServiceConfig.AnnotationsEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=9637,
-  serialized_end=9687,
-)
 
 _SERVICECONFIG = _descriptor.Descriptor(
   name='ServiceConfig',
@@ -4145,8 +3294,8 @@ _SERVICECONFIG = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='annotations', full_name='values.ServiceConfig.annotations', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -4166,46 +3315,8 @@ _SERVICECONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='type', full_name='values.ServiceConfig.type', index=3,
-      number=18, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[_SERVICECONFIG_ANNOTATIONSENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=11196,
-  serialized_end=11374,
-)
-
-
-_SIDECARINJECTORCONFIG_NODESELECTORENTRY = _descriptor.Descriptor(
-  name='NodeSelectorEntry',
-  full_name='values.SidecarInjectorConfig.NodeSelectorEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.SidecarInjectorConfig.NodeSelectorEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.SidecarInjectorConfig.NodeSelectorEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      number=18, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -4215,15 +3326,16 @@ _SIDECARINJECTORCONFIG_NODESELECTORENTRY = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=_b('8\001'),
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=531,
-  serialized_end=582,
+  serialized_start=10080,
+  serialized_end=10223,
 )
+
 
 _SIDECARINJECTORCONFIG = _descriptor.Descriptor(
   name='SidecarInjectorConfig',
@@ -4255,36 +3367,36 @@ _SIDECARINJECTORCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='nodeSelector', full_name='values.SidecarInjectorConfig.nodeSelector', index=3,
-      number=10, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='neverInjectSelector', full_name='values.SidecarInjectorConfig.neverInjectSelector', index=4,
-      number=11, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      number=11, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='alwaysInjectSelector', full_name='values.SidecarInjectorConfig.alwaysInjectSelector', index=5,
-      number=12, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      number=12, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAntiAffinityLabelSelector', full_name='values.SidecarInjectorConfig.podAntiAffinityLabelSelector', index=6,
-      number=13, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      number=13, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='podAntiAffinityTermLabelSelector', full_name='values.SidecarInjectorConfig.podAntiAffinityTermLabelSelector', index=7,
-      number=14, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      number=14, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -4312,7 +3424,7 @@ _SIDECARINJECTORCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_SIDECARINJECTORCONFIG_NODESELECTORENTRY, ],
+  nested_types=[],
   enum_types=[
   ],
   serialized_options=None,
@@ -4321,8 +3433,8 @@ _SIDECARINJECTORCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11377,
-  serialized_end=11801,
+  serialized_start=10226,
+  serialized_end=10736,
 )
 
 
@@ -4359,8 +3471,8 @@ _STDIOMIXERADAPTERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11803,
-  serialized_end=11867,
+  serialized_start=10738,
+  serialized_end=10802,
 )
 
 
@@ -4404,8 +3516,8 @@ _TRACERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11870,
-  serialized_end=12024,
+  serialized_start=10805,
+  serialized_end=10959,
 )
 
 
@@ -4435,8 +3547,8 @@ _TRACERDATADOGCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12026,
-  serialized_end=12064,
+  serialized_start=10961,
+  serialized_end=10999,
 )
 
 
@@ -4487,8 +3599,8 @@ _TRACERLIGHTSTEPCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12066,
-  serialized_end=12163,
+  serialized_start=11001,
+  serialized_end=11098,
 )
 
 
@@ -4518,47 +3630,10 @@ _TRACERZIPKINCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12165,
-  serialized_end=12202,
+  serialized_start=11100,
+  serialized_end=11137,
 )
 
-
-_TRACINGCONFIG_NODESELECTORENTRY = _descriptor.Descriptor(
-  name='NodeSelectorEntry',
-  full_name='values.TracingConfig.NodeSelectorEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='values.TracingConfig.NodeSelectorEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='values.TracingConfig.NodeSelectorEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=531,
-  serialized_end=582,
-)
 
 _TRACINGCONFIG = _descriptor.Descriptor(
   name='TracingConfig',
@@ -4590,8 +3665,8 @@ _TRACINGCONFIG = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='nodeSelector', full_name='values.TracingConfig.nodeSelector', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -4619,7 +3694,7 @@ _TRACINGCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_TRACINGCONFIG_NODESELECTORENTRY, ],
+  nested_types=[],
   enum_types=[
   ],
   serialized_options=None,
@@ -4628,8 +3703,8 @@ _TRACINGCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12205,
-  serialized_end=12548,
+  serialized_start=11140,
+  serialized_end=11421,
 )
 
 
@@ -4659,8 +3734,8 @@ _TRACINGINGRESSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12550,
-  serialized_end=12589,
+  serialized_start=11423,
+  serialized_end=11462,
 )
 
 
@@ -4704,8 +3779,8 @@ _TRACINGJAEGERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12591,
-  serialized_end=12689,
+  serialized_start=11464,
+  serialized_end=11562,
 )
 
 
@@ -4735,8 +3810,8 @@ _TRACINGJAEGERMEMORYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12691,
-  serialized_end=12738,
+  serialized_start=11564,
+  serialized_end=11611,
 )
 
 
@@ -4815,8 +3890,8 @@ _TRACINGZIPKINCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12741,
-  serialized_end=12982,
+  serialized_start=11614,
+  serialized_end=11855,
 )
 
 
@@ -4846,8 +3921,8 @@ _TRACINGZIPKINNODECONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12984,
-  serialized_end=13023,
+  serialized_start=11857,
+  serialized_end=11896,
 )
 
 
@@ -4961,8 +4036,80 @@ _VALUES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13026,
-  serialized_end=13590,
+  serialized_start=11899,
+  serialized_end=12463,
+)
+
+
+_TYPEMAPSTRINGINTERFACE = _descriptor.Descriptor(
+  name='TypeMapStringInterface',
+  full_name='values.TypeMapStringInterface',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=12465,
+  serialized_end=12489,
+)
+
+
+_TYPESLICEOFMAPSTRINGINTERFACE = _descriptor.Descriptor(
+  name='TypeSliceOfMapStringInterface',
+  full_name='values.TypeSliceOfMapStringInterface',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=12491,
+  serialized_end=12522,
+)
+
+
+_TYPESERVICETYPE = _descriptor.Descriptor(
+  name='TypeServiceType',
+  full_name='values.TypeServiceType',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=12524,
+  serialized_end=12541,
 )
 
 
@@ -4999,47 +4146,45 @@ _ZEROVPNCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13592,
-  serialized_end=13640,
+  serialized_start=12543,
+  serialized_end=12591,
 )
 
-_CERTMANAGERCONFIG_NODESELECTORENTRY.containing_type = _CERTMANAGERCONFIG
-_CERTMANAGERCONFIG.fields_by_name['nodeSelector'].message_type = _CERTMANAGERCONFIG_NODESELECTORENTRY
+_CERTMANAGERCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
 _CERTMANAGERCONFIG.fields_by_name['resources'].message_type = k8s_dot_io_dot_api_dot_core_dot_v1_dot_generated__pb2._RESOURCEREQUIREMENTS
-_COREDNSCONFIG_NODESELECTORENTRY.containing_type = _COREDNSCONFIG
-_COREDNSCONFIG.fields_by_name['nodeSelector'].message_type = _COREDNSCONFIG_NODESELECTORENTRY
+_COREDNSCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
 _DEFAULTRESOURCESCONFIG.fields_by_name['requests'].message_type = _RESOURCESREQUESTSCONFIG
 _EGRESSGATEWAYCONFIG_ENVENTRY.containing_type = _EGRESSGATEWAYCONFIG
-_EGRESSGATEWAYCONFIG_NODESELECTORENTRY.containing_type = _EGRESSGATEWAYCONFIG
-_EGRESSGATEWAYCONFIG_PODANNOTATIONSENTRY.containing_type = _EGRESSGATEWAYCONFIG
-_EGRESSGATEWAYCONFIG_SERVICEANNOTATIONSENTRY.containing_type = _EGRESSGATEWAYCONFIG
 _EGRESSGATEWAYCONFIG.fields_by_name['cpu'].message_type = _CPUTARGETUTILIZATIONCONFIG
 _EGRESSGATEWAYCONFIG.fields_by_name['env'].message_type = _EGRESSGATEWAYCONFIG_ENVENTRY
 _EGRESSGATEWAYCONFIG.fields_by_name['labels'].message_type = _GATEWAYLABELSCONFIG
-_EGRESSGATEWAYCONFIG.fields_by_name['nodeSelector'].message_type = _EGRESSGATEWAYCONFIG_NODESELECTORENTRY
-_EGRESSGATEWAYCONFIG.fields_by_name['podAnnotations'].message_type = _EGRESSGATEWAYCONFIG_PODANNOTATIONSENTRY
+_EGRESSGATEWAYCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
+_EGRESSGATEWAYCONFIG.fields_by_name['podAnnotations'].message_type = _TYPEMAPSTRINGINTERFACE
+_EGRESSGATEWAYCONFIG.fields_by_name['podAntiAffinityLabelSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
+_EGRESSGATEWAYCONFIG.fields_by_name['podAntiAffinityTermLabelSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
 _EGRESSGATEWAYCONFIG.fields_by_name['ports'].message_type = _PORTSCONFIG
 _EGRESSGATEWAYCONFIG.fields_by_name['resources'].message_type = k8s_dot_io_dot_api_dot_core_dot_v1_dot_generated__pb2._RESOURCEREQUIREMENTS
 _EGRESSGATEWAYCONFIG.fields_by_name['secretVolumes'].message_type = _SECRETVOLUME
-_EGRESSGATEWAYCONFIG.fields_by_name['serviceAnnotations'].message_type = _EGRESSGATEWAYCONFIG_SERVICEANNOTATIONSENTRY
+_EGRESSGATEWAYCONFIG.fields_by_name['serviceAnnotations'].message_type = _TYPEMAPSTRINGINTERFACE
+_EGRESSGATEWAYCONFIG.fields_by_name['type'].message_type = _TYPESERVICETYPE
 _EGRESSGATEWAYCONFIG.fields_by_name['zvpn'].message_type = _ZEROVPNCONFIG
 _GALLEYCONFIG_MESHENTRY.containing_type = _GALLEYCONFIG
 _GALLEYCONFIG.fields_by_name['mesh'].message_type = _GALLEYCONFIG_MESHENTRY
+_GALLEYCONFIG.fields_by_name['podAntiAffinityLabelSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
+_GALLEYCONFIG.fields_by_name['podAntiAffinityTermLabelSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
 _GALLEYCONFIG.fields_by_name['resources'].message_type = k8s_dot_io_dot_api_dot_core_dot_v1_dot_generated__pb2._RESOURCEREQUIREMENTS
 _GATEWAYSCONFIG.fields_by_name['istioEgressgateway'].message_type = _EGRESSGATEWAYCONFIG
 _GATEWAYSCONFIG.fields_by_name['istioIngressgateway'].message_type = _INGRESSGATEWAYCONFIG
-_GLOBALCONFIG_DEFAULTNODESELECTORENTRY.containing_type = _GLOBALCONFIG
 _GLOBALCONFIG_LOCALITYLBSETTINGENTRY.containing_type = _GLOBALCONFIG
-_GLOBALCONFIG_MESHNETWORKSENTRY.containing_type = _GLOBALCONFIG
 _GLOBALCONFIG.fields_by_name['arch'].message_type = _ARCHCONFIG
-_GLOBALCONFIG.fields_by_name['defaultNodeSelector'].message_type = _GLOBALCONFIG_DEFAULTNODESELECTORENTRY
+_GLOBALCONFIG.fields_by_name['defaultNodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
 _GLOBALCONFIG.fields_by_name['defaultPodDisruptionBudget'].message_type = _DEFAULTPODDISRUPTIONBUDGETCONFIG
 _GLOBALCONFIG.fields_by_name['defaultResources'].message_type = _DEFAULTRESOURCESCONFIG
 _GLOBALCONFIG.fields_by_name['localityLbSetting'].message_type = _GLOBALCONFIG_LOCALITYLBSETTINGENTRY
 _GLOBALCONFIG.fields_by_name['k8sIngress'].message_type = _KUBERNETESINGRESSCONFIG
 _GLOBALCONFIG.fields_by_name['logging'].message_type = _GLOBALLOGGINGCONFIG
 _GLOBALCONFIG.fields_by_name['meshExpansion'].message_type = _MESHEXPANSIONCONFIG
-_GLOBALCONFIG.fields_by_name['meshNetworks'].message_type = _GLOBALCONFIG_MESHNETWORKSENTRY
+_GLOBALCONFIG.fields_by_name['meshNetworks'].message_type = _TYPEMAPSTRINGINTERFACE
 _GLOBALCONFIG.fields_by_name['mtls'].message_type = _MTLSCONFIG
 _GLOBALCONFIG.fields_by_name['multiCluster'].message_type = _MULTICLUSTERCONFIG
 _GLOBALCONFIG.fields_by_name['outboundTrafficPolicy'].message_type = _OUTBOUNDTRAFFICPOLICYCONFIG
@@ -5048,21 +4193,20 @@ _GLOBALCONFIG.fields_by_name['proxyInit'].message_type = _PROXYINITCONFIG
 _GLOBALCONFIG.fields_by_name['sds'].message_type = _SDSCONFIG
 _GLOBALCONFIG.fields_by_name['tracer'].message_type = _TRACERCONFIG
 _INGRESSGATEWAYCONFIG_ENVENTRY.containing_type = _INGRESSGATEWAYCONFIG
-_INGRESSGATEWAYCONFIG_NODESELECTORENTRY.containing_type = _INGRESSGATEWAYCONFIG
-_INGRESSGATEWAYCONFIG_PODANNOTATIONSENTRY.containing_type = _INGRESSGATEWAYCONFIG
-_INGRESSGATEWAYCONFIG_RESOURCESENTRY.containing_type = _INGRESSGATEWAYCONFIG
-_INGRESSGATEWAYCONFIG_SERVICEANNOTATIONSENTRY.containing_type = _INGRESSGATEWAYCONFIG
 _INGRESSGATEWAYCONFIG.fields_by_name['cpu'].message_type = _CPUTARGETUTILIZATIONCONFIG
 _INGRESSGATEWAYCONFIG.fields_by_name['env'].message_type = _INGRESSGATEWAYCONFIG_ENVENTRY
 _INGRESSGATEWAYCONFIG.fields_by_name['labels'].message_type = _GATEWAYLABELSCONFIG
 _INGRESSGATEWAYCONFIG.fields_by_name['meshExpansionPorts'].message_type = _PORTSCONFIG
-_INGRESSGATEWAYCONFIG.fields_by_name['nodeSelector'].message_type = _INGRESSGATEWAYCONFIG_NODESELECTORENTRY
-_INGRESSGATEWAYCONFIG.fields_by_name['podAnnotations'].message_type = _INGRESSGATEWAYCONFIG_PODANNOTATIONSENTRY
+_INGRESSGATEWAYCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
+_INGRESSGATEWAYCONFIG.fields_by_name['podAnnotations'].message_type = _TYPEMAPSTRINGINTERFACE
+_INGRESSGATEWAYCONFIG.fields_by_name['podAntiAffinityLabelSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
+_INGRESSGATEWAYCONFIG.fields_by_name['podAntiAffinityTermLabelSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
 _INGRESSGATEWAYCONFIG.fields_by_name['ports'].message_type = _PORTSCONFIG
-_INGRESSGATEWAYCONFIG.fields_by_name['resources'].message_type = _INGRESSGATEWAYCONFIG_RESOURCESENTRY
+_INGRESSGATEWAYCONFIG.fields_by_name['resources'].message_type = _TYPEMAPSTRINGINTERFACE
 _INGRESSGATEWAYCONFIG.fields_by_name['sds'].message_type = _INGRESSGATEWAYSDSCONFIG
 _INGRESSGATEWAYCONFIG.fields_by_name['secretVolumes'].message_type = _SECRETVOLUME
-_INGRESSGATEWAYCONFIG.fields_by_name['serviceAnnotations'].message_type = _INGRESSGATEWAYCONFIG_SERVICEANNOTATIONSENTRY
+_INGRESSGATEWAYCONFIG.fields_by_name['serviceAnnotations'].message_type = _TYPEMAPSTRINGINTERFACE
+_INGRESSGATEWAYCONFIG.fields_by_name['type'].message_type = _TYPESERVICETYPE
 _INGRESSGATEWAYCONFIG.fields_by_name['zvpn'].message_type = _INGRESSGATEWAYZVPNCONFIG
 _LOADSHEDDINGCONFIG_MODE.containing_type = _LOADSHEDDINGCONFIG
 _MIXERADAPTERSCONFIG.fields_by_name['kubernetesenv'].message_type = _KUBERNETESENVMIXERADAPTERCONFIG
@@ -5070,48 +4214,40 @@ _MIXERADAPTERSCONFIG.fields_by_name['prometheus'].message_type = _PROMETHEUSMIXE
 _MIXERADAPTERSCONFIG.fields_by_name['stdio'].message_type = _STDIOMIXERADAPTERCONFIG
 _MIXERCONFIG.fields_by_name['policy'].message_type = _MIXERPOLICYCONFIG
 _MIXERCONFIG.fields_by_name['telemetry'].message_type = _MIXERTELEMETRYCONFIG
-_MIXERPOLICYCONFIG_PODANNOTATIONSENTRY.containing_type = _MIXERPOLICYCONFIG
 _MIXERPOLICYCONFIG.fields_by_name['cpu'].message_type = _CPUTARGETUTILIZATIONCONFIG
-_MIXERPOLICYCONFIG.fields_by_name['podAnnotations'].message_type = _MIXERPOLICYCONFIG_PODANNOTATIONSENTRY
+_MIXERPOLICYCONFIG.fields_by_name['podAnnotations'].message_type = _TYPEMAPSTRINGINTERFACE
 _MIXERTELEMETRYCONFIG_ENVENTRY.containing_type = _MIXERTELEMETRYCONFIG
-_MIXERTELEMETRYCONFIG_NODESELECTORENTRY.containing_type = _MIXERTELEMETRYCONFIG
-_MIXERTELEMETRYCONFIG_PODANNOTATIONSENTRY.containing_type = _MIXERTELEMETRYCONFIG
 _MIXERTELEMETRYCONFIG.fields_by_name['adapters'].message_type = _MIXERADAPTERSCONFIG
 _MIXERTELEMETRYCONFIG.fields_by_name['cpu'].message_type = _CPUTARGETUTILIZATIONCONFIG
 _MIXERTELEMETRYCONFIG.fields_by_name['env'].message_type = _MIXERTELEMETRYCONFIG_ENVENTRY
 _MIXERTELEMETRYCONFIG.fields_by_name['loadshedding'].message_type = _LOADSHEDDINGCONFIG
-_MIXERTELEMETRYCONFIG.fields_by_name['nodeSelector'].message_type = _MIXERTELEMETRYCONFIG_NODESELECTORENTRY
-_MIXERTELEMETRYCONFIG.fields_by_name['podAnnotations'].message_type = _MIXERTELEMETRYCONFIG_PODANNOTATIONSENTRY
+_MIXERTELEMETRYCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
+_MIXERTELEMETRYCONFIG.fields_by_name['podAnnotations'].message_type = _TYPEMAPSTRINGINTERFACE
 _MIXERTELEMETRYCONFIG.fields_by_name['resources'].message_type = k8s_dot_io_dot_api_dot_core_dot_v1_dot_generated__pb2._RESOURCEREQUIREMENTS
-_NODEAGENTCONFIG_ENVENTRY.containing_type = _NODEAGENTCONFIG
-_NODEAGENTCONFIG_NODESELECTORENTRY.containing_type = _NODEAGENTCONFIG
-_NODEAGENTCONFIG.fields_by_name['env'].message_type = _NODEAGENTCONFIG_ENVENTRY
-_NODEAGENTCONFIG.fields_by_name['nodeSelector'].message_type = _NODEAGENTCONFIG_NODESELECTORENTRY
+_NODEAGENTCONFIG.fields_by_name['env'].message_type = _TYPEMAPSTRINGINTERFACE
+_NODEAGENTCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
 _OUTBOUNDTRAFFICPOLICYCONFIG_MODE.containing_type = _OUTBOUNDTRAFFICPOLICYCONFIG
-_PILOTCONFIG_NODESELECTORENTRY.containing_type = _PILOTCONFIG
-_PILOTCONFIG_DEPLOYMENTLABELSENTRY.containing_type = _PILOTCONFIG
-_PILOTCONFIG_MESHNETWORKSENTRY.containing_type = _PILOTCONFIG
 _PILOTCONFIG_ENVENTRY.containing_type = _PILOTCONFIG
 _PILOTCONFIG.fields_by_name['resources'].message_type = k8s_dot_io_dot_api_dot_core_dot_v1_dot_generated__pb2._RESOURCEREQUIREMENTS
 _PILOTCONFIG.fields_by_name['cpu'].message_type = _CPUTARGETUTILIZATIONCONFIG
-_PILOTCONFIG.fields_by_name['nodeSelector'].message_type = _PILOTCONFIG_NODESELECTORENTRY
+_PILOTCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
 _PILOTCONFIG.fields_by_name['keepaliveMaxServerConnectionAge'].message_type = google_dot_protobuf_dot_duration__pb2._DURATION
-_PILOTCONFIG.fields_by_name['deploymentLabels'].message_type = _PILOTCONFIG_DEPLOYMENTLABELSENTRY
-_PILOTCONFIG.fields_by_name['meshNetworks'].message_type = _PILOTCONFIG_MESHNETWORKSENTRY
+_PILOTCONFIG.fields_by_name['deploymentLabels'].message_type = _TYPEMAPSTRINGINTERFACE
+_PILOTCONFIG.fields_by_name['meshNetworks'].message_type = _TYPEMAPSTRINGINTERFACE
+_PILOTCONFIG.fields_by_name['podAntiAffinityLabelSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
+_PILOTCONFIG.fields_by_name['podAntiAffinityTermLabelSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
 _PILOTCONFIG.fields_by_name['ingress'].message_type = _PILOTINGRESSCONFIG
 _PILOTCONFIG.fields_by_name['env'].message_type = _PILOTCONFIG_ENVENTRY
 _PILOTCONFIG.fields_by_name['policy'].message_type = _PILOTPOLICYCONFIG
 _PILOTCONFIG.fields_by_name['telemetry'].message_type = _PILOTTELEMETRYCONFIG
 _PILOTINGRESSCONFIG_INGRESSCONTROLLERMODE.containing_type = _PILOTINGRESSCONFIG
-_PROMETHEUSCONFIG_NODESELECTORENTRY.containing_type = _PROMETHEUSCONFIG
-_PROMETHEUSCONFIG.fields_by_name['nodeSelector'].message_type = _PROMETHEUSCONFIG_NODESELECTORENTRY
+_PROMETHEUSCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
 _PROMETHEUSCONFIG.fields_by_name['scrapeInterval'].message_type = google_dot_protobuf_dot_duration__pb2._DURATION
 _PROMETHEUSCONFIG.fields_by_name['ingress'].message_type = _ADDONINGRESSCONFIG
 _PROMETHEUSCONFIG.fields_by_name['service'].message_type = _PROMETHEUSSERVICECONFIG
 _PROMETHEUSCONFIG.fields_by_name['security'].message_type = _PROMETHEUSSECURITYCONFIG
 _PROMETHEUSMIXERADAPTERCONFIG.fields_by_name['metricsExpiryDuration'].message_type = google_dot_protobuf_dot_duration__pb2._DURATION
-_PROMETHEUSSERVICECONFIG_ANNOTATIONSENTRY.containing_type = _PROMETHEUSSERVICECONFIG
-_PROMETHEUSSERVICECONFIG.fields_by_name['annotations'].message_type = _PROMETHEUSSERVICECONFIG_ANNOTATIONSENTRY
+_PROMETHEUSSERVICECONFIG.fields_by_name['annotations'].message_type = _TYPEMAPSTRINGINTERFACE
 _PROMETHEUSSERVICECONFIG.fields_by_name['nodePort'].message_type = _PROMETHEUSSERVICENODEPORTCONFIG
 _PROXYCONFIG.fields_by_name['dnsRefreshRate'].message_type = google_dot_protobuf_dot_duration__pb2._DURATION
 _PROXYCONFIG.fields_by_name['envoyMetricsService'].message_type = _ENVOYMETRICSCONFIG
@@ -5121,20 +4257,21 @@ _PROXYCONFIG_ACCESSLOGENCODING.containing_type = _PROXYCONFIG
 _PROXYCONFIG_AUTOINJECT.containing_type = _PROXYCONFIG
 _PROXYCONFIG_TRACER.containing_type = _PROXYCONFIG
 _SECURITYCONFIG_DNSCERTSENTRY.containing_type = _SECURITYCONFIG
-_SECURITYCONFIG_NODESELECTORENTRY.containing_type = _SECURITYCONFIG
 _SECURITYCONFIG.fields_by_name['dnsCerts'].message_type = _SECURITYCONFIG_DNSCERTSENTRY
-_SECURITYCONFIG.fields_by_name['nodeSelector'].message_type = _SECURITYCONFIG_NODESELECTORENTRY
-_SERVICECONFIG_ANNOTATIONSENTRY.containing_type = _SERVICECONFIG
-_SERVICECONFIG.fields_by_name['annotations'].message_type = _SERVICECONFIG_ANNOTATIONSENTRY
-_SIDECARINJECTORCONFIG_NODESELECTORENTRY.containing_type = _SIDECARINJECTORCONFIG
-_SIDECARINJECTORCONFIG.fields_by_name['nodeSelector'].message_type = _SIDECARINJECTORCONFIG_NODESELECTORENTRY
+_SECURITYCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
+_SERVICECONFIG.fields_by_name['annotations'].message_type = _TYPEMAPSTRINGINTERFACE
+_SERVICECONFIG.fields_by_name['type'].message_type = _TYPESERVICETYPE
+_SIDECARINJECTORCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
+_SIDECARINJECTORCONFIG.fields_by_name['neverInjectSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
+_SIDECARINJECTORCONFIG.fields_by_name['alwaysInjectSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
+_SIDECARINJECTORCONFIG.fields_by_name['podAntiAffinityLabelSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
+_SIDECARINJECTORCONFIG.fields_by_name['podAntiAffinityTermLabelSelector'].message_type = _TYPESLICEOFMAPSTRINGINTERFACE
 _TRACERCONFIG.fields_by_name['datadog'].message_type = _TRACERDATADOGCONFIG
 _TRACERCONFIG.fields_by_name['lightstep'].message_type = _TRACERLIGHTSTEPCONFIG
 _TRACERCONFIG.fields_by_name['zipkin'].message_type = _TRACERZIPKINCONFIG
-_TRACINGCONFIG_NODESELECTORENTRY.containing_type = _TRACINGCONFIG
 _TRACINGCONFIG.fields_by_name['ingress'].message_type = _TRACINGINGRESSCONFIG
 _TRACINGCONFIG.fields_by_name['jaeger'].message_type = _TRACINGJAEGERCONFIG
-_TRACINGCONFIG.fields_by_name['nodeSelector'].message_type = _TRACINGCONFIG_NODESELECTORENTRY
+_TRACINGCONFIG.fields_by_name['nodeSelector'].message_type = _TYPEMAPSTRINGINTERFACE
 _TRACINGCONFIG.fields_by_name['service'].message_type = _SERVICECONFIG
 _TRACINGCONFIG.fields_by_name['zipkin'].message_type = _TRACINGZIPKINCONFIG
 _TRACINGJAEGERCONFIG.fields_by_name['memory'].message_type = _TRACINGJAEGERMEMORYCONFIG
@@ -5213,6 +4350,9 @@ DESCRIPTOR.message_types_by_name['TracingJaegerMemoryConfig'] = _TRACINGJAEGERME
 DESCRIPTOR.message_types_by_name['TracingZipkinConfig'] = _TRACINGZIPKINCONFIG
 DESCRIPTOR.message_types_by_name['TracingZipkinNodeConfig'] = _TRACINGZIPKINNODECONFIG
 DESCRIPTOR.message_types_by_name['Values'] = _VALUES
+DESCRIPTOR.message_types_by_name['TypeMapStringInterface'] = _TYPEMAPSTRINGINTERFACE
+DESCRIPTOR.message_types_by_name['TypeSliceOfMapStringInterface'] = _TYPESLICEOFMAPSTRINGINTERFACE
+DESCRIPTOR.message_types_by_name['TypeServiceType'] = _TYPESERVICETYPE
 DESCRIPTOR.message_types_by_name['ZeroVPNConfig'] = _ZEROVPNCONFIG
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -5245,34 +4385,18 @@ CPUTargetUtilizationConfig = _reflection.GeneratedProtocolMessageType('CPUTarget
 _sym_db.RegisterMessage(CPUTargetUtilizationConfig)
 
 CertManagerConfig = _reflection.GeneratedProtocolMessageType('CertManagerConfig', (_message.Message,), {
-
-  'NodeSelectorEntry' : _reflection.GeneratedProtocolMessageType('NodeSelectorEntry', (_message.Message,), {
-    'DESCRIPTOR' : _CERTMANAGERCONFIG_NODESELECTORENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.CertManagerConfig.NodeSelectorEntry)
-    })
-  ,
   'DESCRIPTOR' : _CERTMANAGERCONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.CertManagerConfig)
   })
 _sym_db.RegisterMessage(CertManagerConfig)
-_sym_db.RegisterMessage(CertManagerConfig.NodeSelectorEntry)
 
 CoreDNSConfig = _reflection.GeneratedProtocolMessageType('CoreDNSConfig', (_message.Message,), {
-
-  'NodeSelectorEntry' : _reflection.GeneratedProtocolMessageType('NodeSelectorEntry', (_message.Message,), {
-    'DESCRIPTOR' : _COREDNSCONFIG_NODESELECTORENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.CoreDNSConfig.NodeSelectorEntry)
-    })
-  ,
   'DESCRIPTOR' : _COREDNSCONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.CoreDNSConfig)
   })
 _sym_db.RegisterMessage(CoreDNSConfig)
-_sym_db.RegisterMessage(CoreDNSConfig.NodeSelectorEntry)
 
 DefaultPodDisruptionBudgetConfig = _reflection.GeneratedProtocolMessageType('DefaultPodDisruptionBudgetConfig', (_message.Message,), {
   'DESCRIPTOR' : _DEFAULTPODDISRUPTIONBUDGETCONFIG,
@@ -5296,36 +4420,12 @@ EgressGatewayConfig = _reflection.GeneratedProtocolMessageType('EgressGatewayCon
     # @@protoc_insertion_point(class_scope:values.EgressGatewayConfig.EnvEntry)
     })
   ,
-
-  'NodeSelectorEntry' : _reflection.GeneratedProtocolMessageType('NodeSelectorEntry', (_message.Message,), {
-    'DESCRIPTOR' : _EGRESSGATEWAYCONFIG_NODESELECTORENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.EgressGatewayConfig.NodeSelectorEntry)
-    })
-  ,
-
-  'PodAnnotationsEntry' : _reflection.GeneratedProtocolMessageType('PodAnnotationsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _EGRESSGATEWAYCONFIG_PODANNOTATIONSENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.EgressGatewayConfig.PodAnnotationsEntry)
-    })
-  ,
-
-  'ServiceAnnotationsEntry' : _reflection.GeneratedProtocolMessageType('ServiceAnnotationsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _EGRESSGATEWAYCONFIG_SERVICEANNOTATIONSENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.EgressGatewayConfig.ServiceAnnotationsEntry)
-    })
-  ,
   'DESCRIPTOR' : _EGRESSGATEWAYCONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.EgressGatewayConfig)
   })
 _sym_db.RegisterMessage(EgressGatewayConfig)
 _sym_db.RegisterMessage(EgressGatewayConfig.EnvEntry)
-_sym_db.RegisterMessage(EgressGatewayConfig.NodeSelectorEntry)
-_sym_db.RegisterMessage(EgressGatewayConfig.PodAnnotationsEntry)
-_sym_db.RegisterMessage(EgressGatewayConfig.ServiceAnnotationsEntry)
 
 EnvoyMetricsConfig = _reflection.GeneratedProtocolMessageType('EnvoyMetricsConfig', (_message.Message,), {
   'DESCRIPTOR' : _ENVOYMETRICSCONFIG,
@@ -5365,24 +4465,10 @@ _sym_db.RegisterMessage(GatewaysConfig)
 
 GlobalConfig = _reflection.GeneratedProtocolMessageType('GlobalConfig', (_message.Message,), {
 
-  'DefaultNodeSelectorEntry' : _reflection.GeneratedProtocolMessageType('DefaultNodeSelectorEntry', (_message.Message,), {
-    'DESCRIPTOR' : _GLOBALCONFIG_DEFAULTNODESELECTORENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.GlobalConfig.DefaultNodeSelectorEntry)
-    })
-  ,
-
   'LocalityLbSettingEntry' : _reflection.GeneratedProtocolMessageType('LocalityLbSettingEntry', (_message.Message,), {
     'DESCRIPTOR' : _GLOBALCONFIG_LOCALITYLBSETTINGENTRY,
     '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
     # @@protoc_insertion_point(class_scope:values.GlobalConfig.LocalityLbSettingEntry)
-    })
-  ,
-
-  'MeshNetworksEntry' : _reflection.GeneratedProtocolMessageType('MeshNetworksEntry', (_message.Message,), {
-    'DESCRIPTOR' : _GLOBALCONFIG_MESHNETWORKSENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.GlobalConfig.MeshNetworksEntry)
     })
   ,
   'DESCRIPTOR' : _GLOBALCONFIG,
@@ -5390,9 +4476,7 @@ GlobalConfig = _reflection.GeneratedProtocolMessageType('GlobalConfig', (_messag
   # @@protoc_insertion_point(class_scope:values.GlobalConfig)
   })
 _sym_db.RegisterMessage(GlobalConfig)
-_sym_db.RegisterMessage(GlobalConfig.DefaultNodeSelectorEntry)
 _sym_db.RegisterMessage(GlobalConfig.LocalityLbSettingEntry)
-_sym_db.RegisterMessage(GlobalConfig.MeshNetworksEntry)
 
 GlobalLoggingConfig = _reflection.GeneratedProtocolMessageType('GlobalLoggingConfig', (_message.Message,), {
   'DESCRIPTOR' : _GLOBALLOGGINGCONFIG,
@@ -5409,44 +4493,12 @@ IngressGatewayConfig = _reflection.GeneratedProtocolMessageType('IngressGatewayC
     # @@protoc_insertion_point(class_scope:values.IngressGatewayConfig.EnvEntry)
     })
   ,
-
-  'NodeSelectorEntry' : _reflection.GeneratedProtocolMessageType('NodeSelectorEntry', (_message.Message,), {
-    'DESCRIPTOR' : _INGRESSGATEWAYCONFIG_NODESELECTORENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.IngressGatewayConfig.NodeSelectorEntry)
-    })
-  ,
-
-  'PodAnnotationsEntry' : _reflection.GeneratedProtocolMessageType('PodAnnotationsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _INGRESSGATEWAYCONFIG_PODANNOTATIONSENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.IngressGatewayConfig.PodAnnotationsEntry)
-    })
-  ,
-
-  'ResourcesEntry' : _reflection.GeneratedProtocolMessageType('ResourcesEntry', (_message.Message,), {
-    'DESCRIPTOR' : _INGRESSGATEWAYCONFIG_RESOURCESENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.IngressGatewayConfig.ResourcesEntry)
-    })
-  ,
-
-  'ServiceAnnotationsEntry' : _reflection.GeneratedProtocolMessageType('ServiceAnnotationsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _INGRESSGATEWAYCONFIG_SERVICEANNOTATIONSENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.IngressGatewayConfig.ServiceAnnotationsEntry)
-    })
-  ,
   'DESCRIPTOR' : _INGRESSGATEWAYCONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.IngressGatewayConfig)
   })
 _sym_db.RegisterMessage(IngressGatewayConfig)
 _sym_db.RegisterMessage(IngressGatewayConfig.EnvEntry)
-_sym_db.RegisterMessage(IngressGatewayConfig.NodeSelectorEntry)
-_sym_db.RegisterMessage(IngressGatewayConfig.PodAnnotationsEntry)
-_sym_db.RegisterMessage(IngressGatewayConfig.ResourcesEntry)
-_sym_db.RegisterMessage(IngressGatewayConfig.ServiceAnnotationsEntry)
 
 IngressGatewaySdsConfig = _reflection.GeneratedProtocolMessageType('IngressGatewaySdsConfig', (_message.Message,), {
   'DESCRIPTOR' : _INGRESSGATEWAYSDSCONFIG,
@@ -5512,19 +4564,11 @@ MixerConfig = _reflection.GeneratedProtocolMessageType('MixerConfig', (_message.
 _sym_db.RegisterMessage(MixerConfig)
 
 MixerPolicyConfig = _reflection.GeneratedProtocolMessageType('MixerPolicyConfig', (_message.Message,), {
-
-  'PodAnnotationsEntry' : _reflection.GeneratedProtocolMessageType('PodAnnotationsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _MIXERPOLICYCONFIG_PODANNOTATIONSENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.MixerPolicyConfig.PodAnnotationsEntry)
-    })
-  ,
   'DESCRIPTOR' : _MIXERPOLICYCONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.MixerPolicyConfig)
   })
 _sym_db.RegisterMessage(MixerPolicyConfig)
-_sym_db.RegisterMessage(MixerPolicyConfig.PodAnnotationsEntry)
 
 MixerTelemetryConfig = _reflection.GeneratedProtocolMessageType('MixerTelemetryConfig', (_message.Message,), {
 
@@ -5534,28 +4578,12 @@ MixerTelemetryConfig = _reflection.GeneratedProtocolMessageType('MixerTelemetryC
     # @@protoc_insertion_point(class_scope:values.MixerTelemetryConfig.EnvEntry)
     })
   ,
-
-  'NodeSelectorEntry' : _reflection.GeneratedProtocolMessageType('NodeSelectorEntry', (_message.Message,), {
-    'DESCRIPTOR' : _MIXERTELEMETRYCONFIG_NODESELECTORENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.MixerTelemetryConfig.NodeSelectorEntry)
-    })
-  ,
-
-  'PodAnnotationsEntry' : _reflection.GeneratedProtocolMessageType('PodAnnotationsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _MIXERTELEMETRYCONFIG_PODANNOTATIONSENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.MixerTelemetryConfig.PodAnnotationsEntry)
-    })
-  ,
   'DESCRIPTOR' : _MIXERTELEMETRYCONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.MixerTelemetryConfig)
   })
 _sym_db.RegisterMessage(MixerTelemetryConfig)
 _sym_db.RegisterMessage(MixerTelemetryConfig.EnvEntry)
-_sym_db.RegisterMessage(MixerTelemetryConfig.NodeSelectorEntry)
-_sym_db.RegisterMessage(MixerTelemetryConfig.PodAnnotationsEntry)
 
 MultiClusterConfig = _reflection.GeneratedProtocolMessageType('MultiClusterConfig', (_message.Message,), {
   'DESCRIPTOR' : _MULTICLUSTERCONFIG,
@@ -5565,27 +4593,11 @@ MultiClusterConfig = _reflection.GeneratedProtocolMessageType('MultiClusterConfi
 _sym_db.RegisterMessage(MultiClusterConfig)
 
 NodeAgentConfig = _reflection.GeneratedProtocolMessageType('NodeAgentConfig', (_message.Message,), {
-
-  'EnvEntry' : _reflection.GeneratedProtocolMessageType('EnvEntry', (_message.Message,), {
-    'DESCRIPTOR' : _NODEAGENTCONFIG_ENVENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.NodeAgentConfig.EnvEntry)
-    })
-  ,
-
-  'NodeSelectorEntry' : _reflection.GeneratedProtocolMessageType('NodeSelectorEntry', (_message.Message,), {
-    'DESCRIPTOR' : _NODEAGENTCONFIG_NODESELECTORENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.NodeAgentConfig.NodeSelectorEntry)
-    })
-  ,
   'DESCRIPTOR' : _NODEAGENTCONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.NodeAgentConfig)
   })
 _sym_db.RegisterMessage(NodeAgentConfig)
-_sym_db.RegisterMessage(NodeAgentConfig.EnvEntry)
-_sym_db.RegisterMessage(NodeAgentConfig.NodeSelectorEntry)
 
 OutboundTrafficPolicyConfig = _reflection.GeneratedProtocolMessageType('OutboundTrafficPolicyConfig', (_message.Message,), {
   'DESCRIPTOR' : _OUTBOUNDTRAFFICPOLICYCONFIG,
@@ -5595,27 +4607,6 @@ OutboundTrafficPolicyConfig = _reflection.GeneratedProtocolMessageType('Outbound
 _sym_db.RegisterMessage(OutboundTrafficPolicyConfig)
 
 PilotConfig = _reflection.GeneratedProtocolMessageType('PilotConfig', (_message.Message,), {
-
-  'NodeSelectorEntry' : _reflection.GeneratedProtocolMessageType('NodeSelectorEntry', (_message.Message,), {
-    'DESCRIPTOR' : _PILOTCONFIG_NODESELECTORENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.PilotConfig.NodeSelectorEntry)
-    })
-  ,
-
-  'DeploymentLabelsEntry' : _reflection.GeneratedProtocolMessageType('DeploymentLabelsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _PILOTCONFIG_DEPLOYMENTLABELSENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.PilotConfig.DeploymentLabelsEntry)
-    })
-  ,
-
-  'MeshNetworksEntry' : _reflection.GeneratedProtocolMessageType('MeshNetworksEntry', (_message.Message,), {
-    'DESCRIPTOR' : _PILOTCONFIG_MESHNETWORKSENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.PilotConfig.MeshNetworksEntry)
-    })
-  ,
 
   'EnvEntry' : _reflection.GeneratedProtocolMessageType('EnvEntry', (_message.Message,), {
     'DESCRIPTOR' : _PILOTCONFIG_ENVENTRY,
@@ -5628,9 +4619,6 @@ PilotConfig = _reflection.GeneratedProtocolMessageType('PilotConfig', (_message.
   # @@protoc_insertion_point(class_scope:values.PilotConfig)
   })
 _sym_db.RegisterMessage(PilotConfig)
-_sym_db.RegisterMessage(PilotConfig.NodeSelectorEntry)
-_sym_db.RegisterMessage(PilotConfig.DeploymentLabelsEntry)
-_sym_db.RegisterMessage(PilotConfig.MeshNetworksEntry)
 _sym_db.RegisterMessage(PilotConfig.EnvEntry)
 
 PilotIngressConfig = _reflection.GeneratedProtocolMessageType('PilotIngressConfig', (_message.Message,), {
@@ -5662,19 +4650,11 @@ PortsConfig = _reflection.GeneratedProtocolMessageType('PortsConfig', (_message.
 _sym_db.RegisterMessage(PortsConfig)
 
 PrometheusConfig = _reflection.GeneratedProtocolMessageType('PrometheusConfig', (_message.Message,), {
-
-  'NodeSelectorEntry' : _reflection.GeneratedProtocolMessageType('NodeSelectorEntry', (_message.Message,), {
-    'DESCRIPTOR' : _PROMETHEUSCONFIG_NODESELECTORENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.PrometheusConfig.NodeSelectorEntry)
-    })
-  ,
   'DESCRIPTOR' : _PROMETHEUSCONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.PrometheusConfig)
   })
 _sym_db.RegisterMessage(PrometheusConfig)
-_sym_db.RegisterMessage(PrometheusConfig.NodeSelectorEntry)
 
 PrometheusMixerAdapterConfig = _reflection.GeneratedProtocolMessageType('PrometheusMixerAdapterConfig', (_message.Message,), {
   'DESCRIPTOR' : _PROMETHEUSMIXERADAPTERCONFIG,
@@ -5691,19 +4671,11 @@ PrometheusSecurityConfig = _reflection.GeneratedProtocolMessageType('PrometheusS
 _sym_db.RegisterMessage(PrometheusSecurityConfig)
 
 PrometheusServiceConfig = _reflection.GeneratedProtocolMessageType('PrometheusServiceConfig', (_message.Message,), {
-
-  'AnnotationsEntry' : _reflection.GeneratedProtocolMessageType('AnnotationsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _PROMETHEUSSERVICECONFIG_ANNOTATIONSENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.PrometheusServiceConfig.AnnotationsEntry)
-    })
-  ,
   'DESCRIPTOR' : _PROMETHEUSSERVICECONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.PrometheusServiceConfig)
   })
 _sym_db.RegisterMessage(PrometheusServiceConfig)
-_sym_db.RegisterMessage(PrometheusServiceConfig.AnnotationsEntry)
 
 PrometheusServiceNodePortConfig = _reflection.GeneratedProtocolMessageType('PrometheusServiceNodePortConfig', (_message.Message,), {
   'DESCRIPTOR' : _PROMETHEUSSERVICENODEPORTCONFIG,
@@ -5755,50 +4727,26 @@ SecurityConfig = _reflection.GeneratedProtocolMessageType('SecurityConfig', (_me
     # @@protoc_insertion_point(class_scope:values.SecurityConfig.DnsCertsEntry)
     })
   ,
-
-  'NodeSelectorEntry' : _reflection.GeneratedProtocolMessageType('NodeSelectorEntry', (_message.Message,), {
-    'DESCRIPTOR' : _SECURITYCONFIG_NODESELECTORENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.SecurityConfig.NodeSelectorEntry)
-    })
-  ,
   'DESCRIPTOR' : _SECURITYCONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.SecurityConfig)
   })
 _sym_db.RegisterMessage(SecurityConfig)
 _sym_db.RegisterMessage(SecurityConfig.DnsCertsEntry)
-_sym_db.RegisterMessage(SecurityConfig.NodeSelectorEntry)
 
 ServiceConfig = _reflection.GeneratedProtocolMessageType('ServiceConfig', (_message.Message,), {
-
-  'AnnotationsEntry' : _reflection.GeneratedProtocolMessageType('AnnotationsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _SERVICECONFIG_ANNOTATIONSENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.ServiceConfig.AnnotationsEntry)
-    })
-  ,
   'DESCRIPTOR' : _SERVICECONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.ServiceConfig)
   })
 _sym_db.RegisterMessage(ServiceConfig)
-_sym_db.RegisterMessage(ServiceConfig.AnnotationsEntry)
 
 SidecarInjectorConfig = _reflection.GeneratedProtocolMessageType('SidecarInjectorConfig', (_message.Message,), {
-
-  'NodeSelectorEntry' : _reflection.GeneratedProtocolMessageType('NodeSelectorEntry', (_message.Message,), {
-    'DESCRIPTOR' : _SIDECARINJECTORCONFIG_NODESELECTORENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.SidecarInjectorConfig.NodeSelectorEntry)
-    })
-  ,
   'DESCRIPTOR' : _SIDECARINJECTORCONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.SidecarInjectorConfig)
   })
 _sym_db.RegisterMessage(SidecarInjectorConfig)
-_sym_db.RegisterMessage(SidecarInjectorConfig.NodeSelectorEntry)
 
 StdioMixerAdapterConfig = _reflection.GeneratedProtocolMessageType('StdioMixerAdapterConfig', (_message.Message,), {
   'DESCRIPTOR' : _STDIOMIXERADAPTERCONFIG,
@@ -5836,19 +4784,11 @@ TracerZipkinConfig = _reflection.GeneratedProtocolMessageType('TracerZipkinConfi
 _sym_db.RegisterMessage(TracerZipkinConfig)
 
 TracingConfig = _reflection.GeneratedProtocolMessageType('TracingConfig', (_message.Message,), {
-
-  'NodeSelectorEntry' : _reflection.GeneratedProtocolMessageType('NodeSelectorEntry', (_message.Message,), {
-    'DESCRIPTOR' : _TRACINGCONFIG_NODESELECTORENTRY,
-    '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
-    # @@protoc_insertion_point(class_scope:values.TracingConfig.NodeSelectorEntry)
-    })
-  ,
   'DESCRIPTOR' : _TRACINGCONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
   # @@protoc_insertion_point(class_scope:values.TracingConfig)
   })
 _sym_db.RegisterMessage(TracingConfig)
-_sym_db.RegisterMessage(TracingConfig.NodeSelectorEntry)
 
 TracingIngressConfig = _reflection.GeneratedProtocolMessageType('TracingIngressConfig', (_message.Message,), {
   'DESCRIPTOR' : _TRACINGINGRESSCONFIG,
@@ -5892,6 +4832,27 @@ Values = _reflection.GeneratedProtocolMessageType('Values', (_message.Message,),
   })
 _sym_db.RegisterMessage(Values)
 
+TypeMapStringInterface = _reflection.GeneratedProtocolMessageType('TypeMapStringInterface', (_message.Message,), {
+  'DESCRIPTOR' : _TYPEMAPSTRINGINTERFACE,
+  '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
+  # @@protoc_insertion_point(class_scope:values.TypeMapStringInterface)
+  })
+_sym_db.RegisterMessage(TypeMapStringInterface)
+
+TypeSliceOfMapStringInterface = _reflection.GeneratedProtocolMessageType('TypeSliceOfMapStringInterface', (_message.Message,), {
+  'DESCRIPTOR' : _TYPESLICEOFMAPSTRINGINTERFACE,
+  '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
+  # @@protoc_insertion_point(class_scope:values.TypeSliceOfMapStringInterface)
+  })
+_sym_db.RegisterMessage(TypeSliceOfMapStringInterface)
+
+TypeServiceType = _reflection.GeneratedProtocolMessageType('TypeServiceType', (_message.Message,), {
+  'DESCRIPTOR' : _TYPESERVICETYPE,
+  '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
+  # @@protoc_insertion_point(class_scope:values.TypeServiceType)
+  })
+_sym_db.RegisterMessage(TypeServiceType)
+
 ZeroVPNConfig = _reflection.GeneratedProtocolMessageType('ZeroVPNConfig', (_message.Message,), {
   'DESCRIPTOR' : _ZEROVPNCONFIG,
   '__module__' : 'pkg.apis.istio.v1alpha2.values.values_types_pb2'
@@ -5901,36 +4862,11 @@ _sym_db.RegisterMessage(ZeroVPNConfig)
 
 
 DESCRIPTOR._options = None
-_CERTMANAGERCONFIG_NODESELECTORENTRY._options = None
-_COREDNSCONFIG_NODESELECTORENTRY._options = None
 _EGRESSGATEWAYCONFIG_ENVENTRY._options = None
-_EGRESSGATEWAYCONFIG_NODESELECTORENTRY._options = None
-_EGRESSGATEWAYCONFIG_PODANNOTATIONSENTRY._options = None
-_EGRESSGATEWAYCONFIG_SERVICEANNOTATIONSENTRY._options = None
 _GALLEYCONFIG_MESHENTRY._options = None
-_GLOBALCONFIG_DEFAULTNODESELECTORENTRY._options = None
 _GLOBALCONFIG_LOCALITYLBSETTINGENTRY._options = None
-_GLOBALCONFIG_MESHNETWORKSENTRY._options = None
 _INGRESSGATEWAYCONFIG_ENVENTRY._options = None
-_INGRESSGATEWAYCONFIG_NODESELECTORENTRY._options = None
-_INGRESSGATEWAYCONFIG_PODANNOTATIONSENTRY._options = None
-_INGRESSGATEWAYCONFIG_RESOURCESENTRY._options = None
-_INGRESSGATEWAYCONFIG_SERVICEANNOTATIONSENTRY._options = None
-_MIXERPOLICYCONFIG_PODANNOTATIONSENTRY._options = None
 _MIXERTELEMETRYCONFIG_ENVENTRY._options = None
-_MIXERTELEMETRYCONFIG_NODESELECTORENTRY._options = None
-_MIXERTELEMETRYCONFIG_PODANNOTATIONSENTRY._options = None
-_NODEAGENTCONFIG_ENVENTRY._options = None
-_NODEAGENTCONFIG_NODESELECTORENTRY._options = None
-_PILOTCONFIG_NODESELECTORENTRY._options = None
-_PILOTCONFIG_DEPLOYMENTLABELSENTRY._options = None
-_PILOTCONFIG_MESHNETWORKSENTRY._options = None
 _PILOTCONFIG_ENVENTRY._options = None
-_PROMETHEUSCONFIG_NODESELECTORENTRY._options = None
-_PROMETHEUSSERVICECONFIG_ANNOTATIONSENTRY._options = None
 _SECURITYCONFIG_DNSCERTSENTRY._options = None
-_SECURITYCONFIG_NODESELECTORENTRY._options = None
-_SERVICECONFIG_ANNOTATIONSENTRY._options = None
-_SIDECARINJECTORCONFIG_NODESELECTORENTRY._options = None
-_TRACINGCONFIG_NODESELECTORENTRY._options = None
 # @@protoc_insertion_point(module_scope)
