@@ -81,7 +81,7 @@ func main() {
 				os.Exit(1)
 			}
 			// Subs maps a marker type to a real type.
-			subs["*"+nlv[1]] = v
+			subs["*"+strings.TrimSpace(nlv[1])] = strings.TrimSpace(v)
 			for !strings.HasPrefix(lines[i], "var xxx_messageInfo_") {
 				i++
 			}
