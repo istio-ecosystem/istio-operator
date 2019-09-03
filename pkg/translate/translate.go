@@ -17,6 +17,7 @@ package translate
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"reflect"
@@ -31,6 +32,8 @@ import (
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/version"
 	"istio.io/pkg/log"
+
+	v1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -393,12 +396,48 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 		if err != nil {
 			return "", fmt.Errorf("could not marshal to YAML in OverlayK8sSettings: %s", err)
 		}
-		mergedYAML, err := overlayK8s(baseYAML, overlayYAML, path[1:])
+
+		var dstNodeYaml, k8sSettingName string
+		if len(path) != 0 {
+			k8sSettingName = path[len(path)-1]
+		}
+
+		switch k8sSettingName {
+		case "env":
+			base := make(map[string]interface{})
+			if err := yaml.Unmarshal(baseYAML, &base); err != nil {
+				return "", fmt.Errorf("error: %s to unmarshal baseYAML:\n%s", err, baseYAML)
+			}
+
+			basePc, isBasePcFound, err := tpath.GetPathContext(base, path[1:])
+			if err != nil {
+				return "", err
+			}
+
+			if !isBasePcFound {
+				log.Infof("path %s not found in %T.", path[1:].String(), oo)
+				dstNodeYaml = string(overlayYAML)
+			} else {
+				baseNodeYaml, err := yaml.Marshal(basePc.Node)
+				if err != nil {
+					return "", err
+				}
+
+				dstNodeYaml, err = mergeEnv(string(baseNodeYaml), string(overlayYAML))
+				if err != nil {
+					return "", fmt.Errorf("eror: %s to merge overlayYAML:\n%s to baseYAML:\n%s", err, string(overlayYAML), string(baseNodeYaml))
+				}
+			}
+		default:
+			dstNodeYaml = string(overlayYAML)
+		}
+
+		mergedYAML, err := overlayK8s(baseYAML, []byte(dstNodeYaml), path[1:])
 		if err != nil {
 			return "", err
 		}
-		scope.Debugf("baseYAML:\n%s\n, overlayYAML:\n%s\n, mergedYAML:\n%s\n", string(baseYAML), string(overlayYAML), string(mergedYAML))
 
+		scope.Debugf("baseYAML:\n%s\n, dstNodeYaml:\n%s\n, mergedYAML:\n%s\n", string(baseYAML), dstNodeYaml, string(mergedYAML))
 		mergedObj, err := object.ParseYAMLToK8sObject(mergedYAML)
 		if err != nil {
 			return "", fmt.Errorf("could not ParseYAMLToK8sObject in OverlayK8sSettings: %s", err)
@@ -408,6 +447,55 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 	}
 
 	return objects.YAMLManifest()
+}
+
+// mergeEnv apply deep merge overlay env settings on the base env.
+func mergeEnv(baseEnv, overlayEnv string) (string, error) {
+	if overlayEnv == "" {
+		return baseEnv, nil
+	}
+	baseEnvJSON, err := yaml.YAMLToJSON([]byte(baseEnv))
+	if err != nil {
+		return "", fmt.Errorf("yamlToJSON error in base env: %s\n%s", err, baseEnv)
+	}
+	overlayEnvJSON, err := yaml.YAMLToJSON([]byte(overlayEnv))
+	if err != nil {
+		return "", fmt.Errorf("yamlToJSON error in overlay env: %s\n%s", err, overlayEnv)
+	}
+
+	var baseEnvObj, overlayEnvObj []*v1.EnvVar
+	err = json.Unmarshal(baseEnvJSON, &baseEnvObj)
+	if err != nil {
+		return "", err
+	}
+	err = json.Unmarshal(overlayEnvJSON, &overlayEnvObj)
+	if err != nil {
+		return "", err
+	}
+
+	dstEnvObj := make([]*v1.EnvVar, len(baseEnvObj))
+	copy(dstEnvObj, baseEnvObj)
+	for i, v2 := range overlayEnvObj {
+		exists := false
+		for j, v1 := range baseEnvObj {
+			if v1.Name == v2.Name {
+				// if the env item with name exists in base, then override base.
+				exists = true
+				dstEnvObj[j] = overlayEnvObj[i]
+				break
+			}
+		}
+		if !exists {
+			// if the env item with name doesn't exist in base, then append to base.
+			dstEnvObj = append(dstEnvObj, overlayEnvObj[i])
+		}
+	}
+
+	b, err := json.Marshal(dstEnvObj)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
 }
 
 // overlayK8s overlays overlayYAML over baseYAML at the given path in baseYAML.

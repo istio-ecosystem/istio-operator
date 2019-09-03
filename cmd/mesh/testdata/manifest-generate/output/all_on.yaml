@@ -24,19 +24,25 @@ rules:
 
 
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: ClusterRole
 metadata:
   name: istio-citadel-istio-system
   labels:
+    app: citadel
     release: istio
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: istio-citadel-istio-system
-subjects:
-  - kind: ServiceAccount
-    name: istio-citadel-service-account
-    namespace: istio-system
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["create", "get", "update"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["create", "get", "watch", "list", "update", "delete"]
+- apiGroups: [""]
+  resources: ["serviceaccounts", "services", "namespaces"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["authentication.k8s.io"]
+  resources: ["tokenreviews"]
+  verbs: ["create"]
 ---
 
 
@@ -127,24 +133,6 @@ spec:
 ---
 
 
-apiVersion: policy/v1beta1
-kind: PodDisruptionBudget
-metadata:
-  name: istio-citadel
-  namespace: istio-system
-  labels:
-    app: citadel
-    istio: citadel
-    release: istio
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      app: citadel
-      istio: citadel
----
-
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -170,20 +158,51 @@ spec:
 
 
 apiVersion: v1
-kind: ServiceAccount
+kind: Service
+metadata:
+  # Must match the certificate, this is used in the node agent in same namespace.
+  name: istio-citadel
+  namespace: istio-system
+  labels:
+    app: citadel
+    istio: citadel
+    release: istio
+  name: istio-citadel
+  namespace: istio-system
+spec:
+  ports:
+    - name: grpc-citadel
+      port: 8060
+      targetPort: 8060
+      protocol: TCP
+    - name: http-monitoring
+      port: 15014
+  selector:
+    app: citadel
+---
+
+
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
 metadata:
   name: istio-citadel-service-account
   namespace: istio-system
   labels:
     release: istio
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: citadel
+      istio: citadel
 ---
 
 # Resources for Galley component
 
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: ClusterRoleBinding
 metadata:
-  name: istio-galley-istio-system
+  name: istio-citadel-istio-system
   labels:
     release: istio
 rules:
@@ -224,6 +243,7 @@ rules:
   verbs: ["get", "list", "watch"]
 ---
 
+# Resources for Galley component
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -249,7 +269,6 @@ metadata:
   name: galley-envoy-config
   labels:
     app: galley
-    istio: galley
     release: istio
 data:
   envoy.yaml.tmpl: |-
@@ -489,7 +508,6 @@ kind: Deployment
 metadata:
   labels:
     app: galley
-    istio: galley
     release: istio
   name: istio-galley
   namespace: istio-system
@@ -747,16 +765,16 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: istio-ingressgateway
-    istio: ingressgateway
+    app: galley
+    istio: galley
     release: istio
-  name: istio-ingressgateway
+  name: istio-galley
   namespace: istio-system
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      app: istio-ingressgateway
-      istio: ingressgateway
+      istio: galley
   strategy:
     rollingUpdate:
       maxSurge: 100%
@@ -766,10 +784,10 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        app: istio-ingressgateway
-        chart: gateways
+        app: galley
+        chart: galley
         heritage: Tiller
-        istio: ingressgateway
+        istio: galley
         release: istio
     spec:
       affinity:
@@ -1034,17 +1052,191 @@ metadata:
 apiVersion: networking.istio.io/v1alpha3
 kind: Sidecar
 metadata:
-  name: default
-  namespace: istio-system
   labels:
+    app: istio-ingressgateway
+    istio: ingressgateway
     release: istio
+  name: istio-ingressgateway
+  namespace: istio-system
 spec:
-  egress:
-    - hosts:
-        - "*/*"
+  selector:
+    matchLabels:
+      app: istio-ingressgateway
+      istio: ingressgateway
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: istio-ingressgateway
+        chart: gateways
+        heritage: Tiller
+        istio: ingressgateway
+        release: istio
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+            weight: 2
+          - preference:
+              matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - ppc64le
+            weight: 2
+          - preference:
+              matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - s390x
+            weight: 2
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+                - ppc64le
+                - s390x
+      containers:
+      - args:
+        - proxy
+        - router
+        - --domain
+        - $(POD_NAMESPACE).svc.cluster.local
+        - --proxyLogLevel=warning
+        - --proxyComponentLogLevel=misc:error
+        - --log_output_level=default:info
+        - --drainDuration
+        - 45s
+        - --parentShutdownDuration
+        - 1m0s
+        - --connectTimeout
+        - 10s
+        - --serviceCluster
+        - istio-ingressgateway
+        - --zipkinAddress
+        - zipkin.istio-system:9411
+        - --proxyAdminPort
+        - "15000"
+        - --statusPort
+        - "15020"
+        - --controlPlaneAuthPolicy
+        - MUTUAL_TLS
+        - --discoveryAddress
+        - istio-pilot.istio-system:15011
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: INSTANCE_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        - name: ISTIO_META_POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: ISTIO_META_CONFIG_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: ISTIO_META_ROUTER_MODE
+          value: sni-dnat
+        image: gcr.io/istio-release/proxyv2:master-latest-daily
+        imagePullPolicy: Always
+        name: istio-proxy
+        ports:
+        - containerPort: 15020
+        - containerPort: 80
+        - containerPort: 443
+        - containerPort: 15029
+        - containerPort: 15030
+        - containerPort: 15031
+        - containerPort: 15032
+        - containerPort: 15443
+        - containerPort: 15011
+        - containerPort: 8060
+        - containerPort: 853
+        - containerPort: 15090
+          name: http-envoy-prom
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 30
+          httpGet:
+            path: /healthz/ready
+            port: 15020
+            scheme: HTTP
+          initialDelaySeconds: 1
+          periodSeconds: 2
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        volumeMounts:
+        - mountPath: /etc/certs
+          name: istio-certs
+          readOnly: true
+        - mountPath: /etc/istio/ingressgateway-certs
+          name: ingressgateway-certs
+          readOnly: true
+        - mountPath: /etc/istio/ingressgateway-ca-certs
+          name: ingressgateway-ca-certs
+          readOnly: true
+      serviceAccountName: istio-ingressgateway-service-account
+      volumes:
+      - name: istio-certs
+        secret:
+          optional: true
+          secretName: istio.istio-ingressgateway-service-account
+      - name: ingressgateway-certs
+        secret:
+          optional: true
+          secretName: istio-ingressgateway-certs
+      - name: ingressgateway-ca-certs
+        secret:
+          optional: true
+          secretName: istio-ingressgateway-ca-certs
+
 ---
 
-# Resources for Injector component
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -1071,7 +1263,7 @@ kind: ClusterRoleBinding
 metadata:
   name: istio-sidecar-injector-admin-role-binding-istio-system
   labels:
-    app: sidecar-injector
+    app: istio-ingressgateway
     release: istio
     istio: sidecar-injector
 roleRef:
@@ -1084,6 +1276,7 @@ subjects:
     namespace: istio-system
 ---
 
+# Resources for Injector component
 
 apiVersion: v1
 kind: ConfigMap
@@ -1979,6 +2172,7 @@ data:
                               timeout: 0.000s
 ---
 
+# Resources for Pilot component
 
 apiVersion: v1
 kind: ConfigMap
@@ -2468,6 +2662,7 @@ spec:
         maxRequestsPerConnection: 10000
 ---
 
+# Resources for Policy component
 
 apiVersion: apps/v1
 kind: Deployment
@@ -2692,6 +2887,106 @@ metadata:
 ---
 
 # Resources for Telemetry component
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: istio-policy
+  labels:
+    release: istio
+    app: istio-policy
+rules:
+- apiGroups: ["config.istio.io"] # istio CRD watcher
+  resources: ["*"]
+  verbs: ["create", "get", "list", "watch", "patch"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["configmaps", "endpoints", "pods", "services", "namespaces", "secrets", "replicationcontrollers"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["extensions", "apps"]
+  resources: ["replicasets"]
+  verbs: ["get", "list", "watch"]
+---
+
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-policy-service-account
+  namespace: istio-system
+  labels:
+    app: istio-policy
+    release: istio
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-policy
+  namespace: istio-system
+  labels:
+    app: istio-policy
+    istio: mixer
+    release: istio
+spec:
+  ports:
+  - name: grpc-mixer
+    port: 9091
+  - name: grpc-mixer-mtls
+    port: 15004
+  - name: http-policy-monitoring
+    port: 15014
+  selector:
+    app: istio-policy
+---
+
+
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: istio-policy
+  namespace: istio-system
+  labels:
+    app: istio-policy
+    release: istio
+    istio: mixer
+    istio-mixer-type: policy
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: istio-policy
+      release: istio
+      istio: mixer
+      istio-mixer-type: policy
+---
+
+
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: istio-policy
+  namespace: istio-system
+  labels:
+    app: istio-policy
+    release: istio
+spec:
+  host: istio-policy.istio-system.svc.cluster.local
+  trafficPolicy:
+    portLevelSettings:
+    - port:
+        number: 15004
+      tls:
+        mode: ISTIO_MUTUAL
+    connectionPool:
+      http:
+        http2MaxRequests: 10000
+        maxRequestsPerConnection: 10000
+---
+
 
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
@@ -3211,6 +3506,107 @@ spec:
       connection_security_policy: conditional((context.reporter.kind | "inbound") == "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls", "none"))
       response_flags: context.proxy_error_code | "-"
     monitored_resource_type: '"UNSPECIFIED"'
+---
+
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-mixer-admin-role-binding-istio-system
+  labels:
+    app: istio-telemetry
+    release: istio
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-mixer-istio-system
+subjects:
+  - kind: ServiceAccount
+    name: istio-mixer-service-account
+    namespace: istio-system
+---
+
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: istio-mixer-istio-system
+  labels:
+    app: istio-telemetry
+    release: istio
+rules:
+- apiGroups: ["config.istio.io"] # istio CRD watcher
+  resources: ["*"]
+  verbs: ["create", "get", "list", "watch", "patch"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["configmaps", "endpoints", "pods", "services", "namespaces", "secrets", "replicationcontrollers"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["extensions", "apps"]
+  resources: ["replicasets"]
+  verbs: ["get", "list", "watch"]
+---
+
+
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: istio-telemetry
+    release: istio
+  name: istio-telemetry
+  namespace: istio-system
+spec:
+  maxReplicas: 5
+  metrics:
+  - resource:
+      name: cpu
+      targetAverageUtilization: 80
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: istio-telemetry
+
+---
+
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-mixer-service-account
+  namespace: istio-system
+  labels:
+    app: istio-telemetry
+    release: istio
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-telemetry
+  namespace: istio-system
+  labels:
+    app: istio-telemetry
+    istio: mixer
+    release: istio
+spec:
+  ports:
+  - name: grpc-mixer
+    port: 9091
+  - name: grpc-mixer-mtls
+    port: 15004
+  - name: http-monitoring
+    port: 15014
+  - name: prometheus
+    port: 42422
+  selector:
+    istio: mixer
+    istio-mixer-type: telemetry
 ---
 
 

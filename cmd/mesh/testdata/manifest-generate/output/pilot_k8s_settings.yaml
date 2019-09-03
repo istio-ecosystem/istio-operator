@@ -472,8 +472,17 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: new.path
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
         - name: GODEBUG
           value: gctrace=111
+        - name: PILOT_TRACE_SAMPLING
+          value: "1"
+        - name: CONFIG_NAMESPACE
+          value: istio-config
         - name: NEW_VAR
           value: new_value
         image: docker.io/istio/pilot:1.1.4
