@@ -190,6 +190,7 @@ spec:
     istio: pilot
 
 ---
+<<<<<<< HEAD
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
@@ -210,6 +211,24 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: istio-pilot
+=======
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: istio-pilot
+  namespace: istio-control
+  labels:
+    app: pilot
+    release: istio
+    istio: pilot
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: pilot
+      release: istio
+      istio: pilot
+>>>>>>> revert unnecessary changes.
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -247,6 +266,35 @@ rules:
   resources: ["endpoints", "pods", "services", "namespaces", "nodes", "secrets"]
   verbs: ["get", "list", "watch"]
 ---
+<<<<<<< HEAD
+=======
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: "api-server"
+  namespace: istio-control
+  labels:
+    release: istio
+spec:
+  host: "kubernetes.default.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: "default"
+  namespace: istio-control
+  labels:
+    release: istio
+spec:
+  host: "*.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+---
+>>>>>>> revert unnecessary changes.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -387,6 +435,7 @@ data:
       # Address where istio Pilot service is running
       discoveryAddress: istio-pilot.istio-control:15011
 ---
+<<<<<<< HEAD
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
@@ -400,6 +449,8 @@ spec:
     tls:
       mode: DISABLE
 ---
+=======
+>>>>>>> revert unnecessary changes.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -416,6 +467,39 @@ subjects:
     name: istio-pilot-service-account
     namespace: istio-control
 ---
+<<<<<<< HEAD
+=======
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-pilot-service-account
+  namespace: istio-control
+  labels:
+    app: pilot
+    release: istio
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: pilot
+    release: istio
+  name: istio-pilot
+  namespace: istio-control
+spec:
+  maxReplicas: 5
+  metrics:
+  - resource:
+      name: cpu
+      targetAverageUtilization: 80
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: istio-pilot
+---
+>>>>>>> revert unnecessary changes.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -625,16 +709,6 @@ metadata:
 ---
 
 # Resources for crds component
-
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: istio-control
-  labels:
-    istio-operator-managed: Reconcile
-    istio-injection: disabled
----
-
 
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -1347,5 +1421,15 @@ spec:
     - name: v1beta1
       served: true
       storage: true
+---
+
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: istio-control
+  labels:
+    istio-operator-managed: Reconcile
+    istio-injection: disabled
 ---
 
