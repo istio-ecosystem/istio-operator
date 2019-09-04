@@ -28,7 +28,7 @@ import (
 func profileDiffCmd(rootArgs *rootArgs) *cobra.Command {
 	return &cobra.Command{
 		Use:   "diff <file1.yaml> <file2.yaml>",
-		Short: "Diffs two Istio configuration profiles.",
+		Short: "Diffs two Istio configuration profiles",
 		Long:  "The diff subcommand displays the differences between two Istio configuration profiles.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 2 {

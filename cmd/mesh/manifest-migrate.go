@@ -40,13 +40,13 @@ type manifestMigrateArgs struct {
 
 func addManifestMigrateFlags(cmd *cobra.Command, args *manifestMigrateArgs) {
 	cmd.PersistentFlags().StringVarP(&args.namespace, "namespace", "n", defaultNamespace,
-		" Default namespace for output IstioControlPlane CustomResource.")
+		" Default namespace for output IstioControlPlane CustomResource")
 }
 
 func manifestMigrateCmd(rootArgs *rootArgs, mmArgs *manifestMigrateArgs) *cobra.Command {
 	return &cobra.Command{
 		Use:   "migrate [<filepath>]",
-		Short: "Migrates a file containing Helm values to IstioControlPlane format.",
+		Short: "Migrates a file containing Helm values to IstioControlPlane format",
 		Long:  "The migrate subcommand migrates a configuration from Helm values format to IstioControlPlane format.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 1 {
@@ -100,7 +100,7 @@ func translateFunc(values []byte, l *logger) {
 	}
 	cpYaml, _ := yaml.JSONToYAML([]byte(gotString))
 	if err != nil {
-		l.logAndFatal("error converting json: ", gotString, "\n", err.Error())
+		l.logAndFatal("error converting JSON: ", gotString, "\n", err.Error())
 	}
 	l.print(string(cpYaml) + "\n")
 }
