@@ -37,11 +37,11 @@ type manifestApplyArgs struct {
 	readinessTimeout time.Duration
 	// wait is flag that indicates whether to wait resources ready before exiting.
 	wait bool
+	// yes means don't ask for confirmation (asking for confirmation not implemented)
+	yes bool
 	// set is a string with element format "path=value" where path is an IstioControlPlane path and the value is a
 	// value to set the node at that path to.
 	set []string
-	// yes means don't ask for confirmation (asking for confirmation not implemented)
-	yes bool
 }
 
 func addManifestApplyFlags(cmd *cobra.Command, args *manifestApplyArgs) {
