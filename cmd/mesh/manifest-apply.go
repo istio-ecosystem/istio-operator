@@ -16,6 +16,7 @@ package mesh
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -65,8 +66,10 @@ func manifestApplyCmd(rootArgs *rootArgs, maArgs *manifestApplyArgs) *cobra.Comm
 		Run: func(cmd *cobra.Command, args []string) {
 			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
 			if !maArgs.yes && maArgs.kubeConfigPath == "" && maArgs.context == "" {
-				cmd.Print("Supply --kubeconfig, --context, or --yes to apply manifest to cluster\n")
-				os.Exit(1)
+				if !confirm("Are you sure?", cmd.OutOrStdout()) {
+					cmd.Print("Cancelled.\n")
+					os.Exit(1)
+				}
 			}
 			manifestApply(rootArgs, maArgs, l)
 		}}
@@ -115,4 +118,20 @@ func manifestApply(args *rootArgs, maArgs *manifestApplyArgs, l *logger) {
 			l.logAndPrint("Manifest:\n\n", out[cn].Manifest, "\n")
 		}
 	}
+}
+
+func confirm(msg string, writer io.Writer) bool {
+	fmt.Fprintf(writer, "%s ", msg)
+
+	var response string
+	_, err := fmt.Scanln(&response)
+	if err != nil {
+		return false
+	}
+	response = strings.ToUpper(response)
+	if response == "Y" || response == "YES" {
+		return true
+	}
+
+	return false
 }
