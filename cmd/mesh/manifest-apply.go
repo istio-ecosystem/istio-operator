@@ -40,12 +40,15 @@ type manifestApplyArgs struct {
 	// set is a string with element format "path=value" where path is an IstioControlPlane path and the value is a
 	// value to set the node at that path to.
 	set []string
+	// yes means don't ask for confirmation (asking for confirmation not implemented)
+	yes bool
 }
 
 func addManifestApplyFlags(cmd *cobra.Command, args *manifestApplyArgs) {
 	cmd.PersistentFlags().StringVarP(&args.inFilename, "filename", "f", "", filenameFlagHelpStr)
 	cmd.PersistentFlags().StringVarP(&args.kubeConfigPath, "kubeconfig", "c", "", "Path to kube config.")
 	cmd.PersistentFlags().StringVar(&args.context, "context", "", "The name of the kubeconfig context to use")
+	cmd.PersistentFlags().BoolVar(&args.yes, "yes", false, "Do not ask for confirmation")
 	cmd.PersistentFlags().DurationVar(&args.readinessTimeout, "readiness-timeout", 300*time.Second, "Maximum seconds to wait for all Istio resources to be ready."+
 		" The --wait flag must be set for this flag to apply.")
 	cmd.PersistentFlags().BoolVarP(&args.wait, "wait", "w", false, "Wait, if set will wait until all Pods, Services, and minimum number of Pods "+
@@ -61,6 +64,10 @@ func manifestApplyCmd(rootArgs *rootArgs, maArgs *manifestApplyArgs) *cobra.Comm
 		Args:  cobra.ExactArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
 			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
+			if !maArgs.yes && maArgs.kubeConfigPath == "" && maArgs.context == "" {
+				cmd.Print("Supply --kubeconfig, --context, or --yes to apply manifest to cluster\n")
+				os.Exit(1)
+			}
 			manifestApply(rootArgs, maArgs, l)
 		}}
 }

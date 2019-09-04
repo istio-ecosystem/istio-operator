@@ -58,10 +58,15 @@ func addManifestDiffFlags(cmd *cobra.Command, diffArgs *manifestDiffArgs) {
 
 func manifestDiffCmd(rootArgs *rootArgs, diffArgs *manifestDiffArgs) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "diff",
+		Use:   "diff <file|dir> <file|dir>",
 		Short: "Compare manifests and generate diff.",
 		Long:  "The diff subcommand compares manifests from two files or directories.",
-		Args:  cobra.ExactArgs(2),
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) != 2 {
+				return fmt.Errorf("diff requires two files or directories")
+			}
+			return nil
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			if diffArgs.compareDir {
 				compareManifestsFromDirs(rootArgs, args[0], args[1], diffArgs.selectResources, diffArgs.ignoreResources)
@@ -78,11 +83,13 @@ func compareManifestsFromFiles(rootArgs *rootArgs, args []string, selectResource
 
 	a, err := ioutil.ReadFile(args[0])
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "Could not read %q: %v\n", args[0], err.Error())
 		log.Error(err.Error())
 		os.Exit(1)
 	}
 	b, err := ioutil.ReadFile(args[1])
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "Could not read %q: %v\n", args[1], err.Error())
 		log.Error(err.Error())
 		os.Exit(1)
 	}
