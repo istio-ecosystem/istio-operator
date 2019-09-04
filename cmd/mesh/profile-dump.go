@@ -51,10 +51,15 @@ func addProfileDumpFlags(cmd *cobra.Command, args *profileDumpArgs) {
 
 func profileDumpCmd(rootArgs *rootArgs, pdArgs *profileDumpArgs) *cobra.Command {
 	return &cobra.Command{
-		Use:   "dump",
+		Use:   "dump [<profile>]",
 		Short: "Dumps an Istio configuration profile.",
 		Long:  "The dump subcommand dumps the values in an Istio configuration profile.",
-		Args:  cobra.MaximumNArgs(1),
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) > 1 {
+				return fmt.Errorf("too many positional arguments")
+			}
+			return nil
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
 			profileDump(args, rootArgs, pdArgs, l)

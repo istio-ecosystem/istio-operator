@@ -16,6 +16,7 @@ package mesh
 
 import (
 	"encoding/json"
+	"fmt"
 	"path/filepath"
 
 	"github.com/ghodss/yaml"
@@ -44,9 +45,15 @@ func addManifestMigrateFlags(cmd *cobra.Command, args *manifestMigrateArgs) {
 
 func manifestMigrateCmd(rootArgs *rootArgs, mmArgs *manifestMigrateArgs) *cobra.Command {
 	return &cobra.Command{
-		Use:   "migrate",
+		Use:   "migrate [<filepath>]",
 		Short: "Migrates a file containing Helm values to IstioControlPlane format.",
 		Long:  "The migrate subcommand migrates a configuration from Helm values format to IstioControlPlane format.",
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) > 1 {
+				return fmt.Errorf("migrate accepts optional single filepath")
+			}
+			return nil
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
 			if len(args) == 0 {
@@ -102,7 +109,7 @@ func translateFunc(values []byte, l *logger) {
 func migrateFromClusterConfig(rootArgs *rootArgs, mmArgs *manifestMigrateArgs, l *logger) {
 	initLogsOrExit(rootArgs)
 
-	l.logAndPrint("translating in cluster specs")
+	l.logAndPrint("translating in cluster specs\n")
 
 	c := kubectlcmd.New()
 	output, stderr, err := c.GetConfig("istio-sidecar-injector", mmArgs.namespace, "jsonpath='{.data.values}'")
