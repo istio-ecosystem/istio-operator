@@ -190,22 +190,26 @@ spec:
     istio: pilot
 
 ---
-apiVersion: policy/v1beta1
-kind: PodDisruptionBudget
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
 metadata:
-  name: istio-pilot
-  namespace: istio-control
   labels:
     app: pilot
     release: istio
-    istio: pilot
+  name: istio-pilot
+  namespace: istio-control
 spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      app: pilot
-      release: istio
-      istio: pilot
+  maxReplicas: 5
+  metrics:
+  - resource:
+      name: cpu
+      targetAverageUtilization: 80
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: istio-pilot
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -219,9 +223,6 @@ rules:
   resources: ["*"]
   verbs: ["*"]
 - apiGroups: ["rbac.istio.io"]
-  resources: ["*"]
-  verbs: ["get", "watch", "list"]
-- apiGroups: ["security.istio.io"]
   resources: ["*"]
   verbs: ["get", "watch", "list"]
 - apiGroups: ["networking.istio.io"]
@@ -243,31 +244,21 @@ rules:
   resources: ["endpoints", "pods", "services", "namespaces", "nodes", "secrets"]
   verbs: ["get", "list", "watch"]
 ---
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
 metadata:
-  name: "api-server"
-  namespace: istio-control
+  name: istio-pilot-istio-control
   labels:
+    app: pilot
     release: istio
-spec:
-  host: "kubernetes.default.svc.cluster.local"
-  trafficPolicy:
-    tls:
-      mode: DISABLE
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: "default"
-  namespace: istio-control
-  labels:
-    release: istio
-spec:
-  host: "*.local"
-  trafficPolicy:
-    tls:
-      mode: DISABLE
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-pilot-istio-control
+subjects:
+  - kind: ServiceAccount
+    name: istio-pilot-service-account
+    namespace: istio-control
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -409,51 +400,48 @@ data:
       # Address where istio Pilot service is running
       discoveryAddress: istio-pilot.istio-control:15011
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
 metadata:
-  name: istio-pilot-istio-control
-  labels:
-    app: pilot
-    release: istio
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: istio-pilot-istio-control
-subjects:
-  - kind: ServiceAccount
-    name: istio-pilot-service-account
-    namespace: istio-control
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: istio-pilot-service-account
+  name: "api-server"
   namespace: istio-control
   labels:
-    app: pilot
     release: istio
+spec:
+  host: "kubernetes.default.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE
 ---
-apiVersion: autoscaling/v2beta1
-kind: HorizontalPodAutoscaler
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
 metadata:
+  name: "default"
+  namespace: istio-control
   labels:
-    app: pilot
     release: istio
+spec:
+  host: "*.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
   name: istio-pilot
   namespace: istio-control
+  labels:
+    app: pilot
+    release: istio
+    istio: pilot
 spec:
-  maxReplicas: 5
-  metrics:
-  - resource:
-      name: cpu
-      targetAverageUtilization: 80
-    type: Resource
-  minReplicas: 1
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: istio-pilot
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: pilot
+      release: istio
+      istio: pilot
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -622,6 +610,15 @@ data:
                             route:
                               cluster: out.galley.15019
                               timeout: 0.000s
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-pilot-service-account
+  namespace: istio-control
+  labels:
+    app: pilot
+    release: istio
 ---
 
 # Resources for crds component
@@ -1309,32 +1306,6 @@ spec:
   scope: Namespaced
   versions:
     - name: v1alpha1
-      served: true
-      storage: true
----
-
-
-kind: CustomResourceDefinition
-apiVersion: apiextensions.k8s.io/v1beta1
-metadata:
-  name: authorizationpolicies.security.istio.io
-  labels:
-    app: istio-pilot
-    istio: security
-    heritage: Tiller
-    release: istio
-spec:
-  group: security.istio.io
-  names:
-    kind: AuthorizationPolicy
-    plural: authorizationpolicies
-    singular: authorizationpolicy
-    categories:
-      - istio-io
-      - security-istio-io
-  scope: Namespaced
-  versions:
-    - name: v1beta1
       served: true
       storage: true
 ---
