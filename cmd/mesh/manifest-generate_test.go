@@ -141,12 +141,19 @@ func runTestGroup(t *testing.T, tests testGroup) {
 			if tt.diffSelect != "" {
 				diffSelect = tt.diffSelect
 			}
-			diff, err := object.ManifestDiffWithSelectAndIgnore(got, want, diffSelect, tt.diffIgnore)
+			diff, err := object.ManifestDiffWithSelectAndIgnore(got, want, diffSelect, tt.diffIgnore, false)
 			if err != nil {
 				t.Fatal(err)
 			}
 			if diff != "" {
 				t.Errorf("%s: got:\n%s\nwant:\n%s\n(-got, +want)\n%s\n", tt.desc, "", "", diff)
+			}
+			diffVerbose, err := object.ManifestDiffWithSelectAndIgnore(got, want, diffSelect, tt.diffIgnore, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if diff != "" {
+				t.Errorf("%s: got:\n%s\nwant:\n%s\n(-got, +want)\n%s\n", tt.desc, "", "", diffVerbose)
 			}
 
 		})

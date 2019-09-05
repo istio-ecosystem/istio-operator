@@ -87,7 +87,8 @@ func compareManifestsFromFiles(rootArgs *rootArgs, args []string, selectResource
 		os.Exit(1)
 	}
 
-	diff, err := object.ManifestDiffWithSelectAndIgnore(string(a), string(b), selectResources, ignoreResources)
+	diff, err := object.ManifestDiffWithSelectAndIgnore(string(a), string(b), selectResources,
+		ignoreResources, rootArgs.verbose)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
@@ -119,7 +120,8 @@ func compareManifestsFromDirs(rootArgs *rootArgs, dirName1, dirName2, selectReso
 		os.Exit(1)
 	}
 
-	diff, err := object.ManifestDiffWithSelectAndIgnore(mf1, mf2, selectResources, ignoreResources)
+	diff, err := object.ManifestDiffWithSelectAndIgnore(mf1, mf2, selectResources,
+		ignoreResources, rootArgs.verbose)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
