@@ -396,48 +396,11 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 		if err != nil {
 			return "", fmt.Errorf("could not marshal to YAML in OverlayK8sSettings: %s", err)
 		}
-
-		var dstNodeYaml, k8sSettingName string
-		if len(path) != 0 {
-			k8sSettingName = path[len(path)-1]
-		}
-
-		switch k8sSettingName {
-		case "env":
-			base := make(map[string]interface{})
-			if err := yaml.Unmarshal(baseYAML, &base); err != nil {
-				return "", fmt.Errorf("error: %s to unmarshal baseYAML:\n%s", err, baseYAML)
-			}
-
-			basePc, isBasePcFound, err := tpath.GetPathContext(base, path[1:])
-			if err != nil {
-				return "", err
-			}
-
-			if !isBasePcFound {
-				log.Infof("path %s not found in %T.", path[1:].String(), oo)
-				dstNodeYaml = string(overlayYAML)
-			} else {
-				baseNodeYaml, err := yaml.Marshal(basePc.Node)
-				if err != nil {
-					return "", err
-				}
-
-				dstNodeYaml, err = mergeEnv(string(baseNodeYaml), string(overlayYAML))
-				if err != nil {
-					return "", fmt.Errorf("eror: %s to merge overlayYAML:\n%s to baseYAML:\n%s", err, string(overlayYAML), string(baseNodeYaml))
-				}
-			}
-		default:
-			dstNodeYaml = string(overlayYAML)
-		}
-
-		mergedYAML, err := overlayK8s(baseYAML, []byte(dstNodeYaml), path[1:])
+		mergedYAML, err := overlayK8s(baseYAML, overlayYAML, path[1:])
 		if err != nil {
 			return "", err
 		}
-
-		scope.Debugf("baseYAML:\n%s\n, dstNodeYaml:\n%s\n, mergedYAML:\n%s\n", string(baseYAML), dstNodeYaml, string(mergedYAML))
+		scope.Debugf("baseYAML:\n%s\n, overlayYAML:\n%s\n, mergedYAML:\n%s\n", string(baseYAML), string(overlayYAML), string(mergedYAML))
 		mergedObj, err := object.ParseYAMLToK8sObject(mergedYAML)
 		if err != nil {
 			return "", fmt.Errorf("could not ParseYAMLToK8sObject in OverlayK8sSettings: %s", err)
@@ -450,27 +413,27 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 }
 
 // mergeEnv apply deep merge overlay env settings on the base env.
-func mergeEnv(baseEnv, overlayEnv string) (string, error) {
-	if overlayEnv == "" {
+func mergeEnv(baseEnv, overlayEnv []byte) ([]byte, error) {
+	if overlayEnv == nil {
 		return baseEnv, nil
 	}
-	baseEnvJSON, err := yaml.YAMLToJSON([]byte(baseEnv))
+	baseEnvJSON, err := yaml.YAMLToJSON(baseEnv)
 	if err != nil {
-		return "", fmt.Errorf("yamlToJSON error in base env: %s\n%s", err, baseEnv)
+		return nil, fmt.Errorf("yamlToJSON error in base env: %s\n%s", err, baseEnv)
 	}
-	overlayEnvJSON, err := yaml.YAMLToJSON([]byte(overlayEnv))
+	overlayEnvJSON, err := yaml.YAMLToJSON(overlayEnv)
 	if err != nil {
-		return "", fmt.Errorf("yamlToJSON error in overlay env: %s\n%s", err, overlayEnv)
+		return nil, fmt.Errorf("yamlToJSON error in overlay env: %s\n%s", err, overlayEnv)
 	}
 
 	var baseEnvObj, overlayEnvObj []*v1.EnvVar
 	err = json.Unmarshal(baseEnvJSON, &baseEnvObj)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	err = json.Unmarshal(overlayEnvJSON, &overlayEnvObj)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	dstEnvObj := make([]*v1.EnvVar, len(baseEnvObj))
@@ -491,27 +454,48 @@ func mergeEnv(baseEnv, overlayEnv string) (string, error) {
 		}
 	}
 
-	b, err := json.Marshal(dstEnvObj)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
+	return json.Marshal(dstEnvObj)
 }
 
 // overlayK8s overlays overlayYAML over baseYAML at the given path in baseYAML.
 func overlayK8s(baseYAML, overlayYAML []byte, path util.Path) ([]byte, error) {
-	base, overlayMap := make(map[string]interface{}), make(map[string]interface{})
-	var overlay interface{} = overlayMap
+	var dstNodeYaml []byte
+	base := make(map[string]interface{})
+	base, dstNodeMap := make(map[string]interface{}), make(map[string]interface{})
+	var dstNode interface{} = dstNodeMap
+
 	if err := yaml.Unmarshal(baseYAML, &base); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal in overlayK8s: %s for baseYAML:\n%s", err, baseYAML)
+		return nil, fmt.Errorf("error: %s to unmarshal baseYAML:\n%s", err, baseYAML)
 	}
-	if err := yaml.Unmarshal(overlayYAML, &overlayMap); err != nil {
+
+	basePc, isBasePcFound, err := tpath.GetPathContext(base, path)
+	if !isBasePcFound || err != nil {
+		log.Infof("path %s not found in base object.", path.String())
+		dstNodeYaml = overlayYAML
+	} else {
+		baseNodeYaml, err := yaml.Marshal(basePc.Node)
+		if err != nil {
+			return nil, err
+		}
+
+		k8sSettingName := path[len(path)-1]
+		switch k8sSettingName {
+		case "env":
+			dstNodeYaml, err = mergeEnv(baseNodeYaml, overlayYAML)
+			if err != nil {
+				return nil, fmt.Errorf("eror: %s to merge overlayYAML:\n%s to baseYAML:\n%s", err, string(overlayYAML), string(baseNodeYaml))
+			}
+		default:
+			dstNodeYaml = overlayYAML
+		}
+	}
+	if err := yaml.Unmarshal(dstNodeYaml, &dstNodeMap); err != nil {
 		// May be a scalar type, try to unmarshal into interface instead.
-		if err := yaml.Unmarshal(overlayYAML, &overlay); err != nil {
+		if err := yaml.Unmarshal(dstNodeYaml, &dstNode); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal in overlayK8s: %s for overlayYAML:\n%s", err, overlayYAML)
 		}
 	}
-	if err := tpath.WriteNode(base, path, overlay); err != nil {
+	if err := tpath.WriteNode(base, path, dstNode); err != nil {
 		return nil, err
 	}
 	return yaml.Marshal(base)
