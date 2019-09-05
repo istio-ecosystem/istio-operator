@@ -472,7 +472,7 @@ func manifestDiff(aom, bom map[string]*K8sObject, im map[string]string) (string,
 	for bk := range bom {
 		ao := aom[bk]
 		if ao == nil {
-			out[bk] = fmt.Sprint("\n\nObject " + bk + " is missing in B:\n\n")
+			out[bk] = fmt.Sprint("\n\nObject " + bk + " is missing in A:\n\n")
 			continue
 		}
 	}
