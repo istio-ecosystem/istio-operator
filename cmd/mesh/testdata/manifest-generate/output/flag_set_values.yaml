@@ -15,7 +15,7 @@ rules:
   resources: ["secrets"]
   verbs: ["create", "get", "watch", "list", "update", "delete"]
 - apiGroups: [""]
-  resources: ["serviceaccounts", "services"]
+  resources: ["serviceaccounts", "services", "namespaces"]
   verbs: ["get", "watch", "list"]
 - apiGroups: ["authentication.k8s.io"]
   resources: ["tokenreviews"]
@@ -1153,7 +1153,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config-volume: 230a8bd8896dcb74159c9c1666b8eda58ea98e76c1bf6181ca2264c7f70ef641
+        checksum/config-volume: f8325cc50ac11b03915f0d628e61ce052e6f28ea33ebc81e049e8470b380091d
         sidecar.istio.io/inject: "false"
       labels:
         app: sidecarInjectorWebhook
@@ -1386,7 +1386,7 @@ data:
         - "-x"
         - "{{ annotation .ObjectMeta `traffic.sidecar.istio.io/excludeOutboundIPRanges` .Values.global.proxy.excludeIPRanges }}"
         - "-b"
-        - "{{ annotation .ObjectMeta `traffic.sidecar.istio.io/includeInboundPorts` (includeInboundPorts .Spec.Containers) }}"
+        - "{{ annotation .ObjectMeta `traffic.sidecar.istio.io/includeInboundPorts` `*` }}"
         - "-d"
         - "{{ excludeInboundPort (annotation .ObjectMeta `status.sidecar.istio.io/port` .Values.global.proxy.statusPort) (annotation .ObjectMeta `traffic.sidecar.istio.io/excludeInboundPorts` .Values.global.proxy.excludeInboundPorts) }}"
         {{ if or (isset .ObjectMeta.Annotations `traffic.sidecar.istio.io/excludeOutboundPorts`) (ne (valueOrDefault .Values.global.proxy.excludeOutboundPorts "") "") -}}
