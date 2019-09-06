@@ -2543,6 +2543,11 @@ spec:
         - --useTemplateCRDs=false
         - --trace_zipkin_url=http://zipkin.istio-system:9411/api/v1/spans
         env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
         - name: GODEBUG
           value: gctrace=1
         image: gcr.io/istio-release/mixer:master-latest-daily
@@ -4012,6 +4017,11 @@ spec:
         - --useTemplateCRDs=false
         - --trace_zipkin_url=http://zipkin.istio-system:9411/api/v1/spans
         env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
         - name: GODEBUG
           value: gctrace=1
         - name: GOMAXPROCS
