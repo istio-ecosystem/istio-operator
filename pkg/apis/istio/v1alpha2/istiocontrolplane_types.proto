@@ -21,6 +21,7 @@ syntax = "proto3";
 package v1alpha2;
 
 // TODO: for some reason the below fails proto compilation in this repo.
+// https://github.com/istio/istio/issues/16899
 // package istio.operator.v1alpha2;
 // option go_package="istio.io/operator/pkg/apis/istio/v1alpha2";
 
