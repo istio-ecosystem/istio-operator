@@ -547,7 +547,7 @@ message DeploymentStrategy {
 // Mirrors k8s.io.api.apps.v1.RollingUpdateDeployment for unmarshaling.
 message RollingUpdateDeployment {
     TypeIntOrStringForPB maxUnavailable = 1;
-	TypeIntOrStringForPB maxSurge = 2;
+    TypeIntOrStringForPB maxSurge = 2;
 }
 
 message ObjectMeta {
