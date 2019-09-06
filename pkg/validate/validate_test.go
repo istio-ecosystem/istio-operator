@@ -15,7 +15,6 @@
 package validate
 
 import (
-	"strings"
 	"testing"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
@@ -157,8 +156,4 @@ values:
 			}
 		})
 	}
-}
-
-func stripNL(s string) string {
-	return strings.Trim(s, "\n")
 }
