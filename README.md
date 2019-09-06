@@ -202,7 +202,7 @@ You can mix and match these approaches. For example, you can use a compiled-in c
 local file system.
 
 #### Migration from values.yaml
-The following command takes helm values.yaml files and output the new IstioControlPlaneSpec:
+The following command takes Helm `values.yaml` files and outputs the new `IstioControlPlaneSpec`:
 ```bash
 mesh manifest migrate /usr/home/bob/go/src/istio.io/installer/istio-control/istio-discovery/values.yaml
 ```
