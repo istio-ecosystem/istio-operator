@@ -43,6 +43,12 @@ func TestManifestGenerateFlags(t *testing.T) {
 			diffIgnore: "ConfigMap:*:istio",
 			flags:      "-s values.global.proxy.image=myproxy",
 		},
+		{
+			desc:       "flag_force",
+			diffIgnore: "ConfigMap:*:istio",
+			// FIXME: this test should fail without --force flag.
+			flags: "",
+		},
 		// TODO: test output flag
 	})
 }

@@ -78,12 +78,12 @@ func ManifestCmd() *cobra.Command {
 	return mc
 }
 
-func genManifests(inFilename string, setOverlayYAML string) (name.ManifestMap, error) {
-	mergedYAML, err := genProfile(false, inFilename, "", setOverlayYAML, "")
+func genManifests(l *logger, inFilename string, setOverlayYAML string, force bool) (name.ManifestMap, error) {
+	mergedYAML, err := genProfile(l, false, inFilename, "", setOverlayYAML, "", force)
 	if err != nil {
 		return nil, err
 	}
-	mergedICPS, err := unmarshalAndValidateICPS(mergedYAML)
+	mergedICPS, err := unmarshalAndValidateICPS(l, mergedYAML, force)
 	if err != nil {
 		return nil, err
 	}

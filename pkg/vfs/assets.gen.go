@@ -31952,6 +31952,7 @@ spec:
         logLevel: warning
         componentLogLevel: "misc:error"
         dnsRefreshRate: 300s
+        protocolDetectionTimeout: 1s
         privileged: false
         enableCoreDump: false
         statusPort: 15020
