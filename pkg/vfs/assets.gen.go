@@ -31764,6 +31764,11 @@ spec:
                   name: cpu
                   targetAverageUtilization: 80
           env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
             - name: GODEBUG
               value: "gctrace=1"
           strategy:
@@ -31779,6 +31784,11 @@ spec:
         enabled: true
         k8s:
           env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
           - name: GODEBUG
             value: "gctrace=1"
           - name: GOMAXPROCS
