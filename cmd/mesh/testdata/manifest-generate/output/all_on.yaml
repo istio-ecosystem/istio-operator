@@ -1,6 +1,6 @@
 # Resources for Citadel component
 
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: istio-citadel-istio-system
@@ -15,7 +15,7 @@ rules:
   resources: ["secrets"]
   verbs: ["create", "get", "watch", "list", "update", "delete"]
 - apiGroups: [""]
-  resources: ["serviceaccounts", "services"]
+  resources: ["serviceaccounts", "services", "namespaces"]
   verbs: ["get", "watch", "list"]
 - apiGroups: ["authentication.k8s.io"]
   resources: ["tokenreviews"]
@@ -23,7 +23,7 @@ rules:
 ---
 
 
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: istio-citadel-istio-system
@@ -104,13 +104,13 @@ spec:
         - --append-dns-names=true
         - --grpc-port=8060
         - --citadel-storage-namespace=istio-system
-        - --custom-dns-names=istio-galley-service-account.istio-config:istio-galley.istio-config.svc,istio-galley-service-account.istio-control:istio-galley.istio-control.svc,istio-galley-service-account.istio-control-master:istio-galley.istio-control-master.svc,istio-galley-service-account.istio-master:istio-galley.istio-master.svc,istio-galley-service-account.istio-pilot11:istio-galley.istio-pilot11.svc,istio-pilot-service-account.istio-control:istio-pilot-service-account.istio-control,istio-pilot-service-account.istio-pilot11:istio-pilot-service-account.istio-system,istio-sidecar-injector-service-account.istio-control:istio-sidecar-injector.istio-control.svc,istio-sidecar-injector-service-account.istio-control-master:istio-sidecar-injector.istio-control-master.svc,istio-sidecar-injector-service-account.istio-master:istio-sidecar-injector.istio-master.svc,istio-sidecar-injector-service-account.istio-pilot11:istio-sidecar-injector.istio-pilot11.svc,istio-sidecar-injector-service-account.istio-remote:istio-sidecar-injector.istio-remote.svc,
+        - --custom-dns-names=istio-galley-service-account.istio-config:istio-galley.istio-config.svc,istio-galley-service-account.istio-control:istio-galley.istio-control.svc,istio-galley-service-account.istio-control-master:istio-galley.istio-control-master.svc,istio-galley-service-account.istio-master:istio-galley.istio-master.svc,istio-galley-service-account.istio-pilot11:istio-galley.istio-pilot11.svc,istio-pilot-service-account.istio-control:istio-pilot.istio-control,istio-pilot-service-account.istio-pilot11:istio-pilot.istio-system,istio-sidecar-injector-service-account.istio-control:istio-sidecar-injector.istio-control.svc,istio-sidecar-injector-service-account.istio-control-master:istio-sidecar-injector.istio-control-master.svc,istio-sidecar-injector-service-account.istio-master:istio-sidecar-injector.istio-master.svc,istio-sidecar-injector-service-account.istio-pilot11:istio-sidecar-injector.istio-pilot11.svc,istio-sidecar-injector-service-account.istio-remote:istio-sidecar-injector.istio-remote.svc,
         - --self-signed-ca=true
         - --trust-domain=cluster.local
         env:
         - name: CITADEL_ENABLE_NAMESPACES_BY_DEFAULT
           value: "true"
-        image: gcr.io/istio-release/citadel:release-1.3-latest-daily
+        image: gcr.io/istio-release/citadel:master-latest-daily
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -174,7 +174,6 @@ kind: ServiceAccount
 metadata:
   name: istio-citadel-service-account
   namespace: istio-system
-
   labels:
     release: istio
 ---
@@ -201,6 +200,9 @@ rules:
   resources: ["*"]
   verbs: ["get", "list", "watch"]
 - apiGroups: ["rbac.istio.io"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["security.istio.io"]
   resources: ["*"]
   verbs: ["get", "list", "watch"]
 - apiGroups: ["extensions","apps"]
@@ -398,6 +400,15 @@ data:
             - CREATE
             - UPDATE
             apiGroups:
+            - security.istio.io
+            apiVersions:
+            - "*"
+            resources:
+            - "*"
+          - operations:
+            - CREATE
+            - UPDATE
+            apiGroups:
             - authentication.istio.io
             apiVersions:
             - "*"
@@ -553,7 +564,7 @@ spec:
         - --monitoringPort=15014
         - --validation-port=9443
         - --log_output_level=default:info
-        image: gcr.io/istio-release/galley:release-1.3-latest-daily
+        image: gcr.io/istio-release/galley:master-latest-daily
         imagePullPolicy: Always
         livenessProbe:
           exec:
@@ -616,7 +627,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: status.podIP
-        image: gcr.io/istio-release/proxyv2:release-1.3-latest-daily
+        image: gcr.io/istio-release/proxyv2:master-latest-daily
         imagePullPolicy: Always
         name: istio-proxy
         ports:
@@ -858,7 +869,7 @@ spec:
               fieldPath: metadata.namespace
         - name: ISTIO_META_ROUTER_MODE
           value: sni-dnat
-        image: gcr.io/istio-release/proxyv2:release-1.3-latest-daily
+        image: gcr.io/istio-release/proxyv2:master-latest-daily
         imagePullPolicy: Always
         name: istio-proxy
         ports:
@@ -1153,7 +1164,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config-volume: 230a8bd8896dcb74159c9c1666b8eda58ea98e76c1bf6181ca2264c7f70ef641
+        checksum/config-volume: f8325cc50ac11b03915f0d628e61ce052e6f28ea33ebc81e049e8470b380091d
         sidecar.istio.io/inject: "false"
       labels:
         app: sidecarInjectorWebhook
@@ -1207,7 +1218,7 @@ spec:
         - --healthCheckFile=/health
         - --webhookConfigName=istio-sidecar-injector
         - --log_output_level=debug
-        image: gcr.io/istio-release/sidecar_injector:release-1.3-latest-daily
+        image: gcr.io/istio-release/sidecar_injector:master-latest-daily
         imagePullPolicy: Always
         livenessProbe:
           exec:
@@ -1386,7 +1397,7 @@ data:
         - "-x"
         - "{{ annotation .ObjectMeta `traffic.sidecar.istio.io/excludeOutboundIPRanges` .Values.global.proxy.excludeIPRanges }}"
         - "-b"
-        - "{{ annotation .ObjectMeta `traffic.sidecar.istio.io/includeInboundPorts` (includeInboundPorts .Spec.Containers) }}"
+        - "{{ annotation .ObjectMeta `traffic.sidecar.istio.io/includeInboundPorts` `*` }}"
         - "-d"
         - "{{ excludeInboundPort (annotation .ObjectMeta `status.sidecar.istio.io/port` .Values.global.proxy.statusPort) (annotation .ObjectMeta `traffic.sidecar.istio.io/excludeInboundPorts` .Values.global.proxy.excludeInboundPorts) }}"
         {{ if or (isset .ObjectMeta.Annotations `traffic.sidecar.istio.io/excludeOutboundPorts`) (ne (valueOrDefault .Values.global.proxy.excludeOutboundPorts "") "") -}}
@@ -1755,6 +1766,9 @@ rules:
   resources: ["*"]
   verbs: ["*"]
 - apiGroups: ["rbac.istio.io"]
+  resources: ["*"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["security.istio.io"]
   resources: ["*"]
   verbs: ["get", "watch", "list"]
 - apiGroups: ["networking.istio.io"]
@@ -2202,7 +2216,7 @@ spec:
           value: "1"
         - name: CONFIG_NAMESPACE
           value: istio-config
-        image: gcr.io/istio-release/pilot:release-1.3-latest-daily
+        image: gcr.io/istio-release/pilot:master-latest-daily
         imagePullPolicy: Always
         name: discovery
         ports:
@@ -2248,7 +2262,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: status.podIP
-        image: gcr.io/istio-release/proxyv2:release-1.3-latest-daily
+        image: gcr.io/istio-release/proxyv2:master-latest-daily
         imagePullPolicy: Always
         name: istio-proxy
         ports:
@@ -2529,9 +2543,14 @@ spec:
         - --useTemplateCRDs=false
         - --trace_zipkin_url=http://zipkin.istio-system:9411/api/v1/spans
         env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
         - name: GODEBUG
           value: gctrace=1
-        image: gcr.io/istio-release/mixer:release-1.3-latest-daily
+        image: gcr.io/istio-release/mixer:master-latest-daily
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -2541,6 +2560,7 @@ spec:
           periodSeconds: 5
         name: mixer
         ports:
+        - containerPort: 9091
         - containerPort: 15014
         - containerPort: 42422
         resources:
@@ -2581,11 +2601,10 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: status.podIP
-        image: gcr.io/istio-release/proxyv2:release-1.3-latest-daily
+        image: gcr.io/istio-release/proxyv2:master-latest-daily
         imagePullPolicy: Always
         name: istio-proxy
         ports:
-        - containerPort: 9091
         - containerPort: 15004
         - containerPort: 15090
           name: http-envoy-prom
@@ -3998,11 +4017,16 @@ spec:
         - --useTemplateCRDs=false
         - --trace_zipkin_url=http://zipkin.istio-system:9411/api/v1/spans
         env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
         - name: GODEBUG
           value: gctrace=1
         - name: GOMAXPROCS
           value: "6"
-        image: gcr.io/istio-release/mixer:release-1.3-latest-daily
+        image: gcr.io/istio-release/mixer:master-latest-daily
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -4012,6 +4036,7 @@ spec:
           periodSeconds: 5
         name: mixer
         ports:
+        - containerPort: 9091
         - containerPort: 15014
         - containerPort: 42422
         resources:
@@ -4056,11 +4081,10 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: status.podIP
-        image: gcr.io/istio-release/proxyv2:release-1.3-latest-daily
+        image: gcr.io/istio-release/proxyv2:master-latest-daily
         imagePullPolicy: Always
         name: istio-proxy
         ports:
-        - containerPort: 9091
         - containerPort: 15004
         - containerPort: 15090
           name: http-envoy-prom
@@ -4840,6 +4864,32 @@ spec:
   scope: Namespaced
   versions:
     - name: v1alpha1
+      served: true
+      storage: true
+---
+
+
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: authorizationpolicies.security.istio.io
+  labels:
+    app: istio-pilot
+    istio: security
+    heritage: Tiller
+    release: istio
+spec:
+  group: security.istio.io
+  names:
+    kind: AuthorizationPolicy
+    plural: authorizationpolicies
+    singular: authorizationpolicy
+    categories:
+      - istio-io
+      - security-istio-io
+  scope: Namespaced
+  versions:
+    - name: v1beta1
       served: true
       storage: true
 ---
