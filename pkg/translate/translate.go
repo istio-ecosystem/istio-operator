@@ -171,8 +171,8 @@ var (
 					"[{{.ResourceType}}:{{.ResourceName}}].spec.strategy",
 					nil,
 				},
-				"{{.FeatureName}}.Components.{{.ComponentName}}.K8S.Toleration": {
-					"[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.toleration",
+				"{{.FeatureName}}.Components.{{.ComponentName}}.K8S.Tolerations": {
+					"[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.tolerations",
 					nil,
 				},
 			},
