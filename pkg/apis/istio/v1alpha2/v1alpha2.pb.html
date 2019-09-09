@@ -1,9 +1,156 @@
 ---
-title: v1alpha2
+title: Operator Installation
+description: Configuration for Istio control plane installation through the Operator.
+location: https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb.html
 layout: protoc-gen-docs
 generator: protoc-gen-docs
-number_of_entries: 49
+number_of_entries: 51
 ---
+<p>IstioControlPlane is a schema for both defining and customizing Istio control plane installations.
+Running the operator with an empty user defined InstallSpec results in an control plane with default values, using the
+default charts.</p>
+
+<p>The simplest install specialization is to point the user InstallSpec profile to a different values file, for
+example an Istio minimal control plane, which will use the values associated with the minimal control plane profile for
+Istio.</p>
+
+<p>Deeper customization is possible at three levels:</p>
+
+<ol>
+<li>New APIs defined in this file</li>
+</ol>
+
+<p>Feature API: this API groups an Istio install by features and allows enabling/disabling the features, selecting base
+control plane profiles, as well as some additional high level settings that are feature specific. Each feature contains
+one or more components, which correspond to Istio components (Pods) in the cluster.</p>
+
+<p>k8s API: this API is a pass through to k8s resource settings for Istio k8s resources. It allows customizing Istio k8s
+resources like Affinity, Resource requests/limits, PodDisruptionBudgetSpec, Selectors etc. in a more consistent and
+k8s specific way compared to values.yaml. See KubernetesResourcesSpec in this file for details.</p>
+
+<ol>
+<li>values.yaml</li>
+</ol>
+
+<p>The entirety of values.yaml settings is accessible through InstallSpec (see CommonComponentSpec/Values).
+This API will gradually be deprecated and values there will be moved either into CRDs that are used to directly
+configure components or, in the case of k8s settings, will be replaced by the new API above.</p>
+
+<ol>
+<li>k8s resource overlays</li>
+</ol>
+
+<p>Once a manifest is rendered from InstallSpec, a further customization can be applied by specifying k8s resource
+overlays. The concept is similar to kustomize, where JSON patches are applied for object paths. This allows
+customization at the lowest level and eliminates the need to create ad-hoc template parameters, or edit templates.</p>
+
+<p>EXAMPLES</p>
+
+<ol>
+<li>Default Istio install</li>
+</ol>
+
+<pre><code class="language-yaml">spec:
+</code></pre>
+
+<ol>
+<li>Default minimal profile install</li>
+</ol>
+
+<pre><code class="language-yaml">spec:
+profile: minimal
+</code></pre>
+
+<ol>
+<li>Default install with telemetry disabled</li>
+</ol>
+
+<pre><code class="language-yaml">spec:
+telemetry:
+enabled: false
+</code></pre>
+
+<ol>
+<li>Default install with each feature installed to different namespace and security components in separate namespaces</li>
+</ol>
+
+<pre><code class="language-yaml">spec:
+traffic_management:
+components:
+namespace: istio-traffic-management
+policy:
+components:
+namespace: istio-policy
+telemetry:
+components:
+namespace: istio-telemetry
+config_management:
+components:
+namespace: istio-config-management
+security:
+components:
+citadel:
+namespace: istio-citadel
+cert_manager:
+namespace: istio-cert-manager
+node_agent:
+namespace: istio-node-agent
+</code></pre>
+
+<ol>
+<li>Default install with specialized k8s settings for pilot</li>
+</ol>
+
+<pre><code class="language-yaml">spec:
+traffic_management:
+components:
+pilot:
+k8s:
+resources:
+limits:
+cpu: 444m
+memory: 333Mi
+requests:
+cpu: 222m
+memory: 111Mi
+readinessProbe:
+failureThreshold: 44
+initialDelaySeconds: 11
+periodSeconds: 22
+successThreshold: 33
+</code></pre>
+
+<ol>
+<li>Default install with values.yaml customizations for proxy</li>
+</ol>
+
+<pre><code class="language-yaml">spec:
+traffic_management:
+components:
+proxy:
+values:
+- global.proxy.enableCoreDump: true
+- global.proxy.dnsRefreshRate: 10s
+</code></pre>
+
+<ol>
+<li>Default install with modification to container flag in galley</li>
+</ol>
+
+<pre><code class="language-yaml">spec:
+configuration_management:
+components:
+galley:
+k8s:
+overlays:
+- apiVersion: extensions/v1beta1
+kind: Deployment
+name: istio-galley
+patches:
+- path: spec.template.spec.containers.[name:galley].command.[--livenessProbeInterval]
+value: --livenessProbeInterval=123s
+</code></pre>
+
 <h2 id="AutoInjectionFeatureSpec">AutoInjectionFeatureSpec</h2>
 <section>
 <p>Configuration options for auto injection feature.</p>
@@ -391,6 +538,12 @@ number_of_entries: 49
 <td>
 </td>
 </tr>
+<tr id="HTTPGetAction-port">
+<td><code>port</code></td>
+<td><code><a href="#TypeIntOrStringForPB">TypeIntOrStringForPB</a></code></td>
+<td>
+</td>
+</tr>
 <tr id="HTTPGetAction-host">
 <td><code>host</code></td>
 <td><code>string</code></td>
@@ -686,14 +839,27 @@ Because the spec is a customization API, specifying an empty InstallSpec results
 <td>
 </td>
 </tr>
+<tr id="IstioControlPlaneSpec-values">
+<td><code>values</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
+<td>
+<p>Overrides for default global values.yaml.</p>
+
+</td>
+</tr>
+<tr id="IstioControlPlaneSpec-unvalidatedValues">
+<td><code>unvalidatedValues</code></td>
+<td><code><a href="#TypeMapStringInterface">TypeMapStringInterface</a></code></td>
+<td>
+<p>Unvalidated overrides for default global values.yaml.</p>
+
+</td>
+</tr>
 <tr id="IstioControlPlaneSpec-profile">
 <td><code>profile</code></td>
 <td><code>string</code></td>
 <td>
-<p>Overrides for default global values.yaml.
-Values map[string]interface&lbrace;} <code>protobuf:&quot;bytes,6,opt,name=values&quot; json:&quot;values,omitempty&quot;</code>
-UnvalidatedValues map[string]interface&lbrace;} <code>protobuf:&quot;bytes,6,opt,name=unvalidatedValues&quot; json:&quot;unvalidatedValues,omitempty&quot;</code>
-Path or name for the profile e.g.
+<p>Path or name for the profile e.g.
   minimal (looks in profiles dir for a file called minimal.yaml)
   /tmp/istio/install/values/custom/custom-install.yaml (local file path)
 default profile is used if this field is unset.</p>
@@ -981,7 +1147,7 @@ https://kubernetes.io/docs/concepts/workloads/controllers/deployment/</p>
 </tr>
 </thead>
 <tbody>
-<tr id="PodDisruptionBudgetSpec-min_available">
+<tr id="PodDisruptionBudgetSpec-minAvailable">
 <td><code>minAvailable</code></td>
 <td><code>uint32</code></td>
 <td>
@@ -993,7 +1159,7 @@ https://kubernetes.io/docs/concepts/workloads/controllers/deployment/</p>
 <td>
 </td>
 </tr>
-<tr id="PodDisruptionBudgetSpec-max_unavailable">
+<tr id="PodDisruptionBudgetSpec-maxUnavailable">
 <td><code>maxUnavailable</code></td>
 <td><code>uint32</code></td>
 <td>
@@ -1227,6 +1393,29 @@ Must be enabled to enable any sub-component.</p>
 <section>
 <p>Mirrors k8s.io.api.apps.v1.RollingUpdateDeployment for unmarshaling.</p>
 
+<table class="message-fields">
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr id="RollingUpdateDeployment-maxUnavailable">
+<td><code>maxUnavailable</code></td>
+<td><code><a href="#TypeIntOrStringForPB">TypeIntOrStringForPB</a></code></td>
+<td>
+</td>
+</tr>
+<tr id="RollingUpdateDeployment-maxSurge">
+<td><code>maxSurge</code></td>
+<td><code><a href="#TypeIntOrStringForPB">TypeIntOrStringForPB</a></code></td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
 </section>
 <h2 id="SecurityFeatureSpec">SecurityFeatureSpec</h2>
 <section>
@@ -1345,6 +1534,12 @@ Must be enabled to enable any sub-component.</p>
 </tr>
 </thead>
 <tbody>
+<tr id="TCPSocketAction-port">
+<td><code>port</code></td>
+<td><code><a href="#TypeIntOrStringForPB">TypeIntOrStringForPB</a></code></td>
+<td>
+</td>
+</tr>
 <tr id="TCPSocketAction-host">
 <td><code>host</code></td>
 <td><code>string</code></td>
@@ -1449,80 +1644,6 @@ Must be enabled to enable any sub-component.</p>
 </tbody>
 </table>
 </section>
-<h2 id="TestKube">TestKube</h2>
-<section>
-<p>TESTING ONLY</p>
-
-<table class="message-fields">
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr id="TestKube-env">
-<td><code>env</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
-<td>
-</td>
-</tr>
-<tr id="TestKube-resources">
-<td><code>resources</code></td>
-<td><code><a href="#Resources">Resources</a></code></td>
-<td>
-</td>
-</tr>
-<tr id="TestKube-readiness_probe">
-<td><code>readinessProbe</code></td>
-<td><code><a href="#ReadinessProbe">ReadinessProbe</a></code></td>
-<td>
-<p>k8s.io.api.core.v1.Probe readiness_probe = 81;</p>
-
-</td>
-</tr>
-<tr id="TestKube-hpa_spec">
-<td><code>hpaSpec</code></td>
-<td><code><a href="#k8s-io-api-autoscaling-v2beta1-HorizontalPodAutoscalerSpec">k8s.io.api.autoscaling.v2beta1.HorizontalPodAutoscalerSpec</a></code></td>
-<td>
-</td>
-</tr>
-<tr id="TestKube-pod_disruption_budget">
-<td><code>podDisruptionBudget</code></td>
-<td><code><a href="#PodDisruptionBudgetSpec">PodDisruptionBudgetSpec</a></code></td>
-<td>
-</td>
-</tr>
-<tr id="TestKube-affinity">
-<td><code>affinity</code></td>
-<td><code><a href="#k8s-io-api-core-v1-Affinity">k8s.io.api.core.v1.Affinity</a></code></td>
-<td>
-</td>
-</tr>
-<tr id="TestKube-pod_annotations">
-<td><code>podAnnotations</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
-<td>
-</td>
-</tr>
-<tr id="TestKube-node_selector">
-<td><code>nodeSelector</code></td>
-<td><code>map&lt;string,&nbsp;string&gt;</code></td>
-<td>
-</td>
-</tr>
-<tr id="TestKube-overlays">
-<td><code>overlays</code></td>
-<td><code><a href="#k8sObjectOverlay">k8sObjectOverlay[]</a></code></td>
-<td>
-<p>Kustomize style overrides for k8s resources in rendered manifests.</p>
-
-</td>
-</tr>
-</tbody>
-</table>
-</section>
 <h2 id="TrafficManagementFeatureSpec">TrafficManagementFeatureSpec</h2>
 <section>
 <p>Configuration options for traffic management.</p>
@@ -1589,6 +1710,21 @@ Must be enabled to enable any sub-component.</p>
 </tr>
 </tbody>
 </table>
+</section>
+<h2 id="TypeIntOrStringForPB">TypeIntOrStringForPB</h2>
+<section>
+<p>GOTYPE: *IntOrStringForPB</p>
+
+</section>
+<h2 id="TypeInterface">TypeInterface</h2>
+<section>
+<p>GOTYPE: interface&lbrace;}</p>
+
+</section>
+<h2 id="TypeMapStringInterface">TypeMapStringInterface</h2>
+<section>
+<p>GOTYPE: map[string]interface&lbrace;}</p>
+
 </section>
 <h2 id="k8s-io-api-autoscaling-v2beta1-HorizontalPodAutoscalerSpec">k8s.io.api.autoscaling.v2beta1.HorizontalPodAutoscalerSpec</h2>
 <section>
@@ -1937,6 +2073,21 @@ of peer discovery.
 
 </td>
 </tr>
+<tr id="k8s-io-api-core-v1-ServiceSpec-ipFamily">
+<td><code>ipFamily</code></td>
+<td><code>string</code></td>
+<td>
+<p>ipFamily specifies whether this Service has a preference for a particular IP family (e.g. IPv4 vs.
+IPv6).  If a specific IP family is requested, the clusterIP field will be allocated from that family, if it is
+available in the cluster.  If no IP family is requested, the cluster&rsquo;s primary IP family will be used.
+Other IP fields (loadBalancerIP, loadBalancerSourceRanges, externalIPs) and controllers which
+allocate external load-balancers should use the same IP family.  Endpoints for this Service will be of
+this family.  This field is immutable after creation. Assigning a ServiceIPFamily not available in the
+cluster (e.g. IPv6 in IPv4 only cluster) is an error condition and will fail during clusterIP assignment.
++optional</p>
+
+</td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -2045,6 +2196,18 @@ Namespace is always the component namespace.</p>
 <p>Path of the form a.b:c.e.:f
 Where b:c is a list element selector of the form key:value and :f is a list selector of the form :value.
 All path intermediate nodes must exist.</p>
+
+</td>
+</tr>
+<tr id="k8sObjectOverlay-PathValue-value">
+<td><code>value</code></td>
+<td><code><a href="#TypeInterface">TypeInterface</a></code></td>
+<td>
+<p>Value to add, delete or replace.
+For add, the path should be a new leaf.
+For delete, value should be unset.
+For replace, path should reference an existing node.
+All values are strings but are converted into appropriate type based on schema.</p>
 
 </td>
 </tr>

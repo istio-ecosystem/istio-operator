@@ -93,6 +93,26 @@ func TestManifestGenerateTelemetry(t *testing.T) {
 	})
 }
 
+func TestManifestGenerateOrdered(t *testing.T) {
+	// Since this is testing the special case of stable YAML output order, it
+	// does not use the established test group pattern
+	t.Run("stable_manifest", func(t *testing.T) {
+		inPath := filepath.Join(testDataDir, "input", "all_on.yaml")
+		got1, err := runManifestGenerate(inPath, "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		got2, err := runManifestGenerate(inPath, "")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if got1 != got2 {
+			t.Errorf("stable_manifest: Manifest generation is not producing stable text output.")
+		}
+	})
+}
+
 func runTestGroup(t *testing.T, tests testGroup) {
 	testDataDir = filepath.Join(repoRootDir, "cmd/mesh/testdata/manifest-generate")
 	for _, tt := range tests {
@@ -121,12 +141,15 @@ func runTestGroup(t *testing.T, tests testGroup) {
 			if tt.diffSelect != "" {
 				diffSelect = tt.diffSelect
 			}
-			diff, err := object.ManifestDiffWithSelectAndIgnore(got, want, diffSelect, tt.diffIgnore)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if diff != "" {
-				t.Errorf("%s: got:\n%s\nwant:\n%s\n(-got, +want)\n%s\n", tt.desc, "", "", diff)
+
+			for _, v := range []bool{true, false} {
+				diff, err := object.ManifestDiffWithSelectAndIgnore(got, want, diffSelect, tt.diffIgnore, v)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if diff != "" {
+					t.Errorf("%s: got:\n%s\nwant:\n%s\n(-got, +want)\n%s\n", tt.desc, "", "", diff)
+				}
 			}
 
 		})
@@ -138,7 +161,7 @@ func runTestGroup(t *testing.T, tests testGroup) {
 func runManifestGenerate(path, flags string) (string, error) {
 	args := "manifest generate " + flags
 	if flags == "" {
-		args += " -f " + path
+		args += "-f " + path
 	}
 	return runCommand(args)
 }

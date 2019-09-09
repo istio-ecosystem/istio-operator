@@ -14,13 +14,20 @@
 
 syntax = "proto3";
 
-package v1alpha2;
-
 import "k8s.io/api/core/v1/generated.proto";
 import "k8s.io/api/apps/v1/generated.proto";
 import "k8s.io/api/autoscaling/v2beta1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "github.com/gogo/protobuf/protobuf/google/protobuf/wrappers.proto";
+
+// $title: Operator Installation
+// $description: Configuration for Istio control plane installation through the Operator.
+// $location: https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb.html
+//
+// TODO: for some reason the below fails proto compilation in this repo.
+// https://github.com/istio/istio/issues/16899
+// package istio.operator.v1alpha2;
+// option go_package="istio.io/operator/pkg/apis/istio/v1alpha2";
 
 /*
 IstioControlPlane is a schema for both defining and customizing Istio control plane installations.
@@ -59,21 +66,28 @@ EXAMPLES
 
 1. Default Istio install
 
+```yaml
 spec:
+```
 
 2. Default minimal profile install
 
+```yaml
 spec:
   profile: minimal
+```
 
 3. Default install with telemetry disabled
 
+```yaml
 spec:
   telemetry:
     enabled: false
+```
 
 4. Default install with each feature installed to different namespace and security components in separate namespaces
 
+```yaml
 spec:
   traffic_management:
     components:
@@ -95,9 +109,11 @@ spec:
         namespace: istio-cert-manager
       node_agent:
         namespace: istio-node-agent
+```
 
 5. Default install with specialized k8s settings for pilot
 
+```yaml
 spec:
   traffic_management:
     components:
@@ -115,9 +131,11 @@ spec:
             initialDelaySeconds: 11
             periodSeconds: 22
             successThreshold: 33
+```
 
 6. Default install with values.yaml customizations for proxy
 
+```yaml
 spec:
   traffic_management:
     components:
@@ -125,9 +143,11 @@ spec:
         values:
         - global.proxy.enableCoreDump: true
         - global.proxy.dnsRefreshRate: 10s
+```
 
 7. Default install with modification to container flag in galley
 
+```yaml
 spec:
   configuration_management:
     components:
@@ -140,7 +160,9 @@ spec:
             patches:
             - path: spec.template.spec.containers.[name:galley].command.[--livenessProbeInterval]
               value: --livenessProbeInterval=123s
+```
 */
+package v1alpha2;
 
 // IstioControlPlane is a CustomResourceDefinition (CRD) describing an Istio control plane.
 message IstioControlPlane {
@@ -168,8 +190,9 @@ message IstioControlPlaneSpec {
     AutoInjectionFeatureSpec auto_injection = 30;
     GatewayFeatureSpec gateways = 31;
     // Overrides for default global values.yaml.
-    // Values map[string]interface{} `protobuf:"bytes,6,opt,name=values" json:"values,omitempty"`
-    // UnvalidatedValues map[string]interface{} `protobuf:"bytes,6,opt,name=unvalidatedValues" json:"unvalidatedValues,omitempty"`
+    TypeMapStringInterface values = 50;
+    // Unvalidated overrides for default global values.yaml.
+    TypeMapStringInterface unvalidatedValues = 51;
     // Path or name for the profile e.g.
     //   minimal (looks in profiles dir for a file called minimal.yaml)
     //   /tmp/istio/install/values/custom/custom-install.yaml (local file path)
@@ -450,8 +473,7 @@ message k8sObjectOverlay {
         // For delete, value should be unset.
         // For replace, path should reference an existing node.
         // All values are strings but are converted into appropriate type based on schema.
-//        Value                interface{}           `protobuf:"bytes,4,opt,name=value,proto3" json:"value,omitempty"`
-
+        TypeInterface value = 2;
     }
     // Resource API version.
     string api_version = 1;
@@ -513,6 +535,7 @@ message ExecAction {
 // Mirrors k8s.io.api.core.v1.HTTPGetAction for unmarshaling
 message HTTPGetAction {
     string path = 1;
+    TypeIntOrStringForPB port = 2;
     string host = 3;
     string scheme = 4;
     repeated HTTPHeader httpHeaders = 5;
@@ -526,14 +549,15 @@ message HTTPHeader {
 
 // Mirrors k8s.io.api.core.v1.TCPSocketAction for unmarshaling
 message TCPSocketAction {
+    TypeIntOrStringForPB port = 1;
     string host = 2;
 }
 
 // Mirrors k8s.io.api.policy.v1beta1.PodDisruptionBudget for unmarshaling.
 message PodDisruptionBudgetSpec {
-    uint32 min_available = 1;
+    uint32 minAvailable = 1;
     k8s.io.apimachinery.pkg.apis.meta.v1.LabelSelector selector = 2;
-    uint32 max_unavailable = 3;
+    uint32 maxUnavailable = 3;
 }
 
 // Mirrors k8s.io.api.apps.v1.DeploymentStrategy for unmarshaling.
@@ -544,6 +568,8 @@ message DeploymentStrategy {
 
 // Mirrors k8s.io.api.apps.v1.RollingUpdateDeployment for unmarshaling.
 message RollingUpdateDeployment {
+    TypeIntOrStringForPB maxUnavailable = 1;
+    TypeIntOrStringForPB maxSurge = 2;
 }
 
 message ObjectMeta {
@@ -552,20 +578,11 @@ message ObjectMeta {
     string namespace = 6;
 }
 
-// TESTING ONLY
-message TestKube {
-    map<string, string> env = 60;
+// GOTYPE: map[string]interface{}
+message TypeMapStringInterface {}
 
-    Resources resources = 80;
-    //k8s.io.api.core.v1.Probe readiness_probe = 81;
-    ReadinessProbe readiness_probe = 81;
-    k8s.io.api.autoscaling.v2beta1.HorizontalPodAutoscalerSpec hpa_spec = 86;
-    PodDisruptionBudgetSpec pod_disruption_budget = 87;
-    k8s.io.api.core.v1.Affinity affinity = 8;
+// GOTYPE: interface{}
+message TypeInterface {}
 
-    map<string, string> pod_annotations = 90;
-    map<string, string> node_selector = 92;
-
-    // Kustomize style overrides for k8s resources in rendered manifests.
-    repeated k8sObjectOverlay overlays = 100;
-}
+// GOTYPE: *IntOrStringForPB
+message TypeIntOrStringForPB {}
