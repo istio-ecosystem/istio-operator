@@ -456,7 +456,7 @@ func manifestDiff(aom, bom map[string]*K8sObject, im map[string]string, verbose 
 		}
 		bo := bom[ak]
 		if bo == nil {
-			out[ak] = fmt.Sprint("\n\nObject " + ak + " is missing in B:\n\n")
+			out[ak] = fmt.Sprintf("\n\nObject %s is missing in B:\n\n", ak)
 			continue
 		}
 		by, err := bo.YAML()
@@ -473,13 +473,13 @@ func manifestDiff(aom, bom map[string]*K8sObject, im map[string]string, verbose 
 		}
 
 		if diff != "" {
-			out[ak] = fmt.Sprint("\n\nObject "+ak+" has diffs:\n\n", diff)
+			out[ak] = fmt.Sprintf("\n\nObject %s has diffs:\n\n%s", ak, diff)
 		}
 	}
 	for bk := range bom {
 		ao := aom[bk]
 		if ao == nil {
-			out[bk] = fmt.Sprint("\n\nObject " + bk + " is missing in A:\n\n")
+			out[bk] = fmt.Sprintf("\n\nObject %s is missing in A:\n\n", bk)
 			continue
 		}
 	}
