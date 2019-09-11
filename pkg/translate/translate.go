@@ -17,7 +17,6 @@ package translate
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"reflect"
@@ -33,7 +32,8 @@ import (
 	"istio.io/operator/pkg/version"
 	"istio.io/pkg/log"
 
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/strategicpatch"
+	"k8s.io/client-go/kubernetes/scheme"
 )
 
 const (
@@ -368,10 +368,6 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 			log.Infof("path %s is int 0, skip mapping.", inPath)
 			continue
 		}
-		overlayYAML, err := yaml.Marshal(m)
-		if err != nil {
-			return "", err
-		}
 		outPath, err := t.renderResourceComponentPathTemplate(v.outPath, componentName)
 		if err != nil {
 			return "", err
@@ -392,113 +388,16 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 			continue
 		}
 
-		baseYAML, err := oo.YAML()
-		if err != nil {
-			return "", fmt.Errorf("could not marshal to YAML in OverlayK8sSettings: %s", err)
-		}
-		mergedYAML, err := overlayK8s(baseYAML, overlayYAML, path[1:])
+		// strategic merge overlay m to the base object oo
+		mergedObj, err := mergeK8sObject(oo, m, path[1:])
 		if err != nil {
 			return "", err
-		}
-		scope.Debugf("baseYAML:\n%s\n, overlayYAML:\n%s\n, mergedYAML:\n%s\n", string(baseYAML), string(overlayYAML), string(mergedYAML))
-		mergedObj, err := object.ParseYAMLToK8sObject(mergedYAML)
-		if err != nil {
-			return "", fmt.Errorf("could not ParseYAMLToK8sObject in OverlayK8sSettings: %s", err)
 		}
 		// Update the original object in objects slice, since the output should be ordered.
 		*(om[pe]) = *mergedObj
 	}
 
 	return objects.YAMLManifest()
-}
-
-// mergeEnv apply deep merge overlay env settings on the base env.
-func mergeEnv(baseEnv, overlayEnv []byte) ([]byte, error) {
-	if overlayEnv == nil {
-		return baseEnv, nil
-	}
-	baseEnvJSON, err := yaml.YAMLToJSON(baseEnv)
-	if err != nil {
-		return nil, fmt.Errorf("yamlToJSON error in base env: %s\n%s", err, baseEnv)
-	}
-	overlayEnvJSON, err := yaml.YAMLToJSON(overlayEnv)
-	if err != nil {
-		return nil, fmt.Errorf("yamlToJSON error in overlay env: %s\n%s", err, overlayEnv)
-	}
-
-	var baseEnvObj, overlayEnvObj []*v1.EnvVar
-	err = json.Unmarshal(baseEnvJSON, &baseEnvObj)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(overlayEnvJSON, &overlayEnvObj)
-	if err != nil {
-		return nil, err
-	}
-
-	dstEnvObj := make([]*v1.EnvVar, len(baseEnvObj))
-	copy(dstEnvObj, baseEnvObj)
-	for i, v2 := range overlayEnvObj {
-		exists := false
-		for j, v1 := range baseEnvObj {
-			if v1.Name == v2.Name {
-				// if the env item with name exists in base, then override base.
-				exists = true
-				dstEnvObj[j] = overlayEnvObj[i]
-				break
-			}
-		}
-		if !exists {
-			// if the env item with name doesn't exist in base, then append to base.
-			dstEnvObj = append(dstEnvObj, overlayEnvObj[i])
-		}
-	}
-
-	return json.Marshal(dstEnvObj)
-}
-
-// overlayK8s overlays overlayYAML over baseYAML at the given path in baseYAML.
-func overlayK8s(baseYAML, overlayYAML []byte, path util.Path) ([]byte, error) {
-	var dstNodeYaml []byte
-	base := make(map[string]interface{})
-	base, dstNodeMap := make(map[string]interface{}), make(map[string]interface{})
-	var dstNode interface{} = dstNodeMap
-
-	if err := yaml.Unmarshal(baseYAML, &base); err != nil {
-		return nil, fmt.Errorf("error: %s to unmarshal baseYAML:\n%s", err, baseYAML)
-	}
-
-	basePc, isBasePcFound, err := tpath.GetPathContext(base, path)
-	if !isBasePcFound || err != nil {
-		log.Infof("path %s not found in base object.", path.String())
-		dstNodeYaml = overlayYAML
-	} else {
-		baseNodeYaml, err := yaml.Marshal(basePc.Node)
-		if err != nil {
-			return nil, err
-		}
-
-		k8sSettingName := path[len(path)-1]
-		switch k8sSettingName {
-		case "env":
-			dstNodeYaml, err = mergeEnv(baseNodeYaml, overlayYAML)
-			if err != nil {
-				return nil, fmt.Errorf("eror: %s to merge overlayYAML:\n%s to baseYAML:\n%s", err, string(overlayYAML), string(baseNodeYaml))
-			}
-		default:
-			dstNodeYaml = overlayYAML
-		}
-	}
-	if err := yaml.Unmarshal(dstNodeYaml, &dstNodeMap); err != nil {
-		// May be a scalar type, try to unmarshal into interface instead.
-		if err := yaml.Unmarshal(dstNodeYaml, &dstNode); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal in overlayK8s: %s for overlayYAML:\n%s", err, overlayYAML)
-		}
-	}
-	if err := tpath.WriteNode(base, path, dstNode); err != nil {
-		return nil, err
-	}
-	return yaml.Marshal(base)
 }
 
 // ProtoToValues traverses the supplied IstioControlPlaneSpec and returns a values.yaml translation from it.
@@ -775,4 +674,43 @@ func defaultTranslationFunc(m *Translation, root map[string]interface{}, valuesP
 
 func firstCharToLower(s string) string {
 	return strings.ToLower(s[0:1]) + s[1:]
+}
+
+// mergeK8sObject does strategic merge for overlayNode on the base object.
+func mergeK8sObject(base *object.K8sObject, overlayNode interface{}, path util.Path) (*object.K8sObject, error) {
+	overlay, err := name.CreatePatchObjectFromPath(overlayNode, path)
+	if err != nil {
+		return nil, err
+	}
+	overlayYAML, err := yaml.Marshal(overlay)
+	if err != nil {
+		return nil, err
+	}
+	overlayJSON, err := yaml.YAMLToJSON(overlayYAML)
+	if err != nil {
+		return nil, fmt.Errorf("yamlToJSON error in overlayYAML: %s\n%s", err, overlayYAML)
+	}
+	baseJSON, err := base.JSON()
+	if err != nil {
+		return nil, err
+	}
+
+	// get a versioned object from the scheme, we can use the strategic patching mechanism
+	// (i.e. take advantage of patchStrategy in the type)
+	versionedObject, err := scheme.Scheme.New(base.GroupVersionKind())
+	if err != nil {
+		return nil, err
+	}
+	// strategic merge patch
+	newBytes, err := strategicpatch.StrategicMergePatch(baseJSON, overlayJSON, versionedObject)
+	if err != nil {
+		return nil, fmt.Errorf("get error: %s to merge patch:\n%s for base:\n%s", err, overlayJSON, baseJSON)
+	}
+
+	newObj, err := object.ParseJSONToK8sObject(newBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return newObj, nil
 }
