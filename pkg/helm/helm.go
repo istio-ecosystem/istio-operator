@@ -38,6 +38,9 @@ const (
 
 	// DefaultProfileString is the name of the default profile.
 	DefaultProfileString = "default"
+
+	// notes file name for the helm chart.
+	NotesFileName = "NOTES.txt"
 )
 
 // TemplateRenderer defines a helm template renderer interface.
@@ -116,6 +119,9 @@ func renderChart(namespace, values string, chrt *chart.Chart) (string, error) {
 	// Create sorted array of keys to iterate over, to stabilize the order of the rendered templates
 	keys := make([]string, 0, len(files))
 	for k := range files {
+		if strings.Contains(k, NotesFileName) {
+			continue
+		}
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
