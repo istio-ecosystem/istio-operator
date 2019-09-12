@@ -59,7 +59,7 @@ gateways:
       enabled: true
       suffix: global
     podAnnotations: {}
-    type: LoadBalancer 
+    type: LoadBalancer
     meshExpansionPorts:
       - port: 15011
         targetPort: 15011
@@ -140,7 +140,7 @@ gateways:
     connectTimeout: 10s
     serviceAnnotations: {}
     podAnnotations: {}
-    type: ClusterIP 
+    type: ClusterIP
     secretVolumes:
       - name: egressgateway-certs
         secretName: istio-egressgateway-certs
@@ -279,8 +279,8 @@ security:
   rollingMaxSurge: 100%
   rollingMaxUnavailable: 25%
   image: citadel
-  selfSigned: true 
-  trustDomain: cluster.local 
+  selfSigned: true
+  trustDomain: cluster.local
   workloadCertTtl: 2160h
   enableNamespacesByDefault: true
   dnsCerts:
@@ -445,7 +445,7 @@ kiali:
   hub: quay.io/kiali
   image: kiali
   tag: v1.1.0
-  contextPath: /kiali 
+  contextPath: /kiali
   nodeSelector: {}
   tolerations: []
   podAntiAffinityLabelSelector: []
@@ -458,11 +458,11 @@ kiali:
     tls:
   dashboard:
     auth:
-      strategy: login 
-    secretName: kiali 
-    viewOnlyMode: false 
-    grafanaURL:  
-    jaegerURL:  
+      strategy: login
+    secretName: kiali
+    viewOnlyMode: false
+    grafanaURL:
+    jaegerURL:
   prometheusAddr: http://prometheus:9090
   createDemoSecret: false
   security:
@@ -483,7 +483,7 @@ certmanager:
 istio_cni:
   enabled: false
   hub: gcr.io/istio-release
-  tag: master-latest-daily
+  tag: release-1.3-latest-daily
   pullPolicy: Always
   logLevel: info
   cniBinDir: /opt/cni/bin
@@ -501,7 +501,7 @@ istiocoredns:
   podAntiAffinityTermLabelSelector: []
 global:
   hub: gcr.io/istio-release
-  tag: master-latest-daily
+  tag: release-1.3-latest-daily
   logging:
     level: "default:info"
   monitoringPort: 15014
@@ -533,14 +533,14 @@ global:
     accessLogEncoding: TEXT
     envoyAccessLogService:
       enabled: false
-      host: 
-      port: 
+      host:
+      port:
       tlsSettings:
-        mode: DISABLE 
-        clientCertificate: 
-        privateKey: 
-        caCertificates: 
-        sni: 
+        mode: DISABLE
+        clientCertificate:
+        privateKey:
+        caCertificates:
+        sni:
         subjectAltNames: []
       tcpKeepalive:
         probes: 3
@@ -566,12 +566,12 @@ global:
     autoInject: enabled
     envoyStatsd:
       enabled: false
-      host: 
-      port: 
+      host:
+      port:
     envoyMetricsService:
       enabled: false
-      host: 
-      port: 
+      host:
+      port:
     tracer: "zipkin"
   proxy_init:
     image: proxy_init
@@ -582,10 +582,10 @@ global:
   enableTracing: true
   tracer:
     lightstep:
-      address: ""                
-      accessToken: ""            
-      secure: true               
-      cacertPath: ""             
+      address: ""
+      accessToken: ""
+      secure: true
+      cacertPath: ""
     zipkin:
       address: ""
     datadog:

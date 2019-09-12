@@ -554,8 +554,7 @@ values:
     env:
       CA_ADDR: istio-citadel:8060
       CA_PROVIDER: Citadel
-      Plugins: ""
-      VALID_TOKEN: "true"
+      VALID_TOKEN: true
     image: node-agent-k8s
   pilot:
     appNamespaces: []

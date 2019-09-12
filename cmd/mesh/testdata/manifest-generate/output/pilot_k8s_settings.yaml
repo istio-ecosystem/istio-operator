@@ -537,13 +537,13 @@ spec:
           readOnly: true
         - mountPath: /var/lib/envoy
           name: pilot-envoy-config
-      serviceAccountName: istio-pilot-service-account
       nodeSelector:
         master: "true"
+      serviceAccountName: istio-pilot-service-account
       tolerations:
-      - key: dedicated
+      - effect: NoSchedule
+        key: dedicated
         operator: Exists
-        effect: NoSchedule
       - key: CriticalAddonsOnly
         operator: Exists
       volumes:
