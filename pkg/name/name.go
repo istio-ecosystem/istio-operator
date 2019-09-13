@@ -433,7 +433,7 @@ func CreatePatchObjectFromPath(node interface{}, path util.Path) (map[string]int
 			break
 		}
 
-		// if current path element is kc element, then append new item to parent list.
+		// if current path element is kv element, then append new item to parent list.
 		if util.IsKVPathElement(pe) {
 			currentNode, ok := currentNode.([]interface{})
 			if !ok {
@@ -442,6 +442,9 @@ func CreatePatchObjectFromPath(node interface{}, path util.Path) (map[string]int
 			k, v, err := util.PathKV(pe)
 			if err != nil {
 				return nil, err
+			}
+			if k == "" || v == "" {
+				return nil, fmt.Errorf("path %s has an invalid KV element %s", path, pe)
 			}
 			currentNode[0] = map[string]interface{}{k: v}
 			nextNode = currentNode[0]
