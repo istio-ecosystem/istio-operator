@@ -433,7 +433,6 @@ func CreatePatchObjectFromPath(node interface{}, path util.Path) (map[string]int
 			break
 		}
 
-		// if current path element is kv element, then append new item to parent list.
 		if util.IsKVPathElement(pe) {
 			currentNode, ok := currentNode.([]interface{})
 			if !ok {
