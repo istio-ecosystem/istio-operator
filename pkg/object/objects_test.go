@@ -66,6 +66,7 @@ func TestHashNameKind(t *testing.T) {
 	}
 }
 
+// funlen: ignore tests
 func TestParseJSONToK8sObject(t *testing.T) {
 	testDeploymentJSON := `{
 	"apiVersion": "apps/v1",

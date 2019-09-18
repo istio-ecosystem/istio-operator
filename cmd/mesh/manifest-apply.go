@@ -67,7 +67,7 @@ func manifestApplyCmd(rootArgs *rootArgs, maArgs *manifestApplyArgs) *cobra.Comm
 			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
 			if !maArgs.yes && maArgs.kubeConfigPath == "" && maArgs.context == "" {
 				if !confirm("Are you sure?", cmd.OutOrStdout()) {
-					cmd.Print("Cancelled.\n")
+					cmd.Print("Canceled.\n")
 					os.Exit(1)
 				}
 			}

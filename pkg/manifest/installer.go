@@ -24,17 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"istio.io/operator/pkg/util"
-
 	"github.com/ghodss/yaml"
-
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
-
-	"istio.io/operator/pkg/object"
-
-	// For kubeclient GCP auth
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
@@ -47,12 +37,16 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // Included for kubectl
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	deploymentutil "k8s.io/kubernetes/pkg/controller/deployment/util"
 
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/name"
+	"istio.io/operator/pkg/object" // For kubeclient GCP auth
+	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/version"
 	"istio.io/pkg/log"
 )
@@ -621,12 +615,6 @@ func initK8SRestClient(kubeconfig, context string) error {
 	if err != nil {
 		return err
 	}
-	/*	k8sRESTConfig, err = rest.RESTClientFor(config)
-		if err != nil {
-			return nil, err
-		}
-		return &Client{config, restClient}, nil
-	*/
 	return nil
 }
 
