@@ -48,14 +48,14 @@ setup_kind_cluster "${NODE_IMAGE}"
 popd
 
 echo "installing istio with operator CLI"
-go run ./cmd/mesh.go manifest apply
+go run ./cmd/mesh.go manifest apply --yes
 
 function run-simple-base() {
     kubectl create ns "${NS}" || true
     kubectl -n "${NS}" apply -f prow/k8s/mtls_${MODE}.yaml
     kubectl -n "${NS}" apply -f prow/k8s/sidecar-local.yaml
     kubectl label ns "${NS}" istio-injection=disabled --overwrite
-    (cd "${ISTIO_DIR}"; make e2e_simple_run "${TEST_FLAGS}" \
+    (cd "${ISTIO_DIR}"; make e2e_simple_run \
     E2E_ARGS="${E2E_ARGS} --auth_enable=${SIMPLE_AUTH} --namespace=${NS}")
 }
 function run-simple() {
@@ -70,7 +70,7 @@ function run-bookinfo-demo() {
     kubectl create ns bookinfo-demo || true
     kubectl -n bookinfo-demo apply -f prow/k8s/mtls_permissive.yaml
     kubectl -n bookinfo-demo apply -f prow/k8s/sidecar-local.yaml
-    (cd "${ISTIO_DIR}"; make e2e_bookinfo_run "${TEST_FLAGS}" \
+    (cd "${ISTIO_DIR}"; make e2e_bookinfo_run \
       E2E_ARGS="${E2E_ARGS} --namespace=bookinfo-demo")
 }
 
