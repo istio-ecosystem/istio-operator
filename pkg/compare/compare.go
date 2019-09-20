@@ -90,9 +90,54 @@ func YAMLCmpWithIgnore(a, b string, ignorePaths []string) string {
 	if err := yaml.Unmarshal([]byte(b), &bo); err != nil {
 		return err.Error()
 	}
+
+	unmarshalConfigMapData(ao)
+	unmarshalConfigMapData(bo)
+
 	var r YAMLCmpReporter
 	cmp.Equal(ao, bo, cmp.Reporter(&r), genPathIgnoreOpt(ignorePaths))
 	return r.String()
+}
+
+func unmarshalConfigMapData(obj map[string]interface{}) {
+	InlineYamlData(obj, "ConfigMap", "data")
+}
+
+func InlineYamlData(obj map[string]interface{}, targetKind, targetPath string) {
+	if kind, ok := obj["kind"]; !ok || kind != targetKind {
+		return
+	}
+
+	nodeList := strings.Split(targetPath, ".")
+	if len(nodeList) == 0 {
+		return
+	}
+
+	cur := obj
+	for _, nname := range nodeList {
+		ndata, ok := cur[nname]
+		if !ok || ndata == nil {
+			return // target path does not exist
+		}
+		switch nnode := ndata.(type) {
+		case map[string]interface{}:
+			cur = nnode
+		default:
+			return // target path does not exist
+		}
+	}
+
+	for dk, dv := range cur {
+		switch vnode := dv.(type) {
+		case string:
+			vo := make(map[string]interface{})
+			if err := yaml.Unmarshal([]byte(vnode), &vo); err != nil {
+				continue
+			}
+			// Replace the original text yaml tree node with yaml objects
+			cur[dk] = vo
+		}
+	}
 }
 
 // genPathIgnoreOpt returns a cmp.Option to ignore paths specified in parameter ignorePaths.
