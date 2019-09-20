@@ -19,6 +19,7 @@ import (
 	"reflect"
 
 	protobuf "github.com/gogo/protobuf/types"
+
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
 	"istio.io/pkg/log"
