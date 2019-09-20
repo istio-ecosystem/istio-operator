@@ -139,8 +139,8 @@ func IsFeatureEnabledInSpec(featureName FeatureName, controlPlaneSpec *v1alpha2.
 // TODO: remove extra validations when comfort level is high enough.
 func IsComponentEnabledInSpec(featureName FeatureName, componentName ComponentName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) (bool, error) {
 	//check in Values part as well for third Party components
-	if  featureName == ThirdPartyFeatureName{
-		return  IsComponentEnabledFromValue(string(componentName),controlPlaneSpec.Values)
+	if featureName == ThirdPartyFeatureName {
+		return IsComponentEnabledFromValue(string(componentName), controlPlaneSpec.Values)
 	}
 	featureNodeI, found, err := GetFromStructPath(controlPlaneSpec, string(featureName)+".Enabled")
 	if err != nil {
@@ -175,6 +175,7 @@ func IsComponentEnabledInSpec(featureName FeatureName, componentName ComponentNa
 	}
 	return componentNode.Value, nil
 }
+
 // IsComponentEnabledFromValue get whether component is enabled in helm value.yaml tree.
 // valuePath points to component path in the values tree.
 func IsComponentEnabledFromValue(valuePath string, valueSpec map[string]interface{}) (bool, error) {
