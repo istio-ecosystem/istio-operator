@@ -19,7 +19,6 @@ import (
 	"reflect"
 
 	protobuf "github.com/gogo/protobuf/types"
-
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
 	"istio.io/pkg/log"
@@ -94,11 +93,11 @@ var (
 		IngressComponentName:         GatewayFeatureName,
 		EgressComponentName:          GatewayFeatureName,
 		// External
-		PrometheusComponentName:         TelemetryFeatureName,
-		PrometheusOperatorComponentName: TelemetryFeatureName,
-		GrafanaComponentName:            TelemetryFeatureName,
-		KialiComponentName:              TelemetryFeatureName,
-		TracingComponentName:            TelemetryFeatureName,
+		PrometheusComponentName:         ThirdPartyFeatureName,
+		PrometheusOperatorComponentName: ThirdPartyFeatureName,
+		GrafanaComponentName:            ThirdPartyFeatureName,
+		KialiComponentName:              ThirdPartyFeatureName,
+		TracingComponentName:            ThirdPartyFeatureName,
 		// ThirdParty
 		CNIComponentName: ThirdPartyFeatureName,
 	}
@@ -139,6 +138,10 @@ func IsFeatureEnabledInSpec(featureName FeatureName, controlPlaneSpec *v1alpha2.
 // IsComponentEnabledInSpec assumes that controlPlaneSpec has been validated.
 // TODO: remove extra validations when comfort level is high enough.
 func IsComponentEnabledInSpec(featureName FeatureName, componentName ComponentName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) (bool, error) {
+	//check in Values part as well for third Party components
+	if  featureName == ThirdPartyFeatureName{
+		return  IsComponentEnabledFromValue(string(componentName),controlPlaneSpec.Values)
+	}
 	featureNodeI, found, err := GetFromStructPath(controlPlaneSpec, string(featureName)+".Enabled")
 	if err != nil {
 		return false, fmt.Errorf("error in IsComponentEnabledInSpec GetFromStructPath featureEnabled for feature=%s, component=%s: %s",
@@ -172,7 +175,6 @@ func IsComponentEnabledInSpec(featureName FeatureName, componentName ComponentNa
 	}
 	return componentNode.Value, nil
 }
-
 // IsComponentEnabledFromValue get whether component is enabled in helm value.yaml tree.
 // valuePath points to component path in the values tree.
 func IsComponentEnabledFromValue(valuePath string, valueSpec map[string]interface{}) (bool, error) {
