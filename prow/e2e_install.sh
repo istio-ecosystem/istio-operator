@@ -34,7 +34,7 @@ ARTIFACTS="${ARTIFACTS:-$(mktemp -d)}"
 ISTIO_NS=istio-system
 MODE=permissive
 SIMPLE_AUTH=false
-E2E_ARGS="--skip_setup=true --use_local_cluster=true --istio_namespace=${ISTIO_NS} test_logs_path=${ARTIFACTS}"
+E2E_ARGS="--skip_setup=true --use_local_cluster=true --istio_namespace=${ISTIO_NS} --test_logs_path=${ARTIFACTS}"
 TMPDIR=/tmp
 export GO111MODULE=on
 export IstioTop=${ISTIO_DIR}/../../..
