@@ -23,6 +23,7 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"istio.io/operator/pkg/tpath"
+	"istio.io/pkg/log"
 )
 
 // YAMLCmpReporter is a custom reporter to generate tree based diff for YAMLs, used by cmp.Equal().
@@ -91,39 +92,43 @@ func YAMLCmpWithIgnore(a, b string, ignorePaths []string) string {
 		return err.Error()
 	}
 
-	unmarshalConfigMapData(ao)
-	unmarshalConfigMapData(bo)
+	if kind, ok := ao["kind"]; ok && kind == "ConfigMap" {
+		if err := UnmarshalInlineYaml(ao, "data"); err != nil {
+			log.Warnf("Unable to unmarshal ConfigMap Data, error: %v", err)
+		}
+	}
+	if kind, ok := bo["kind"]; ok && kind == "ConfigMap" {
+		if err := UnmarshalInlineYaml(bo, "data"); err != nil {
+			log.Warnf("Unable to unmarshal ConfigMap Data, error: %v", err)
+		}
+	}
 
 	var r YAMLCmpReporter
 	cmp.Equal(ao, bo, cmp.Reporter(&r), genPathIgnoreOpt(ignorePaths))
 	return r.String()
 }
 
-func unmarshalConfigMapData(obj map[string]interface{}) {
-	InlineYamlData(obj, "ConfigMap", "data")
-}
-
-func InlineYamlData(obj map[string]interface{}, targetKind, targetPath string) {
-	if kind, ok := obj["kind"]; !ok || kind != targetKind {
-		return
-	}
-
+// UnmarshalInlineYaml tries to unmarshal string values in obj into YAML objects
+// at a given targetPath. Side effect: this will mutate obj in place.
+func UnmarshalInlineYaml(obj map[string]interface{}, targetPath string) (err error) {
 	nodeList := strings.Split(targetPath, ".")
 	if len(nodeList) == 0 {
-		return
+		return fmt.Errorf("targetPath '%v' length is zero after split", targetPath)
 	}
 
 	cur := obj
 	for _, nname := range nodeList {
 		ndata, ok := cur[nname]
-		if !ok || ndata == nil {
-			return // target path does not exist
+		if !ok || ndata == nil { // target path does not exist
+			return fmt.Errorf("targetPath '%v' doest not exist in obj: '%v' is missing",
+				targetPath, nname)
 		}
 		switch nnode := ndata.(type) {
 		case map[string]interface{}:
 			cur = nnode
-		default:
-			return // target path does not exist
+		default: // target path type does not match
+			return fmt.Errorf("targetPath '%v' doest not exist in obj: "+
+				"'%v' type is not map[string]interface{}", targetPath, nname)
 		}
 	}
 
@@ -138,6 +143,7 @@ func InlineYamlData(obj map[string]interface{}, targetKind, targetPath string) {
 			cur[dk] = vo
 		}
 	}
+	return
 }
 
 // genPathIgnoreOpt returns a cmp.Option to ignore paths specified in parameter ignorePaths.
