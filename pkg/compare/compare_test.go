@@ -671,24 +671,6 @@ func TestYAMLCmpWithYamlInline(t *testing.T) {
 		want interface{}
 	}{
 		{
-			desc: "ConfigMap data identical",
-			a: `kind: ConfigMap
-data:
-  validatingwebhookconfiguration.yaml: |-
-    apiVersion: admissionregistration.k8s.io/v1beta1
-    kind: ValidatingWebhookConfiguration
-    metadata:
-      name: istio-galley`,
-			b: `kind: ConfigMap
-data:
-  validatingwebhookconfiguration.yaml: |-
-    apiVersion: admissionregistration.k8s.io/v1beta1
-    kind: ValidatingWebhookConfiguration
-    metadata:
-      name: istio-galley`,
-			want: ``,
-		},
-		{
 			desc: "ConfigMap data order changed",
 			a: `kind: ConfigMap
 data:
@@ -720,8 +702,8 @@ data:
 			b: `kind: ConfigMap
 data:
   validatingwebhookconfiguration.yaml: |-
-    apiVersion: admissionregistration.k8s.io/v1beta2
     kind: ValidatingWebhookConfiguration
+    apiVersion: admissionregistration.k8s.io/v1beta2
     metadata:
       name: istio-galley`,
 			want: `data:
@@ -730,55 +712,37 @@ data:
 `,
 		},
 		{
-			desc: "ConfigMap data string change",
+			desc: "ConfigMap data deep nested value change",
 			a: `apiVersion: v1
 kind: ConfigMap
 metadata:
   name: injector-mesh
-  namespace: istio-system
-  labels:
-    release: istio
 data:
   mesh: |-
     defaultConfig:
-      connectTimeout: 10s
-      configPath: "/etc/istio/proxyv1"
-      serviceCluster: istio-proxy
-      drainDuration: 45s
-      parentShutdownDuration: 1m0s
-      proxyAdminPort: 15000
-      concurrency: 2
       tracing:
         zipkin:
           address: zipkin.istio-system:9411
       controlPlaneAuthPolicy: NONE
-      discoveryAddress: istio-pilot.istio-system:15010`,
+      connectTimeout: 10s`,
 			b: `apiVersion: v1
 kind: ConfigMap
 metadata:
   name: injector-mesh
-  namespace: istio-system
-  labels:
-    release: istio
 data:
   mesh: |-
     defaultConfig:
       connectTimeout: 10s
-      configPath: "/etc/istio/proxyv2"
-      serviceCluster: istio-proxy
-      drainDuration: 45s
-      parentShutdownDuration: 1m0s
-      proxyAdminPort: 15000
-      concurrency: 2
       tracing:
         zipkin:
-          address: zipkin.istio-system:9411
-      controlPlaneAuthPolicy: NONE
-      discoveryAddress: istio-pilot.istio-system:15010`,
+          address: zipkin.istio-system:9412
+      controlPlaneAuthPolicy: NONE`,
 			want: `data:
   mesh:
     defaultConfig:
-      configPath: /etc/istio/proxyv1 -> /etc/istio/proxyv2
+      tracing:
+        zipkin:
+          address: zipkin.istio-system:9411 -> zipkin.istio-system:9412
 `,
 		},
 		{
