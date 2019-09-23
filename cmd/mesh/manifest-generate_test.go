@@ -16,7 +16,9 @@ package mesh
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"istio.io/operator/pkg/object"
@@ -25,11 +27,17 @@ import (
 type testGroup []struct {
 	desc       string
 	flags      string
+	noInput    bool
+	outputDir  string
 	diffSelect string
 	diffIgnore string
 }
 
 func TestManifestGenerateFlags(t *testing.T) {
+	outDirectory, err := ioutil.TempDir("", "output-testing")
+	if err != nil {
+		t.Fatal(err)
+	}
 	runTestGroup(t, testGroup{
 		{
 			desc: "all_off",
@@ -42,8 +50,24 @@ func TestManifestGenerateFlags(t *testing.T) {
 			desc:       "flag_set_values",
 			diffIgnore: "ConfigMap:*:istio",
 			flags:      "-s values.global.proxy.image=myproxy",
+			noInput:    true,
 		},
-		// TODO: test output flag (istio/istio#17230)
+		{
+			desc:  "flag_override_values",
+			flags: "-s defaultNamespace=control-plane",
+		},
+		{
+			desc:      "flag_output",
+			flags:     "-o " + outDirectory,
+			outputDir: outDirectory,
+		},
+		{
+			desc:       "flag_output_set_values",
+			diffIgnore: "ConfigMap:*:istio",
+			flags:      "-s values.global.proxy.image=mynewproxy -o " + outDirectory,
+			outputDir:  outDirectory,
+			noInput:    true,
+		},
 	})
 }
 
@@ -120,9 +144,35 @@ func runTestGroup(t *testing.T, tests testGroup) {
 			inPath := filepath.Join(testDataDir, "input", tt.desc+".yaml")
 			outPath := filepath.Join(testDataDir, "output", tt.desc+".yaml")
 
+			if tt.noInput {
+				inPath = ""
+			}
+
 			got, err := runManifestGenerate(inPath, tt.flags)
 			if err != nil {
 				t.Fatal(err)
+			}
+
+			// if outputDir is set, walk the directory and concatenate all YAMLs
+			if tt.outputDir != "" {
+				got = ""
+				err = filepath.Walk(tt.outputDir, func(path string, info os.FileInfo, err error) error {
+					if err != nil {
+						t.Fatal(err)
+					}
+					if !info.IsDir() && strings.HasSuffix(path, ".yaml") {
+						yaml, err := readFile(path)
+						if err != nil {
+							t.Fatal(err)
+						}
+						got += yaml + "\n"
+					}
+					return nil
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				os.RemoveAll(tt.outputDir)
 			}
 
 			if refreshGoldenFiles() {
@@ -156,12 +206,15 @@ func runTestGroup(t *testing.T, tests testGroup) {
 	}
 }
 
-// runManifestGenerate runs the manifest generate command. If flags is not set, passes the given path as a -f flag,
-// otherwise flags is passed to the command verbatim. Both path and flags should not be simultaneously set.
+// runManifestGenerate runs the manifest generate command. If path is set, passes the given path as a -f flag,
+// flags is passed to the command verbatim. If you set both flags and path, make sure to not use -f in flags.
 func runManifestGenerate(path, flags string) (string, error) {
-	args := "manifest generate " + flags
-	if flags == "" {
-		args += "-f " + path
+	args := "manifest generate"
+	if path != "" {
+		args += " -f " + path
+	}
+	if flags != "" {
+		args += " " + flags
 	}
 	return runCommand(args)
 }
