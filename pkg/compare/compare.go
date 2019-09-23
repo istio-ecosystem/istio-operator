@@ -92,12 +92,12 @@ func YAMLCmpWithIgnore(a, b string, ignorePaths []string) string {
 		return err.Error()
 	}
 
-	if kind, ok := ao["kind"]; ok && kind == "ConfigMap" {
+	if kind := ao["kind"]; kind == "ConfigMap" {
 		if err := UnmarshalInlineYaml(ao, "data"); err != nil {
 			log.Warnf("Unable to unmarshal ConfigMap Data, error: %v", err)
 		}
 	}
-	if kind, ok := bo["kind"]; ok && kind == "ConfigMap" {
+	if kind := bo["kind"]; kind == "ConfigMap" {
 		if err := UnmarshalInlineYaml(bo, "data"); err != nil {
 			log.Warnf("Unable to unmarshal ConfigMap Data, error: %v", err)
 		}
