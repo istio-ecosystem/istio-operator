@@ -34,10 +34,8 @@ type testGroup []struct {
 }
 
 func TestManifestGenerateFlags(t *testing.T) {
-	outDirectory, err := ioutil.TempDir("", "output-testing")
-	if err != nil {
-		t.Fatal(err)
-	}
+	flagOutputDir := createTempDirOrFail(t, "flag-output")
+	flagOutputValuesDir := createTempDirOrFail(t, "flag-output-values")
 	runTestGroup(t, testGroup{
 		{
 			desc: "all_off",
@@ -58,17 +56,19 @@ func TestManifestGenerateFlags(t *testing.T) {
 		},
 		{
 			desc:      "flag_output",
-			flags:     "-o " + outDirectory,
-			outputDir: outDirectory,
+			flags:     "-o " + flagOutputDir,
+			outputDir: flagOutputDir,
 		},
 		{
 			desc:       "flag_output_set_values",
 			diffIgnore: "ConfigMap:*:istio",
-			flags:      "-s values.global.proxy.image=mynewproxy -o " + outDirectory,
-			outputDir:  outDirectory,
+			flags:      "-s values.global.proxy.image=mynewproxy -o " + flagOutputValuesDir,
+			outputDir:  flagOutputValuesDir,
 			noInput:    true,
 		},
 	})
+	removeDirOrFail(t, flagOutputDir)
+	removeDirOrFail(t, flagOutputValuesDir)
 }
 
 func TestManifestGeneratePilot(t *testing.T) {
@@ -172,7 +172,6 @@ func runTestGroup(t *testing.T, tests testGroup) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				os.RemoveAll(tt.outputDir)
 			}
 
 			if refreshGoldenFiles() {
@@ -217,4 +216,19 @@ func runManifestGenerate(path, flags string) (string, error) {
 		args += " " + flags
 	}
 	return runCommand(args)
+}
+
+func createTempDirOrFail(t *testing.T, prefix string) string {
+	dir, err := ioutil.TempDir("", prefix)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return dir
+}
+
+func removeDirOrFail(t *testing.T, path string) {
+	err := os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
