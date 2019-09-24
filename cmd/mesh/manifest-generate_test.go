@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"istio.io/operator/pkg/object"
+	"istio.io/operator/pkg/util"
 )
 
 type testGroup []struct {
@@ -153,21 +154,9 @@ func runTestGroup(t *testing.T, tests testGroup) {
 				t.Fatal(err)
 			}
 
-			// if outputDir is set, walk the directory and concatenate all YAMLs
 			if tt.outputDir != "" {
-				got = ""
-				err = filepath.Walk(tt.outputDir, func(path string, info os.FileInfo, err error) error {
-					if err != nil {
-						t.Fatal(err)
-					}
-					if !info.IsDir() && strings.HasSuffix(path, ".yaml") {
-						yaml, err := readFile(path)
-						if err != nil {
-							t.Fatal(err)
-						}
-						got += yaml + "\n"
-					}
-					return nil
+				got, err = util.ReadFilesWithFilter(tt.outputDir, func(fileName string) bool {
+					return strings.HasSuffix(fileName, ".yaml")
 				})
 				if err != nil {
 					t.Fatal(err)
