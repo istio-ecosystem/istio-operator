@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"html/template"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/ghodss/yaml"
@@ -105,18 +106,20 @@ type TranslationFunc func(t *Translation, root map[string]interface{}, valuesPat
 // Translation is a mapping to an output path using a translation function.
 type Translation struct {
 	// OutPath defines the position in the yaml file
-	OutPath         string `yaml:"outPath"`
+	OutPath         string          `yaml:"outPath"`
 	translationFunc TranslationFunc `yaml:"TranslationFunc,omitempty"`
 }
+
 // NewTranslator creates a new Translator for minorVersion and returns a ptr to it.
 func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
-	f := "translateConfig/translateConfig-" + minorVersion.String() +".yaml"
+	v := fmt.Sprintf("%s.%d", minorVersion.MajorVersion, minorVersion.Minor)
+	f := "translateConfig/translateConfig-" + v + ".yaml"
 	b, err := vfs.ReadFile(f)
 	if err != nil {
 		return nil, fmt.Errorf("could not read translateConfig file %s: %s", f, err)
 	}
 	t := &Translator{}
-	err = yaml.Unmarshal(b,t)
+	err = yaml.Unmarshal(b, t)
 	if err != nil {
 		return nil, fmt.Errorf("could not Unmarshal translateConfig file %s: %s", f, err)
 	}
@@ -295,7 +298,15 @@ func (t *Translator) protoToHelmValues(node interface{}, root map[string]interfa
 // setEnablementAndNamespaces translates the enablement and namespace value of each component in the baseYAML values
 // tree, based on feature/component inheritance relationship.
 func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp *v1alpha2.IstioControlPlaneSpec) error {
-	for cn, c := range t.ComponentMaps {
+	var keys []string
+	for k := range t.ComponentMaps {
+		keys = append(keys, string(k))
+	}
+	sort.Strings(keys)
+	len := len(keys)
+	for i := len - 1; i >= 0; i-- {
+		cn := name.ComponentName(keys[i])
+		c := t.ComponentMaps[cn]
 		e, err := t.IsComponentEnabled(cn, icp)
 		if err != nil {
 			return err
