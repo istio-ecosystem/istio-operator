@@ -429,30 +429,32 @@ func renameResource(iom map[string]*K8sObject, rnm map[string]string) (map[strin
 		for fromPat, toPat := range rnm {
 			fromRe, err := buildResourceRegexp(strings.TrimSpace(fromPat))
 			if err != nil {
-				return nil, fmt.Errorf("error building the resource regexp: %v", err)
+				return nil, fmt.Errorf("error building the regexp from "+
+					"rename-from string: %v, error: %v", fromPat, err)
 			}
 			if fromRe.MatchString(name) {
 				fromList := strings.Split(name, ":")
 				if len(fromList) != 3 {
-					return nil, fmt.Errorf("failed to split renamed-from format,"+
-						" length != 3: %v", fromPat)
+					return nil, fmt.Errorf("failed to split the old name,"+
+						" length != 3: %v", name)
 				}
 				toList := strings.Split(toPat, ":")
 				if len(toList) != 3 {
-					return nil, fmt.Errorf("failed to split renamed-to format,"+
+					return nil, fmt.Errorf("failed to split the rename-to string,"+
 						" length != 3: %v", toPat)
 				}
 
-				// Use original name if new pattern has regex
-				newNameList := make([]string, 3)
+				// Use the old name if toList has "*" or ""
+				// Otherwise, use the name in toList
+				newList := make([]string, 3)
 				for i := range toList {
 					if toList[i] == "" || toList[i] == "*" {
-						newNameList[i] = fromList[i]
+						newList[i] = fromList[i]
 					} else {
-						newNameList[i] = toList[i]
+						newList[i] = toList[i]
 					}
 				}
-				tk := strings.Join(newNameList, ":")
+				tk := strings.Join(newList, ":")
 				oom[tk] = obj
 				isRenamed = true
 			}

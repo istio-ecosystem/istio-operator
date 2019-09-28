@@ -935,6 +935,27 @@ spec:
 		want            string
 	}{
 		{
+			"ManifestDiffDeployWithRenamedFlagMultiResourceWildcard",
+			testDeploymentYaml + YAMLSeparator + testServiceYaml,
+			testDeploymentYamlRenamed + YAMLSeparator + testServiceYamlRenamed,
+			"Service:*:istio-pilot->::istio-control,Deployment::istio-citadel->::istio-ca",
+			"::",
+			"",
+			`
+
+Object Deployment:istio-system:istio-ca has diffs:
+
+metadata:
+  name: istio-citadel -> istio-ca
+
+
+Object Service:istio-system:istio-control has diffs:
+
+metadata:
+  name: istio-pilot -> istio-control
+`,
+		},
+		{
 			"ManifestDiffDeployWithRenamedFlagMultiResource",
 			testDeploymentYaml + YAMLSeparator + testServiceYaml,
 			testDeploymentYamlRenamed + YAMLSeparator + testServiceYamlRenamed,
