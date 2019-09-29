@@ -21,6 +21,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	binversion "istio.io/operator/version"
 	"istio.io/pkg/collateral"
 	"istio.io/pkg/version"
 )
@@ -40,6 +41,7 @@ func getRootCmd(args []string) *cobra.Command {
 
 	rootCmd.AddCommand(serverCmd())
 	rootCmd.AddCommand(version.CobraCommand())
+	version.Info.Version = binversion.OperatorVersionString
 	rootCmd.AddCommand(collateral.CobraCommand(rootCmd, &doc.GenManHeader{
 		Title:   "Istio Operator",
 		Section: "operator CLI",
