@@ -46,7 +46,7 @@ type ReverseTranslator struct {
 var (
 	// ReverseTranslators maps a minor version to a corresponding ReverseTranslator.
 	ReverseTranslators = map[version.MinorVersion]*ReverseTranslator{
-		version.NewMinorVersion(1, 3): {
+		version.NewMinorVersion(1, 4): {
 			APIMapping: map[string]*Translation{},
 			KubernetesPatternMapping: map[string]string{
 				"{{.ValueComponentName}}.podAntiAffinityLabelSelector": "{{.FeatureName}}.Components.{{.ComponentName}}.K8s." +
