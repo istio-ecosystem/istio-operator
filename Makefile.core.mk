@@ -17,6 +17,10 @@ ifeq ($(BUILD_WITH_CONTAINER),0)
 override GOBIN := $(GOPATH)/bin
 endif
 
+CONTROLLER_BUILD ?= build
+VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
+                 git describe --match=$(git rev-parse --short=8 HEAD) --always --dirty --abbrev=8)
+
 pwd := $(shell pwd)
 
 # make targets
@@ -50,10 +54,23 @@ generate: generate-values generate-types vfsgen
 
 clean: clean-values clean-types
 
-default: mesh
+default: mesh controller
 
 mesh: vfsgen
 	go build -o ${GOBIN}/mesh ./cmd/mesh.go
+
+controller: vfsgen
+	go build -o ${CONTROLLER_BUILD}/_output/bin/istio-operator ./cmd/manager
+
+controller-image: build-controller-image push-controller-image
+
+build-controller-image: controller
+	docker build -t istionightly/operator:latest -f ${CONTROLLER_BUILD}/Dockerfile .
+	docker tag istionightly/operator:latest istionightly/operator:${VERSION}
+
+push-controller-image:
+	docker push istionightly/operator:latest
+	docker push istionightly/operator:${VERSION}
 
 update-goldens:
 	export REFRESH_GOLDEN=true
