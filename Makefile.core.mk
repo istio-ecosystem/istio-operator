@@ -65,11 +65,9 @@ controller: vfsgen
 controller-image: build-controller-image push-controller-image
 
 build-controller-image: controller
-	docker build -t istionightly/operator:latest -f ${CONTROLLER_BUILD}/Dockerfile .
-	docker tag istionightly/operator:latest istionightly/operator:${VERSION}
+	docker build -t istionightly/operator:${VERSION} -f ${CONTROLLER_BUILD}/Dockerfile .
 
 push-controller-image:
-	docker push istionightly/operator:latest
 	docker push istionightly/operator:${VERSION}
 
 update-goldens:
