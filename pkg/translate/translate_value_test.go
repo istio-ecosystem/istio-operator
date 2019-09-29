@@ -112,11 +112,6 @@ configManagement:
    galley:
      enabled: false
  enabled: false
-cni:
-  components:
-    cni:
-      enabled: false
-  enabled: false
 security:
  components:
    namespace: istio-system
@@ -254,11 +249,6 @@ configManagement:
     galley:
       enabled: true
   enabled: true 
-cni:
-  components:
-    cni:
-      enabled: false
-  enabled: false
 security:
   components:
     namespace: istio-system
@@ -337,11 +327,6 @@ configManagement:
    galley:
      enabled: false
  enabled: false
-cni:
-  components:
-    cni:
-      enabled: false
-  enabled: false
 security:
  components:
    namespace: istio-system

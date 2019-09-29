@@ -35,11 +35,6 @@ configManagement:
             maxUnavailable: 25%
         tolerations: []
   enabled: true
-cni:
-  components:
-    cni:
-      enabled: false
-  enabled: false
 gateways:
   components:
     egressGateway:
