@@ -526,6 +526,17 @@ spec:
       rewriteAppHTTPProbe: false
       selfSigned: false
       injectLabel: istio-injection
+      alwaysInjectSelector: []
+      neverInjectSelector: []
+      nodeSelector: {}
+      podAntiAffinityLabelSelector: []
+      podAntiAffinityTermLabelSelector: []
+      replicaCount: 1
+      rollingMaxSurge: 100%
+      rollingMaxUnavailable: 25%
+      tolerations: []
+    istio_cni:
+      enabled: false
 
     prometheus:
       enabled: true

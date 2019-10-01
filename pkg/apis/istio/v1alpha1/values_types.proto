@@ -1333,6 +1333,14 @@ message SidecarInjectorConfig {
   google.protobuf.BoolValue selfSigned = 17;
 
   string injectLabel = 18;
+
+  TypeSliceOfMapStringInterface tolerations = 19;
+
+  // K8s rolling update strategy
+  TypeIntOrStringForPB rollingMaxSurge = 20;
+
+  // K8s rolling update strategy
+  TypeIntOrStringForPB rollingMaxUnavailable = 21;
 }
 
 // Configuration for stdio adapter in mixer, recommended for debug usage only.
