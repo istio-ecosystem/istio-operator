@@ -18,7 +18,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gogo/protobuf/types"
+	"github.com/golang/protobuf/ptypes/wrappers"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha1"
 )
@@ -38,7 +38,7 @@ func TestValidate(t *testing.T) {
 			name: "With CNI defined",
 			toValidate: &v1alpha1.Values{
 				IstioCni: &v1alpha1.CNIConfig{
-					Enabled: &types.BoolValue{Value: true},
+					Enabled: &wrappers.BoolValue{Value: true},
 				},
 			},
 			validated: true,
@@ -47,7 +47,7 @@ func TestValidate(t *testing.T) {
 			name: "With Slice",
 			toValidate: &v1alpha1.Values{
 				Gateways: &v1alpha1.GatewaysConfig{
-					Enabled: &types.BoolValue{Value: true},
+					Enabled: &wrappers.BoolValue{Value: true},
 					IstioEgressgateway: &v1alpha1.EgressGatewayConfig{
 						Ports: []*v1alpha1.PortsConfig{
 							{
