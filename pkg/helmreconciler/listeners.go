@@ -319,7 +319,7 @@ func (l *LoggingRenderingListener) EndPrune() error {
 // EndDelete logs the event and any error that occurred
 func (l *LoggingRenderingListener) EndDelete(instance runtime.Object, err error) error {
 	if err != nil {
-		log.Errorf("errors occurred during deletion", err)
+		log.Errorf("errors occurred during deletion: %s", err)
 	}
 	log.Info("end deleting resources")
 	return nil

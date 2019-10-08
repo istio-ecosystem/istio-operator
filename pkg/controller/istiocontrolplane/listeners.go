@@ -202,7 +202,7 @@ func (c *IstioDefaultChartCustomizer) waitForService(object runtime.Object) {
 			return c.serviceReady(service), nil
 		})
 		if err != nil {
-			log.Errorf("service failed to become ready in a timely manner", name)
+			log.Errorf("service failed to become ready in a timely manner: %s", name)
 		}
 	}
 }
