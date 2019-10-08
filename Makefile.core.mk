@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ISTIO_DOCKER_HUB ?= docker.io/istio
-DOCKER_VERSION ?= latest
+TAG ?= latest
 
 pwd := $(shell pwd)
 
@@ -65,14 +64,18 @@ mesh: vfsgen
 	go build -o $(GOPATH)/bin/mesh ./cmd/mesh.go
 	GOARCH=$(TARGET_ARCH) GOOS=$(TARGET_OS) go build -o /work/mesh ./cmd/mesh.go
 
+# NOTE: docker targets only work with local builds.
+
 controller: vfsgen
-	go build -o ${GOBIN}/istio-operator ./cmd/manager
+	go build -o $(GOPATH)/bin/istio-operator ./cmd/manager
 
 docker: controller
-	docker build -t ${ISTIO_DOCKER_HUB}/operator:${DOCKER_VERSION} -f build/Dockerfile .
+	mkdir -p build/out
+	cp $(GOPATH)/bin/istio-operator build/out/.
+	docker build -t $(HUB)/operator:$(TAG) -f build/Dockerfile .
 
 docker.push:
-	docker push ${ISTIO_DOCKER_HUB}/operator:${DOCKER_VERSION}
+	docker push $(HUB)/operator:$(TAG)
 
 docker.all: docker docker.push
 
