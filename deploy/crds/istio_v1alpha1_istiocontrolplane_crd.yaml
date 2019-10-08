@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: istiocontrolplanes.istio.io
 spec:
-  group: istio.io
+  group: install.istio.io
   names:
     kind: IstioControlPlane
     listKind: IstioControlPlaneList
@@ -31,8 +31,8 @@ spec:
           type: object
         status:
           type: object
-  version: v1alpha1
+  version: v1alpha2
   versions:
-  - name: v1alpha1
+  - name: v1alpha2
     served: true
     storage: true
