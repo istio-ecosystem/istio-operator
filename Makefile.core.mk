@@ -17,9 +17,8 @@ ifeq ($(BUILD_WITH_CONTAINER),0)
 override GOBIN := $(GOPATH)/bin
 endif
 
-CONTROLLER_BUILD ?= build
-VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
-                 git describe --match=$(git rev-parse --short=8 HEAD) --always --dirty --abbrev=8)
+ISTIO_DOCKER_HUB ?= docker.io/istio
+DOCKER_VERSION ?= latest
 
 pwd := $(shell pwd)
 
@@ -60,15 +59,15 @@ mesh: vfsgen
 	go build -o ${GOBIN}/mesh ./cmd/mesh.go
 
 controller: vfsgen
-	go build -o ${CONTROLLER_BUILD}/_output/bin/istio-operator ./cmd/manager
+	go build -o ${GOBIN}/istio-operator ./cmd/manager
 
-controller-image: build-controller-image push-controller-image
+docker: controller
+	docker build -t ${ISTIO_DOCKER_HUB}/operator:${DOCKER_VERSION} -f build/Dockerfile .
 
-build-controller-image: controller
-	docker build -t istionightly/operator:${VERSION} -f ${CONTROLLER_BUILD}/Dockerfile .
+docker.push:
+	docker push ${ISTIO_DOCKER_HUB}/operator:${DOCKER_VERSION}
 
-push-controller-image:
-	docker push istionightly/operator:${VERSION}
+docker.all: docker docker.push
 
 update-goldens:
 	export REFRESH_GOLDEN=true
