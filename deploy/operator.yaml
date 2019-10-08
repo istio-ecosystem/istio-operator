@@ -18,6 +18,7 @@ spec:
           image: docker.io/istio/controller
           command:
           - istio-operator
+          - server
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
