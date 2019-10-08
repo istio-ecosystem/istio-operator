@@ -18,7 +18,8 @@ package v1alpha2
 
 import (
 	"github.com/gogo/protobuf/jsonpb"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
@@ -51,5 +52,5 @@ func FromString(val string) IntOrStringForPB {
 type IstioControlPlaneList struct {
 	v1.TypeMeta `json:",inline"`
 	v1.ListMeta `json:"metadata,omitempty"`
-	Items           []IstioControlPlane `json:"items"`
+	Items       []IstioControlPlane `json:"items"`
 }
