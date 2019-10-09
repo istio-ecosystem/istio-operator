@@ -24,7 +24,7 @@ import (
 	"istio.io/operator/pkg/version"
 )
 
-func TestProtoToValuesV14(t *testing.T) {
+func TestProtoToValuesV13(t *testing.T) {
 	tests := []struct {
 		desc    string
 		yamlStr string
@@ -165,7 +165,7 @@ tracing:
 		},
 	}
 
-	tr, err := NewTranslator(version.NewMinorVersion(1, 4))
+	tr, err := NewTranslator(version.NewMinorVersion(1, 3))
 	if err != nil {
 		t.Fatal(err)
 	}

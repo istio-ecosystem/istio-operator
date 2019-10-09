@@ -372,7 +372,7 @@ autoInjection:
 `,
 		},
 	}
-	tr, err := NewReverseTranslator(version.NewMinorVersion(1, 4))
+	tr, err := NewReverseTranslator(version.NewMinorVersion(1, 3))
 	if err != nil {
 		t.Fatal("fail to get helm value.yaml translator")
 	}

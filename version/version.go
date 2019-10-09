@@ -32,6 +32,7 @@ var (
 	// It must be synced with the versions.yaml file.
 	SupportedVersions = []string{
 		"1.3.0",
+		"1.3.1",
 		"1.4.0",
 	}
 
