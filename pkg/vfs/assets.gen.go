@@ -215,13 +215,9 @@
 // ../../data/profiles/demo.yaml
 // ../../data/profiles/minimal.yaml
 // ../../data/profiles/sds.yaml
-<<<<<<< HEAD
 // ../../data/translateConfig/translateConfig-1.3.yaml
 // ../../data/translateConfig/translateConfig-1.4.yaml
 // ../../data/versions.yaml
-=======
-// ../../data/translateConfig/translateConfig-1.4.yaml
->>>>>>> fix test.
 // DO NOT EDIT!
 
 package vfs
@@ -32899,7 +32895,7 @@ func profilesSdsYaml() (*asset, error) {
 	return a, nil
 }
 
-var _translateconfigTranslateconfig14Yaml = []byte(`apiMapping:
+var _translateconfigTranslateconfig13Yaml = []byte(`apiMapping:
   Hub:
     outPath: "global.hub"
   Tag:
@@ -33113,17 +33109,17 @@ componentMaps:
     ToHelmValuesTreeRoot: "prometheus"
 `)
 
-func translateconfigTranslateconfig14YamlBytes() ([]byte, error) {
-	return _translateconfigTranslateconfig14Yaml, nil
+func translateconfigTranslateconfig13YamlBytes() ([]byte, error) {
+	return _translateconfigTranslateconfig13Yaml, nil
 }
 
-func translateconfigTranslateconfig14Yaml() (*asset, error) {
-	bytes, err := translateconfigTranslateconfig14YamlBytes()
+func translateconfigTranslateconfig13Yaml() (*asset, error) {
+	bytes, err := translateconfigTranslateconfig13YamlBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "translateConfig/translateConfig-1.4.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	info := bindataFileInfo{name: "translateConfig/translateConfig-1.3.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -33656,13 +33652,9 @@ var _bindata = map[string]func() (*asset, error){
 	"profiles/demo.yaml": profilesDemoYaml,
 	"profiles/minimal.yaml": profilesMinimalYaml,
 	"profiles/sds.yaml": profilesSdsYaml,
-<<<<<<< HEAD
 	"translateConfig/translateConfig-1.3.yaml": translateconfigTranslateconfig13Yaml,
 	"translateConfig/translateConfig-1.4.yaml": translateconfigTranslateconfig14Yaml,
 	"versions.yaml": versionsYaml,
-=======
-	"translateConfig/translateConfig-1.4.yaml": translateconfigTranslateconfig14Yaml,
->>>>>>> fix test.
 }
 
 // AssetDir returns the file names below a certain
@@ -34015,10 +34007,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 		"sds.yaml": &bintree{profilesSdsYaml, map[string]*bintree{}},
 	}},
 	"translateConfig": &bintree{nil, map[string]*bintree{
-<<<<<<< HEAD
 		"translateConfig-1.3.yaml": &bintree{translateconfigTranslateconfig13Yaml, map[string]*bintree{}},
-=======
->>>>>>> fix test.
 		"translateConfig-1.4.yaml": &bintree{translateconfigTranslateconfig14Yaml, map[string]*bintree{}},
 	}},
 	"versions.yaml": &bintree{versionsYaml, map[string]*bintree{}},
