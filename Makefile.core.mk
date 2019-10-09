@@ -54,6 +54,10 @@ default: mesh
 mesh: vfsgen
 	go build -o ${GOBIN}/mesh ./cmd/mesh.go
 
+update-goldens:
+	export REFRESH_GOLDEN=true
+	@go test ./cmd/mesh/...
+
 ########################
 
 TMPDIR := $(shell mktemp -d)

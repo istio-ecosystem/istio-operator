@@ -207,15 +207,6 @@ spec:
       release: istio
       istio: pilot
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: istio-pilot-service-account
-  namespace: istio-control
-  labels:
-    app: pilot
-    release: istio
----
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
@@ -236,6 +227,57 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: istio-pilot
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-pilot-istio-control
+  labels:
+    app: pilot
+    release: istio
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-pilot-istio-control
+subjects:
+  - kind: ServiceAccount
+    name: istio-pilot-service-account
+    namespace: istio-control
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: "default"
+  namespace: istio-control
+  labels:
+    release: istio
+spec:
+  host: "*.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: "api-server"
+  namespace: istio-control
+  labels:
+    release: istio
+spec:
+  host: "kubernetes.default.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-pilot-service-account
+  namespace: istio-control
+  labels:
+    app: pilot
+    release: istio
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -438,35 +480,6 @@ data:
                               cluster: out.galley.15019
                               timeout: 0.000s
 ---
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: "api-server"
-  namespace: istio-control
-  labels:
-    release: istio
-spec:
-  host: "kubernetes.default.svc.cluster.local"
-  trafficPolicy:
-    tls:
-      mode: DISABLE
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: istio-pilot-istio-control
-  labels:
-    app: pilot
-    release: istio
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: istio-pilot-istio-control
-subjects:
-  - kind: ServiceAccount
-    name: istio-pilot-service-account
-    namespace: istio-control
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -606,19 +619,6 @@ data:
       #
       # Address where istio Pilot service is running
       discoveryAddress: istio-pilot.istio-control:15011
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: "default"
-  namespace: istio-control
-  labels:
-    release: istio
-spec:
-  host: "*.local"
-  trafficPolicy:
-    tls:
-      mode: DISABLE
 ---
 
 # Resources for Prometheus component

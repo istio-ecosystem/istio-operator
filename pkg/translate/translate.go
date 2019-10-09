@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"html/template"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/ghodss/yaml"
@@ -575,7 +576,15 @@ func (t *Translator) protoToHelmValues(node interface{}, root map[string]interfa
 // setEnablementAndNamespaces translates the enablement and namespace value of each component in the baseYAML values
 // tree, based on feature/component inheritance relationship.
 func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp *v1alpha2.IstioControlPlaneSpec) error {
-	for cn, c := range t.ComponentMaps {
+	var keys []string
+	for k := range t.ComponentMaps {
+		keys = append(keys, string(k))
+	}
+	sort.Strings(keys)
+	len := len(keys)
+	for i := len - 1; i >= 0; i-- {
+		cn := name.ComponentName(keys[i])
+		c := t.ComponentMaps[cn]
 		e, err := t.IsComponentEnabled(cn, icp)
 		if err != nil {
 			return err
