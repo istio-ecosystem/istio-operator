@@ -581,8 +581,7 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp
 		keys = append(keys, string(k))
 	}
 	sort.Strings(keys)
-	len := len(keys)
-	for i := len - 1; i >= 0; i-- {
+	for i := len(keys) - 1; i >= 0; i-- {
 		cn := name.ComponentName(keys[i])
 		c := t.ComponentMaps[cn]
 		e, err := t.IsComponentEnabled(cn, icp)
