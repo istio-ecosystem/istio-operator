@@ -52,8 +52,6 @@ import (
 
 	kubectlutil "k8s.io/kubectl/pkg/util/deployment"
 
-	"istio.io/operator/internal/thirdparty/kube/deploymentutil"
-
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/version"
@@ -568,7 +566,7 @@ func isPodReady(pod *v1.Pod) bool {
 
 func deploymentsReady(deployments []deployment) bool {
 	for _, v := range deployments {
-		if !(v.replicaSets.Status.ReadyReplicas >= *v.deployment.Spec.Replicas-deploymentutil.MaxUnavailable(*v.deployment)) {
+		if !(v.replicaSets.Status.ReadyReplicas >= *v.deployment.Spec.Replicas) {
 			logAndPrint("Deployment is not ready: %s/%s", v.deployment.GetNamespace(), v.deployment.GetName())
 			return false
 		}
