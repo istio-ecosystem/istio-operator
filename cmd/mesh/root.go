@@ -65,6 +65,7 @@ func GetRootCmd(args []string) *cobra.Command {
 	rootCmd.AddCommand(mc)
 	rootCmd.AddCommand(pc)
 	rootCmd.AddCommand(version.CobraCommand())
+	rootCmd.AddCommand(Upgrade())
 
 	version.Info.Version = binversion.OperatorVersionString
 
