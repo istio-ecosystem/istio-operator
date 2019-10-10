@@ -22,7 +22,7 @@ import (
 
 const (
 	// OperatorVersionString is the version string of this operator binary.
-	OperatorVersionString = "1.3.0"
+	OperatorVersionString = "1.3.1"
 )
 
 var (
@@ -30,6 +30,7 @@ var (
 	// It must be synced with the versions.yaml file.
 	SupportedVersions = []string{
 		"1.3.0",
+		"1.3.1",
 	}
 
 	// OperatorBinaryVersion is the Istio operator version.

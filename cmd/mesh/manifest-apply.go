@@ -79,7 +79,7 @@ func manifestApplyCmd(rootArgs *rootArgs, maArgs *manifestApplyArgs) *cobra.Comm
 }
 
 func manifestApply(args *rootArgs, maArgs *manifestApplyArgs, l *logger) {
-	if err := configLogs(args); err != nil {
+	if err := configLogs(args.logToStdErr); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Could not configure logs: %s", err)
 		os.Exit(1)
 	}
