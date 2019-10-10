@@ -50,6 +50,8 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	kubectlutil "k8s.io/kubectl/pkg/util/deployment"
+
 	"istio.io/operator/internal/thirdparty/kube/deploymentutil"
 
 	"istio.io/operator/pkg/kubectlcmd"
@@ -474,7 +476,7 @@ func waitForResources(objects object.K8sObjects, opts *InstallOptions) error {
 				if err != nil {
 					return false, err
 				}
-				newReplicaSet, err := deploymentutil.GetNewReplicaSet(currentDeployment, cs.AppsV1())
+				_, _, newReplicaSet, err := kubectlutil.GetAllReplicaSets(currentDeployment, cs.AppsV1())
 				if err != nil || newReplicaSet == nil {
 					return false, err
 				}
