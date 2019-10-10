@@ -349,9 +349,9 @@ func waitUpgradeComplete(kubeClient kubernetes.ExecClient, istioNamespace string
 				"All Istio control plane pods are running with the same version.\n\n")
 			return
 		}
-		l.logAndPrint("Istio control plane pods are running with the multiple versions.")
+		l.logAndPrint("Istio control plane pods are running on multiple versions.")
 	}
-	l.logAndPrint("Upgrade rollout unfinished. Maximum number of attempts exceeded, quit...")
+	l.logAndFatal("Upgrade rollout unfinished. Maximum number of attempts exceeded, quit...")
 }
 
 func sleepSeconds(n int) {
