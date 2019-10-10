@@ -24,9 +24,9 @@ import (
 	"sync"
 	"time"
 
-	"istio.io/operator/pkg/util"
-
 	"github.com/ghodss/yaml"
+
+	"istio.io/operator/pkg/util"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 
@@ -49,7 +49,8 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	deploymentutil "k8s.io/kubernetes/pkg/controller/deployment/util"
+
+	"istio.io/operator/internal/thirdparty/kube/deploymentutil"
 
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/name"
