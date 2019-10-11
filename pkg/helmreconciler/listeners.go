@@ -258,25 +258,41 @@ func (l *LoggingRenderingListener) BeginResource(obj runtime.Object) (runtime.Ob
 
 // ResourceCreated logs the event
 func (l *LoggingRenderingListener) ResourceCreated(created runtime.Object) error {
-	log.Info("new resource created")
+	accessor := meta.NewAccessor()
+	kind, _ := accessor.Kind(created)
+	name, _ := accessor.Name(created)
+	version, _ := accessor.APIVersion(created)
+	log.Infof("resource created (%s, %s, %s)", version, kind, name)
 	return nil
 }
 
 // ResourceUpdated logs the event
 func (l *LoggingRenderingListener) ResourceUpdated(updated runtime.Object, old runtime.Object) error {
-	log.Info("existing resource updated")
+	accessor := meta.NewAccessor()
+	kind, _ := accessor.Kind(updated)
+	name, _ := accessor.Name(updated)
+	version, _ := accessor.APIVersion(updated)
+	log.Infof("resource updated (%s, %s, %s)", version, kind, name)
 	return nil
 }
 
 // ResourceDeleted logs the event
 func (l *LoggingRenderingListener) ResourceDeleted(deleted runtime.Object) error {
-	log.Info("resource deleted")
+	accessor := meta.NewAccessor()
+	kind, _ := accessor.Kind(deleted)
+	name, _ := accessor.Name(deleted)
+	version, _ := accessor.APIVersion(deleted)
+	log.Infof("resource deleted (%s, %s, %s)", version, kind, name)
 	return nil
 }
 
 // ResourceError logs the event and the error
 func (l *LoggingRenderingListener) ResourceError(obj runtime.Object, err error) error {
-	log.Errorf("error processing resource: %s", err)
+	accessor := meta.NewAccessor()
+	kind, _ := accessor.Kind(obj)
+	name, _ := accessor.Name(obj)
+	version, _ := accessor.APIVersion(obj)
+	log.Errorf("error processing resource (%s, %s, %s)", version, kind, name)
 	return nil
 }
 
