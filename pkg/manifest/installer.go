@@ -566,7 +566,7 @@ func isPodReady(pod *v1.Pod) bool {
 
 func deploymentsReady(deployments []deployment) bool {
 	for _, v := range deployments {
-		if !(v.replicaSets.Status.ReadyReplicas >= *v.deployment.Spec.Replicas) {
+		if v.replicaSets.Status.ReadyReplicas < *v.deployment.Spec.Replicas {
 			logAndPrint("Deployment is not ready: %s/%s", v.deployment.GetNamespace(), v.deployment.GetName())
 			return false
 		}
