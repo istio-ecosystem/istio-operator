@@ -17,11 +17,11 @@ package istiocontrolplane
 import (
 	"strconv"
 
-	"istio.io/operator/pkg/util"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/helmreconciler"
+	"istio.io/operator/pkg/util"
 )
 
 const (
