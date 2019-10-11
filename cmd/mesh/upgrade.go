@@ -327,7 +327,7 @@ func waitUpgradeComplete(kubeClient kubernetes.ExecClient, istioNamespace string
 			l.logAndPrintf("Failed to find Istio namespace: %v", istioNamespace)
 			continue
 		}
-		if identicalVersions(*meshInfo) &&  targetVer == (*meshInfo)[0].Info.Version {
+		if identicalVersions(*meshInfo) && targetVer == (*meshInfo)[0].Info.Version {
 			l.logAndPrintf("Upgrade rollout completed. " +
 				"All Istio control plane pods are running on the target version.\n\n")
 			return
