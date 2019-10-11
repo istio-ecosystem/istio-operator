@@ -79,7 +79,7 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 		"Wait, if set will wait until all Pods, Services, and minimum number of Pods "+
 			"of a Deployment are in a ready state before the command exits. "+
 			"It will wait for a maximum duration of --readiness-timeout seconds")
-	cmd.PersistentFlags().BoolVarP(&args.dryRun, "dryrun", "d", false,
+	cmd.PersistentFlags().BoolVarP(&args.dryRun, "dry-run", "d", false,
 		"Run the upgrade process without actually applying the changes")
 	cmd.PersistentFlags().BoolVar(&args.force, "force", false,
 		"Apply the upgrade without eligibility checks")
@@ -322,13 +322,9 @@ func retrieveControlPlaneVersion(kubeClient kubernetes.ExecClient, istioNamespac
 }
 
 func waitUpgradeComplete(kubeClient kubernetes.ExecClient, istioNamespace string, targetVer string) {
-	l.logAndPrintf("Start waiting for upgrade rollout to complete...")
-	sleepSeconds(20)
 	for i := 1; i <= 60; i++ {
-		if i != 1 {
-			sleepSeconds(10)
-		}
 		l.logAndPrintf("Waiting for upgrade rollout to complete, attempt #%v: ", i)
+		sleepSeconds(10)
 		meshInfo, e := kubeClient.GetIstioVersions(istioNamespace)
 		if e != nil {
 			l.logAndPrintf("Failed to retrieve Istio control plane version, error: %v", e)
@@ -338,28 +334,28 @@ func waitUpgradeComplete(kubeClient kubernetes.ExecClient, istioNamespace string
 			l.logAndPrintf("Failed to find Istio namespace: %v", istioNamespace)
 			continue
 		}
+		if identicalVersions(*meshInfo) &&  targetVer == (*meshInfo)[0].Info.Version {
+			l.logAndPrintf("Upgrade rollout completed. " +
+				"All Istio control plane pods are running on the target version.\n\n")
+			return
+		}
 		for _, remote := range *meshInfo {
 			if targetVer != remote.Info.Version {
 				l.logAndPrintf("Control Plane - %s pod - version %s does not match the target version %s",
 					remote.Component, remote.Info.Version, targetVer)
 			}
 		}
-		if identicalVersions(*meshInfo) {
-			l.logAndPrintf("Upgrade rollout completed. " +
-				"All Istio control plane pods are running with the same version.\n\n")
-			return
-		}
-		l.logAndPrint("Istio control plane pods are running on multiple versions.")
 	}
 	l.logAndFatal("Upgrade rollout unfinished. Maximum number of attempts exceeded, quit...")
 }
 
 func sleepSeconds(n int) {
-	l.logAndPrintf("Going to sleep for %v secounds ", n)
+	l.logAndPrintf("Going to sleep for %v secounds", n)
 	for i := 1; i <= n; i++ {
 		time.Sleep(time.Second)
 		fmt.Print(".")
 	}
+	fmt.Println()
 }
 
 func retrieveClientVersion() string {
