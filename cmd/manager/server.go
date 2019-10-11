@@ -34,8 +34,8 @@ import (
 	"istio.io/pkg/log"
 )
 
-// Change below variables to serve metrics on different host or port.
-var (
+// Should match deploy/service.yaml
+const (
 	metricsHost       = "0.0.0.0"
 	metricsPort int32 = 8383
 )
