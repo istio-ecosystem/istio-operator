@@ -166,6 +166,11 @@ package v1alpha2;
 
 // IstioControlPlane is a CustomResourceDefinition (CRD) describing an Istio control plane.
 message IstioControlPlane {
+    // ObjectMeta is v11.ObjectMeta.
+    TypeObjectMeta object_meta = 1;
+    // TypeMeta is v11.TypeMeta.
+    TypeTypeMeta type_meta = 2;
+
     // Spec defines the desired state of IstioControlPlane.
     IstioControlPlaneSpec spec = 3;
     // Status reports the status of the Istio control plane.
@@ -609,3 +614,9 @@ message TypeInterface {}
 
 // GOTYPE: *IntOrStringForPB
 message TypeIntOrStringForPB {}
+
+// GOTYPE: _ *v11.ObjectMeta
+message TypeObjectMeta{}
+
+// GOTYPE: _ *v11.TypeMeta
+message TypeTypeMeta{}
