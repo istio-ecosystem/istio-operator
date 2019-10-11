@@ -90,7 +90,8 @@ func Upgrade() *cobra.Command {
 		Short:   "Upgrade Istio control plane in-place",
 		Example: `mesh upgrade`,
 		RunE: func(cmd *cobra.Command, args []string) (e error) {
-			return upgrade(cmd, rootArgs, macArgs)
+			l = newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
+			return upgrade(rootArgs, macArgs)
 		},
 	}
 	addFlags(cmd, rootArgs)
@@ -98,8 +99,8 @@ func Upgrade() *cobra.Command {
 	return cmd
 }
 
-func upgrade(cmd *cobra.Command, rootArgs *rootArgs, args *upgradeArgs) (err error) {
-	initLog(rootArgs.logToStdErr, cmd)
+func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
+	initLogsOrExit(rootArgs)
 	kubeClient := getKubeClient(args.kubeConfigPath, args.context)
 	currentVer := retrieveControlPlaneVersion(kubeClient, args.istioNamespace)
 	targetVer := retrieveClientVersion()
@@ -121,13 +122,6 @@ func upgrade(cmd *cobra.Command, rootArgs *rootArgs, args *upgradeArgs) (err err
 	}
 	l.logAndPrintf("Upgrade submitted. Please use `istioctl version` to check the current versions.")
 	return
-}
-
-func initLog(logToStdErr bool, cmd *cobra.Command) {
-	l = newLogger(logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
-	if err := configLogs(logToStdErr); err != nil {
-		l.logAndFatalf("Failed to configure logs: %s", err)
-	}
 }
 
 func applyUpgradeManifest(targetVer, inFilename,
