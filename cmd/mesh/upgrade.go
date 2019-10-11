@@ -58,8 +58,6 @@ type upgradeArgs struct {
 	wait bool
 	// yes means don't ask for confirmation (asking for confirmation not implemented).
 	yes bool
-	// dryRun means running the upgrade process without actually applying the changes.
-	dryRun bool
 	// force means directly applying the upgrade without eligibility checks.
 	force bool
 }
@@ -79,8 +77,6 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 		"Wait, if set will wait until all Pods, Services, and minimum number of Pods "+
 			"of a Deployment are in a ready state before the command exits. "+
 			"It will wait for a maximum duration of --readiness-timeout seconds")
-	cmd.PersistentFlags().BoolVarP(&args.dryRun, "dry-run", "d", false,
-		"Run the upgrade process without actually applying the changes")
 	cmd.PersistentFlags().BoolVar(&args.force, "force", false,
 		"Apply the upgrade without eligibility checks")
 }
@@ -88,20 +84,22 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 // Upgrade command upgrades Istio control plane in-place with eligibility checks
 func Upgrade() *cobra.Command {
 	macArgs := &upgradeArgs{}
+	rootArgs := &rootArgs{}
 	cmd := &cobra.Command{
 		Use:     "upgrade",
 		Short:   "Upgrade Istio control plane in-place",
 		Example: `mesh upgrade`,
 		RunE: func(cmd *cobra.Command, args []string) (e error) {
-			return upgrade(cmd, macArgs)
+			return upgrade(cmd, rootArgs, macArgs)
 		},
 	}
+	addFlags(cmd, rootArgs)
 	addUpgradeFlags(cmd, macArgs)
 	return cmd
 }
 
-func upgrade(cmd *cobra.Command, args *upgradeArgs) (err error) {
-	initLog(cmd)
+func upgrade(cmd *cobra.Command, rootArgs *rootArgs, args *upgradeArgs) (err error) {
+	initLog(rootArgs.logToStdErr, cmd)
 	kubeClient := getKubeClient(args.kubeConfigPath, args.context)
 	currentVer := retrieveControlPlaneVersion(kubeClient, args.istioNamespace)
 	targetVer := retrieveClientVersion()
@@ -113,7 +111,8 @@ func upgrade(cmd *cobra.Command, args *upgradeArgs) (err error) {
 		runUpgradeHooks(kubeClient, args.istioNamespace,
 			currentVer, targetVer, currentValues, targetValues)
 	}
-	applyUpgradeManifest(targetVer, args.inFilename, args.kubeConfigPath, args.context, args.dryRun)
+	applyUpgradeManifest(targetVer, args.inFilename, args.kubeConfigPath,
+		args.context, rootArgs.dryRun, rootArgs.verbose)
 	if args.wait {
 		waitUpgradeComplete(kubeClient, args.istioNamespace, targetVer)
 		upgradeVer := retrieveControlPlaneVersion(kubeClient, args.istioNamespace)
@@ -124,15 +123,15 @@ func upgrade(cmd *cobra.Command, args *upgradeArgs) (err error) {
 	return
 }
 
-func initLog(cmd *cobra.Command) {
-	l = newLogger(false, cmd.OutOrStdout(), cmd.OutOrStderr())
-	if err := configLogs(false); err != nil {
+func initLog(logToStdErr bool, cmd *cobra.Command) {
+	l = newLogger(logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
+	if err := configLogs(logToStdErr); err != nil {
 		l.logAndFatalf("Failed to configure logs: %s", err)
 	}
 }
 
 func applyUpgradeManifest(targetVer, inFilename,
-	kubeConfigPath, context string, dryRun bool) {
+	kubeConfigPath, context string, dryRun, verbose bool) {
 	imageSourceOverlay := getImageSourceOverlay(targetVer)
 
 	manifests, err := genManifests(inFilename, imageSourceOverlay)
@@ -141,7 +140,7 @@ func applyUpgradeManifest(targetVer, inFilename,
 	}
 	opts := &manifest.InstallOptions{
 		DryRun:      dryRun,
-		Verbose:     false,
+		Verbose:     verbose,
 		WaitTimeout: 300 * time.Second,
 		Kubeconfig:  kubeConfigPath,
 		Context:     context,
