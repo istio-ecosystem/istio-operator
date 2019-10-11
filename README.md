@@ -94,13 +94,13 @@ The `mesh` command supports the following flags:
 
 #### Basic default manifest
 
-The following command generates a manifest with the compiled-in profiles and charts:
+The following command generates a manifest with the compiled-in `default` profile and charts:
 
 ```bash
 mesh manifest generate
 ```
 
-You can see these sources for the compiled-in profiles in the repo under `data/profiles`. `Charts/profiles` will be released separately and the mesh command will point to a version of the released charts by default.
+You can see these sources for the compiled-in profiles and charts in the repo under `data/`. These profiles and charts are also included in the Istio release tar. 
 
 #### Output to dirs
 
