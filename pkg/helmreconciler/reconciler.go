@@ -21,7 +21,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/helm/pkg/releaseutil"
 
-	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 
 	"istio.io/pkg/log"
@@ -31,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"istio.io/operator/pkg/name"
+	"istio.io/operator/pkg/util"
 )
 
 // HelmReconciler reconciles resources rendered by a set of helm charts for a specific instances of a custom resource,
