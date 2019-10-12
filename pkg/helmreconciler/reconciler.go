@@ -18,11 +18,11 @@ import (
 	"sync"
 
 	"github.com/ghodss/yaml"
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/helm/pkg/releaseutil"
 
 	"istio.io/operator/pkg/util"
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
 
 	"istio.io/pkg/log"
 
