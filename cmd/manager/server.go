@@ -97,7 +97,7 @@ func run() {
 
 	leaderElectionNS, err := getLeaderElectionNamespace()
 	if err != nil {
-		log.Fatalf("Failed to get watch namespace: %v", err)
+		log.Fatalf("Failed to get leader election namespace: %v", err)
 	}
 
 	// Get a config to talk to the apiserver
