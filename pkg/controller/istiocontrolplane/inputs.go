@@ -81,10 +81,10 @@ func (i *IstioRenderingInput) GetTargetNamespace() string {
 }
 
 // GetProcessingOrder returns the order in which the rendered charts should be processed.
-func (i *IstioRenderingInput) GetProcessingOrder(manifests helmreconciler.ChartManifestsMap) (helmreconciler.ComponentNameToListMap, helmreconciler.DependencyWaitCh) {
+func (i *IstioRenderingInput) GetProcessingOrder(m helmreconciler.ChartManifestsMap) (helmreconciler.ComponentNameToListMap, helmreconciler.DependencyWaitCh) {
 	componentNameList := make([]name.ComponentName, 0)
 	dependencyWaitCh := make(helmreconciler.DependencyWaitCh)
-	for c, _ := range manifests {
+	for c := range m {
 		cn := name.ComponentName(c)
 		if cn == name.IstioBaseComponentName {
 			continue
