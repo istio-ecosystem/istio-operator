@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"istio.io/pkg/log"
@@ -55,4 +56,9 @@ func IsFilePath(path string) bool {
 func IsHTTPURL(path string) bool {
 	u, err := url.Parse(path)
 	return err == nil && u.Host != "" && (u.Scheme == "http" || u.Scheme == "https")
+}
+
+// GenerateKeyFromUnstructured generate key from Unstructured: name/namespace/kind
+func GenerateKeyFromUnstructured(u *unstructured.Unstructured) string {
+	return strings.Join([]string{u.GetName(), u.GetNamespace(), u.GroupVersionKind().Kind}, "/")
 }

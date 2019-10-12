@@ -17,7 +17,10 @@ package helmreconciler
 import (
 	"sync"
 
+	"github.com/ghodss/yaml"
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/helm/pkg/releaseutil"
 
 	"istio.io/operator/pkg/util"
 
@@ -101,12 +104,12 @@ func (h *HelmReconciler) Reconcile() error {
 		return err
 	}
 
-	status := h.processRecursive(manifestMap)
+	status, objectMap := h.processRecursive(manifestMap)
 
 	// Delete any resources not in the manifest but managed by operator.
 	var errs util.Errors
 	errs = util.AppendErr(errs, h.customizer.Listener().BeginPrune(false))
-	errs = util.AppendErr(errs, h.Prune(false))
+	errs = util.AppendErr(errs, h.Prune(false, objectMap))
 	errs = util.AppendErr(errs, h.customizer.Listener().EndPrune())
 
 	errs = util.AppendErr(errs, h.customizer.Listener().EndReconcile(h.instance, status))
@@ -116,7 +119,7 @@ func (h *HelmReconciler) Reconcile() error {
 
 // processRecursive processes the given manifests in an order of dependencies defined in h. Dependencies are a tree,
 // where a child must wait for the parent to complete before starting.
-func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2.InstallStatus {
+func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) (*v1alpha2.InstallStatus, map[string]bool) {
 	deps, dch := h.customizer.Input().GetProcessingOrder(manifests)
 	out := &v1alpha2.InstallStatus{Status: make(map[string]*v1alpha2.InstallStatus_VersionStatus)}
 
@@ -162,8 +165,37 @@ func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2
 		}()
 	}
 	wg.Wait()
-
-	return out
+	objectMap := make(map[string]bool)
+	for _, m := range manifests {
+		objects := releaseutil.SplitManifests(m[0].Content)
+		for _, raw := range objects {
+			rawJSON, err := yaml.YAMLToJSON([]byte(raw))
+			if err != nil {
+				log.Infof("unable to convert raw data to JSON: %s", err)
+				continue
+			}
+			obj := &unstructured.Unstructured{}
+			_, _, err = unstructured.UnstructuredJSONScheme.Decode(rawJSON, nil, obj)
+			if err != nil {
+				continue
+			}
+			if obj.GetKind() == "List" {
+				list, err := obj.ToList()
+				if err != nil {
+					log.Infof("error converting List object: %s", err)
+					continue
+				}
+				for _, item := range list.Items {
+					key := util.GenerateKeyFromUnstructured(&item)
+					objectMap[key] = true
+				}
+			} else {
+				key := util.GenerateKeyFromUnstructured(obj)
+				objectMap[key] = true
+			}
+		}
+	}
+	return out, objectMap
 }
 
 // Delete resources associated with the custom resource instance
@@ -180,7 +212,7 @@ func (h *HelmReconciler) Delete() error {
 	if err != nil {
 		allErrors = append(allErrors, err)
 	}
-	err = h.Prune(true)
+	err = h.Prune(true, nil)
 	if err != nil {
 		allErrors = append(allErrors, err)
 	}
