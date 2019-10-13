@@ -67,11 +67,12 @@ func (l *logger) logAndPrint(v ...interface{}) {
 		return
 	}
 	s := fmt.Sprint(v...)
-	if !l.logToStdErr {
-		l.print(s)
-		l.print("\n")
+	if l.logToStdErr {
+		l.printErr(s)
+		l.printErr("\n")
+	} else {
+		log.Infof(s)
 	}
-	log.Infof(s)
 }
 
 func (l *logger) logAndFatal(v ...interface{}) {
@@ -81,6 +82,10 @@ func (l *logger) logAndFatal(v ...interface{}) {
 
 func (l *logger) print(s string) {
 	_, _ = l.stdOut.Write([]byte(s))
+}
+
+func (l *logger) printErr(s string) {
+	_, _ = l.stdErr.Write([]byte(s))
 }
 
 func refreshGoldenFiles() bool {
