@@ -112,10 +112,12 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 		checkUpgradeValues(currentValues, targetValues, args.yes)
 	}
 
-	runUpgradeHooks(kubeClient, istioNamespace,
-		currentVer, targetVer, currentValues, targetValues)
+	runPreUpgradeHooks(kubeClient, istioNamespace,
+		currentVer, targetVer, currentValues, targetValues, rootArgs.dryRun)
 	applyUpgradeManifest(targetVer, args.inFilename, args.kubeConfigPath,
 		args.context, rootArgs.dryRun, rootArgs.verbose)
+	runPostUpgradeHooks(kubeClient, istioNamespace,
+		currentVer, targetVer, currentValues, targetValues, rootArgs.dryRun)
 
 	if args.wait {
 		waitUpgradeComplete(kubeClient, istioNamespace, targetVer)
@@ -322,6 +324,7 @@ func retrieveControlPlaneVersion(kubeClient kubernetes.ExecClient, istioNamespac
 	for _, remote := range *meshInfo {
 		l.logAndPrintf("Control Plane - %s pod - version: %s", remote.Component, remote.Info.Version)
 	}
+	l.logAndPrint("")
 
 	return coalesceVersions(meshInfo)
 }
