@@ -17,6 +17,7 @@ package mesh
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -33,6 +34,15 @@ import (
 	"istio.io/operator/pkg/manifest"
 	pkgversion "istio.io/operator/pkg/version"
 	opversion "istio.io/operator/version"
+)
+
+const (
+	// The maximum duration the command will wait until the apply deployment reaches a ready state
+	upgradeWaitSecWhenApply = 300
+	// The time that the command will wait between each check of the upgraded version.
+	upgradeWaitSecCheckVerPerLoop = 10
+	// The maximum number of attempts that the command will check for the upgraded version.
+	upgradeWaitCheckVerMaxAttempts = 60
 )
 
 var (
@@ -69,13 +79,14 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 	cmd.PersistentFlags().StringVar(&args.context, "context", "",
 		"The name of the kubeconfig context to use")
 	cmd.PersistentFlags().BoolVarP(&args.yes, "yes", "y", false,
-		"Do not ask for confirmation")
+		"If yes, skips the prompting confirmation for value changes in this upgrade")
 	cmd.PersistentFlags().BoolVarP(&args.wait, "wait", "w", false,
 		"Wait, if set will wait until all Pods, Services, and minimum number of Pods "+
 			"of a Deployment are in a ready state before the command exits. "+
-			"It will wait for a maximum duration of --readiness-timeout seconds")
+			"It will wait for a maximum duration of "+strconv.Itoa(upgradeWaitSecWhenApply)+" seconds")
 	cmd.PersistentFlags().BoolVar(&args.force, "force", false,
-		"Apply the upgrade without eligibility checks")
+		"Apply the upgrade without eligibility checks and testing for changes "+
+			"in profile default values")
 	cmd.PersistentFlags().StringVarP(&args.versionsURI, "versionsURI", "u",
 		versionsMapURL, "URI for operator versions to Istio versions map")
 }
@@ -85,9 +96,9 @@ func Upgrade() *cobra.Command {
 	macArgs := &upgradeArgs{}
 	rootArgs := &rootArgs{}
 	cmd := &cobra.Command{
-		Use:     "upgrade",
-		Short:   "Upgrade Istio control plane in-place",
-		Long:    "The mesh upgrade command checks for upgrade version eligibility and," +
+		Use:   "upgrade",
+		Short: "Upgrade Istio control plane in-place",
+		Long: "The mesh upgrade command checks for upgrade version eligibility and," +
 			" if eligible, upgrades the Istio control plane components in-place. Warning: " +
 			"traffic may be disrupted during upgrade. Please ensure PodDisruptionBudgets " +
 			"are defined to maintain service continuity.",
@@ -152,7 +163,7 @@ func applyUpgradeManifest(targetVer, inFilename,
 	opts := &manifest.InstallOptions{
 		DryRun:      dryRun,
 		Verbose:     verbose,
-		WaitTimeout: 300 * time.Second,
+		WaitTimeout: upgradeWaitSecWhenApply * time.Second,
 		Kubeconfig:  kubeConfigPath,
 		Context:     context,
 	}
@@ -343,9 +354,9 @@ func retrieveControlPlaneVersion(kubeClient kubernetes.ExecClient, istioNamespac
 // waitUpgradeComplete waits for the upgrade to complete by periodically comparing the current component version
 // to the target version.
 func waitUpgradeComplete(kubeClient kubernetes.ExecClient, istioNamespace string, targetVer string) {
-	for i := 1; i <= 60; i++ {
+	for i := 1; i <= upgradeWaitCheckVerMaxAttempts; i++ {
 		l.logAndPrintf("Waiting for upgrade rollout to complete, attempt #%v: ", i)
-		sleepSeconds(10)
+		sleepSeconds(upgradeWaitSecCheckVerPerLoop)
 		meshInfo, e := kubeClient.GetIstioVersions(istioNamespace)
 		if e != nil {
 			l.logAndPrintf("Failed to retrieve Istio control plane version, error: %v", e)
