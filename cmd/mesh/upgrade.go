@@ -17,7 +17,6 @@ package mesh
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -25,24 +24,18 @@ import (
 	"github.com/spf13/cobra"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	istioVersion "istio.io/pkg/version"
+	meshInfoVersion "istio.io/pkg/version"
+
+	goversion "github.com/hashicorp/go-version"
 
 	"istio.io/operator/pkg/compare"
 	"istio.io/operator/pkg/kubernetes"
 	"istio.io/operator/pkg/manifest"
+	pkgversion "istio.io/operator/pkg/version"
 	opversion "istio.io/operator/version"
 )
 
 var (
-	supportedVersionMap = map[string]map[string]bool{
-		"1.3.0": {
-			"1.3.1": true,
-			"1.3.2": true,
-		},
-		"1.3.1": {
-			"1.3.2": true,
-		},
-	}
 	l *logger
 )
 
@@ -59,6 +52,8 @@ type upgradeArgs struct {
 	yes bool
 	// force means directly applying the upgrade without eligibility checks.
 	force bool
+	// versionsURI is a URI pointing to a YAML formatted versions mapping.
+	versionsURI string
 }
 
 // addUpgradeFlags adds upgrade related flags into cobra command
@@ -77,6 +72,8 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 			"It will wait for a maximum duration of --readiness-timeout seconds")
 	cmd.PersistentFlags().BoolVar(&args.force, "force", false,
 		"Apply the upgrade without eligibility checks")
+	cmd.PersistentFlags().StringVarP(&args.versionsURI, "versionsURI", "u",
+		versionsMapURL, "URI for operator versions to Istio versions map")
 }
 
 // Upgrade command upgrades Istio control plane in-place with eligibility checks
@@ -100,7 +97,9 @@ func Upgrade() *cobra.Command {
 // upgrade is the main function for Upgrade command
 func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 	initLogsOrExit(rootArgs)
-	targetVer := retrieveClientVersion()
+	targetVer := opversion.OperatorVersionString
+	l.logAndPrintf("Client - istioctl version: %s\n", targetVer)
+
 	targetValues := genValuesFromFile(targetVer, args.inFilename, args.force)
 	targetICPS := genICPSFromFile(args.inFilename, args.force)
 
@@ -111,7 +110,7 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 	currentValues := readValuesFromInjectorConfigMap(kubeClient, istioNamespace)
 
 	if !args.force {
-		checkSupportedVersions(currentVer, targetVer)
+		checkSupportedVersions(currentVer, targetVer, args.versionsURI)
 		checkUpgradeValues(currentValues, targetValues, args.yes)
 	}
 
@@ -262,62 +261,56 @@ func readValuesFromInjectorConfigMap(kubeClient kubernetes.ExecClient, istioName
 }
 
 // checkSupportedVersions checks if the upgrade cur -> tar is supported by the tool
-func checkSupportedVersions(cur string, tar string) {
+func checkSupportedVersions(cur, tar, versionsURI string) {
 	if cur == tar {
 		l.logAndFatalf("Abort. The current version %v equals to the target version %v.", cur, tar)
 	}
 
-	curMajor, curMinor, curPatch := parseVersionFormat(cur)
-	tarMajor, tarMinor, tarPatch := parseVersionFormat(tar)
+	curPkgVer, err := pkgversion.NewVersionFromString(cur)
+	if err != nil {
+		l.logAndFatalf("Abort. Incorrect version: %v.", cur)
+	}
 
-	if curMajor != tarMajor {
+	tarPkgVer, err := pkgversion.NewVersionFromString(tar)
+	if err != nil {
+		l.logAndFatalf("Abort. Incorrect version: %v.", tar)
+	}
+
+	if curPkgVer.Major != tarPkgVer.Major {
 		l.logAndFatalf("Abort. Major version upgrade is not supported: %v -> %v.", cur, tar)
 	}
 
-	if curMinor != tarMinor {
+	if curPkgVer.Minor != tarPkgVer.Minor {
 		l.logAndFatalf("Abort. Minor version upgrade is not supported: %v -> %v.", cur, tar)
 	}
 
-	if curPatch == tarPatch {
+	if curPkgVer.Patch == tarPkgVer.Patch {
 		l.logAndFatalf("Abort. The target version has been installed in the cluster.\n"+
 			"istioctl: %v\nIstio control plane: %v", cur, tar)
 	}
 
-	if curPatch > tarPatch {
+	if curPkgVer.Patch > tarPkgVer.Patch {
 		l.logAndFatalf("Abort. A newer version has been installed in the cluster.\n"+
 			"istioctl: %v\nIstio control plane: %v", cur, tar)
 	}
 
-	if !supportedVersionMap[cur][tar] {
+	tarGoVersion, err := goversion.NewVersion(tar)
+	if err != nil {
+		l.logAndFatalf("Abort. Failed to parse the target version: %v", tar)
+	}
+
+	compatibleMap := getVersionCompatibleMap(versionsURI, tarGoVersion, l)
+
+	curGoVersion, err := goversion.NewVersion(cur)
+	if err != nil {
+		l.logAndFatalf("Abort. Failed to parse the current version: %v", cur)
+	}
+
+	if !compatibleMap.SupportedIstioVersions.Check(curGoVersion) {
 		l.logAndFatalf("Abort. Upgrade is currently not supported: %v -> %v.", cur, tar)
 	}
 
-	l.logAndPrintf("Version check passed: %v -> %v.\n", cur, tar)
-}
-
-// parseVersionFormat parses Istio version string into 3 parts: major, minor, patch
-func parseVersionFormat(ver string) (int, int, int) {
-	fullVerArray := strings.Split(ver, "-")
-	if len(fullVerArray) == 0 {
-		l.logAndFatalf("Abort. Incorrect version: %v.", ver)
-	}
-	verArray := strings.Split(fullVerArray[0], ".")
-	if len(verArray) != 3 {
-		l.logAndFatalf("Abort. Incorrect version: %v.", ver)
-	}
-	major, err := strconv.Atoi(verArray[0])
-	if err != nil {
-		l.logAndFatalf("Abort. Incorrect marjor version: %v.", verArray[0])
-	}
-	minor, err := strconv.Atoi(verArray[1])
-	if err != nil {
-		l.logAndFatalf("Abort. Incorrect minor version: %v.", verArray[1])
-	}
-	patch, err := strconv.Atoi(verArray[2])
-	if err != nil {
-		l.logAndFatalf("Abort. Incorrect patch version: %v.", verArray[2])
-	}
-	return major, minor, patch
+	l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", cur, tar)
 }
 
 // retrieveControlPlaneVersion retrieves the version number from the Istio control plane
@@ -379,14 +372,8 @@ func sleepSeconds(n int) {
 	fmt.Println()
 }
 
-// retrieveClientVersion gets the current client's version
-func retrieveClientVersion() string {
-	l.logAndPrintf("Client - istioctl version: %s\n", istioVersion.Info.Version)
-	return istioVersion.Info.Version
-}
-
 // coalesceVersions coalesces all Istio control plane components versions
-func coalesceVersions(remoteVersion *istioVersion.MeshInfo) string {
+func coalesceVersions(remoteVersion *meshInfoVersion.MeshInfo) string {
 	if !identicalVersions(*remoteVersion) {
 		l.logAndFatalf("Different versions of Istio components found: %v", remoteVersion)
 	}
@@ -394,7 +381,7 @@ func coalesceVersions(remoteVersion *istioVersion.MeshInfo) string {
 }
 
 // identicalVersions checks if Istio control plane components are on the same version
-func identicalVersions(remoteVersion istioVersion.MeshInfo) bool {
+func identicalVersions(remoteVersion meshInfoVersion.MeshInfo) bool {
 	exemplar := remoteVersion[0].Info
 	for i := 1; i < len(remoteVersion); i++ {
 		candidate := (remoteVersion)[i].Info
