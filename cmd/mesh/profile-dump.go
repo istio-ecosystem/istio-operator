@@ -20,7 +20,6 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
-
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/component/component"
 	"istio.io/operator/pkg/helm"
@@ -88,6 +87,14 @@ func profileDump(args []string, rootArgs *rootArgs, pdArgs *profileDumpArgs, l *
 
 func genProfile(helmValues bool, inFilename, profile, setOverlayYAML, configPath string, force bool, l *logger) (string, error) {
 	overlayYAML := ""
+	set := make(map[string]interface{})
+	err := yaml.Unmarshal([]byte(setOverlayYAML), &set)
+	if err != nil {
+		return "", fmt.Errorf("could not Unmarshal overlay Set%s: %s", setOverlayYAML, err)
+	}
+	if setProfile, ok := set["profile"]; ok {
+		profile = setProfile.(string)
+	}
 	var overlayICPS *v1alpha2.IstioControlPlaneSpec
 	if inFilename != "" {
 		b, err := ioutil.ReadFile(inFilename)
