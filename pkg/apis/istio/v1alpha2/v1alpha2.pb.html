@@ -4,7 +4,7 @@ description: Configuration for Istio control plane installation through the Oper
 location: https://istio.io/docs/reference/config/istio.operator.v1alpha12.pb.html
 layout: protoc-gen-docs
 generator: protoc-gen-docs
-number_of_entries: 57
+number_of_entries: 55
 ---
 <p>IstioControlPlane is a schema for both defining and customizing Istio control plane installations.
 Running the operator with an empty user defined InstallSpec results in an control plane with default values, using the
@@ -972,33 +972,13 @@ No
 </tr>
 </thead>
 <tbody>
-<tr id="IstioControlPlane-object_meta">
-<td><code>objectMeta</code></td>
-<td><code><a href="#TypeObjectMeta">TypeObjectMeta</a></code></td>
-<td>
-<p>ObjectMeta is v11.ObjectMeta.</p>
-
-</td>
-<td>
-No
-</td>
-</tr>
-<tr id="IstioControlPlane-type_meta">
-<td><code>typeMeta</code></td>
-<td><code><a href="#TypeTypeMeta">TypeTypeMeta</a></code></td>
-<td>
-<p>TypeMeta is v11.TypeMeta.</p>
-
-</td>
-<td>
-No
-</td>
-</tr>
 <tr id="IstioControlPlane-spec">
 <td><code>spec</code></td>
 <td><code><a href="#IstioControlPlaneSpec">IstioControlPlaneSpec</a></code></td>
 <td>
-<p>Spec defines the desired state of IstioControlPlane.</p>
+<p>GOFIELD:metav1.TypeMeta <code>json:&quot;,inline&quot;</code>
+GOFIELD:metav1.ObjectMeta <code>json:&quot;metadata,omitempty&quot; protobuf:&quot;bytes,1,opt,name=metadata&quot;</code>
+Spec defines the desired state of IstioControlPlane.</p>
 
 </td>
 <td>
@@ -2286,16 +2266,6 @@ No
 <h2 id="TypeMapStringInterface">TypeMapStringInterface</h2>
 <section>
 <p>GOTYPE: map[string]interface&lbrace;}</p>
-
-</section>
-<h2 id="TypeObjectMeta">TypeObjectMeta</h2>
-<section>
-<p>GOTYPE: _ *v11.ObjectMeta</p>
-
-</section>
-<h2 id="TypeTypeMeta">TypeTypeMeta</h2>
-<section>
-<p>GOTYPE: _ *v11.TypeMeta</p>
 
 </section>
 <h2 id="k8s-io-api-autoscaling-v2beta1-HorizontalPodAutoscalerSpec">k8s.io.api.autoscaling.v2beta1.HorizontalPodAutoscalerSpec</h2>

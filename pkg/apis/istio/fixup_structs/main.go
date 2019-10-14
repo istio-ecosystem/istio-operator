@@ -42,10 +42,18 @@ type TypeMapStringInterface struct {
 
 The code below removes all the generated code for the marker types, and replaces any instances
 of those types with the real types they represent.
+
+To make the resulting fields anonymous, insert a _ after GOTYPE e.g. // GOTYPE: _ myAnonymousType
+
+An additional mechanism for adding fields is to insert // GOFIELD: in a structure. This binary will simply remove the
+// GOFIELD: and leave behind whatever is after it. The difference with this approach is that no additional Go struct
+are generated for this type.
+
 */
 
 const (
-	goTypeToken = "// GOTYPE: "
+	goTypeToken  = "// GOTYPE:"
+	goFieldToken = "// GOFIELD:"
 )
 
 var (
@@ -60,6 +68,7 @@ var (
 	// replaceMapping substitutes the value for the key in all files.
 	replaceMapping = map[string]string{
 		"github.com/gogo/protobuf/protobuf/google/protobuf": "github.com/gogo/protobuf/types",
+		goFieldToken: " ",
 	}
 )
 
@@ -144,6 +153,7 @@ func main() {
 	if strings.Contains(filePath, "values_types") {
 		out = patchValues(out)
 	}
+	fmt.Printf("Writing to output file %s\n", filePath)
 	if err := ioutil.WriteFile(filePath, []byte(strings.Join(out, "\n")), 0644); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
