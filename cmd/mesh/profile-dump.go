@@ -206,7 +206,7 @@ func unmarshalAndValidateICP(crYAML string) (*v1alpha2.IstioControlPlaneSpec, st
 func unmarshalAndValidateICPS(icpsYAML string, force bool, l *logger) (*v1alpha2.IstioControlPlaneSpec, error) {
 	icps := &v1alpha2.IstioControlPlaneSpec{}
 	if err := util.UnmarshalWithJSONPB(icpsYAML, icps); err != nil {
-		return nil, fmt.Errorf("could not unmarshal the merged YAML: %s\n\nYAML:\n%s", err, icpsYAML)s
+		return nil, fmt.Errorf("could not unmarshal the merged YAML: %s\n\nYAML:\n%s", err, icpsYAML)
 	}
 	if errs := validate.CheckIstioControlPlaneSpec(icps, true); len(errs) != 0 {
 		if !force {
