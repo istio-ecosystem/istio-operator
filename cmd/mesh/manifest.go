@@ -19,9 +19,12 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
+
+	"istio.io/operator/pkg/manifest"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/component/controlplane"
@@ -107,6 +110,48 @@ func genManifests(inFilename string, setOverlayYAML string, force bool, l *logge
 		return manifests, errs.ToError()
 	}
 	return manifests, nil
+}
+
+func genApplyManifests(setOverlay []string, inFilename string, dryRun bool, verbose bool,
+	kubeConfigPath string, context string, waitTimeout time.Duration, l *logger) {
+
+	overlayFromSet, err := makeTreeFromSetList(setOverlay)
+	if err != nil {
+		l.logAndFatal(err.Error())
+	}
+
+	manifests, err := genManifests(inFilename, overlayFromSet, dryRun, l)
+	if err != nil {
+		l.logAndFatalf("Failed to generate manifest: %v", err)
+	}
+	opts := &manifest.InstallOptions{
+		DryRun:      dryRun,
+		Verbose:     verbose,
+		WaitTimeout: waitTimeout * time.Second,
+		Kubeconfig:  kubeConfigPath,
+		Context:     context,
+	}
+	out, err := manifest.ApplyAll(manifests, binversion.OperatorBinaryVersion, opts)
+	if err != nil {
+		l.logAndFatalf("Failed to apply manifest with kubectl client: %v", err)
+	}
+	for cn := range manifests {
+		if out[cn].Err != nil {
+			cs := fmt.Sprintf("Component %s failed install:", cn)
+			l.logAndPrintf("\n%s\n%s\n", cs, strings.Repeat("=", len(cs)))
+			l.logAndPrint("Error: ", out[cn].Err, "\n")
+		} else {
+			cs := fmt.Sprintf("Component %s installed successfully:", cn)
+			l.logAndPrintf("\n%s\n%s\n", cs, strings.Repeat("=", len(cs)))
+		}
+
+		if strings.TrimSpace(out[cn].Stderr) != "" {
+			l.logAndPrint("Error detail:\n", out[cn].Stderr, "\n")
+		}
+		if strings.TrimSpace(out[cn].Stdout) != "" {
+			l.logAndPrint("Stdout:\n", out[cn].Stdout, "\n")
+		}
+	}
 }
 
 // fetchInstallPackageFromURL downloads installation packages from specified URL.
