@@ -21,19 +21,29 @@ import (
 )
 
 type hook func(kubeClient kubernetes.ExecClient, istioNamespace,
-	currentVer, targetVer, currentValues, targetValues string)
+	currentVer, targetVer, currentValues, targetValues string, dryRun bool)
 
-func runUpgradeHooks(kubeClient kubernetes.ExecClient, istioNamespace,
-	currentVer, targetVer, currentValues, targetValues string) {
-	for _, h := range hooks {
-		h(kubeClient, istioNamespace, currentVer, targetVer, currentValues, targetValues)
+func runPreUpgradeHooks(kubeClient kubernetes.ExecClient, istioNamespace,
+	currentVer, targetVer, currentValues, targetValues string, dryRun bool) {
+	for _, h := range preUpgradeHooks {
+		h(kubeClient, istioNamespace, currentVer, targetVer,
+			currentValues, targetValues, dryRun)
 	}
 }
 
-var hooks = []hook{checkInitCrdJobs}
+func runPostUpgradeHooks(kubeClient kubernetes.ExecClient, istioNamespace,
+	currentVer, targetVer, currentValues, targetValues string, dryRun bool) {
+	for _, h := range prePostUpgradeHooks {
+		h(kubeClient, istioNamespace, currentVer, targetVer,
+			currentValues, targetValues, dryRun)
+	}
+}
+
+var preUpgradeHooks = []hook{checkInitCrdJobs}
+var prePostUpgradeHooks = []hook{}
 
 func checkInitCrdJobs(kubeClient kubernetes.ExecClient, istioNamespace,
-	currentVer, targetVer, currentValues, targetValues string) {
+	currentVer, targetVer, currentValues, targetValues string, dryRun bool) {
 	pl, err := kubeClient.PodsForSelector(istioNamespace, "")
 	if err != nil {
 		l.logAndFatalf("Abort. Failed to list pods: %v", err)
