@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package kubernetes
+package manifest
 
 import (
 	"bytes"
@@ -23,12 +23,10 @@ import (
 	"github.com/hashicorp/go-multierror"
 
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/remotecommand"
 
-	"istio.io/istio/pkg/kube"
 	"istio.io/pkg/log"
 	"istio.io/pkg/version"
 )
@@ -57,17 +55,6 @@ func NewClient(kubeconfig, configContext string) (*Client, error) {
 		return nil, err
 	}
 	return &Client{config, restClient}, nil
-}
-
-func defaultRestConfig(kubeconfig, configContext string) (*rest.Config, error) {
-	config, err := kube.BuildClientConfig(kubeconfig, configContext)
-	if err != nil {
-		return nil, err
-	}
-	config.APIPath = "/api"
-	config.GroupVersion = &v1.SchemeGroupVersion
-	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
-	return config, nil
 }
 
 // PodExec takes a command and the pod data to run the command in the specified pod

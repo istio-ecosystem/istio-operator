@@ -17,13 +17,13 @@ package mesh
 import (
 	"strings"
 
-	"istio.io/operator/pkg/kubernetes"
+	"istio.io/operator/pkg/manifest"
 )
 
-type hook func(kubeClient kubernetes.ExecClient, istioNamespace,
+type hook func(kubeClient manifest.ExecClient, istioNamespace,
 	currentVer, targetVer, currentValues, targetValues string, dryRun bool)
 
-func runPreUpgradeHooks(kubeClient kubernetes.ExecClient, istioNamespace,
+func runPreUpgradeHooks(kubeClient manifest.ExecClient, istioNamespace,
 	currentVer, targetVer, currentValues, targetValues string, dryRun bool) {
 	for _, h := range preUpgradeHooks {
 		h(kubeClient, istioNamespace, currentVer, targetVer,
@@ -31,7 +31,7 @@ func runPreUpgradeHooks(kubeClient kubernetes.ExecClient, istioNamespace,
 	}
 }
 
-func runPostUpgradeHooks(kubeClient kubernetes.ExecClient, istioNamespace,
+func runPostUpgradeHooks(kubeClient manifest.ExecClient, istioNamespace,
 	currentVer, targetVer, currentValues, targetValues string, dryRun bool) {
 	for _, h := range prePostUpgradeHooks {
 		h(kubeClient, istioNamespace, currentVer, targetVer,
@@ -42,7 +42,7 @@ func runPostUpgradeHooks(kubeClient kubernetes.ExecClient, istioNamespace,
 var preUpgradeHooks = []hook{checkInitCrdJobs}
 var prePostUpgradeHooks = []hook{}
 
-func checkInitCrdJobs(kubeClient kubernetes.ExecClient, istioNamespace,
+func checkInitCrdJobs(kubeClient manifest.ExecClient, istioNamespace,
 	currentVer, targetVer, currentValues, targetValues string, dryRun bool) {
 	pl, err := kubeClient.PodsForSelector(istioNamespace, "")
 	if err != nil {
