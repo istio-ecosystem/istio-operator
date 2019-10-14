@@ -49,8 +49,6 @@ var (
 )
 
 type upgradeArgs struct {
-	// targetVersion is the version which the command is going to apply.
-	targetVersion string
 	// inFilename is the path to the input IstioControlPlane CR.
 	inFilename string
 	// kubeConfigPath is the path to kube config file.
@@ -69,8 +67,6 @@ type upgradeArgs struct {
 
 // addUpgradeFlags adds upgrade related flags into cobra command
 func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
-	cmd.PersistentFlags().StringVarP(&args.targetVersion, "target",
-		"t", opversion.OperatorVersionString, "The target version to upgrade")
 	cmd.PersistentFlags().StringVarP(&args.inFilename, "filename",
 		"f", "", "Path to file containing IstioControlPlane CustomResource")
 	cmd.PersistentFlags().StringVarP(&args.kubeConfigPath, "kubeconfig",
@@ -115,11 +111,12 @@ func Upgrade() *cobra.Command {
 // upgrade is the main function for Upgrade command
 func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 	initLogsOrExit(rootArgs)
-
 	l.logAndPrintf("Client - istioctl version: %s\n", opversion.OperatorVersionString)
 
-	targetValues := genValuesFromFile(args.targetVersion, args.inFilename, args.force)
+	targetValues := genValuesFromFile(args.inFilename, args.force)
 	targetICPS := genICPSFromFile(args.inFilename, args.force)
+	targetVersion := targetICPS.GetTag()
+	l.logAndPrintf("Upgrade - target version: %s\n", targetVersion)
 
 	kubeClient := getKubeExecClient(args.kubeConfigPath, args.context)
 	//TODO(elfinhe): support components distributed in multiple namespaces
@@ -128,19 +125,19 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 	currentValues := readValuesFromInjectorConfigMap(kubeClient, istioNamespace)
 
 	if !args.force {
-		checkSupportedVersions(currentVer, args.targetVersion, args.versionsURI)
+		checkSupportedVersions(currentVer, targetVersion, args.versionsURI)
 		checkUpgradeValues(currentValues, targetValues, args.yes)
 	}
 
 	runPreUpgradeHooks(kubeClient, istioNamespace,
-		currentVer, args.targetVersion, currentValues, targetValues, rootArgs.dryRun)
-	applyUpgradeManifest(args.targetVersion, args.inFilename, args.kubeConfigPath,
+		currentVer, targetVersion, currentValues, targetValues, rootArgs.dryRun)
+	applyUpgradeManifest(args.inFilename, args.kubeConfigPath,
 		args.context, rootArgs.dryRun, rootArgs.verbose)
 	runPostUpgradeHooks(kubeClient, istioNamespace,
-		currentVer, args.targetVersion, currentValues, targetValues, rootArgs.dryRun)
+		currentVer, targetVersion, currentValues, targetValues, rootArgs.dryRun)
 
 	if args.wait {
-		waitUpgradeComplete(kubeClient, istioNamespace, args.targetVersion)
+		waitUpgradeComplete(kubeClient, istioNamespace, targetVersion)
 		upgradeVer := retrieveControlPlaneVersion(kubeClient, istioNamespace)
 		l.logAndPrintf("Success. Now the Istio control plane is running at version %v.", upgradeVer)
 		return
@@ -151,9 +148,8 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 
 // applyUpgradeManifest applies the Istion Control Plane specs reading from inFilename to
 // the cluster by given kubeConfigPath and context
-func applyUpgradeManifest(targetVer, inFilename,
-	kubeConfigPath, context string, dryRun, verbose bool) {
-	genApplyManifests(getImageSourceOverlay(targetVer), inFilename, dryRun,
+func applyUpgradeManifest(inFilename, kubeConfigPath, context string, dryRun, verbose bool) {
+	genApplyManifests(nil, inFilename, dryRun,
 		verbose, kubeConfigPath, context, upgradeWaitSecWhenApply, l)
 }
 
@@ -175,15 +171,6 @@ func checkUpgradeValues(curValues string, tarValues string, yes bool) {
 	}
 }
 
-// getImageSourceOverlay generates an overlay for the container image source for a release version
-func getImageSourceOverlay(v string) []string {
-	setImageSource := []string{
-		"hub=docker.io/istio",
-		"tag=" + v,
-	}
-	return setImageSource
-}
-
 // genICPSFromFile generates an IstioControlPlaneSpec for a spec file
 func genICPSFromFile(filename string, force bool) *v1alpha2.IstioControlPlaneSpec {
 	_, overlayICPS, err := genICPS(filename, "", "", force, l)
@@ -195,15 +182,8 @@ func genICPSFromFile(filename string, force bool) *v1alpha2.IstioControlPlaneSpe
 }
 
 // genValuesFromFile generates values for a spec file
-func genValuesFromFile(targetVer, filename string, force bool) string {
-	srcImageStrs := getImageSourceOverlay(targetVer)
-
-	imageSourceOverlay, err := makeTreeFromSetList(srcImageStrs)
-	if err != nil {
-		l.logAndFatal(err.Error())
-	}
-
-	values, err := genProfile(true, filename, "", imageSourceOverlay, "", force, l)
+func genValuesFromFile(filename string, force bool) string {
+	values, err := genProfile(true, filename, "", "", "", force, l)
 	if err != nil {
 		l.logAndFatalf("Abort. Failed to generate values from file: %v, error: %v", filename, err)
 	}
