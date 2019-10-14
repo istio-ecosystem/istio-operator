@@ -101,8 +101,8 @@ func Upgrade() *cobra.Command {
 func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 	initLogsOrExit(rootArgs)
 	targetVer := retrieveClientVersion()
-	targetValues := genValuesFromFile(targetVer, args.inFilename)
-	targetICPS := genICPSFromFile(args.inFilename)
+	targetValues := genValuesFromFile(targetVer, args.inFilename, args.force)
+	targetICPS := genICPSFromFile(args.inFilename, args.force)
 
 	kubeClient := getKubeClient(args.kubeConfigPath, args.context)
 	//TODO(elfinhe): This should support components in multi-namespaces
@@ -138,7 +138,7 @@ func applyUpgradeManifest(targetVer, inFilename,
 	kubeConfigPath, context string, dryRun, verbose bool) {
 	imageSourceOverlay := getImageSourceOverlay(targetVer)
 
-	manifests, err := genManifests(inFilename, imageSourceOverlay)
+	manifests, err := genManifests(inFilename, imageSourceOverlay, dryRun, l)
 	if err != nil {
 		l.logAndFatalf("Failed to generate manifest: %v", err)
 	}
@@ -212,8 +212,8 @@ func getImageSourceOverlay(v string) string {
 }
 
 // genICPSFromFile generates an IstioControlPlaneSpec for a spec file
-func genICPSFromFile(filename string) *v1alpha2.IstioControlPlaneSpec {
-	_, overlayICPS, err := genICPS(filename, "", "")
+func genICPSFromFile(filename string, force bool) *v1alpha2.IstioControlPlaneSpec {
+	_, overlayICPS, err := genICPS(filename, "", "", force, l)
 	if err != nil {
 		l.logAndFatalf("Failed to generate ICPS from file %s, error: %s",
 			filename, err)
@@ -222,9 +222,9 @@ func genICPSFromFile(filename string) *v1alpha2.IstioControlPlaneSpec {
 }
 
 // genValuesFromFile generates values for a spec file
-func genValuesFromFile(targetVer, filename string) string {
+func genValuesFromFile(targetVer, filename string, force bool) string {
 	imageSourceOverlay := getImageSourceOverlay(targetVer)
-	values, err := genProfile(true, filename, "", imageSourceOverlay, "")
+	values, err := genProfile(true, filename, "", imageSourceOverlay, "", force, l)
 	if err != nil {
 		l.logAndFatalf("Abort. Failed to generate values from file: %v, error: %v", filename, err)
 	}
