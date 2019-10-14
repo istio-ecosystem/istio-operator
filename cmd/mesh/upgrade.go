@@ -23,13 +23,14 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 
+	"istio.io/operator/pkg/manifest"
+
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	meshInfoVersion "istio.io/pkg/version"
 
 	goversion "github.com/hashicorp/go-version"
 
 	"istio.io/operator/pkg/compare"
-	"istio.io/operator/pkg/kubernetes"
 	pkgversion "istio.io/operator/pkg/version"
 	opversion "istio.io/operator/version"
 )
@@ -115,12 +116,12 @@ func Upgrade() *cobra.Command {
 func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 	initLogsOrExit(rootArgs)
 
-	l.logAndPrintf("Client - istioctl version: %s\n", args.targetVersion)
+	l.logAndPrintf("Client - istioctl version: %s\n", opversion.OperatorVersionString)
 
 	targetValues := genValuesFromFile(args.targetVersion, args.inFilename, args.force)
 	targetICPS := genICPSFromFile(args.inFilename, args.force)
 
-	kubeClient := getKubeClient(args.kubeConfigPath, args.context)
+	kubeClient := getKubeExecClient(args.kubeConfigPath, args.context)
 	//TODO(elfinhe): support components distributed in multiple namespaces
 	istioNamespace := targetICPS.GetDefaultNamespace()
 	currentVer := retrieveControlPlaneVersion(kubeClient, istioNamespace)
@@ -156,22 +157,14 @@ func applyUpgradeManifest(targetVer, inFilename,
 		verbose, kubeConfigPath, context, upgradeWaitSecWhenApply, l)
 }
 
-// getKubeClient returns a Kubernetes client specified by kubeConfig and configContext
-func getKubeClient(kubeConfig, configContext string) kubernetes.ExecClient {
-	kubeClient, err := kubernetes.NewClient(kubeConfig, configContext)
-	if err != nil {
-		l.logAndFatalf("Abort. Failed to connect Kubernetes API server: %v", err)
-	}
-	return kubeClient
-}
-
 // checkUpgradeValues checks the upgrade eligibility by comparing the current values with the target values
 func checkUpgradeValues(curValues string, tarValues string, yes bool) {
 	diff := compare.YAMLCmp(curValues, tarValues)
 	if diff == "" {
-		l.logAndPrintf("Upgrade check: values are valid for upgrade.\n")
+		l.logAndPrintf("Upgrade check: Values unchanged. The target values are identical to the current values.\n")
 	} else {
-		l.logAndPrintf("Upgrade check: values will be changed during the upgrade:\n%s", diff)
+		l.logAndPrintf("Upgrade check: Warning!!! the following values will be changed as part of upgrade. "+
+			"If you have not overridden these values, they will change in your cluster, Please double check they are correct:\n%s", diff)
 	}
 
 	if yes {
@@ -218,7 +211,7 @@ func genValuesFromFile(targetVer, filename string, force bool) string {
 }
 
 // readValuesFromInjectorConfigMap reads the values from the config map of sidecar-injector.
-func readValuesFromInjectorConfigMap(kubeClient kubernetes.ExecClient, istioNamespace string) string {
+func readValuesFromInjectorConfigMap(kubeClient manifest.ExecClient, istioNamespace string) string {
 	configMapList, err := kubeClient.ConfigMapForSelector(istioNamespace, "istio=sidecar-injector")
 	if err != nil || len(configMapList.Items) == 0 {
 		l.logAndFatalf("Abort. Failed to retrieve sidecar-injector config map: %v", err)
@@ -301,7 +294,7 @@ func checkSupportedVersions(cur, tar, versionsURI string) {
 }
 
 // retrieveControlPlaneVersion retrieves the version number from the Istio control plane
-func retrieveControlPlaneVersion(kubeClient kubernetes.ExecClient, istioNamespace string) string {
+func retrieveControlPlaneVersion(kubeClient manifest.ExecClient, istioNamespace string) string {
 	meshInfo, e := kubeClient.GetIstioVersions(istioNamespace)
 	if e != nil {
 		l.logAndFatalf("Failed to retrieve Istio control plane version, error: %v", e)
@@ -321,7 +314,7 @@ func retrieveControlPlaneVersion(kubeClient kubernetes.ExecClient, istioNamespac
 
 // waitUpgradeComplete waits for the upgrade to complete by periodically comparing the current component version
 // to the target version.
-func waitUpgradeComplete(kubeClient kubernetes.ExecClient, istioNamespace string, targetVer string) {
+func waitUpgradeComplete(kubeClient manifest.ExecClient, istioNamespace string, targetVer string) {
 	for i := 1; i <= upgradeWaitCheckVerMaxAttempts; i++ {
 		l.logAndPrintf("Waiting for upgrade rollout to complete, attempt #%v: ", i)
 		sleepSeconds(upgradeWaitSecCheckVerPerLoop)
