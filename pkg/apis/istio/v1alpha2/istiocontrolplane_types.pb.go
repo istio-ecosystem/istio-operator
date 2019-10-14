@@ -190,8 +190,8 @@ func (InstallStatus_Status) EnumDescriptor() ([]byte, []int) {
 
 // IstioControlPlane is a CustomResourceDefinition (CRD) describing an Istio control plane.
 type IstioControlPlane struct {
-	 metav1.TypeMeta `json:",inline"`
-	 metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	 v11.TypeMeta `json:",inline"`
+	 v11.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// Spec defines the desired state of IstioControlPlane.
 	Spec *IstioControlPlaneSpec `protobuf:"bytes,3,opt,name=spec,proto3" json:"spec,omitempty"`
 	// Status reports the status of the Istio control plane.
