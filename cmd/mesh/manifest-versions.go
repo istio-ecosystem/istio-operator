@@ -22,6 +22,8 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
+	goversion "github.com/hashicorp/go-version"
+
 	"istio.io/operator/pkg/httprequest"
 	"istio.io/operator/pkg/version"
 	binversion "istio.io/operator/version"
@@ -62,37 +64,7 @@ func manifestVersionsCmd(rootArgs *rootArgs, versionsArgs *manifestVersionsArgs)
 func manifestVersions(args *rootArgs, mvArgs *manifestVersionsArgs, l *logger) {
 	initLogsOrExit(args)
 
-	var b []byte
-	var err error
-	uri := mvArgs.versionsURI
-
-	if strings.HasPrefix(uri, "http") {
-		b, err = httprequest.Get(uri)
-		if err != nil {
-			l.logAndFatal(err.Error())
-		}
-	} else {
-		b, err = ioutil.ReadFile(uri)
-		if err != nil {
-			l.logAndFatal(err.Error())
-		}
-	}
-	var versions []*version.CompatibilityMapping
-	if err = yaml.Unmarshal(b, &versions); err != nil {
-		l.logAndFatal(err.Error())
-	}
-
-	var myVersionMap *version.CompatibilityMapping
-	for _, v := range versions {
-		if v.OperatorVersion.Equal(binversion.OperatorBinaryGoVersion) {
-			myVersionMap = v
-			break
-		}
-	}
-
-	if myVersionMap == nil {
-		l.logAndFatal("This operator version ", binversion.OperatorBinaryGoVersion.String(), " was not found in the global manifestVersions map.")
-	}
+	myVersionMap := getVersionCompatibleMap(mvArgs.versionsURI, binversion.OperatorBinaryGoVersion, l)
 
 	fmt.Print("\nOperator version is ", binversion.OperatorBinaryGoVersion.String(), ".\n\n")
 	fmt.Println("The following installation package versions are recommended for use with this version of the operator:")
@@ -104,4 +76,37 @@ func manifestVersions(args *rootArgs, mvArgs *manifestVersionsArgs, l *logger) {
 		fmt.Printf("  %s\n", v.String())
 	}
 	fmt.Println()
+}
+
+func getVersionCompatibleMap(versionsURI string, binVersion *goversion.Version,
+	l *logger) *version.CompatibilityMapping {
+	var b []byte
+	var err error
+	if strings.HasPrefix(versionsURI, "http") {
+		b, err = httprequest.Get(versionsURI)
+		if err != nil {
+			l.logAndFatal(err.Error())
+		}
+	} else {
+		b, err = ioutil.ReadFile(versionsURI)
+		if err != nil {
+			l.logAndFatal(err.Error())
+		}
+	}
+	var versions []*version.CompatibilityMapping
+	if err = yaml.Unmarshal(b, &versions); err != nil {
+		l.logAndFatal(err.Error())
+	}
+	var myVersionMap *version.CompatibilityMapping
+	for _, v := range versions {
+		if v.OperatorVersion.Equal(binVersion) {
+			myVersionMap = v
+			break
+		}
+	}
+	if myVersionMap == nil {
+		l.logAndFatal("This operator version ", binVersion.String(),
+			" was not found in the global manifestVersions map.")
+	}
+	return myVersionMap
 }
