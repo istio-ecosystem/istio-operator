@@ -40,6 +40,8 @@ var (
 )
 
 type upgradeArgs struct {
+	// targetVersion is the version which the command is going to apply.
+	targetVersion string
 	// inFilename is the path to the input IstioControlPlane CR.
 	inFilename string
 	// kubeConfigPath is the path to kube config file.
@@ -58,6 +60,8 @@ type upgradeArgs struct {
 
 // addUpgradeFlags adds upgrade related flags into cobra command
 func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
+	cmd.PersistentFlags().StringVarP(&args.targetVersion, "target",
+		"t", opversion.OperatorVersionString, "The target version to upgrade")
 	cmd.PersistentFlags().StringVarP(&args.inFilename, "filename",
 		"f", "", "Path to file containing IstioControlPlane CustomResource")
 	cmd.PersistentFlags().StringVarP(&args.kubeConfigPath, "kubeconfig",
@@ -83,6 +87,10 @@ func Upgrade() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "upgrade",
 		Short:   "Upgrade Istio control plane in-place",
+		Long:    "The mesh upgrade command checks for upgrade version eligibility and," +
+			" if eligible, upgrades the Istio control plane components in-place. Warning: " +
+			"traffic may be disrupted during upgrade. Please ensure PodDisruptionBudgets " +
+			"are defined to maintain service continuity.",
 		Example: `mesh upgrade`,
 		RunE: func(cmd *cobra.Command, args []string) (e error) {
 			l = newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
@@ -97,32 +105,32 @@ func Upgrade() *cobra.Command {
 // upgrade is the main function for Upgrade command
 func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 	initLogsOrExit(rootArgs)
-	targetVer := opversion.OperatorVersionString
-	l.logAndPrintf("Client - istioctl version: %s\n", targetVer)
 
-	targetValues := genValuesFromFile(targetVer, args.inFilename, args.force)
+	l.logAndPrintf("Client - istioctl version: %s\n", args.targetVersion)
+
+	targetValues := genValuesFromFile(args.targetVersion, args.inFilename, args.force)
 	targetICPS := genICPSFromFile(args.inFilename, args.force)
 
 	kubeClient := getKubeClient(args.kubeConfigPath, args.context)
-	//TODO(elfinhe): This should support components in multi-namespaces
+	//TODO(elfinhe): support components distributed in multiple namespaces
 	istioNamespace := targetICPS.GetDefaultNamespace()
 	currentVer := retrieveControlPlaneVersion(kubeClient, istioNamespace)
 	currentValues := readValuesFromInjectorConfigMap(kubeClient, istioNamespace)
 
 	if !args.force {
-		checkSupportedVersions(currentVer, targetVer, args.versionsURI)
+		checkSupportedVersions(currentVer, args.targetVersion, args.versionsURI)
 		checkUpgradeValues(currentValues, targetValues, args.yes)
 	}
 
 	runPreUpgradeHooks(kubeClient, istioNamespace,
-		currentVer, targetVer, currentValues, targetValues, rootArgs.dryRun)
-	applyUpgradeManifest(targetVer, args.inFilename, args.kubeConfigPath,
+		currentVer, args.targetVersion, currentValues, targetValues, rootArgs.dryRun)
+	applyUpgradeManifest(args.targetVersion, args.inFilename, args.kubeConfigPath,
 		args.context, rootArgs.dryRun, rootArgs.verbose)
 	runPostUpgradeHooks(kubeClient, istioNamespace,
-		currentVer, targetVer, currentValues, targetValues, rootArgs.dryRun)
+		currentVer, args.targetVersion, currentValues, targetValues, rootArgs.dryRun)
 
 	if args.wait {
-		waitUpgradeComplete(kubeClient, istioNamespace, targetVer)
+		waitUpgradeComplete(kubeClient, istioNamespace, args.targetVersion)
 		upgradeVer := retrieveControlPlaneVersion(kubeClient, istioNamespace)
 		l.logAndPrintf("Success. Now the Istio control plane is running at version %v.", upgradeVer)
 		return
