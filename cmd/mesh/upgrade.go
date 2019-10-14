@@ -24,6 +24,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	istioVersion "istio.io/pkg/version"
 
 	"istio.io/operator/pkg/compare"
@@ -46,8 +47,6 @@ var (
 )
 
 type upgradeArgs struct {
-	// istioNamespace k8s namespace for istio control plane.
-	istioNamespace string
 	// inFilename is the path to the input IstioControlPlane CR.
 	inFilename string
 	// kubeConfigPath is the path to kube config file.
@@ -63,8 +62,6 @@ type upgradeArgs struct {
 }
 
 func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
-	cmd.PersistentFlags().StringVarP(&args.istioNamespace, "istioNamespace",
-		"i", "istio-system", "Istio system namespace")
 	cmd.PersistentFlags().StringVarP(&args.inFilename, "filename",
 		"f", "", "Path to file containing IstioControlPlane CustomResource")
 	cmd.PersistentFlags().StringVarP(&args.kubeConfigPath, "kubeconfig",
@@ -101,22 +98,28 @@ func Upgrade() *cobra.Command {
 
 func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 	initLogsOrExit(rootArgs)
-	kubeClient := getKubeClient(args.kubeConfigPath, args.context)
-	currentVer := retrieveControlPlaneVersion(kubeClient, args.istioNamespace)
 	targetVer := retrieveClientVersion()
+	targetValues := genValuesFromFile(targetVer, args.inFilename)
+	overlayICPS := genICPSFromFile(args.inFilename)
+	istioNamespace := overlayICPS.GetDefaultNamespace()
+
+	kubeClient := getKubeClient(args.kubeConfigPath, args.context)
+	currentVer := retrieveControlPlaneVersion(kubeClient, istioNamespace)
+	currentValues := readValuesFromInjectorConfigMap(kubeClient, istioNamespace)
+
 	if !args.force {
 		checkSupportedVersions(currentVer, targetVer)
-		currentValues := readValuesFromInjectorConfigMap(kubeClient, args.istioNamespace)
-		targetValues := genValuesFromFile(targetVer, args.inFilename)
 		checkUpgradeValues(currentValues, targetValues, args.yes)
-		runUpgradeHooks(kubeClient, args.istioNamespace,
-			currentVer, targetVer, currentValues, targetValues)
 	}
+
+	runUpgradeHooks(kubeClient, istioNamespace,
+		currentVer, targetVer, currentValues, targetValues)
 	applyUpgradeManifest(targetVer, args.inFilename, args.kubeConfigPath,
 		args.context, rootArgs.dryRun, rootArgs.verbose)
+
 	if args.wait {
-		waitUpgradeComplete(kubeClient, args.istioNamespace, targetVer)
-		upgradeVer := retrieveControlPlaneVersion(kubeClient, args.istioNamespace)
+		waitUpgradeComplete(kubeClient, istioNamespace, targetVer)
+		upgradeVer := retrieveControlPlaneVersion(kubeClient, istioNamespace)
 		l.logAndPrintf("Success. Now the Istio control plane is running at version %v.", upgradeVer)
 		return
 	}
@@ -196,6 +199,15 @@ func getImageSourceOverlay(v string) string {
 		l.logAndFatal(err.Error())
 	}
 	return imageSourceOverlay
+}
+
+func genICPSFromFile(filename string) *v1alpha2.IstioControlPlaneSpec {
+	_, overlayICPS, err := genICPS(filename, "", "")
+	if err != nil {
+		l.logAndFatalf("Failed to generate ICPS from file %s, error: %s",
+			filename, err)
+	}
+	return overlayICPS
 }
 
 func genValuesFromFile(targetVer, filename string) string {
