@@ -61,6 +61,7 @@ type upgradeArgs struct {
 	force bool
 }
 
+// addUpgradeFlags adds upgrade related flags into cobra command
 func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 	cmd.PersistentFlags().StringVarP(&args.inFilename, "filename",
 		"f", "", "Path to file containing IstioControlPlane CustomResource")
@@ -96,14 +97,16 @@ func Upgrade() *cobra.Command {
 	return cmd
 }
 
+// upgrade is the main function for Upgrade command
 func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 	initLogsOrExit(rootArgs)
 	targetVer := retrieveClientVersion()
 	targetValues := genValuesFromFile(targetVer, args.inFilename)
-	overlayICPS := genICPSFromFile(args.inFilename)
-	istioNamespace := overlayICPS.GetDefaultNamespace()
+	targetICPS := genICPSFromFile(args.inFilename)
 
 	kubeClient := getKubeClient(args.kubeConfigPath, args.context)
+	//TODO(elfinhe): This should support components in multi-namespaces
+	istioNamespace := targetICPS.GetDefaultNamespace()
 	currentVer := retrieveControlPlaneVersion(kubeClient, istioNamespace)
 	currentValues := readValuesFromInjectorConfigMap(kubeClient, istioNamespace)
 
@@ -129,6 +132,8 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 	return
 }
 
+// applyUpgradeManifest applies the Istion Control Plane specs reading from inFilename to
+// the cluster by given kubeConfigPath and context
 func applyUpgradeManifest(targetVer, inFilename,
 	kubeConfigPath, context string, dryRun, verbose bool) {
 	imageSourceOverlay := getImageSourceOverlay(targetVer)
@@ -167,14 +172,16 @@ func applyUpgradeManifest(targetVer, inFilename,
 	}
 }
 
+// getKubeClient returns a Kubernetes client specified by kubeConfig and configContext
 func getKubeClient(kubeConfig, configContext string) kubernetes.ExecClient {
-	kubeClient, err := clientExecFactory(kubeConfig, configContext)
+	kubeClient, err := kubernetes.NewClient(kubeConfig, configContext)
 	if err != nil {
 		l.logAndFatalf("Abort. Failed to connect Kubernetes API server: %v", err)
 	}
 	return kubeClient
 }
 
+// checkUpgradeValues checks the upgrade eligibility by comparing the current values with the target values
 func checkUpgradeValues(curValues string, tarValues string, yes bool) {
 	diff := compare.YAMLCmp(curValues, tarValues)
 	if diff == "" {
@@ -191,6 +198,7 @@ func checkUpgradeValues(curValues string, tarValues string, yes bool) {
 	}
 }
 
+// getImageSourceOverlay generates an overlay for the container image source for a release version
 func getImageSourceOverlay(v string) string {
 	setImageSource := []string{
 		"hub=docker.io/istio",
@@ -203,6 +211,7 @@ func getImageSourceOverlay(v string) string {
 	return imageSourceOverlay
 }
 
+// genICPSFromFile generates an IstioControlPlaneSpec for a spec file
 func genICPSFromFile(filename string) *v1alpha2.IstioControlPlaneSpec {
 	_, overlayICPS, err := genICPS(filename, "", "")
 	if err != nil {
@@ -212,6 +221,7 @@ func genICPSFromFile(filename string) *v1alpha2.IstioControlPlaneSpec {
 	return overlayICPS
 }
 
+// genValuesFromFile generates values for a spec file
 func genValuesFromFile(targetVer, filename string) string {
 	imageSourceOverlay := getImageSourceOverlay(targetVer)
 	values, err := genProfile(true, filename, "", imageSourceOverlay, "")
@@ -221,10 +231,7 @@ func genValuesFromFile(targetVer, filename string) string {
 	return values
 }
 
-func clientExecFactory(kubeconfig, configContext string) (kubernetes.ExecClient, error) {
-	return kubernetes.NewClient(kubeconfig, configContext)
-}
-
+// readValuesFromInjectorConfigMap reads the values from the config map of sidecar-injector.
 func readValuesFromInjectorConfigMap(kubeClient kubernetes.ExecClient, istioNamespace string) string {
 	configMapList, err := kubeClient.ConfigMapForSelector(istioNamespace, "istio=sidecar-injector")
 	if err != nil || len(configMapList.Items) == 0 {
@@ -254,6 +261,7 @@ func readValuesFromInjectorConfigMap(kubeClient kubernetes.ExecClient, istioName
 	return string(yamlValues)
 }
 
+// checkSupportedVersions checks if the upgrade cur -> tar is supported by the tool
 func checkSupportedVersions(cur string, tar string) {
 	if cur == tar {
 		l.logAndFatalf("Abort. The current version %v equals to the target version %v.", cur, tar)
@@ -287,6 +295,7 @@ func checkSupportedVersions(cur string, tar string) {
 	l.logAndPrintf("Version check passed: %v -> %v.\n", cur, tar)
 }
 
+// parseVersionFormat parses Istio version string into 3 parts: major, minor, patch
 func parseVersionFormat(ver string) (int, int, int) {
 	fullVerArray := strings.Split(ver, "-")
 	if len(fullVerArray) == 0 {
@@ -311,6 +320,7 @@ func parseVersionFormat(ver string) (int, int, int) {
 	return major, minor, patch
 }
 
+// retrieveControlPlaneVersion retrieves the version number from the Istio control plane
 func retrieveControlPlaneVersion(kubeClient kubernetes.ExecClient, istioNamespace string) string {
 	meshInfo, e := kubeClient.GetIstioVersions(istioNamespace)
 	if e != nil {
@@ -329,6 +339,8 @@ func retrieveControlPlaneVersion(kubeClient kubernetes.ExecClient, istioNamespac
 	return coalesceVersions(meshInfo)
 }
 
+// waitUpgradeComplete waits for the upgrade to complete by periodically comparing the current component version
+// to the target version.
 func waitUpgradeComplete(kubeClient kubernetes.ExecClient, istioNamespace string, targetVer string) {
 	for i := 1; i <= 60; i++ {
 		l.logAndPrintf("Waiting for upgrade rollout to complete, attempt #%v: ", i)
@@ -357,6 +369,7 @@ func waitUpgradeComplete(kubeClient kubernetes.ExecClient, istioNamespace string
 	l.logAndFatal("Upgrade rollout unfinished. Maximum number of attempts exceeded, quit...")
 }
 
+// sleepSeconds sleeps for n seconds, printing a dot '.' per second
 func sleepSeconds(n int) {
 	l.logAndPrintf("Going to sleep for %v secounds", n)
 	for i := 1; i <= n; i++ {
@@ -366,18 +379,21 @@ func sleepSeconds(n int) {
 	fmt.Println()
 }
 
+// retrieveClientVersion gets the current client's version
 func retrieveClientVersion() string {
 	l.logAndPrintf("Client - istioctl version: %s\n", istioVersion.Info.Version)
 	return istioVersion.Info.Version
 }
 
+// coalesceVersions coalesces all Istio control plane components versions
 func coalesceVersions(remoteVersion *istioVersion.MeshInfo) string {
 	if !identicalVersions(*remoteVersion) {
-		l.logAndFatalf("Different versions of Istio componets found: %v", remoteVersion)
+		l.logAndFatalf("Different versions of Istio components found: %v", remoteVersion)
 	}
 	return (*remoteVersion)[0].Info.Version
 }
 
+// identicalVersions checks if Istio control plane components are on the same version
 func identicalVersions(remoteVersion istioVersion.MeshInfo) bool {
 	exemplar := remoteVersion[0].Info
 	for i := 1; i < len(remoteVersion); i++ {
@@ -386,6 +402,5 @@ func identicalVersions(remoteVersion istioVersion.MeshInfo) bool {
 			return false
 		}
 	}
-
 	return true
 }
