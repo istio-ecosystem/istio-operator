@@ -164,7 +164,7 @@ func checkUpgradeValues(curValues string, tarValues string, yes bool) {
 		l.logAndPrintf("Upgrade check: Values unchanged. The target values are identical to the current values.\n")
 	} else {
 		l.logAndPrintf("Upgrade check: Warning!!! the following values will be changed as part of upgrade. "+
-			"If you have not overridden these values, they will change in your cluster, Please double check they are correct:\n%s", diff)
+			"If you have not overridden these values, they will change in your cluster. Please double check they are correct:\n%s", diff)
 	}
 
 	if yes {
