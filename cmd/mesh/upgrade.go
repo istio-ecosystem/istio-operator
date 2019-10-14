@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/ghodss/yaml"
@@ -31,7 +30,6 @@ import (
 
 	"istio.io/operator/pkg/compare"
 	"istio.io/operator/pkg/kubernetes"
-	"istio.io/operator/pkg/manifest"
 	pkgversion "istio.io/operator/pkg/version"
 	opversion "istio.io/operator/version"
 )
@@ -154,40 +152,8 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 // the cluster by given kubeConfigPath and context
 func applyUpgradeManifest(targetVer, inFilename,
 	kubeConfigPath, context string, dryRun, verbose bool) {
-	imageSourceOverlay := getImageSourceOverlay(targetVer)
-
-	manifests, err := genManifests(inFilename, imageSourceOverlay, dryRun, l)
-	if err != nil {
-		l.logAndFatalf("Failed to generate manifest: %v", err)
-	}
-	opts := &manifest.InstallOptions{
-		DryRun:      dryRun,
-		Verbose:     verbose,
-		WaitTimeout: upgradeWaitSecWhenApply * time.Second,
-		Kubeconfig:  kubeConfigPath,
-		Context:     context,
-	}
-	out, err := manifest.ApplyAll(manifests, opversion.OperatorBinaryVersion, opts)
-	if err != nil {
-		l.logAndFatalf("Failed to apply manifest with kubectl client: %v", err)
-	}
-	for cn := range manifests {
-		if out[cn].Err != nil {
-			cs := fmt.Sprintf("Component %s failed install:", cn)
-			l.logAndPrintf("\n%s\n%s\n", cs, strings.Repeat("=", len(cs)))
-			l.logAndPrint("Error: ", out[cn].Err, "\n")
-		} else {
-			cs := fmt.Sprintf("Component %s installed successfully:", cn)
-			l.logAndPrintf("\n%s\n%s\n", cs, strings.Repeat("=", len(cs)))
-		}
-
-		if strings.TrimSpace(out[cn].Stderr) != "" {
-			l.logAndPrint("Error detail:\n", out[cn].Stderr, "\n")
-		}
-		if strings.TrimSpace(out[cn].Stdout) != "" {
-			l.logAndPrint("Stdout:\n", out[cn].Stdout, "\n")
-		}
-	}
+	genApplyManifests(getImageSourceOverlay(targetVer), inFilename, dryRun,
+		verbose, kubeConfigPath, context, upgradeWaitSecWhenApply, l)
 }
 
 // getKubeClient returns a Kubernetes client specified by kubeConfig and configContext
@@ -217,16 +183,12 @@ func checkUpgradeValues(curValues string, tarValues string, yes bool) {
 }
 
 // getImageSourceOverlay generates an overlay for the container image source for a release version
-func getImageSourceOverlay(v string) string {
+func getImageSourceOverlay(v string) []string {
 	setImageSource := []string{
 		"hub=docker.io/istio",
 		"tag=" + v,
 	}
-	imageSourceOverlay, err := makeTreeFromSetList(setImageSource)
-	if err != nil {
-		l.logAndFatal(err.Error())
-	}
-	return imageSourceOverlay
+	return setImageSource
 }
 
 // genICPSFromFile generates an IstioControlPlaneSpec for a spec file
@@ -241,7 +203,13 @@ func genICPSFromFile(filename string, force bool) *v1alpha2.IstioControlPlaneSpe
 
 // genValuesFromFile generates values for a spec file
 func genValuesFromFile(targetVer, filename string, force bool) string {
-	imageSourceOverlay := getImageSourceOverlay(targetVer)
+	srcImageStrs := getImageSourceOverlay(targetVer)
+
+	imageSourceOverlay, err := makeTreeFromSetList(srcImageStrs)
+	if err != nil {
+		l.logAndFatal(err.Error())
+	}
+
 	values, err := genProfile(true, filename, "", imageSourceOverlay, "", force, l)
 	if err != nil {
 		l.logAndFatalf("Abort. Failed to generate values from file: %v, error: %v", filename, err)
