@@ -326,7 +326,6 @@ func waitUpgradeComplete(kubeClient manifest.ExecClient, istioNamespace string, 
 
 // sleepSeconds sleeps for n seconds, printing a dot '.' per second
 func sleepSeconds(n int) {
-	l.logAndPrintf("Going to sleep for %v secounds", n)
 	for i := 1; i <= n; i++ {
 		time.Sleep(time.Second)
 		fmt.Print(".")
