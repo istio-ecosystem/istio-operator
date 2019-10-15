@@ -39,6 +39,7 @@ require (
 	github.com/openshift/cluster-network-operator v0.0.0-20191009144453-fdceef8e1a7b
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v1.1.0 // indirect
+	github.com/prometheus/common v0.6.0
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.3.0
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
