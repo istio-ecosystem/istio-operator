@@ -30,6 +30,12 @@ var (
 	err3 = fmt.Errorf("err3")
 )
 
+func init() {
+	// TODO: remove when integrated, this is just to silence lint.
+	_ = runPreUpgradeHooks(nil, nil, true)
+	_ = runPostUpgradeHooks(nil, nil, true)
+}
+
 func h1(_ ExecClient, _, _ *v1alpha2.IstioControlPlaneSpec) util.Errors {
 	return util.NewErrs(err1)
 }
@@ -59,6 +65,7 @@ func TestRunUpgradeHooks(t *testing.T) {
 		},
 	}
 
+	malformedStr := "Malformed version: bad ver"
 	tests := []struct {
 		desc      string
 		sourceVer string
@@ -70,7 +77,7 @@ func TestRunUpgradeHooks(t *testing.T) {
 			desc:      "bad ver",
 			sourceVer: "bad ver",
 			targetVer: "1.3",
-			wantErrs:  util.Errors{errors.New("Malformed version: bad ver")},
+			wantErrs:  util.Errors{errors.New(malformedStr)},
 		},
 		{
 			desc:      "h1",
@@ -110,7 +117,7 @@ func TestRunUpgradeHooks(t *testing.T) {
 				sourceVer: tt.sourceVer,
 				targetVer: tt.targetVer,
 			}
-			gotErrs := runUpgradeHooks(testUpgradeHooks, nil, hc, tt.dryRun)
+			gotErrs := runUpgradeHooks(testUpgradeHooks, nil, &hc, tt.dryRun)
 			if !util.EqualErrors(gotErrs, tt.wantErrs) {
 				t.Errorf("%s: got: %s, wantErrs: %s", tt.desc, gotErrs.String(), tt.wantErrs.String())
 			}
