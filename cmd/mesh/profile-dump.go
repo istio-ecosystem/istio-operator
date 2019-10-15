@@ -92,7 +92,7 @@ func genICPS(inFilename, profile, setOverlayYAML string, force bool, l *logger) 
 	set := make(map[string]interface{})
 	err := yaml.Unmarshal([]byte(setOverlayYAML), &set)
 	if err != nil {
-		return "", fmt.Errorf("could not Unmarshal overlay Set%s: %s", setOverlayYAML, err)
+		return "", nil, fmt.Errorf("could not Unmarshal overlay Set%s: %s", setOverlayYAML, err)
 	}
 	if setProfile, ok := set["profile"]; ok {
 		profile = setProfile.(string)
