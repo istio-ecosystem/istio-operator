@@ -40,7 +40,8 @@ const (
 	upgradeWaitSecWhenApply = 300
 	// The time that the command will wait between each check of the upgraded version.
 	upgradeWaitSecCheckVerPerLoop = 10
-	// The maximum number of attempts that the command will check for the upgraded version.
+	// The maximum number of attempts that the command will check for the upgrade completion,
+	// which means only the target version exist and the old version pods have been terminated.
 	upgradeWaitCheckVerMaxAttempts = 60
 )
 
@@ -87,7 +88,7 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 }
 
 // Upgrade command upgrades Istio control plane in-place with eligibility checks
-func Upgrade() *cobra.Command {
+func UpgradeCmd() *cobra.Command {
 	macArgs := &upgradeArgs{}
 	rootArgs := &rootArgs{}
 	cmd := &cobra.Command{
