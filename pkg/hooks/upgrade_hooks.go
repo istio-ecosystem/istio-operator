@@ -23,10 +23,10 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/hashicorp/go-version"
-	"github.com/prometheus/common/log"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/util"
+	"istio.io/pkg/log"
 )
 
 // ExecClient is an interface for remote execution
