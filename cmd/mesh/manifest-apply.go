@@ -80,7 +80,7 @@ func manifestApply(args *rootArgs, maArgs *manifestApplyArgs, l *logger) {
 		_, _ = fmt.Fprintf(os.Stderr, "Could not configure logs: %s", err)
 		os.Exit(1)
 	}
-	genApplyManifests(maArgs.set, maArgs.inFilename, args.dryRun, args.verbose,
+	_ = genApplyManifests(maArgs.set, maArgs.inFilename, args.dryRun, args.verbose,
 		maArgs.kubeConfigPath, maArgs.context, maArgs.readinessTimeout, l)
 }
 
