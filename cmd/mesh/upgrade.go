@@ -57,7 +57,7 @@ type upgradeArgs struct {
 	context string
 	// wait is flag that indicates whether to wait resources ready before exiting.
 	wait bool
-	// yes means don't ask for confirmation (asking for confirmation not implemented).
+	// yes means skipping the prompting confirmation for value changes in this upgrade.
 	yes bool
 	// force means directly applying the upgrade without eligibility checks.
 	force bool
