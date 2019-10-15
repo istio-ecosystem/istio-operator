@@ -24,12 +24,11 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/scheme"
 )
 
 // TestICPController runs ReconcileIstioControlPlane.Reconcile() against a
@@ -186,10 +185,10 @@ func checkICPStatus(cl client.Client, key client.ObjectKey, profile string) (boo
 	for k, v := range installStatus.Status {
 		if s, ok := status[k]; ok {
 			if !statusExpected(s, v) {
-				return false, fmt.Errorf("Failed to get Expected IstioControlPlane status: (%s)", k)
+				return false, fmt.Errorf("failed to get Expected IstioControlPlane status: (%s)", k)
 			}
 		} else {
-			return false, fmt.Errorf("Failed to find Expected IstioControlPlane status: (%s)", k)
+			return false, fmt.Errorf("failed to find Expected IstioControlPlane status: (%s)", k)
 		}
 	}
 	return true, nil
