@@ -21,21 +21,21 @@ import (
 )
 
 type hook func(kubeClient manifest.ExecClient, istioNamespace,
-	currentVer, targetVer, currentValues, targetValues string, dryRun bool)
+	currentVer, targetVer, currentValues, targetValues string, dryRun bool, l *logger)
 
 func runPreUpgradeHooks(kubeClient manifest.ExecClient, istioNamespace,
-	currentVer, targetVer, currentValues, targetValues string, dryRun bool) {
+	currentVer, targetVer, currentValues, targetValues string, dryRun bool, l *logger) {
 	for _, h := range preUpgradeHooks {
 		h(kubeClient, istioNamespace, currentVer, targetVer,
-			currentValues, targetValues, dryRun)
+			currentValues, targetValues, dryRun, l)
 	}
 }
 
 func runPostUpgradeHooks(kubeClient manifest.ExecClient, istioNamespace,
-	currentVer, targetVer, currentValues, targetValues string, dryRun bool) {
+	currentVer, targetVer, currentValues, targetValues string, dryRun bool, l *logger) {
 	for _, h := range prePostUpgradeHooks {
 		h(kubeClient, istioNamespace, currentVer, targetVer,
-			currentValues, targetValues, dryRun)
+			currentValues, targetValues, dryRun, l)
 	}
 }
 
@@ -43,7 +43,7 @@ var preUpgradeHooks = []hook{checkInitCrdJobs}
 var prePostUpgradeHooks = []hook{}
 
 func checkInitCrdJobs(kubeClient manifest.ExecClient, istioNamespace,
-	currentVer, targetVer, currentValues, targetValues string, dryRun bool) {
+	currentVer, targetVer, currentValues, targetValues string, dryRun bool, l *logger) {
 	pl, err := kubeClient.PodsForSelector(istioNamespace, "")
 	if err != nil {
 		l.logAndFatalf("Abort. Failed to list pods: %v", err)
