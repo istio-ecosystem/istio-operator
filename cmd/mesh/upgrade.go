@@ -127,7 +127,8 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 
 	if !args.force {
 		checkSupportedVersions(currentVer, targetVersion, args.versionsURI)
-		checkUpgradeValues(currentValues, targetValues, args.yes)
+		checkUpgradeValues(currentValues, targetValues)
+		waitForConfirmation(args.yes)
 	}
 
 	runPreUpgradeHooks(kubeClient, istioNamespace,
@@ -155,7 +156,7 @@ func applyUpgradeManifest(inFilename, kubeConfigPath, context string, dryRun, ve
 }
 
 // checkUpgradeValues checks the upgrade eligibility by comparing the current values with the target values
-func checkUpgradeValues(curValues string, tarValues string, yes bool) {
+func checkUpgradeValues(curValues string, tarValues string) {
 	diff := compare.YAMLCmp(curValues, tarValues)
 	if diff == "" {
 		l.logAndPrintf("Upgrade check: Values unchanged. The target values are identical to the current values.\n")
@@ -163,7 +164,10 @@ func checkUpgradeValues(curValues string, tarValues string, yes bool) {
 		l.logAndPrintf("Upgrade check: Warning!!! the following values will be changed as part of upgrade. "+
 			"If you have not overridden these values, they will change in your cluster. Please double check they are correct:\n%s", diff)
 	}
+}
 
+// waitForConfirmation waits for user's confirmation if yes is not set
+func waitForConfirmation(yes bool) {
 	if yes {
 		return
 	}
