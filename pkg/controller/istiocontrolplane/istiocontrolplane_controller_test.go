@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
+
 	"istio.io/operator/pkg/helmreconciler"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -128,10 +129,10 @@ func switchIstioControlPlaneProfile(cl client.Client, key client.ObjectKey, prof
 }
 func checkICPStatus(cl client.Client, key client.ObjectKey, profile string) (bool, error) {
 	minimalStatus := map[string]*v1alpha2.InstallStatus_VersionStatus{
-		"crds": &v1alpha2.InstallStatus_VersionStatus{
+		"Pilot": &v1alpha2.InstallStatus_VersionStatus{
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
-		"Pilot": &v1alpha2.InstallStatus_VersionStatus{
+		"crds": &v1alpha2.InstallStatus_VersionStatus{
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
 	}
