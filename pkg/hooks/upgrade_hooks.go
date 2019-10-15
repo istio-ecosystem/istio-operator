@@ -61,8 +61,8 @@ var (
 	// before upgrade.
 	preUpgradeHooks = []hookVersionMapping{
 		{
-			sourceVersionConstraint: "1.3",
-			targetVersionConstraint: "",
+			sourceVersionConstraint: ">=1.3",
+			targetVersionConstraint: ">=1.3",
 			hooks:                   []hook{checkInitCrdJobs},
 		},
 	}
