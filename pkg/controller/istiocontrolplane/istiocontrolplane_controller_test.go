@@ -129,39 +129,39 @@ func switchIstioControlPlaneProfile(cl client.Client, key client.ObjectKey, prof
 }
 func checkICPStatus(cl client.Client, key client.ObjectKey, profile string) (bool, error) {
 	minimalStatus := map[string]*v1alpha2.InstallStatus_VersionStatus{
-		"Pilot": &v1alpha2.InstallStatus_VersionStatus{
+		"Pilot": {
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
-		"crds": &v1alpha2.InstallStatus_VersionStatus{
+		"crds": {
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
 	}
 	defaultStatus := map[string]*v1alpha2.InstallStatus_VersionStatus{
-		"crds": &v1alpha2.InstallStatus_VersionStatus{
+		"crds": {
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
-		"Pilot": &v1alpha2.InstallStatus_VersionStatus{
+		"Pilot": {
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
-		"Policy": &v1alpha2.InstallStatus_VersionStatus{
+		"Policy": {
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
-		"Telemetry": &v1alpha2.InstallStatus_VersionStatus{
+		"Telemetry": {
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
-		"Injector": &v1alpha2.InstallStatus_VersionStatus{
+		"Injector": {
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
-		"Citadel": &v1alpha2.InstallStatus_VersionStatus{
+		"Citadel": {
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
-		"Galley": &v1alpha2.InstallStatus_VersionStatus{
+		"Galley": {
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
-		"Prometheus": &v1alpha2.InstallStatus_VersionStatus{
+		"Prometheus": {
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
-		"IngressGateway": &v1alpha2.InstallStatus_VersionStatus{
+		"IngressGateway": {
 			Status: v1alpha2.InstallStatus_HEALTHY,
 		},
 	}
