@@ -24,7 +24,6 @@ import (
 	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/compare"
 	"istio.io/operator/pkg/manifest"
 	pkgversion "istio.io/operator/pkg/version"
@@ -111,45 +110,101 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs) (err error) {
 	initLogsOrExit(rootArgs)
 	l.logAndPrintf("Client - istioctl version: %s\n", opversion.OperatorVersionString)
 
-	targetValues := genValuesFromFile(args.inFilename, args.force)
-	targetICPS := genICPSFromFile(args.inFilename, args.force)
+	// Generates values for args.inFilename ICP specs yaml
+	targetValues, err := genProfile(true, args.inFilename, "",
+		"", "", args.force, l)
+	if err != nil {
+		l.logAndPrintf("Abort. Failed to generate values from file: %v, error: %v", args.inFilename, err)
+		return err
+	}
+
+	// Generate ICPS objects
+	_, targetICPS, err := genICPS(args.inFilename, "", "", args.force, l)
+	if err != nil {
+		l.logAndPrintf("Failed to generate ICPS from file %s, error: %s",
+			args.inFilename, err)
+		return err
+	}
+
+	// Get the target version from the tag in the ICPS
 	targetVersion := targetICPS.GetTag()
 	l.logAndPrintf("Upgrade - target version: %s\n", targetVersion)
 
+	// Create a kube client from args.kubeConfigPath and  args.context
 	kubeClient := getKubeExecClient(args.kubeConfigPath, args.context)
+
+	// Get Istio control plane namespace
 	//TODO(elfinhe): support components distributed in multiple namespaces
 	istioNamespace := targetICPS.GetDefaultNamespace()
-	currentVer := retrieveControlPlaneVersion(kubeClient, istioNamespace)
-	currentValues := readValuesFromInjectorConfigMap(kubeClient, istioNamespace)
+
+	// Read the current Istio version from the the cluster
+	currentVer, err := retrieveControlPlaneVersion(kubeClient, istioNamespace)
+	if err != nil {
+		l.logAndPrintf("Failed to read the current Istio version, error: %v", err)
+		return err
+	}
+
+	// Read the current Istio installation values from the cluster
+	currentValues, err := readValuesFromInjectorConfigMap(kubeClient, istioNamespace)
+	if err != nil {
+		l.logAndPrintf("Failed to read the current Istio installation values, "+
+			"error: %v", err)
+		return err
+	}
 
 	if !args.force {
-		checkSupportedVersions(currentVer, targetVersion, args.versionsURI)
+		// Check if the upgrade currentVer -> targetVersion is supported
+		err := checkSupportedVersions(currentVer, targetVersion, args.versionsURI)
+		if err != nil {
+			l.logAndPrintf("Upgrade version check failed: %v -> %v. Error: %v",
+				currentVer, targetVersion, err)
+			return err
+		}
+		l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", currentVer, targetVersion)
+
 		checkUpgradeValues(currentValues, targetValues)
 		waitForConfirmation(args.yes)
 	}
 
+	// Run pre-upgrade hooks
+	// TODO(elfinhe): add err handling when hook refactoring is done
 	runPreUpgradeHooks(kubeClient, istioNamespace,
 		currentVer, targetVersion, currentValues, targetValues, rootArgs.dryRun)
-	applyUpgradeManifest(args.inFilename, args.kubeConfigPath,
-		args.context, rootArgs.dryRun, rootArgs.verbose)
+
+	// Apply the Istio Control Plane specs reading from inFilename to the cluster
+	err = genApplyManifests(nil, args.inFilename, rootArgs.dryRun,
+		rootArgs.verbose, args.kubeConfigPath, args.context, upgradeWaitSecWhenApply, l)
+	if err != nil {
+		l.logAndPrintf("Failed to apply the Istio Control Plane specs. Error: %v", err)
+		return err
+	}
+
+	// Run post-upgrade hooks
+	// TODO(elfinhe): add err handling when hook refactoring is done
 	runPostUpgradeHooks(kubeClient, istioNamespace,
 		currentVer, targetVersion, currentValues, targetValues, rootArgs.dryRun)
 
 	if args.wait {
-		waitUpgradeComplete(kubeClient, istioNamespace, targetVersion)
-		upgradeVer := retrieveControlPlaneVersion(kubeClient, istioNamespace)
+		// Waits for the upgrade to complete by periodically comparing the each
+		// component version to the target version.
+		err = waitUpgradeComplete(kubeClient, istioNamespace, targetVersion)
+		if err != nil {
+			l.logAndPrintf("Failed to wait for the upgrade to complete. Error: %v", err)
+			return err
+		}
+
+		// Read the upgraded Istio version from the the cluster
+		upgradeVer, err := retrieveControlPlaneVersion(kubeClient, istioNamespace)
+		if err != nil {
+			l.logAndPrintf("Failed to read the upgraded Istio version. Error: %v", err)
+			return err
+		}
+
 		l.logAndPrintf("Success. Now the Istio control plane is running at version %v.", upgradeVer)
-		return
+		return nil
 	}
 	l.logAndPrintf("Upgrade submitted. Please use `istioctl version` to check the current versions.")
-	return
-}
-
-// applyUpgradeManifest applies the Istion Control Plane specs reading from inFilename to
-// the cluster by given kubeConfigPath and context
-func applyUpgradeManifest(inFilename, kubeConfigPath, context string, dryRun, verbose bool) {
-	genApplyManifests(nil, inFilename, dryRun,
-		verbose, kubeConfigPath, context, upgradeWaitSecWhenApply, l)
+	return nil
 }
 
 // checkUpgradeValues checks the upgrade eligibility by comparing the current values with the target values
@@ -173,30 +228,11 @@ func waitForConfirmation(yes bool) {
 	}
 }
 
-// genICPSFromFile generates an IstioControlPlaneSpec for a spec file
-func genICPSFromFile(filename string, force bool) *v1alpha2.IstioControlPlaneSpec {
-	_, overlayICPS, err := genICPS(filename, "", "", force, l)
-	if err != nil {
-		l.logAndFatalf("Failed to generate ICPS from file %s, error: %s",
-			filename, err)
-	}
-	return overlayICPS
-}
-
-// genValuesFromFile generates values for a spec file
-func genValuesFromFile(filename string, force bool) string {
-	values, err := genProfile(true, filename, "", "", "", force, l)
-	if err != nil {
-		l.logAndFatalf("Abort. Failed to generate values from file: %v, error: %v", filename, err)
-	}
-	return values
-}
-
 // readValuesFromInjectorConfigMap reads the values from the config map of sidecar-injector.
-func readValuesFromInjectorConfigMap(kubeClient manifest.ExecClient, istioNamespace string) string {
+func readValuesFromInjectorConfigMap(kubeClient manifest.ExecClient, istioNamespace string) (string, error) {
 	configMapList, err := kubeClient.ConfigMapForSelector(istioNamespace, "istio=sidecar-injector")
 	if err != nil || len(configMapList.Items) == 0 {
-		l.logAndFatalf("Abort. Failed to retrieve sidecar-injector config map: %v", err)
+		return "", fmt.Errorf("failed to retrieve sidecar-injector config map: %v", err)
 	}
 
 	jsonValues := ""
@@ -211,79 +247,79 @@ func readValuesFromInjectorConfigMap(kubeClient manifest.ExecClient, istioNamesp
 	}
 
 	if !foundValues {
-		l.logAndFatalf("Abort. Failed to find values in sidecar-injector config map: %v", configMapList)
+		return "", fmt.Errorf("failed to find values in sidecar-injector config map: %v", configMapList)
 	}
 
 	yamlValues, err := yaml.JSONToYAML([]byte(jsonValues))
 	if err != nil {
-		l.logAndFatalf("jsonToYAML failed to parse values:\n%v\nError:\n%v", yamlValues, err)
+		return "", fmt.Errorf("jsonToYAML failed to parse values:\n%v\nError:\n%v", yamlValues, err)
 	}
 
-	return string(yamlValues)
+	return string(yamlValues), nil
 }
 
 // checkSupportedVersions checks if the upgrade cur -> tar is supported by the tool
-func checkSupportedVersions(cur, tar, versionsURI string) {
+func checkSupportedVersions(cur, tar, versionsURI string) error {
 	if cur == tar {
-		l.logAndFatalf("Abort. The current version %v equals to the target version %v.", cur, tar)
+		return fmt.Errorf("the current version %v equals to the target version %v", cur, tar)
 	}
 
 	curPkgVer, err := pkgversion.NewVersionFromString(cur)
 	if err != nil {
-		l.logAndFatalf("Abort. Incorrect version: %v.", cur)
+		return fmt.Errorf("incorrect version: %v", cur)
 	}
 
 	tarPkgVer, err := pkgversion.NewVersionFromString(tar)
 	if err != nil {
-		l.logAndFatalf("Abort. Incorrect version: %v.", tar)
+		return fmt.Errorf("incorrect version: %v", tar)
 	}
 
 	if curPkgVer.Major != tarPkgVer.Major {
-		l.logAndFatalf("Abort. Major version upgrade is not supported: %v -> %v.", cur, tar)
+		return fmt.Errorf("major version upgrade is not supported: %v -> %v", cur, tar)
 	}
 
 	if curPkgVer.Minor != tarPkgVer.Minor {
-		l.logAndFatalf("Abort. Minor version upgrade is not supported: %v -> %v.", cur, tar)
+		return fmt.Errorf("minor version upgrade is not supported: %v -> %v", cur, tar)
 	}
 
 	if curPkgVer.Patch == tarPkgVer.Patch {
-		l.logAndFatalf("Abort. The target version has been installed in the cluster.\n"+
+		return fmt.Errorf("the target version has been installed in the cluster.\n"+
 			"istioctl: %v\nIstio control plane: %v", cur, tar)
 	}
 
 	if curPkgVer.Patch > tarPkgVer.Patch {
-		l.logAndFatalf("Abort. A newer version has been installed in the cluster.\n"+
+		return fmt.Errorf("a newer version has been installed in the cluster.\n"+
 			"istioctl: %v\nIstio control plane: %v", cur, tar)
 	}
 
 	tarGoVersion, err := goversion.NewVersion(tar)
 	if err != nil {
-		l.logAndFatalf("Abort. Failed to parse the target version: %v", tar)
+		return fmt.Errorf("failed to parse the target version: %v", tar)
 	}
 
 	compatibleMap := getVersionCompatibleMap(versionsURI, tarGoVersion, l)
 
 	curGoVersion, err := goversion.NewVersion(cur)
 	if err != nil {
-		l.logAndFatalf("Abort. Failed to parse the current version: %v", cur)
+		return fmt.Errorf("failed to parse the current version: %v", cur)
 	}
 
 	if !compatibleMap.SupportedIstioVersions.Check(curGoVersion) {
-		l.logAndFatalf("Abort. Upgrade is currently not supported: %v -> %v.", cur, tar)
+		return fmt.Errorf("upgrade is currently not supported: %v -> %v", cur, tar)
 	}
 
-	l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", cur, tar)
+	return nil
 }
 
 // retrieveControlPlaneVersion retrieves the version number from the Istio control plane
-func retrieveControlPlaneVersion(kubeClient manifest.ExecClient, istioNamespace string) string {
+func retrieveControlPlaneVersion(kubeClient manifest.ExecClient, istioNamespace string) (string, error) {
 	meshInfo, e := kubeClient.GetIstioVersions(istioNamespace)
 	if e != nil {
-		l.logAndFatalf("Failed to retrieve Istio control plane version, error: %v", e)
+		return "", fmt.Errorf("failed to retrieve Istio control plane version, error: %v", e)
 	}
 
 	if meshInfo == nil {
-		l.logAndFatalf("Istio control plane not found in namespace: %v", istioNamespace)
+		return "", fmt.Errorf("istio control plane not found in namespace: %v", istioNamespace)
 	}
 
 	for _, remote := range *meshInfo {
@@ -291,12 +327,16 @@ func retrieveControlPlaneVersion(kubeClient manifest.ExecClient, istioNamespace 
 	}
 	l.logAndPrint("")
 
-	return coalesceVersions(meshInfo)
+	v, e := coalesceVersions(meshInfo)
+	if e != nil {
+		return "", e
+	}
+	return v, nil
 }
 
 // waitUpgradeComplete waits for the upgrade to complete by periodically comparing the current component version
 // to the target version.
-func waitUpgradeComplete(kubeClient manifest.ExecClient, istioNamespace string, targetVer string) {
+func waitUpgradeComplete(kubeClient manifest.ExecClient, istioNamespace string, targetVer string) error {
 	for i := 1; i <= upgradeWaitCheckVerMaxAttempts; i++ {
 		l.logAndPrintf("Waiting for upgrade rollout to complete, attempt #%v: ", i)
 		sleepSeconds(upgradeWaitSecCheckVerPerLoop)
@@ -312,7 +352,7 @@ func waitUpgradeComplete(kubeClient manifest.ExecClient, istioNamespace string, 
 		if identicalVersions(*meshInfo) && targetVer == (*meshInfo)[0].Info.Version {
 			l.logAndPrintf("Upgrade rollout completed. " +
 				"All Istio control plane pods are running on the target version.\n\n")
-			return
+			return nil
 		}
 		for _, remote := range *meshInfo {
 			if targetVer != remote.Info.Version {
@@ -321,7 +361,7 @@ func waitUpgradeComplete(kubeClient manifest.ExecClient, istioNamespace string, 
 			}
 		}
 	}
-	l.logAndFatal("Upgrade rollout unfinished. Maximum number of attempts exceeded, quit...")
+	return fmt.Errorf("upgrade rollout unfinished. Maximum number of attempts exceeded")
 }
 
 // sleepSeconds sleeps for n seconds, printing a dot '.' per second
@@ -334,11 +374,11 @@ func sleepSeconds(n int) {
 }
 
 // coalesceVersions coalesces all Istio control plane components versions
-func coalesceVersions(remoteVersion *meshInfoVersion.MeshInfo) string {
+func coalesceVersions(remoteVersion *meshInfoVersion.MeshInfo) (string, error) {
 	if !identicalVersions(*remoteVersion) {
-		l.logAndFatalf("Different versions of Istio components found: %v", remoteVersion)
+		return "", fmt.Errorf("different versions of Istio components found: %v", remoteVersion)
 	}
-	return (*remoteVersion)[0].Info.Version
+	return (*remoteVersion)[0].Info.Version, nil
 }
 
 // identicalVersions checks if Istio control plane components are on the same version

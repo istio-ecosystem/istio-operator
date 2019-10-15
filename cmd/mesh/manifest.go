@@ -113,16 +113,16 @@ func genManifests(inFilename string, setOverlayYAML string, force bool, l *logge
 }
 
 func genApplyManifests(setOverlay []string, inFilename string, dryRun bool, verbose bool,
-	kubeConfigPath string, context string, waitTimeout time.Duration, l *logger) {
+	kubeConfigPath string, context string, waitTimeout time.Duration, l *logger) error {
 
 	overlayFromSet, err := makeTreeFromSetList(setOverlay)
 	if err != nil {
-		l.logAndFatal(err.Error())
+		return fmt.Errorf("failed to generate tree from the set overlay, error: %v", err)
 	}
 
 	manifests, err := genManifests(inFilename, overlayFromSet, dryRun, l)
 	if err != nil {
-		l.logAndFatalf("Failed to generate manifest: %v", err)
+		return fmt.Errorf("failed to generate manifest: %v", err)
 	}
 	opts := &manifest.InstallOptions{
 		DryRun:      dryRun,
@@ -133,7 +133,7 @@ func genApplyManifests(setOverlay []string, inFilename string, dryRun bool, verb
 	}
 	out, err := manifest.ApplyAll(manifests, binversion.OperatorBinaryVersion, opts)
 	if err != nil {
-		l.logAndFatalf("Failed to apply manifest with kubectl client: %v", err)
+		return fmt.Errorf("failed to apply manifest with kubectl client: %v", err)
 	}
 	for cn := range manifests {
 		if out[cn].Err != nil {
@@ -152,6 +152,7 @@ func genApplyManifests(setOverlay []string, inFilename string, dryRun bool, verb
 			l.logAndPrint("Stdout:\n", out[cn].Stdout, "\n")
 		}
 	}
+	return nil
 }
 
 // fetchInstallPackageFromURL downloads installation packages from specified URL.
