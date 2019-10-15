@@ -16,12 +16,12 @@ package istiocontrolplane
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"testing"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/helmreconciler"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -181,16 +181,15 @@ func checkICPStatus(cl client.Client, key client.ObjectKey, profile string) (boo
 	size := len(installStatus.Status)
 	expectedSize := len(status)
 	if size != expectedSize {
-		return false, errors.New(fmt.Sprintf("status size(%v) is not equal to expected status size (%v)",
-			size, expectedSize))
+		return false, fmt.Errorf("status size(%v) is not equal to expected status size (%v)", size, expectedSize)
 	}
 	for k, v := range installStatus.Status {
 		if s, ok := status[k]; ok {
 			if !statusExpected(s, v) {
-				return false, errors.New(fmt.Sprintf("Failed to get Expected IstioControlPlane status: (%s)", k))
+				return false, fmt.Errorf("Failed to get Expected IstioControlPlane status: (%s)", k)
 			}
 		} else {
-			return false, errors.New(fmt.Sprintf("Failed to find Expected IstioControlPlane status: (%s)", k))
+			return false, fmt.Errorf("Failed to find Expected IstioControlPlane status: (%s)", k)
 		}
 	}
 	return true, nil
