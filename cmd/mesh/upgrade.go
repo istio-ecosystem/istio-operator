@@ -21,18 +21,15 @@ import (
 	"time"
 
 	"github.com/ghodss/yaml"
+	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
 
-	"istio.io/operator/pkg/manifest"
-
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	meshInfoVersion "istio.io/pkg/version"
-
-	goversion "github.com/hashicorp/go-version"
-
 	"istio.io/operator/pkg/compare"
+	"istio.io/operator/pkg/manifest"
 	pkgversion "istio.io/operator/pkg/version"
 	opversion "istio.io/operator/version"
+	meshInfoVersion "istio.io/pkg/version"
 )
 
 const (
