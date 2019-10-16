@@ -91,7 +91,12 @@ func UpgradeCmd() *cobra.Command {
 		Example: `mesh upgrade`,
 		RunE: func(cmd *cobra.Command, args []string) (e error) {
 			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
-			return upgrade(rootArgs, macArgs, l)
+			initLogsOrExit(rootArgs)
+			err := upgrade(rootArgs, macArgs, l)
+			if err != nil {
+				l.logAndPrintf("Error: %v\n", err)
+			}
+			return err
 		},
 	}
 	addFlags(cmd, rootArgs)
@@ -101,43 +106,38 @@ func UpgradeCmd() *cobra.Command {
 
 // upgrade is the main function for Upgrade command
 func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
-	initLogsOrExit(rootArgs)
 	l.logAndPrintf("Client - istioctl version: %s\n", opversion.OperatorVersionString)
 
 	// Generates values for args.inFilename ICP specs yaml
 	targetValues, err := genProfile(true, args.inFilename, "",
 		"", "", args.force, l)
 	if err != nil {
-		l.logAndPrintf("Abort. Failed to generate values from file: %v, error: %v", args.inFilename, err)
-		return err
+		return fmt.Errorf("failed to generate values from file: %v, error: %v", args.inFilename, err)
 	}
 
 	// Generate ICPS objects
 	_, targetICPS, err := genICPS(args.inFilename, "", "", args.force, l)
 	if err != nil {
-		l.logAndPrintf("Failed to generate ICPS from file %s, error: %s",
-			args.inFilename, err)
-		return err
+		return fmt.Errorf("failed to generate ICPS from file %s, error: %s", args.inFilename, err)
 	}
 
 	// Get the target version from the tag in the ICPS
 	targetVersion := targetICPS.GetTag()
 	if targetVersion != opversion.OperatorVersionString {
-		l.logAndPrintf("The target version %v in %v is not supported "+
-			"by istioctl %v, please download istioctl %v to run upgrade", targetVersion,
-			args.inFilename, opversion.OperatorVersionString, targetVersion)
 		if !args.force {
-			return fmt.Errorf("the target version %v not equal to the binary version %v",
-				targetVersion, opversion.OperatorVersionString)
+			return fmt.Errorf("the target version %v in %v is not supported "+
+				"by istioctl %v, please download istioctl %v and run upgrade again", targetVersion,
+				args.inFilename, opversion.OperatorVersionString, targetVersion)
 		}
+		l.logAndPrintf("Warning. The target version %v does not equal to the binary version %v",
+			targetVersion, opversion.OperatorVersionString)
 	}
 	l.logAndPrintf("Upgrade - target version: %s\n", targetVersion)
 
 	// Create a kube client from args.kubeConfigPath and  args.context
 	kubeClient, err := manifest.NewClient(args.kubeConfigPath, args.context)
 	if err != nil {
-		l.logAndPrintf("Abort. Failed to connect Kubernetes API server, error: %v", err)
-		return err
+		return fmt.Errorf("failed to connect Kubernetes API server, error: %v", err)
 	}
 
 	// Get Istio control plane namespace
@@ -146,34 +146,24 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 
 	// Read the current Istio version from the the cluster
 	currentVer, err := retrieveControlPlaneVersion(kubeClient, istioNamespace, l)
-	if err != nil {
-		l.logAndPrintf("Failed to read the current Istio version, error: %v", err)
-		if !args.force {
-			return err
-		}
+	if err != nil && !args.force {
+		return fmt.Errorf("failed to read the current Istio version, error: %v", err)
 	}
 
 	// Read the current Istio installation values from the cluster
 	currentValues, err := readValuesFromInjectorConfigMap(kubeClient, istioNamespace)
-	if err != nil {
-		l.logAndPrintf("Failed to read the current Istio installation values, "+
+	if err != nil && !args.force {
+		return fmt.Errorf("failed to read the current Istio installation values, "+
 			"error: %v", err)
-		if !args.force {
-			return err
-		}
 	}
 
 	// Check if the upgrade currentVer -> targetVersion is supported
 	err = checkSupportedVersions(currentVer, targetVersion, args.versionsURI, l)
 	if err != nil {
-		l.logAndPrintf("Upgrade version check failed: %v -> %v. Error: %v",
+		return fmt.Errorf("upgrade version check failed: %v -> %v. Error: %v",
 			currentVer, targetVersion, err)
-		if !args.force {
-			return err
-		}
-	} else {
-		l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", currentVer, targetVersion)
 	}
+	l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", currentVer, targetVersion)
 
 	checkUpgradeValues(currentValues, targetValues, l)
 	waitForConfirmation(args.yes, l)
@@ -187,8 +177,7 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	err = genApplyManifests(nil, args.inFilename, rootArgs.dryRun,
 		rootArgs.verbose, args.kubeConfigPath, args.context, upgradeWaitSecWhenApply, l)
 	if err != nil {
-		l.logAndPrintf("Failed to apply the Istio Control Plane specs. Error: %v", err)
-		return err
+		return fmt.Errorf("failed to apply the Istio Control Plane specs. Error: %v", err)
 	}
 
 	// Run post-upgrade hooks
@@ -205,15 +194,13 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	// component version to the target version.
 	err = waitUpgradeComplete(kubeClient, istioNamespace, targetVersion, l)
 	if err != nil {
-		l.logAndPrintf("Failed to wait for the upgrade to complete. Error: %v", err)
-		return err
+		return fmt.Errorf("failed to wait for the upgrade to complete. Error: %v", err)
 	}
 
 	// Read the upgraded Istio version from the the cluster
 	upgradeVer, err := retrieveControlPlaneVersion(kubeClient, istioNamespace, l)
 	if err != nil {
-		l.logAndPrintf("Failed to read the upgraded Istio version. Error: %v", err)
-		return err
+		return fmt.Errorf("failed to read the upgraded Istio version. Error: %v", err)
 	}
 
 	l.logAndPrintf("Success. Now the Istio control plane is running at version %v.", upgradeVer)
