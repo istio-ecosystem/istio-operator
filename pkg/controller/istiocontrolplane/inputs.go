@@ -20,42 +20,6 @@ import (
 	"istio.io/operator/pkg/name"
 )
 
-var (
-	componentDependencies = helmreconciler.ComponentNameToListMap{
-		name.IstioBaseComponentName: {
-			name.PilotComponentName,
-			name.PolicyComponentName,
-			name.TelemetryComponentName,
-			name.GalleyComponentName,
-			name.CitadelComponentName,
-			name.NodeAgentComponentName,
-			name.CertManagerComponentName,
-			name.SidecarInjectorComponentName,
-			name.IngressComponentName,
-			name.EgressComponentName,
-			name.PrometheusComponentName,
-			name.PrometheusOperatorComponentName,
-			name.GrafanaComponentName,
-			name.KialiComponentName,
-			name.CNIComponentName,
-			name.TracingComponentName,
-		},
-	}
-
-	installTree      = make(helmreconciler.ComponentTree)
-	dependencyWaitCh = make(helmreconciler.DependencyWaitCh)
-)
-
-func init() {
-	buildInstallTree()
-	for _, parent := range componentDependencies {
-		for _, child := range parent {
-			dependencyWaitCh[child] = make(chan struct{}, 1)
-		}
-	}
-
-}
-
 // IstioRenderingInput is a RenderingInput specific to an v1alpha2 IstioControlPlane instance.
 type IstioRenderingInput struct {
 	instance *v1alpha2.IstioControlPlane
@@ -96,9 +60,4 @@ func (i *IstioRenderingInput) GetProcessingOrder(m helmreconciler.ChartManifests
 		name.IstioBaseComponentName: componentNameList,
 	}
 	return componentDependencies, dependencyWaitCh
-}
-
-func buildInstallTree() {
-	// Starting with root, recursively insert each first level child into each node.
-	helmreconciler.InsertChildrenRecursive(name.IstioBaseComponentName, installTree, componentDependencies)
 }
