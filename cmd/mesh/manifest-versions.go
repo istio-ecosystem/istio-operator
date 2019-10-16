@@ -46,8 +46,8 @@ func addManifestVersionsFlags(cmd *cobra.Command, mvArgs *manifestVersionsArgs) 
 func manifestVersionsCmd(rootArgs *rootArgs, versionsArgs *manifestVersionsArgs) *cobra.Command {
 	return &cobra.Command{
 		Use:   "versions",
-		Short: "List the versions of Istio recommended for and supported by this version of the operator binary",
-		Long:  "List the versions of Istio recommended for and supported by this version of the operator binary.",
+		Short: "List the versions of Istio recommended for use or supported for upgrade by this version of the operator binary",
+		Long:  "List the versions of Istio recommended for use or supported for upgrade by this version of the operator binary.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 0 {
 				cmd.Println(cmd.UsageString())
@@ -71,7 +71,7 @@ func manifestVersions(args *rootArgs, mvArgs *manifestVersionsArgs, l *logger) {
 	for _, v := range myVersionMap.RecommendedIstioVersions {
 		fmt.Printf("  %s\n", v.String())
 	}
-	fmt.Println("\nThe following installation package versions are supported by this version of the operator:")
+	fmt.Println("\nThe following installation package versions are supported for upgrade by this version of the operator:")
 	for _, v := range myVersionMap.SupportedIstioVersions {
 		fmt.Printf("  %s\n", v.String())
 	}
