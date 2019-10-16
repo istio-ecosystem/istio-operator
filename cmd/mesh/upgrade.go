@@ -24,7 +24,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"istio.io/operator/pkg/compare"
+	"istio.io/operator/pkg/hooks"
 	"istio.io/operator/pkg/manifest"
+	"istio.io/operator/pkg/translate"
 	opversion "istio.io/operator/version"
 )
 
@@ -145,7 +147,7 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	istioNamespace := targetICPS.GetDefaultNamespace()
 
 	// Read the current Istio version from the the cluster
-	currentVer, err := retrieveControlPlaneVersion(kubeClient, istioNamespace, l)
+	currentVersion, err := retrieveControlPlaneVersion(kubeClient, istioNamespace, l)
 	if err != nil && !args.force {
 		return fmt.Errorf("failed to read the current Istio version, error: %v", err)
 	}
@@ -157,21 +159,39 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 			"error: %v", err)
 	}
 
-	// Check if the upgrade currentVer -> targetVersion is supported
-	err = checkSupportedVersions(currentVer, targetVersion, args.versionsURI, l)
+	// Create a new values translator
+	tr, err := translate.NewReverseTranslator(opversion.OperatorBinaryVersion.MinorVersion)
+	if err != nil && !args.force {
+		return fmt.Errorf("fail to create values translator, error: %v", err)
+	}
+	// Translate the current values into ICPS
+	currentICPS, err := tr.TranslateFromValueToSpec([]byte(currentValues))
+	if err != nil && !args.force {
+		return fmt.Errorf("failed to translate the current values, error: %v", err.Error())
+	}
+
+	// Check if the upgrade currentVersion -> targetVersion is supported
+	err = checkSupportedVersions(currentVersion, targetVersion, args.versionsURI, l)
 	if err != nil {
 		return fmt.Errorf("upgrade version check failed: %v -> %v. Error: %v",
-			currentVer, targetVersion, err)
+			currentVersion, targetVersion, err)
 	}
-	l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", currentVer, targetVersion)
+	l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", currentVersion, targetVersion)
 
 	checkUpgradeValues(currentValues, targetValues, l)
 	waitForConfirmation(args.yes, l)
 
 	// Run pre-upgrade hooks
-	// TODO(elfinhe): add err handling when hook refactoring is done
-	runPreUpgradeHooks(kubeClient, istioNamespace,
-		currentVer, targetVersion, currentValues, targetValues, rootArgs.dryRun, l)
+	hparams := &hooks.HookCommonParams{
+		SourceVer:    currentVersion,
+		TargetVer:    targetVersion,
+		SourceValues: currentICPS,
+		TargetValues: targetICPS,
+	}
+	errs := hooks.RunPreUpgradeHooks(kubeClient, hparams, rootArgs.dryRun)
+	if len(errs) != 0 && !args.force {
+		return fmt.Errorf("failed in pre-upgrade hooks, error: %v", errs.ToError())
+	}
 
 	// Apply the Istio Control Plane specs reading from inFilename to the cluster
 	err = genApplyManifests(nil, args.inFilename, rootArgs.dryRun,
@@ -181,9 +201,10 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	}
 
 	// Run post-upgrade hooks
-	// TODO(elfinhe): add err handling when hook refactoring is done
-	runPostUpgradeHooks(kubeClient, istioNamespace,
-		currentVer, targetVersion, currentValues, targetValues, rootArgs.dryRun, l)
+	errs = hooks.RunPostUpgradeHooks(kubeClient, hparams, rootArgs.dryRun)
+	if len(errs) != 0 && !args.force {
+		return fmt.Errorf("failed in post-upgrade hooks, error: %v", errs.ToError())
+	}
 
 	if !args.wait {
 		l.logAndPrintf("Upgrade submitted. Please use `istioctl version` to check the current versions.")
