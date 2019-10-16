@@ -28,7 +28,6 @@ import (
 	"istio.io/operator/pkg/manifest"
 	pkgversion "istio.io/operator/pkg/version"
 	opversion "istio.io/operator/version"
-	meshInfoVersion "istio.io/pkg/version"
 )
 
 const (
@@ -309,21 +308,21 @@ func checkSupportedVersions(cur, tar, versionsURI string, l *logger) error {
 
 // retrieveControlPlaneVersion retrieves the version number from the Istio control plane
 func retrieveControlPlaneVersion(kubeClient manifest.ExecClient, istioNamespace string, l *logger) (string, error) {
-	meshInfo, e := kubeClient.GetIstioVersions(istioNamespace)
+	cv, e := kubeClient.GetIstioVersions(istioNamespace)
 	if e != nil {
 		return "", fmt.Errorf("failed to retrieve Istio control plane version, error: %v", e)
 	}
 
-	if meshInfo == nil {
+	if len(cv) == 0 {
 		return "", fmt.Errorf("istio control plane not found in namespace: %v", istioNamespace)
 	}
 
-	for _, remote := range *meshInfo {
-		l.logAndPrintf("Control Plane - %s pod - version: %s", remote.Component, remote.Info.Version)
+	for _, remote := range cv {
+		l.logAndPrintf("Control Plane - %s pod - version: %s", remote.Component, remote.Version)
 	}
 	l.logAndPrint("")
 
-	v, e := coalesceVersions(meshInfo)
+	v, e := coalesceVersions(cv)
 	if e != nil {
 		return "", e
 	}
@@ -336,24 +335,24 @@ func waitUpgradeComplete(kubeClient manifest.ExecClient, istioNamespace string, 
 	for i := 1; i <= upgradeWaitCheckVerMaxAttempts; i++ {
 		l.logAndPrintf("Waiting for upgrade rollout to complete, attempt #%v: ", i)
 		sleepSeconds(upgradeWaitSecCheckVerPerLoop)
-		meshInfo, e := kubeClient.GetIstioVersions(istioNamespace)
+		cv, e := kubeClient.GetIstioVersions(istioNamespace)
 		if e != nil {
 			l.logAndPrintf("Failed to retrieve Istio control plane version, error: %v", e)
 			continue
 		}
-		if meshInfo == nil {
+		if cv == nil {
 			l.logAndPrintf("Failed to find Istio namespace: %v", istioNamespace)
 			continue
 		}
-		if identicalVersions(*meshInfo) && targetVer == (*meshInfo)[0].Info.Version {
+		if identicalVersions(cv) && targetVer == cv[0].Version {
 			l.logAndPrintf("Upgrade rollout completed. " +
 				"All Istio control plane pods are running on the target version.\n\n")
 			return nil
 		}
-		for _, remote := range *meshInfo {
-			if targetVer != remote.Info.Version {
+		for _, remote := range cv {
+			if targetVer != remote.Version {
 				l.logAndPrintf("Control Plane - %s pod - version %s does not match the target version %s",
-					remote.Component, remote.Info.Version, targetVer)
+					remote.Component, remote.Version, targetVer)
 			}
 		}
 	}
@@ -370,19 +369,21 @@ func sleepSeconds(n int) {
 }
 
 // coalesceVersions coalesces all Istio control plane components versions
-func coalesceVersions(remoteVersion *meshInfoVersion.MeshInfo) (string, error) {
-	if !identicalVersions(*remoteVersion) {
-		return "", fmt.Errorf("different versions of Istio components found: %v", remoteVersion)
+func coalesceVersions(cv []manifest.ComponentVersion) (string, error) {
+	if len(cv) == 0 {
+		return "", fmt.Errorf("empty list of ComponentVersion")
 	}
-	return (*remoteVersion)[0].Info.Version, nil
+	if !identicalVersions(cv) {
+		return "", fmt.Errorf("different versions of Istio components found: %v", cv)
+	}
+	return cv[0].Version, nil
 }
 
 // identicalVersions checks if Istio control plane components are on the same version
-func identicalVersions(remoteVersion meshInfoVersion.MeshInfo) bool {
-	exemplar := remoteVersion[0].Info
-	for i := 1; i < len(remoteVersion); i++ {
-		candidate := (remoteVersion)[i].Info
-		if exemplar.Version != candidate.Version {
+func identicalVersions(cv []manifest.ComponentVersion) bool {
+	exemplar := cv[0]
+	for i := 1; i < len(cv); i++ {
+		if exemplar.Version != cv[i].Version {
 			return false
 		}
 	}
