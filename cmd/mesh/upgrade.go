@@ -30,9 +30,9 @@ import (
 
 const (
 	// The maximum duration the command will wait until the apply deployment reaches a ready state
-	upgradeWaitSecWhenApply time.Duration = 300
+	upgradeWaitSecWhenApply = 300 * time.Second
 	// The duration that the command will wait between each check of the upgraded version.
-	upgradeWaitSecCheckVerPerLoop time.Duration = 10
+	upgradeWaitSecCheckVerPerLoop = 10 * time.Second
 	// The maximum number of attempts that the command will check for the upgrade completion,
 	// which means only the target version exist and the old version pods have been terminated.
 	upgradeWaitCheckVerMaxAttempts = 60
@@ -69,7 +69,7 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 		"Wait, if set will wait until all Pods, Services, and minimum number of Pods "+
 			"of a Deployment are in a ready state before the command exits. "+
 			"It will wait for a maximum duration of "+(upgradeWaitSecCheckVerPerLoop*
-			upgradeWaitCheckVerMaxAttempts*time.Second).String())
+			upgradeWaitCheckVerMaxAttempts).String())
 	cmd.PersistentFlags().BoolVar(&args.force, "force", false,
 		"Apply the upgrade without eligibility checks and testing for changes "+
 			"in profile default values")
@@ -333,8 +333,7 @@ func waitUpgradeComplete(kubeClient manifest.ExecClient, istioNamespace string, 
 
 // sleepSeconds sleeps for n seconds, printing a dot '.' per second
 func sleepSeconds(duration time.Duration) {
-	timeout := duration * time.Second
-	for t := time.Duration(0); t < timeout; t += time.Second {
+	for t := time.Duration(0); t < duration; t += time.Second {
 		time.Sleep(time.Second)
 		fmt.Print(".")
 	}
