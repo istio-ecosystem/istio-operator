@@ -17,7 +17,6 @@ package mesh
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/ghodss/yaml"
@@ -26,15 +25,14 @@ import (
 
 	"istio.io/operator/pkg/compare"
 	"istio.io/operator/pkg/manifest"
-	pkgversion "istio.io/operator/pkg/version"
 	opversion "istio.io/operator/version"
 )
 
 const (
 	// The maximum duration the command will wait until the apply deployment reaches a ready state
-	upgradeWaitSecWhenApply = 300
-	// The time that the command will wait between each check of the upgraded version.
-	upgradeWaitSecCheckVerPerLoop = 10
+	upgradeWaitSecWhenApply time.Duration = 300
+	// The duration that the command will wait between each check of the upgraded version.
+	upgradeWaitSecCheckVerPerLoop time.Duration = 10
 	// The maximum number of attempts that the command will check for the upgrade completion,
 	// which means only the target version exist and the old version pods have been terminated.
 	upgradeWaitCheckVerMaxAttempts = 60
@@ -70,7 +68,8 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 	cmd.PersistentFlags().BoolVarP(&args.wait, "wait", "w", false,
 		"Wait, if set will wait until all Pods, Services, and minimum number of Pods "+
 			"of a Deployment are in a ready state before the command exits. "+
-			"It will wait for a maximum duration of "+strconv.Itoa(upgradeWaitSecWhenApply)+" seconds")
+			"It will wait for a maximum duration of "+(upgradeWaitSecWhenApply*
+			upgradeWaitCheckVerMaxAttempts*time.Second).String())
 	cmd.PersistentFlags().BoolVar(&args.force, "force", false,
 		"Apply the upgrade without eligibility checks and testing for changes "+
 			"in profile default values")
@@ -136,7 +135,9 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	currentVer, err := retrieveControlPlaneVersion(kubeClient, istioNamespace, l)
 	if err != nil {
 		l.logAndPrintf("Failed to read the current Istio version, error: %v", err)
-		return err
+		if !args.force {
+			return err
+		}
 	}
 
 	// Read the current Istio installation values from the cluster
@@ -144,22 +145,25 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	if err != nil {
 		l.logAndPrintf("Failed to read the current Istio installation values, "+
 			"error: %v", err)
-		return err
-	}
-
-	if !args.force {
-		// Check if the upgrade currentVer -> targetVersion is supported
-		err := checkSupportedVersions(currentVer, targetVersion, args.versionsURI, l)
-		if err != nil {
-			l.logAndPrintf("Upgrade version check failed: %v -> %v. Error: %v",
-				currentVer, targetVersion, err)
+		if !args.force {
 			return err
 		}
-		l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", currentVer, targetVersion)
-
-		checkUpgradeValues(currentValues, targetValues, l)
-		waitForConfirmation(args.yes, l)
 	}
+
+	// Check if the upgrade currentVer -> targetVersion is supported
+	err = checkSupportedVersions(currentVer, targetVersion, args.versionsURI, l)
+	if err != nil {
+		l.logAndPrintf("Upgrade version check failed: %v -> %v. Error: %v",
+			currentVer, targetVersion, err)
+		if !args.force {
+			return err
+		}
+	} else {
+		l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", currentVer, targetVersion)
+	}
+
+	checkUpgradeValues(currentValues, targetValues, l)
+	waitForConfirmation(args.yes, l)
 
 	// Run pre-upgrade hooks
 	// TODO(elfinhe): add err handling when hook refactoring is done
@@ -179,26 +183,27 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	runPostUpgradeHooks(kubeClient, istioNamespace,
 		currentVer, targetVersion, currentValues, targetValues, rootArgs.dryRun, l)
 
-	if args.wait {
-		// Waits for the upgrade to complete by periodically comparing the each
-		// component version to the target version.
-		err = waitUpgradeComplete(kubeClient, istioNamespace, targetVersion, l)
-		if err != nil {
-			l.logAndPrintf("Failed to wait for the upgrade to complete. Error: %v", err)
-			return err
-		}
-
-		// Read the upgraded Istio version from the the cluster
-		upgradeVer, err := retrieveControlPlaneVersion(kubeClient, istioNamespace, l)
-		if err != nil {
-			l.logAndPrintf("Failed to read the upgraded Istio version. Error: %v", err)
-			return err
-		}
-
-		l.logAndPrintf("Success. Now the Istio control plane is running at version %v.", upgradeVer)
+	if !args.wait {
+		l.logAndPrintf("Upgrade submitted. Please use `istioctl version` to check the current versions.")
 		return nil
 	}
-	l.logAndPrintf("Upgrade submitted. Please use `istioctl version` to check the current versions.")
+
+	// Waits for the upgrade to complete by periodically comparing the each
+	// component version to the target version.
+	err = waitUpgradeComplete(kubeClient, istioNamespace, targetVersion, l)
+	if err != nil {
+		l.logAndPrintf("Failed to wait for the upgrade to complete. Error: %v", err)
+		return err
+	}
+
+	// Read the upgraded Istio version from the the cluster
+	upgradeVer, err := retrieveControlPlaneVersion(kubeClient, istioNamespace, l)
+	if err != nil {
+		l.logAndPrintf("Failed to read the upgraded Istio version. Error: %v", err)
+		return err
+	}
+
+	l.logAndPrintf("Success. Now the Istio control plane is running at version %v.", upgradeVer)
 	return nil
 }
 
@@ -255,38 +260,6 @@ func readValuesFromInjectorConfigMap(kubeClient manifest.ExecClient, istioNamesp
 
 // checkSupportedVersions checks if the upgrade cur -> tar is supported by the tool
 func checkSupportedVersions(cur, tar, versionsURI string, l *logger) error {
-	if cur == tar {
-		return fmt.Errorf("the current version %v equals to the target version %v", cur, tar)
-	}
-
-	curPkgVer, err := pkgversion.NewVersionFromString(cur)
-	if err != nil {
-		return fmt.Errorf("incorrect version: %v", cur)
-	}
-
-	tarPkgVer, err := pkgversion.NewVersionFromString(tar)
-	if err != nil {
-		return fmt.Errorf("incorrect version: %v", tar)
-	}
-
-	if curPkgVer.Major != tarPkgVer.Major {
-		return fmt.Errorf("major version upgrade is not supported: %v -> %v", cur, tar)
-	}
-
-	if curPkgVer.Minor != tarPkgVer.Minor {
-		return fmt.Errorf("minor version upgrade is not supported: %v -> %v", cur, tar)
-	}
-
-	if curPkgVer.Patch == tarPkgVer.Patch {
-		return fmt.Errorf("the target version has been installed in the cluster.\n"+
-			"istioctl: %v\nIstio control plane: %v", cur, tar)
-	}
-
-	if curPkgVer.Patch > tarPkgVer.Patch {
-		return fmt.Errorf("a newer version has been installed in the cluster.\n"+
-			"istioctl: %v\nIstio control plane: %v", cur, tar)
-	}
-
 	tarGoVersion, err := goversion.NewVersion(tar)
 	if err != nil {
 		return fmt.Errorf("failed to parse the target version: %v", tar)
@@ -333,7 +306,6 @@ func retrieveControlPlaneVersion(kubeClient manifest.ExecClient, istioNamespace 
 // to the target version.
 func waitUpgradeComplete(kubeClient manifest.ExecClient, istioNamespace string, targetVer string, l *logger) error {
 	for i := 1; i <= upgradeWaitCheckVerMaxAttempts; i++ {
-		l.logAndPrintf("Waiting for upgrade rollout to complete, attempt #%v: ", i)
 		sleepSeconds(upgradeWaitSecCheckVerPerLoop)
 		cv, e := kubeClient.GetIstioVersions(istioNamespace)
 		if e != nil {
@@ -360,8 +332,9 @@ func waitUpgradeComplete(kubeClient manifest.ExecClient, istioNamespace string, 
 }
 
 // sleepSeconds sleeps for n seconds, printing a dot '.' per second
-func sleepSeconds(n int) {
-	for i := 1; i <= n; i++ {
+func sleepSeconds(duration time.Duration) {
+	timeout := duration * time.Second
+	for t := time.Duration(0); t < timeout; t += time.Second {
 		time.Sleep(time.Second)
 		fmt.Print(".")
 	}
