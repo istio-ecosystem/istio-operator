@@ -21,7 +21,6 @@ import (
 	"io"
 	"os"
 
-	"istio.io/operator/pkg/manifest"
 	"istio.io/pkg/log"
 )
 
@@ -100,13 +99,4 @@ func (l *logger) print(s string) {
 
 func refreshGoldenFiles() bool {
 	return os.Getenv("REFRESH_GOLDEN") == "true"
-}
-
-// getKubeExecClient returns a Kubernetes client specified by kubeConfig and configContext
-func getKubeExecClient(kubeConfig, configContext string, l *logger) manifest.ExecClient {
-	kubeClient, err := manifest.NewClient(kubeConfig, configContext)
-	if err != nil {
-		l.logAndFatalf("Abort. Failed to connect Kubernetes API server: %v", err)
-	}
-	return kubeClient
 }

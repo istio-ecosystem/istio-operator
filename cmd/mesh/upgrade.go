@@ -125,7 +125,11 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	l.logAndPrintf("Upgrade - target version: %s\n", targetVersion)
 
 	// Create a kube client from args.kubeConfigPath and  args.context
-	kubeClient := getKubeExecClient(args.kubeConfigPath, args.context, l)
+	kubeClient, err := manifest.NewClient(args.kubeConfigPath, args.context)
+	if err != nil {
+		l.logAndPrintf("Abort. Failed to connect Kubernetes API server, error: %v", err)
+		return err
+	}
 
 	// Get Istio control plane namespace
 	//TODO(elfinhe): support components distributed in multiple namespaces
