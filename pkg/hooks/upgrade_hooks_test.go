@@ -32,8 +32,9 @@ var (
 
 func init() {
 	// TODO: remove when integrated, this is just to silence lint.
-	_ = runPreUpgradeHooks(nil, nil, true)
-	_ = runPostUpgradeHooks(nil, nil, true)
+	hc := hookCommonParams{}
+	_ = runPreUpgradeHooks(nil, &hc, true)
+	_ = runPostUpgradeHooks(nil, &hc, true)
 }
 
 func h1(_ ExecClient, _, _ *v1alpha2.IstioControlPlaneSpec) util.Errors {
