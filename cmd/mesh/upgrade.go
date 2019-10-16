@@ -68,7 +68,7 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 	cmd.PersistentFlags().BoolVarP(&args.wait, "wait", "w", false,
 		"Wait, if set will wait until all Pods, Services, and minimum number of Pods "+
 			"of a Deployment are in a ready state before the command exits. "+
-			"It will wait for a maximum duration of "+(upgradeWaitSecWhenApply*
+			"It will wait for a maximum duration of "+(upgradeWaitSecCheckVerPerLoop*
 			upgradeWaitCheckVerMaxAttempts*time.Second).String())
 	cmd.PersistentFlags().BoolVar(&args.force, "force", false,
 		"Apply the upgrade without eligibility checks and testing for changes "+
