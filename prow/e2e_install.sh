@@ -36,8 +36,8 @@ MODE=permissive
 SIMPLE_AUTH=false
 E2E_ARGS="--skip_setup=true --use_local_cluster=true --istio_namespace=${ISTIO_NS} --test_logs_path=${ARTIFACTS}"
 TMPDIR=/tmp
-export HUB="gcr.io/istio-release"
-export TAG="master-latest-daily"
+export HUB="gcr.io/istio-testing"
+export TAG="1.4-dev"
 export GO111MODULE=on
 export IstioTop=${ISTIO_DIR}/../../..
 

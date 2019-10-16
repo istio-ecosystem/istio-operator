@@ -40,7 +40,7 @@ function update_branch() {
     fi
 }
 
-FROM_BRANCH=${FROM_BRANCH:-master}
+FROM_BRANCH=${FROM_BRANCH:-release-1.4}
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
 SHORT_VERSION=${CURRENT_BRANCH//release-/}
