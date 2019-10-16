@@ -14,10 +14,8 @@ require (
 	github.com/aokoli/goutils v1.0.1 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.2.1 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
-	github.com/docker/spdystream v0.0.0-20181023171402-6480d4af844c // indirect
+	github.com/docker/distribution v2.7.1+incompatible
 	github.com/dsnet/compress v0.0.1 // indirect
-	github.com/elazarl/goproxy v0.0.0-20190630181448-f1e96bc0f4c5 // indirect
-	github.com/elazarl/goproxy/ext v0.0.0-20190630181448-f1e96bc0f4c5 // indirect
 	github.com/evanphx/json-patch v4.5.0+incompatible
 	github.com/frankban/quicktest v1.4.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.7
@@ -33,7 +31,6 @@ require (
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/gophercloud/gophercloud v0.0.0-20190424031112-b9b92a825806 // indirect
 	github.com/gorilla/mux v1.7.2 // indirect
-	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/go-version v1.2.0
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
