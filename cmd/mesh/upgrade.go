@@ -122,6 +122,15 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 
 	// Get the target version from the tag in the ICPS
 	targetVersion := targetICPS.GetTag()
+	if targetVersion != opversion.OperatorVersionString {
+		l.logAndPrintf("The target version %v in %v is not supported "+
+			"by istioctl %v, please download istioctl %v to run upgrade", targetVersion,
+			args.inFilename, opversion.OperatorVersionString, targetVersion)
+		if !args.force {
+			return fmt.Errorf("the target version %v not equal to the binary version %v",
+				targetVersion, opversion.OperatorVersionString)
+		}
+	}
 	l.logAndPrintf("Upgrade - target version: %s\n", targetVersion)
 
 	// Create a kube client from args.kubeConfigPath and  args.context
