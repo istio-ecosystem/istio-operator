@@ -127,7 +127,7 @@ func genApplyManifests(setOverlay []string, inFilename string, dryRun bool, verb
 	opts := &manifest.InstallOptions{
 		DryRun:      dryRun,
 		Verbose:     verbose,
-		WaitTimeout: waitTimeout * time.Second,
+		WaitTimeout: waitTimeout,
 		Kubeconfig:  kubeConfigPath,
 		Context:     context,
 	}
