@@ -114,7 +114,6 @@ func genManifests(inFilename string, setOverlayYAML string, force bool, l *logge
 
 func genApplyManifests(setOverlay []string, inFilename string, dryRun bool, verbose bool,
 	kubeConfigPath string, context string, waitTimeout time.Duration, l *logger) error {
-
 	overlayFromSet, err := makeTreeFromSetList(setOverlay)
 	if err != nil {
 		return fmt.Errorf("failed to generate tree from the set overlay, error: %v", err)

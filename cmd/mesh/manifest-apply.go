@@ -82,7 +82,7 @@ func manifestApply(args *rootArgs, maArgs *manifestApplyArgs, l *logger) {
 	}
 	if err := genApplyManifests(maArgs.set, maArgs.inFilename, args.dryRun, args.verbose,
 		maArgs.kubeConfigPath, maArgs.context, maArgs.readinessTimeout, l); err != nil {
-			l.logAndFatalf("Failed to generate and apply manifests, error: %v", err)
+		l.logAndFatalf("Failed to generate and apply manifests, error: %v", err)
 	}
 }
 
