@@ -286,7 +286,8 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 	appliedObjects = append(appliedObjects, objects...)
 
 	extraArgs := []string{"--force"}
-	// Base components include namespaces and CRDs, do not prune them.
+	// Base components include namespaces and CRDs, pruning them will removes
+	// user configs, which makes it hard to roll back.
 	if componentName != name.IstioBaseComponentName {
 		extraArgs = append(extraArgs, "--prune", "--selector", fmt.Sprintf("%s=%s", istioComponentLabelStr, componentName))
 	}
