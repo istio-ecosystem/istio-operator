@@ -19,6 +19,9 @@ import (
 	"fmt"
 	"strconv"
 	"testing"
+	"time"
+
+	"github.com/onsi/gomega"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/helmreconciler"
@@ -29,10 +32,26 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
+const (
+	timeout        = time.Second * 2
+	defaultProfile = "default"
+	demoProfile    = "demo"
+	minimalProfile = "minimal"
+	sdsProfile     = "sds"
+)
+
 var (
+	c      client.Client
+	icpkey = types.NamespacedName{
+		Name:      "test-istiocontrolplane",
+		Namespace: "test-istio-operator",
+	}
+	expectedRequest = reconcile.Request{NamespacedName: icpkey}
+
 	minimalStatus = map[string]*v1alpha2.InstallStatus_VersionStatus{
 		"Pilot": {
 			Status: v1alpha2.InstallStatus_HEALTHY,
@@ -156,28 +175,28 @@ func TestICPController_SwitchProfile(t *testing.T) {
 	cases := []testCase{
 		{
 			description:    "switch profile from minimal to default",
-			initialProfile: "minimal",
-			targetProfile:  "default",
+			initialProfile: minimalProfile,
+			targetProfile:  defaultProfile,
 		},
 		{
 			description:    "switch profile from default to minimal",
-			initialProfile: "default",
-			targetProfile:  "minimal",
+			initialProfile: defaultProfile,
+			targetProfile:  minimalProfile,
 		},
 		{
 			description:    "switch profile from default to demo",
-			initialProfile: "default",
-			targetProfile:  "demo",
+			initialProfile: defaultProfile,
+			targetProfile:  demoProfile,
 		},
 		{
 			description:    "switch profile from demo to sds",
-			initialProfile: "demo",
-			targetProfile:  "sds",
+			initialProfile: demoProfile,
+			targetProfile:  sdsProfile,
 		},
 		{
 			description:    "switch profile from sds to default",
-			initialProfile: "sds",
-			targetProfile:  "default",
+			initialProfile: sdsProfile,
+			targetProfile:  defaultProfile,
 		},
 	}
 	for i, c := range cases {
@@ -186,16 +205,15 @@ func TestICPController_SwitchProfile(t *testing.T) {
 		})
 	}
 }
+
 func testSwitchProfile(t *testing.T, c testCase) {
 	t.Helper()
-	name := "example-istiocontrolplane"
-	namespace := "istio-system"
 	icp := &v1alpha2.IstioControlPlane{
 		Kind:       "IstioControlPlane",
 		ApiVersion: "install.istio.io/v1alpha2",
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:      icpkey.Name,
+			Namespace: icpkey.Namespace,
 		},
 		Spec: &v1alpha2.IstioControlPlaneSpec{
 			Profile: c.initialProfile,
@@ -213,8 +231,8 @@ func testSwitchProfile(t *testing.T, c testCase) {
 
 	req := reconcile.Request{
 		NamespacedName: types.NamespacedName{
-			Name:      name,
-			Namespace: namespace,
+			Name:      icpkey.Name,
+			Namespace: icpkey.Namespace,
 		},
 	}
 	res, err := r.Reconcile(req)
@@ -272,13 +290,13 @@ func checkICPStatus(cl client.Client, key client.ObjectKey, profile string) (boo
 	}
 	var status map[string]*v1alpha2.InstallStatus_VersionStatus
 	switch profile {
-	case "minimal":
+	case minimalProfile:
 		status = minimalStatus
-	case "default":
+	case defaultProfile:
 		status = defaultStatus
-	case "sds":
+	case sdsProfile:
 		status = sdsStatus
-	case "demo":
+	case demoProfile:
 		status = demoStatus
 	}
 	installStatus := instance.GetStatus()
@@ -297,4 +315,46 @@ func checkICPStatus(cl client.Client, key client.ObjectKey, profile string) (boo
 		}
 	}
 	return true, nil
+}
+
+// TestReconcile test the reconciler process with manager from end to end.
+func TestReconcile(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	// Setup the Manager and Controller. Wrap the Controller Reconcile function so it writes each request to a
+	// channel when it is finished.
+	mgr, err := manager.New(cfg, manager.Options{})
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	c = mgr.GetClient()
+
+	rec := newReconciler(mgr)
+	recFn, requests := SetupTestReconcile(rec)
+
+	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
+
+	stopMgr, mgrStopped := StartTestManager(mgr, g)
+
+	defer func() {
+		close(stopMgr)
+		mgrStopped.Wait()
+	}()
+
+	icp := &v1alpha2.IstioControlPlane{
+		Kind:       "IstioControlPlane",
+		ApiVersion: "install.istio.io/v1alpha2",
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      icpkey.Name,
+			Namespace: icpkey.Namespace,
+		},
+		Spec: &v1alpha2.IstioControlPlaneSpec{
+			Profile: defaultProfile,
+		},
+	}
+
+	g.Expect(c.Create(context.TODO(), icp)).NotTo(gomega.HaveOccurred())
+
+	defer c.Delete(context.TODO(), icp)
+
+	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 }
