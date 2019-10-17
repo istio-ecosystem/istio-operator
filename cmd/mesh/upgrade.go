@@ -301,7 +301,7 @@ func retrieveControlPlaneVersion(kubeClient manifest.ExecClient, istioNamespace 
 	}
 
 	for _, remote := range cv {
-		l.logAndPrintf("Control Plane - %s pod - version: %s", remote.Component, remote.Version)
+		l.logAndPrintf("Control Plane - %v", remote)
 	}
 	l.logAndPrint("")
 
@@ -333,8 +333,8 @@ func waitUpgradeComplete(kubeClient manifest.ExecClient, istioNamespace string, 
 		}
 		for _, remote := range cv {
 			if targetVer != remote.Version {
-				l.logAndPrintf("Control Plane - %s pod - version %s does not match the target version %s",
-					remote.Component, remote.Version, targetVer)
+				l.logAndPrintf("Control Plane - %v does not match the target version %s",
+					remote, targetVer)
 			}
 		}
 	}
