@@ -22,6 +22,7 @@ import (
 	"github.com/ghodss/yaml"
 	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
+	"istio.io/pkg/log"
 
 	"istio.io/operator/pkg/compare"
 	"istio.io/operator/pkg/hooks"
@@ -95,7 +96,7 @@ func UpgradeCmd() *cobra.Command {
 			initLogsOrExit(rootArgs)
 			err := upgrade(rootArgs, macArgs, l)
 			if err != nil {
-				l.logAndPrintf("Error: %v\n", err)
+				log.Infof("Error: %v\n", err)
 			}
 			return err
 		},
