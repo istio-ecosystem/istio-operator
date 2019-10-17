@@ -23,11 +23,9 @@ import (
 	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/compare"
 	"istio.io/operator/pkg/hooks"
 	"istio.io/operator/pkg/manifest"
-	"istio.io/operator/pkg/translate"
 	opversion "istio.io/operator/version"
 )
 
@@ -160,21 +158,6 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 			"error: %v", err)
 	}
 
-	// Create a new values translator
-	tr, err := translate.NewReverseTranslator(opversion.OperatorBinaryVersion.MinorVersion)
-	if err != nil && !args.force {
-		return fmt.Errorf("fail to create values translator, error: %v", err)
-	}
-
-	// Translate the current values into ICPS
-	var currentICPS *v1alpha2.IstioControlPlaneSpec
-	if tr != nil {
-		currentICPS, err = tr.TranslateFromValueToSpec([]byte(currentValues))
-		if err != nil && !args.force {
-			return fmt.Errorf("failed to translate the current values, error: %v", err.Error())
-		}
-	}
-
 	// Check if the upgrade currentVersion -> targetVersion is supported
 	err = checkSupportedVersions(currentVersion, targetVersion, args.versionsURI, l)
 	if err != nil && !args.force {
@@ -190,7 +173,7 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	hparams := &hooks.HookCommonParams{
 		SourceVer:    currentVersion,
 		TargetVer:    targetVersion,
-		SourceValues: currentICPS,
+		SourceValues: targetICPS,
 		TargetValues: targetICPS,
 	}
 	errs := hooks.RunPreUpgradeHooks(kubeClient, hparams, rootArgs.dryRun)
