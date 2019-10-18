@@ -291,8 +291,8 @@ func (c *CitadelChartCustomizer) cleanCitadelResources(obj runtime.Object) error
 
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:	cmName,
-			Namespace:	cmNamespace,
+			Name:      cmName,
+			Namespace: cmNamespace,
 		},
 	}
 
@@ -362,4 +362,3 @@ func (c *KialiChartCustomizer) patchKialiConfigMap(obj runtime.Object) (runtime.
 	}
 	return obj, nil
 }
-
