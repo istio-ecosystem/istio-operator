@@ -90,7 +90,7 @@ func (client *Client) GetIstioVersions(namespace string) ([]ComponentVersion, er
 
 		server := ComponentVersion{
 			Component: component,
-			Pod: pod,
+			Pod:       pod,
 		}
 
 		pv := ""
