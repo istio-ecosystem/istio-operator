@@ -22,6 +22,7 @@ import (
 	"github.com/ghodss/yaml"
 	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
+
 	"istio.io/pkg/log"
 
 	"istio.io/operator/pkg/compare"
@@ -275,11 +276,14 @@ func checkSupportedVersions(cur, tar, versionsURI string, l *logger) error {
 		return fmt.Errorf("failed to parse the target version: %v", tar)
 	}
 
-	compatibleMap := getVersionCompatibleMap(versionsURI, tarGoVersion, l)
+	compatibleMap, err := getVersionCompatibleMap(versionsURI, tarGoVersion, l)
+	if err != nil {
+		return err
+	}
 
 	curGoVersion, err := goversion.NewVersion(cur)
 	if err != nil {
-		return fmt.Errorf("failed to parse the current version: %v", cur)
+		return fmt.Errorf("failed to parse the current version: %v, error: %v", cur, err)
 	}
 
 	if !compatibleMap.SupportedIstioVersions.Check(curGoVersion) {
