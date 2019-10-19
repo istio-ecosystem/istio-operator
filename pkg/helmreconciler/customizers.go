@@ -15,6 +15,8 @@
 package helmreconciler
 
 import (
+	"sync"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/helm/pkg/manifest"
@@ -119,7 +121,9 @@ type DefaultChartCustomizerListener struct {
 	ChartAnnotationKey string
 	reconciler         *HelmReconciler
 	customizers        map[string]ChartCustomizer
+	customizersMU      sync.Mutex
 	customizer         ChartCustomizer
+	customizerMU       sync.Mutex
 }
 
 var _ RenderingListener = &DefaultChartCustomizerListener{}
@@ -145,18 +149,24 @@ func (l *DefaultChartCustomizerListener) RegisterReconciler(reconciler *HelmReco
 // BeginChart creates a new ChartCustomizer for the specified chart and delegates listener calls applying to resources
 // (e.g. BeginResource) to the customizer up through EndChart.
 func (l *DefaultChartCustomizerListener) BeginChart(chartName string, manifests []manifest.Manifest) ([]manifest.Manifest, error) {
+	l.customizerMU.Lock()
+	defer l.customizerMU.Unlock()
 	l.customizer = l.GetOrCreateCustomizer(chartName)
 	return l.customizer.BeginChart(chartName, manifests)
 }
 
 // BeginResource delegates to the active ChartCustomizer's BeginResource
 func (l *DefaultChartCustomizerListener) BeginResource(chartName string, obj runtime.Object) (runtime.Object, error) {
+	l.customizerMU.Lock()
+	defer l.customizerMU.Unlock()
 	l.customizer = l.GetOrCreateCustomizer(chartName)
 	return l.customizer.BeginResource(chartName, obj)
 }
 
 // ResourceCreated delegates to the active ChartCustomizer's ResourceCreated
 func (l *DefaultChartCustomizerListener) ResourceCreated(created runtime.Object) error {
+	l.customizerMU.Lock()
+	defer l.customizerMU.Unlock()
 	if l.customizer == nil {
 		return nil
 	}
@@ -165,6 +175,8 @@ func (l *DefaultChartCustomizerListener) ResourceCreated(created runtime.Object)
 
 // ResourceUpdated delegates to the active ChartCustomizer's ResourceUpdated
 func (l *DefaultChartCustomizerListener) ResourceUpdated(updated runtime.Object, old runtime.Object) error {
+	l.customizerMU.Lock()
+	defer l.customizerMU.Unlock()
 	if l.customizer == nil {
 		return nil
 	}
@@ -173,6 +185,8 @@ func (l *DefaultChartCustomizerListener) ResourceUpdated(updated runtime.Object,
 
 // ResourceError delegates to the active ChartCustomizer's ResourceError
 func (l *DefaultChartCustomizerListener) ResourceError(obj runtime.Object, err error) error {
+	l.customizerMU.Lock()
+	defer l.customizerMU.Unlock()
 	if l.customizer == nil {
 		return nil
 	}
@@ -181,6 +195,8 @@ func (l *DefaultChartCustomizerListener) ResourceError(obj runtime.Object, err e
 
 // EndResource delegates to the active ChartCustomizer's EndResource
 func (l *DefaultChartCustomizerListener) EndResource(obj runtime.Object) error {
+	l.customizerMU.Lock()
+	defer l.customizerMU.Unlock()
 	if l.customizer == nil {
 		return nil
 	}
@@ -189,6 +205,8 @@ func (l *DefaultChartCustomizerListener) EndResource(obj runtime.Object) error {
 
 // EndChart delegates to the active ChartCustomizer's EndChart and resets the active ChartCustomizer to nil.
 func (l *DefaultChartCustomizerListener) EndChart(chartName string) error {
+	l.customizerMU.Lock()
+	defer l.customizerMU.Unlock()
 	if l.customizer == nil {
 		return nil
 	}
@@ -210,6 +228,8 @@ func (l *DefaultChartCustomizerListener) ResourceDeleted(deleted runtime.Object)
 func (l *DefaultChartCustomizerListener) GetOrCreateCustomizer(chartName string) ChartCustomizer {
 	var ok bool
 	var customizer ChartCustomizer
+	l.customizersMU.Lock()
+	defer l.customizersMU.Unlock()
 	if customizer, ok = l.customizers[chartName]; !ok {
 		customizer = l.ChartCustomizerFactory.NewChartCustomizer(chartName)
 		if reconcilerListener, ok := customizer.(ReconcilerListener); ok {
@@ -228,6 +248,7 @@ type DefaultChartCustomizer struct {
 	Reconciler             *HelmReconciler
 	NewResourcesByKind     map[string][]runtime.Object
 	DeletedResourcesByKind map[string][]runtime.Object
+	mu                     sync.Mutex
 }
 
 var _ ChartCustomizer = &DefaultChartCustomizer{}
@@ -264,6 +285,8 @@ func (c *DefaultChartCustomizer) BeginResource(chartName string, obj runtime.Obj
 // ResourceCreated adds the created object to NewResourcesByKind
 func (c *DefaultChartCustomizer) ResourceCreated(created runtime.Object) error {
 	kind := created.GetObjectKind().GroupVersionKind().Kind
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	objects, ok := c.NewResourcesByKind[kind]
 	if !ok {
 		objects = []runtime.Object{}
@@ -275,6 +298,8 @@ func (c *DefaultChartCustomizer) ResourceCreated(created runtime.Object) error {
 // ResourceUpdated adds the updated object to NewResourcesByKind
 func (c *DefaultChartCustomizer) ResourceUpdated(updated, old runtime.Object) error {
 	kind := updated.GetObjectKind().GroupVersionKind().Kind
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	objects, ok := c.NewResourcesByKind[kind]
 	if !ok {
 		objects = []runtime.Object{}
@@ -286,11 +311,14 @@ func (c *DefaultChartCustomizer) ResourceUpdated(updated, old runtime.Object) er
 // ResourceDeleted adds the deleted object to DeletedResourcesByKind
 func (c *DefaultChartCustomizer) ResourceDeleted(deleted runtime.Object) error {
 	kind := deleted.GetObjectKind().GroupVersionKind().Kind
+	var mu sync.Mutex
+	mu.Lock()
 	objects, ok := c.DeletedResourcesByKind[kind]
 	if !ok {
 		objects = []runtime.Object{}
 	}
 	c.DeletedResourcesByKind[kind] = append(objects, deleted)
+	mu.Unlock()
 	return nil
 }
 

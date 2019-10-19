@@ -280,7 +280,7 @@ func (c *CitadelChartCustomizer) ResourceDeleted(obj runtime.Object) error {
 }
 
 func (c *CitadelChartCustomizer) cleanCitadelResources(obj runtime.Object) error {
-	cleanCitadelResourcesMaxRetries := 3
+	cleanCitadelResourcesMaxRetries := 10
 	objAccessor, err := meta.Accessor(obj)
 	if err != nil {
 		return fmt.Errorf("get error to get namespace of %s: %s", obj.GetObjectKind().GroupVersionKind(), err)
