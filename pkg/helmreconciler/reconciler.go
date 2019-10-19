@@ -102,13 +102,13 @@ func (h *HelmReconciler) Reconcile() error {
 	}
 
 	// handle the defined callbacks to the generated manifests for each subchart chart.
-	for chartName, manifests := range manifestMap {
-		newManifests, err := h.customizer.Listener().BeginChart(chartName, manifests)
-		if err != nil {
-			return err
-		}
-		manifestMap[chartName] = newManifests
-	}
+	//for chartName, manifests := range manifestMap {
+	//	newManifests, err := h.customizer.Listener().BeginChart(chartName, manifests)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	manifestMap[chartName] = newManifests
+	//}
 	status := h.processRecursive(manifestMap)
 
 	// Delete any resources not in the manifest but managed by operator.
