@@ -150,11 +150,9 @@ func (l *DefaultChartCustomizerListener) BeginChart(chartName string, manifests 
 }
 
 // BeginResource delegates to the active ChartCustomizer's BeginResource
-func (l *DefaultChartCustomizerListener) BeginResource(obj runtime.Object) (runtime.Object, error) {
-	if l.customizer == nil {
-		return obj, nil
-	}
-	return l.customizer.BeginResource(obj)
+func (l *DefaultChartCustomizerListener) BeginResource(chartName string, obj runtime.Object) (runtime.Object, error) {
+	l.customizer = l.GetOrCreateCustomizer(chartName)
+	return l.customizer.BeginResource(chartName, obj)
 }
 
 // ResourceCreated delegates to the active ChartCustomizer's ResourceCreated
@@ -255,10 +253,10 @@ func (c *DefaultChartCustomizer) BeginChart(chart string, manifests []manifest.M
 }
 
 // BeginResource adds the chart annotation to the resource (ChartAnnotationKey=ChartName)
-func (c *DefaultChartCustomizer) BeginResource(obj runtime.Object) (runtime.Object, error) {
+func (c *DefaultChartCustomizer) BeginResource(chartName string, obj runtime.Object) (runtime.Object, error) {
 	var err error
-	if len(c.ChartName) > 0 && len(c.ChartAnnotationKey) > 0 {
-		err = util.SetAnnotation(obj, c.ChartAnnotationKey, c.ChartName)
+	if len(chartName) > 0 && len(c.ChartAnnotationKey) > 0 {
+		err = util.SetAnnotation(obj, c.ChartAnnotationKey, chartName)
 	}
 	return obj, err
 }
