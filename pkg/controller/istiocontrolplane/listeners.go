@@ -101,7 +101,9 @@ func NewChartCustomizerListener() *IstioChartCustomizerListener {
 	listener := &IstioChartCustomizerListener{
 		DefaultChartCustomizerListener: helmreconciler.NewDefaultChartCustomizerListener(ChartOwnerKey),
 	}
-	listener.DefaultChartCustomizerListener.ChartCustomizerFactory = &IstioChartCustomizerFactory{}
+	listener.DefaultChartCustomizerListener.ChartCustomizerFactory = &IstioChartCustomizerFactory{
+		DefaultChartCustomizerFactory: &helmreconciler.DefaultChartCustomizerFactory{ChartAnnotationKey: ChartOwnerKey},
+	}
 	return listener
 }
 
@@ -116,12 +118,12 @@ var _ helmreconciler.ChartCustomizerFactory = &IstioChartCustomizerFactory{}
 // Currently, an IstioDefaultChartCustomizer is returned for all charts except: kiali
 func (f *IstioChartCustomizerFactory) NewChartCustomizer(chartName string) helmreconciler.ChartCustomizer {
 	switch chartName {
-	case "istio/charts/citadel":
-		return NewCitadelChartCustomizer(chartName, f.DefaultChartCustomizerFactory.ChartAnnotationKey)
-	case "istio/charts/kiali":
-		return NewKialiChartCustomizer(chartName, f.DefaultChartCustomizerFactory.ChartAnnotationKey)
+	case "Citadel":
+		return NewCitadelChartCustomizer(chartName, f.ChartAnnotationKey)
+	case "Kiali":
+		return NewKialiChartCustomizer(chartName, f.ChartAnnotationKey)
 	default:
-		return NewIstioDefaultChartCustomizer(chartName, f.DefaultChartCustomizerFactory.ChartAnnotationKey)
+		return NewIstioDefaultChartCustomizer(chartName, f.ChartAnnotationKey)
 	}
 }
 
@@ -333,9 +335,9 @@ func NewKialiChartCustomizer(chartName, chartAnnotationKey string) *KialiChartCu
 
 // BeginResource invokes the default BeginResource behavior for all resources and patches the grafana and jaeger URLs
 // in the "kiali" ConfigMap with the actual installed URLs.  (TODO)
-func (c *KialiChartCustomizer) BeginResource(obj runtime.Object) (runtime.Object, error) {
+func (c *KialiChartCustomizer) BeginResource(chart string, obj runtime.Object) (runtime.Object, error) {
 	var err error
-	if obj, err = c.IstioDefaultChartCustomizer.BeginResource(obj); err != nil {
+	if obj, err = c.IstioDefaultChartCustomizer.BeginResource(c.ChartName, obj); err != nil {
 		return obj, err
 	}
 	switch obj.GetObjectKind().GroupVersionKind().Kind {
