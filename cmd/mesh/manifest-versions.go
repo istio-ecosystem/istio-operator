@@ -108,16 +108,15 @@ func getVersionCompatibleMap(versionsURI string, binVersion *goversion.Version,
 	return myVersionMap, nil
 }
 
-func loadCompatibleMapFile(versionsURI string, l *logger) (b []byte, err error) {
+func loadCompatibleMapFile(versionsURI string, l *logger) ([]byte, error) {
+	var err error
 	if util.IsHTTPURL(versionsURI) {
-		b, err = httprequest.Get(versionsURI)
-		if err == nil {
-			return
+		if b, err := httprequest.Get(versionsURI); err == nil {
+			return b, nil
 		}
 	} else {
-		b, err = ioutil.ReadFile(versionsURI)
-		if err == nil {
-			return
+		if b, err := ioutil.ReadFile(versionsURI); err == nil {
+			return b, nil
 		}
 	}
 
