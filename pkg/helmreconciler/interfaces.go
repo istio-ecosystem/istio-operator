@@ -105,6 +105,7 @@ type RenderingListener interface {
 	// applying settings that are specific to the environment, e.g. URLs from Ingress/Service resources created from
 	// other charts; etc.
 	// obj represents a resource created from a manifest.
+	// chart represents the helm chart obj belongs to.
 	// The returned runtime.Object is the object that will be reconciled (created/updated).
 	BeginResource(chart string, obj runtime.Object) (runtime.Object, error)
 	// ResourceCreated occurs after a resource has been created (i.e. client.Create(obj)).  This method allows users
