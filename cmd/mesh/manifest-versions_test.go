@@ -74,7 +74,7 @@ func TestGetVersionCompatibleMap(t *testing.T) {
 				l:           l,
 			},
 			want: nil,
-			wantErr: fmt.Errorf("this operator version %v was not found in the global manifestVersions map",
+			wantErr: fmt.Errorf("this operator version %s was not found in the global manifestVersions map",
 				goVer131000.String()),
 		},
 	}
