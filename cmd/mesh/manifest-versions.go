@@ -17,16 +17,15 @@ package mesh
 import (
 	"fmt"
 	"io/ioutil"
-	"net/url"
 
 	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
-	"istio.io/operator/pkg/vfs"
-
 	"istio.io/operator/pkg/httprequest"
+	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/version"
+	"istio.io/operator/pkg/vfs"
 	binversion "istio.io/operator/version"
 )
 
@@ -104,26 +103,25 @@ func getVersionCompatibleMap(versionsURI string, binVersion *goversion.Version,
 		}
 	}
 	if myVersionMap == nil {
-		return nil, fmt.Errorf("this operator version %s was not found in the global manifestVersions map", binVersion.String())
+		return nil, fmt.Errorf("this operator version %s was not found in the version map", binVersion.String())
 	}
 	return myVersionMap, nil
 }
 
 func loadCompatibleMapFile(versionsURI string, l *logger) (b []byte, err error) {
-	if _, err = url.ParseRequestURI(versionsURI); err == nil {
+	if util.IsHTTPURL(versionsURI) {
 		b, err = httprequest.Get(versionsURI)
 		if err == nil {
 			return
 		}
+	} else {
+		b, err = ioutil.ReadFile(versionsURI)
+		if err == nil {
+			return
+		}
 	}
-	l.logAndPrintf("Warning: failed to retrieve the version map from the remote URL (%s): %s. " +
-		"Falling back to the local file: %s", versionsURI, err, versionsURI)
 
-	b, err = ioutil.ReadFile(versionsURI)
-	if err == nil {
-		return
-	}
-	l.logAndPrintf("Warning: failed to retrieve the version map from the local file (%s): %s. " +
-			"Falling back to the internal version map.", versionsURI, err)
+	l.logAndPrintf("Warning: failed to retrieve the version map from (%s): %s. "+
+		"Falling back to the internal version map.", versionsURI, err)
 	return vfs.ReadFile("versions.yaml")
 }

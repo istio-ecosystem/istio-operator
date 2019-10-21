@@ -16,12 +16,16 @@ package mesh
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	goversion "github.com/hashicorp/go-version"
+	"gopkg.in/yaml.v2"
 
 	"istio.io/operator/pkg/version"
+	binversion "istio.io/operator/version"
 )
 
 func TestGetVersionCompatibleMap(t *testing.T) {
@@ -30,16 +34,42 @@ func TestGetVersionCompatibleMap(t *testing.T) {
 		binVersion  *goversion.Version
 		l           *logger
 	}
-	goVer131000, _ := goversion.NewVersion("1.3.1000")
-	goVer132, _ := goversion.NewVersion("1.3.2")
-	scVer132, _ := goversion.NewConstraint(">=1.3.0,<=1.3.2")
-	rcVer132, _ := goversion.NewConstraint("1.3.2")
-	vm132 := &version.CompatibilityMapping{
-		OperatorVersion:          goVer132,
-		SupportedIstioVersions:   scVer132,
-		RecommendedIstioVersions: rcVer132,
-	}
+
+	testDataDir = filepath.Join(repoRootDir, "cmd/mesh/testdata/manifest-versions")
+	testdataVersionsFilePath := filepath.Join(testDataDir, "input", "versions.yaml")
+	operatorVersionsFilePath := "../../data/versions.yaml"
+	nonexistentFilePath := "__nonexistent-versions.yaml"
+
+	goVerNonexistent, _ := goversion.NewVersion("0.0.999")
+	goVer133, _ := goversion.NewVersion("1.3.3")
+
 	l := newLogger(true, os.Stdout, os.Stderr)
+
+	b, err := ioutil.ReadFile(operatorVersionsFilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var vs []version.CompatibilityMapping
+	if err := yaml.Unmarshal(b, &vs); err != nil {
+		t.Fatal(err)
+	}
+	var curCm, ver133Cm *version.CompatibilityMapping
+	for i := range vs {
+		if binversion.OperatorBinaryGoVersion.Equal(vs[i].OperatorVersion) {
+			curCm = &vs[i]
+		}
+		if goVer133.Equal(vs[i].OperatorVersion) {
+			ver133Cm = &vs[i]
+		}
+	}
+
+	if curCm == nil {
+		t.Fatalf("OperatorBinaryGoVersion %v cannot be found in %s, "+
+			"if OperatorBinaryGoVersion is updated to a new version, please also add it "+
+			"into versions.yaml and generate the built-in vfs data.",
+			binversion.OperatorBinaryGoVersion, operatorVersionsFilePath)
+	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -47,35 +77,56 @@ func TestGetVersionCompatibleMap(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name: "built-in version map",
+			name: "read the current binary version from data versions",
 			args: args{
-				versionsURI: "__nonexistent-versions.yaml",
-				binVersion:  goVer132,
+				versionsURI: operatorVersionsFilePath,
+				binVersion:  binversion.OperatorBinaryGoVersion,
 				l:           l,
 			},
-			want:    vm132,
+			want:    curCm,
 			wantErr: nil,
 		},
 		{
-			name: "read from github",
+			name: "read the current binary version from built-in version map",
 			args: args{
-				versionsURI: versionsMapURL,
-				binVersion:  goVer132,
+				versionsURI: nonexistentFilePath,
+				binVersion:  binversion.OperatorBinaryGoVersion,
 				l:           l,
 			},
-			want:    vm132,
+			want:    curCm,
 			wantErr: nil,
 		},
 		{
-			name: "go version not found in version map",
+			name: "read version 133 from testdata",
 			args: args{
-				versionsURI: "__nonexistent-versions.yaml",
-				binVersion:  goVer131000,
+				versionsURI: testdataVersionsFilePath,
+				binVersion:  goVer133,
+				l:           l,
+			},
+			want:    ver133Cm,
+			wantErr: nil,
+		},
+		{
+			name: "read nonexistent version from testdata",
+			args: args{
+				versionsURI: testdataVersionsFilePath,
+				binVersion:  goVerNonexistent,
 				l:           l,
 			},
 			want: nil,
-			wantErr: fmt.Errorf("this operator version %s was not found in the global manifestVersions map",
-				goVer131000.String()),
+			wantErr: fmt.Errorf("this operator version %s was not found in the version map",
+				goVerNonexistent.String()),
+		},
+		{
+			name: "read nonexistent version in built-in version map",
+			args: args{
+				versionsURI: nonexistentFilePath,
+				binVersion:  goVerNonexistent,
+				l:           l,
+			},
+			want: nil,
+			wantErr: fmt.Errorf("this operator version %s was not found in the version map",
+				goVerNonexistent.String()),
 		},
 	}
 	for _, tt := range tests {
