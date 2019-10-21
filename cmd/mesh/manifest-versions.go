@@ -104,7 +104,7 @@ func getVersionCompatibleMap(versionsURI string, binVersion *goversion.Version,
 		}
 	}
 	if myVersionMap == nil {
-		return nil, fmt.Errorf("this operator version %v was not found in the global manifestVersions map", binVersion.String())
+		return nil, fmt.Errorf("this operator version %s was not found in the global manifestVersions map", binVersion.String())
 	}
 	return myVersionMap, nil
 }
@@ -116,14 +116,14 @@ func loadCompatibleMapFile(versionsURI string, l *logger) (b []byte, err error) 
 			return
 		}
 	}
-	l.logAndPrintf("Warning. Failed to retrieve the version map from the remote url: %v, error: %v."+
-		" Now fall back to the local file system.", versionsURI, err)
+	l.logAndPrintf("Warning: failed to retrieve the version map from the remote URL (%s): %s. " +
+		"Falling back to the local file: %s", versionsURI, err, versionsURI)
 
 	b, err = ioutil.ReadFile(versionsURI)
 	if err == nil {
 		return
 	}
-	l.logAndPrintf("Warning. Failed to retrieve the version map from the local file: %v, error: %v."+
-		" Now fall back to the built-in version map.", versionsURI, err)
+	l.logAndPrintf("Warning: failed to retrieve the version map from the local file (%s): %s. " +
+			"Falling back to the internal version map.", versionsURI, err)
 	return vfs.ReadFile("versions.yaml")
 }
