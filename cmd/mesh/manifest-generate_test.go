@@ -150,6 +150,26 @@ func TestManifestGenerateOrdered(t *testing.T) {
 	})
 }
 
+// TestLDFlags checks whether building mesh command with
+// -ldflags "-X istio.io/operator/cmd/mesh.HubValueFromBuild=myhub -X istio.io/operator/cmd/mesh.TagValueFromBuild=mytag"
+// results in these values showing up in a generated manifest.
+func TestLDFlags(t *testing.T) {
+	tmpHub, tmpTag := HubValueFromBuild, TagValueFromBuild
+	defer func() {
+		HubValueFromBuild, TagValueFromBuild = tmpHub, tmpTag
+	}()
+	HubValueFromBuild, TagValueFromBuild = "testHub", "testTag"
+	l := newLogger(true, os.Stdout, os.Stderr)
+	_, icps, err := genICPS("", "default", "", true, l)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if icps.Hub != HubValueFromBuild || icps.Tag != TagValueFromBuild {
+		t.Fatalf("HubValueFromBuild,TagValueFromBuild got: %s,%s, want: %s, %s", icps.Hub, icps.Tag, HubValueFromBuild, TagValueFromBuild)
+	}
+
+}
+
 func runTestGroup(t *testing.T, tests testGroup) {
 	testDataDir = filepath.Join(repoRootDir, "cmd/mesh/testdata/manifest-generate")
 	for _, tt := range tests {
