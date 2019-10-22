@@ -63,7 +63,7 @@ func profileDumpCmd(rootArgs *rootArgs, pdArgs *profileDumpArgs) *cobra.Command 
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
+			l := newLogger(rootArgs.logToStdErr)
 			profileDump(args, rootArgs, pdArgs, l)
 		}}
 

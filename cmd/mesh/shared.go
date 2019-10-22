@@ -18,7 +18,6 @@ package mesh
 
 import (
 	"fmt"
-	"io"
 	"os"
 
 	"istio.io/pkg/log"
@@ -53,7 +52,11 @@ func initLogsOrExit(args *rootArgs) {
 
 func configLogs(logToStdErr bool) error {
 	opt := log.DefaultOptions()
-	if !logToStdErr && logToFile {
+	if !logToStdErr {
+		opt.ErrorOutputPaths = []string{"/dev/null"}
+		opt.OutputPaths = []string{"/dev/null"}
+	}
+	if logToFile {
 		opt.ErrorOutputPaths = []string{logFilePath}
 		opt.OutputPaths = []string{logFilePath}
 	}
@@ -62,15 +65,11 @@ func configLogs(logToStdErr bool) error {
 
 type logger struct {
 	logToStdErr bool
-	stdOut      io.Writer
-	stdErr      io.Writer
 }
 
-func newLogger(logToStdErr bool, stdOut, stdErr io.Writer) *logger {
+func newLogger(logToStdErr bool) *logger {
 	return &logger{
 		logToStdErr: logToStdErr,
-		stdOut:      stdOut,
-		stdErr:      stdErr,
 	}
 }
 
@@ -83,8 +82,9 @@ func (l *logger) logAndPrint(v ...interface{}) {
 	if !l.logToStdErr {
 		l.print(s)
 		l.print("\n")
+	} else {
+		log.Infof(s)
 	}
-	log.Infof(s)
 }
 
 func (l *logger) logAndFatal(v ...interface{}) {
@@ -97,8 +97,9 @@ func (l *logger) logAndPrintf(format string, a ...interface{}) {
 	if !l.logToStdErr {
 		l.print(s)
 		l.print("\n")
+	} else {
+		log.Infof(s)
 	}
-	log.Infof(s)
 }
 
 func (l *logger) logAndFatalf(format string, a ...interface{}) {
@@ -107,7 +108,7 @@ func (l *logger) logAndFatalf(format string, a ...interface{}) {
 }
 
 func (l *logger) print(s string) {
-	_, _ = l.stdOut.Write([]byte(s))
+	fmt.Print(s)
 }
 
 func refreshGoldenFiles() bool {

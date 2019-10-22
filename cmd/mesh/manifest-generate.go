@@ -56,7 +56,7 @@ func manifestGenerateCmd(rootArgs *rootArgs, mgArgs *manifestGenerateArgs) *cobr
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
+			l := newLogger(rootArgs.logToStdErr)
 			manifestGenerate(rootArgs, mgArgs, l)
 		}}
 

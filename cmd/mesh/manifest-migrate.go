@@ -55,7 +55,7 @@ func manifestMigrateCmd(rootArgs *rootArgs, mmArgs *manifestMigrateArgs) *cobra.
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
+			l := newLogger(rootArgs.logToStdErr)
 			if len(args) == 0 {
 				migrateFromClusterConfig(rootArgs, mmArgs, l)
 			} else {
