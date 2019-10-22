@@ -13,9 +13,10 @@ meeting to share your ideas.
 This document is an overview of how the operator works from a user perspective. For more details about the design and
 architecture and a code overview, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-Note that the operator CLI is distributed to users as part of istioctl, where it is imported as a module. The mesh command
+The operator CLI is distributed to users as part of istioctl. The `mesh` command
 in this repo is simply a wrapper to speed up development - the subcommands are the same code that is incorporated into
-istioctl when it is released.
+istioctl. Making changes to any `mesh` subcommand will be reflected in istioctl after one of the regular syncs to
+istio/operator.
 
 ## Introduction
 
@@ -65,7 +66,7 @@ for details.
 
 ## Developer quick start
 
-The quick start describes how to install and use the operator `mesh` CLI command.
+The quick start describes how to install and use the operator `mesh` CLI command and/or controller.
 
 ### Building
 
@@ -76,25 +77,76 @@ to execute the following step one time.
 GO111MODULE=on go get github.com/jteeuwen/go-bindata/go-bindata@v3.0.8-0.20180305030458-6025e8de665b
 ```
 
-To build the operator, simply:
+#### Clone the repo
 
 ```bash
 git clone https://github.com/istio/operator.git
 cd operator
+```
+
+#### CLI
+
+To build the operator CLI, simply:
+
+```bash
 make mesh
 ```
 
 This will create a binary called `mesh` in ${GOPATH}/bin. Ensure this is in your PATH to run the examples below.
 
-### Flags
+#### Controller
+
+Building a custom controller requires a Dockerhub (or similar) account. To build using the container based build:
+
+```bash
+HUB=docker.io/<your-account> TAG=latest make docker.all
+```
+
+This builds the controller binary and docker file, and pushes the image to the specified hub with the `latest` tag.
+
+Note: The container based build does not work in all setups due to security restrictions. If the above does not work for you,
+try the local build:
+
+```bash
+GOBIN=<your-bin-path> BUILD_WITH_CONTAINER=0 HUB=docker.io/<your-account> TAG=latest make docker.all
+```
+
+Once the images are pushed, configure kubectl to point to your cluster and install the controller. You should edit
+the file deploy/operator.yaml to point to your docker hub:
+
+```yaml
+          image: docker.io/<your-account>/operator
+```
+
+Install the controller manifest:
+
+```bash
+kubectl apply -k deploy/
+```
+
+This installs the controller into the cluster in the istio-operator namespace. The controller in turns installs
+the Istio control plane into the istio-system namespace by default.
+
+### Relationship between the CLI and controller
+
+The CLI and controller share the same API and codebase for generating manifests from the API. You can think of the
+controller as the CLI command `mesh manifest apply` running in a loop in a pod in the cluster and using the config
+from the in-cluster IstioControlPlane CustomResource (CR). 
+There are two major differences:
+1. The controller does not accept any dynamic user config through flags. All user interaction is through the
+IstioControlPlane CR.
+1. The controller has additional logic that mirrors istioctl commands like upgrade, but is driven from the declarative
+API rather than command line.
+
+### Quick tour of CLI commands
+
+#### Flags
 
 The `mesh` command supports the following flags:
 
 - `logtostderr`: log to console (by default logs go to ./mesh-cli.log).
 - `dry-run`: console output only, nothing applied to cluster or written to files.
 - `verbose`: display entire manifest contents and other debug info (default is false).
-
-### Quick tour of CLI commands
 
 #### Basic default manifest
 
@@ -376,6 +428,12 @@ The user-defined overlay uses a path spec that includes the ability to select li
 the container with the key-value "name: discovery" is selected from the list of containers, and the command line
 parameter with value "30m" is selected to be modified. The advanced overlay capability is described in more detail in
 the spec.
+
+## Interaction with controller
+
+The controller shares the same API as the operator CLI, so it's possible to install any of the above examples as a CR
+in the cluster in the istio-operator namespace and the controller will react to it with the same outcome as running
+`mesh manifest apply -f <path-to-custom-resource-file>`.
 
 ## Architecture
 
