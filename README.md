@@ -3,7 +3,7 @@
 
 # Istio Operator
 
-The Istio operator CLI is now suitable for developers to evaluate and experiment with. You can
+The Istio operator CLI is beta and the controller is alpha for 1.4. You can
 [contribute](CONTRIBUTING.md) by picking an
 [unassigned open issue](https://github.com/istio/istio/issues?q=is%3Aissue+is%3Aopen+label%3Aarea%2Fenvironments%2Foperator+no%3Aassignee),
 creating a [bug or feature request](BUGS-AND-FEATURE-REQUESTS.md),
@@ -11,7 +11,11 @@ or just coming to the weekly [Environments Working Group](https://github.com/ist
 meeting to share your ideas.
 
 This document is an overview of how the operator works from a user perspective. For more details about the design and
-architecture and a code overview, see [ARCHITECTURE.md](./ARCHITECTURE.md)
+architecture and a code overview, see [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+Note that the operator CLI is distributed to users as part of istioctl, where it is imported as a module. The mesh command
+in this repo is simply a wrapper to speed up development - the subcommands are the same code that is incorporated into
+istioctl when it is released.
 
 ## Introduction
 
