@@ -76,7 +76,7 @@ func manifestDiffCmd(rootArgs *rootArgs, diffArgs *manifestDiffArgs) *cobra.Comm
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
+			l := newLogger(rootArgs.logToStdErr)
 			if diffArgs.compareDir {
 				compareManifestsFromDirs(rootArgs, args[0], args[1], diffArgs.renameResources,
 					diffArgs.selectResources, diffArgs.ignoreResources)
