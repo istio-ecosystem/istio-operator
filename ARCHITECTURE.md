@@ -248,7 +248,7 @@ subdirectory as a Cobra command with the following subcommands:
     - [diff](cmd/mesh/profile-diff.go): the diff subcommand is used to display the difference between two Istio configuration profiles.
     - [dump](cmd/mesh/profile-dump.go): the dump subcommand is used to dump the values in an Istio configuration profile.
     - [list](cmd/mesh/profile-list.go): the list subcommand is used to list available Istio configuration profiles.
-- [upgrade](cmd/mesh/upgrade.go): performs an in-place upgrade of the Istio control plane. It reuses the manifest generation functions in [manifest](cmd/mesh/manifest.go) to generate manifests for the upgrade. Prior to executing the upgrade actions, it checks that the eligibility criteria for upgrade are met. It also checks for any changes in the profile default values between versions and alerts the user to any such changes. After applying this upgrade manifests, this subcommand has a flag (--wait) to wait for all pods running at the same upgraded version.
+- [upgrade](cmd/mesh/upgrade.go): performs an in-place upgrade of the Istio control plane. This subcommand reuses functions in [manifest](cmd/mesh/manifest.go) to generate manifests for the upgrade. Prior to executing the upgrade actions, it checks that the eligibility criteria for upgrade are met. The upgrade subcommand also checks for any changes in the profile default values between versions and alerts the user to any such changes. After applying this upgrade manifests, this subcommand has a flag (--wait) to wait for all pods to be running at the same upgraded version.
 
 ## Migration tools
 
