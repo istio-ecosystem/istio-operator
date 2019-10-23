@@ -17,6 +17,7 @@ package mesh
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -42,7 +43,7 @@ func TestGetVersionCompatibleMap(t *testing.T) {
 	goVerNonexistent, _ := goversion.NewVersion("0.0.999")
 	goVer133, _ := goversion.NewVersion("1.3.3")
 
-	l := newLogger(true)
+	l := newLogger(true, os.Stdout, os.Stderr)
 
 	b, err := ioutil.ReadFile(operatorVersionsFilePath)
 	if err != nil {
