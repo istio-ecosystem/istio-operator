@@ -18,6 +18,7 @@ package mesh
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"istio.io/pkg/log"
@@ -65,11 +66,17 @@ func configLogs(logToStdErr bool) error {
 
 type logger struct {
 	logToStdErr bool
+	stdOut      io.Writer
+	stdErr      io.Writer
 }
 
-func newLogger(logToStdErr bool) *logger {
+// newLogger creates a new logger and returns a pointer to it.
+// stdOut and stdErr can be used to capture output for testing.
+func newLogger(logToStdErr bool, stdOut, stdErr io.Writer) *logger {
 	return &logger{
 		logToStdErr: logToStdErr,
+		stdOut:      stdOut,
+		stdErr:      stdErr,
 	}
 }
 
@@ -108,7 +115,7 @@ func (l *logger) logAndFatalf(format string, a ...interface{}) {
 }
 
 func (l *logger) print(s string) {
-	fmt.Print(s)
+	_, _ = l.stdOut.Write([]byte(s))
 }
 
 func refreshGoldenFiles() bool {

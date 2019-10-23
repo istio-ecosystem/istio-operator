@@ -93,7 +93,7 @@ func UpgradeCmd() *cobra.Command {
 			"are defined to maintain service continuity.",
 		Example: `mesh upgrade`,
 		RunE: func(cmd *cobra.Command, args []string) (e error) {
-			l := newLogger(rootArgs.logToStdErr)
+			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
 			initLogsOrExit(rootArgs)
 			err := upgrade(rootArgs, macArgs, l)
 			if err != nil {
