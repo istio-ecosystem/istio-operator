@@ -38,7 +38,7 @@ spec:
             More info: https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#spec-and-status'
           type: object
         status:
-          description: 'Status describes each of istio control plane component's status at the current time.
+          description: 'Status describes each of istio control plane component status at the current time.
             0 means NONE, 1 means UPDATING, 2 means HEALTHY, 3 means ERROR, 4 means RECONCILING.
             More info: https://github.com/istio/operator/blob/master/pkg/apis/istio/v1alpha2/v1alpha2.pb.html &
             https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#spec-and-status'
