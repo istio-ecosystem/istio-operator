@@ -102,6 +102,103 @@ func (c *Client) Apply(dryRun, verbose bool, kubeconfig, context, namespace stri
 	return stdout.String(), csError, nil
 }
 
+// Apply runs the kubectl apply with the provided manifest argument
+func (c *Client) GetAll(dryRun bool, kubeconfig, context, namespace string, extraArgs ...string) (string, string, error) {
+	args := []string{"get", "all"}
+	if kubeconfig != "" {
+		args = append(args, "--kubeconfig", kubeconfig)
+	}
+	if context != "" {
+		args = append(args, "--context", context)
+	}
+	if namespace != "" {
+		args = append(args, "-n", namespace)
+	}
+	args = append(args, extraArgs...)
+
+	cmd := exec.Command("kubectl", args...)
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	cmdStr := strings.Join(cmd.Args, " ")
+	if dryRun {
+		logAndPrint("GetAll is in dry run mode, would be running in the following namespace %s:\n%s\n", namespace, cmdStr)
+		return "", "", nil
+	}
+
+	log.Infof("running to namespace %s:\n%s\n", namespace, cmdStr)
+
+	err := c.cmdSite.Run(cmd)
+	csError := util.ConsolidateLog(stderr.String())
+
+	if err != nil {
+		logAndPrint("error running kubectl get all: %s", err)
+		return stdout.String(), csError, fmt.Errorf("error running kubectl get all: %s", err)
+	}
+
+	logAndPrint("kubectl get all success")
+
+	return stdout.String(), csError, nil
+}
+
+// Delete runs the kubectl delete with the provided manifest argument
+func (c *Client) Delete(dryRun, verbose bool, kubeconfig, context, namespace string, manifest string, extraArgs ...string) (string, string, error) {
+	if strings.TrimSpace(manifest) == "" {
+		log.Infof("Empty manifest, not applying.")
+		return "", "", nil
+	}
+
+	args := []string{"delete"}
+	if kubeconfig != "" {
+		args = append(args, "--kubeconfig", kubeconfig)
+	}
+	if context != "" {
+		args = append(args, "--context", context)
+	}
+	if namespace != "" {
+		args = append(args, "-n", namespace)
+	}
+	args = append(args, extraArgs...)
+	args = append(args, "-f", "-")
+
+	cmd := exec.Command("kubectl", args...)
+	cmd.Stdin = strings.NewReader(manifest)
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	cmdStr := strings.Join(cmd.Args, " ")
+	if verbose {
+
+		cmdStr += "\n" + manifest
+	} else {
+		cmdStr += " <use --verbose to see manifest string> \n"
+	}
+	if dryRun {
+		logAndPrint("Delete is in dry run mode, would be running in the following in namespace %s:\n%s\n", namespace, cmdStr)
+		return "", "", nil
+	}
+
+	log.Infof("Executing command: %s", cmdStr)
+
+	err := c.cmdSite.Run(cmd)
+	csError := util.ConsolidateLog(stderr.String())
+
+	if err != nil {
+		logAndPrint("error running kubectl delete: %s", err)
+		return stdout.String(), csError, fmt.Errorf("error running kubectl delete: %s", err)
+	}
+
+	logAndPrint("kubectl delete success")
+
+	return stdout.String(), csError, nil
+}
+
 // GetConfig runs the kubectl get cm command with the provided argument
 func (c *Client) GetConfig(name, namespace, output string, extraArgs ...string) (string, string, error) {
 	args := []string{"get", "cm", name}

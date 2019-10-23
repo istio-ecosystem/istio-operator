@@ -18,7 +18,7 @@ import (
 	"sync"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
-
+	"istio.io/operator/pkg/object"
 	"istio.io/operator/pkg/util"
 
 	"istio.io/pkg/log"
@@ -101,6 +101,12 @@ func (h *HelmReconciler) Reconcile() error {
 		return err
 	}
 
+	// filter empty manifests, which cannot be created or updated.
+	manifestMap, err = filterEmptyManifests(manifestMap)
+	if err != nil {
+		return err
+	}
+
 	// handle the defined callbacks to the generated manifests for each subchart chart.
 	//for chartName, manifests := range manifestMap {
 	//	newManifests, err := h.customizer.Listener().BeginChart(chartName, manifests)
@@ -120,6 +126,26 @@ func (h *HelmReconciler) Reconcile() error {
 	errs = util.AppendErr(errs, h.customizer.Listener().EndReconcile(h.instance, status))
 
 	return errs.ToError()
+}
+
+// filterEmptyManifests filter out empty manifests and returns ChartManifestsMap with objects inside
+func filterEmptyManifests(manifestMap ChartManifestsMap) (ChartManifestsMap, error) {
+	out := make(ChartManifestsMap)
+	var errs util.Errors
+	for c, ml := range manifestMap {
+		objCnt := 0
+		for _, m := range ml {
+			objs, err := object.ParseK8sObjectsFromYAMLManifest(m.Content)
+			if err != nil {
+				errs = util.AppendErr(errs, err)
+			}
+			objCnt += len(objs)
+		}
+		if objCnt != 0 {
+			out[c] = ml
+		}
+	}
+	return out, errs.ToError()
 }
 
 // processRecursive processes the given manifests in an order of dependencies defined in h. Dependencies are a tree,
