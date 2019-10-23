@@ -13,7 +13,7 @@
 # limitations under the License.
 
 HUB ?= gcr.io/istio-testing
-TAG ?= master-latest-daily
+TAG ?= 1.5-dev
 
 pwd := $(shell pwd)
 
@@ -81,6 +81,7 @@ docker.push:
 docker.save: docker
 	mkdir -p $(TARGET_OUT)/release/docker
 	docker save $(HUB)/operator:$(TAG) -o $(TARGET_OUT)/release/docker/operator.tar
+	gzip --best $(TARGET_OUT)/release/docker/operator.tar
 
 docker.all: docker docker.push
 
