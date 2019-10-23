@@ -151,12 +151,13 @@ func unmarshalAndValidateICPSpec(icpsYAML string) (*v1alpha2.IstioControlPlaneSp
 	return icps, nil
 }
 
-func (h *HelmReconciler) ProcessManifest(manifest manifest.Manifest) error {
+// ProcessManifest apply the manifest to create or update resources, returns the number of objects processed
+func (h *HelmReconciler) ProcessManifest(manifest manifest.Manifest) (int, error) {
 	var errs []error
 	log.Infof("Processing resources from manifest: %s", manifest.Name)
 	objects, err := object.ParseK8sObjectsFromYAMLManifest(manifest.Content)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	for _, obj := range objects {
 		err = h.ProcessObject(manifest.Name, obj.UnstructuredObject())
@@ -164,7 +165,7 @@ func (h *HelmReconciler) ProcessManifest(manifest manifest.Manifest) error {
 			errs = append(errs, err)
 		}
 	}
-	return utilerrors.NewAggregate(errs)
+	return len(objects), utilerrors.NewAggregate(errs)
 }
 
 func (h *HelmReconciler) ProcessObject(chartName string, obj *unstructured.Unstructured) error {

@@ -102,7 +102,7 @@ func (c *Client) Apply(dryRun, verbose bool, kubeconfig, context, namespace stri
 	return stdout.String(), csError, nil
 }
 
-// GetAll runs the kubectl get all with the provided manifest argument
+// GetAll runs the kubectl get all with the provided arguments
 func (c *Client) GetAll(dryRun bool, kubeconfig, context, namespace string, extraArgs ...string) (string, string, error) {
 	args := []string{"get", "all"}
 	if kubeconfig != "" {
