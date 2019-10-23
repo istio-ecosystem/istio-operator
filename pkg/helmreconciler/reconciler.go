@@ -18,16 +18,13 @@ import (
 	"sync"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	"istio.io/operator/pkg/object"
+	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/util"
-
 	"istio.io/pkg/log"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"istio.io/operator/pkg/name"
 )
 
 // HelmReconciler reconciles resources rendered by a set of helm charts for a specific instances of a custom resource,
@@ -101,12 +98,6 @@ func (h *HelmReconciler) Reconcile() error {
 		return err
 	}
 
-	// filter empty manifests, which cannot be created or updated.
-	manifestMap, err = filterEmptyManifests(manifestMap)
-	if err != nil {
-		return err
-	}
-
 	// handle the defined callbacks to the generated manifests for each subchart chart.
 	//for chartName, manifests := range manifestMap {
 	//	newManifests, err := h.customizer.Listener().BeginChart(chartName, manifests)
@@ -128,26 +119,6 @@ func (h *HelmReconciler) Reconcile() error {
 	return errs.ToError()
 }
 
-// filterEmptyManifests filter out empty manifests and returns ChartManifestsMap with objects inside
-func filterEmptyManifests(manifestMap ChartManifestsMap) (ChartManifestsMap, error) {
-	out := make(ChartManifestsMap)
-	var errs util.Errors
-	for c, ml := range manifestMap {
-		objCnt := 0
-		for _, m := range ml {
-			objs, err := object.ParseK8sObjectsFromYAMLManifest(m.Content)
-			if err != nil {
-				errs = util.AppendErr(errs, err)
-			}
-			objCnt += len(objs)
-		}
-		if objCnt != 0 {
-			out[c] = ml
-		}
-	}
-	return out, errs.ToError()
-}
-
 // processRecursive processes the given manifests in an order of dependencies defined in h. Dependencies are a tree,
 // where a child must wait for the parent to complete before starting.
 func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2.InstallStatus {
@@ -167,26 +138,38 @@ func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2
 				<-s
 				log.Infof("Dependency for %s has completed, proceeding.", c)
 			}
+
+			status := v1alpha2.InstallStatus_RECONCILING
 			mu.Lock()
 			if _, ok := out.Status[c]; !ok {
 				out.Status[c] = &v1alpha2.InstallStatus_VersionStatus{}
+				out.Status[c].Status = status
 			}
 			mu.Unlock()
-			status := v1alpha2.InstallStatus_RECONCILING
+
 			errString := ""
 			if len(m) != 0 {
 				status = v1alpha2.InstallStatus_HEALTHY
-				if err := h.ProcessManifest(m[0]); err != nil {
+				if cnt, err := h.ProcessManifest(m[0]); err != nil {
 					errString = err.Error()
 					status = v1alpha2.InstallStatus_ERROR
+				} else if cnt == 0 {
+					status = v1alpha2.InstallStatus_NONE
 				}
 			}
-			mu.Lock()
-			out.Status[c].Status = status
-			if errString != "" {
-				out.Status[c].Error = errString
+
+			if status == v1alpha2.InstallStatus_NONE {
+				mu.Lock()
+				delete(out.Status, c)
+				mu.Unlock()
+			} else {
+				mu.Lock()
+				out.Status[c].Status = status
+				if errString != "" {
+					out.Status[c].Error = errString
+				}
+				mu.Unlock()
 			}
-			mu.Unlock()
 
 			// Signal all the components that depend on us.
 			for _, ch := range deps[cn] {
