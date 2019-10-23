@@ -32,6 +32,8 @@ import (
 	"istio.io/operator/pkg/helmreconciler"
 	"istio.io/operator/pkg/util"
 	"istio.io/pkg/log"
+
+	"github.com/golang/protobuf/proto"
 )
 
 const (
@@ -86,6 +88,10 @@ type ReconcileIstioControlPlane struct {
 	scheme  *runtime.Scheme
 	factory *helmreconciler.Factory
 }
+type specAlias map[string]interface{}
+func (m *specAlias) Reset()         { *m = specAlias{} }
+func (m *specAlias) String() string { return proto.CompactTextString(m) }
+func (*specAlias) ProtoMessage()    {}
 
 // Reconcile reads that state of the cluster for a IstioControlPlane object and makes changes based on the state read
 // and what is in the IstioControlPlane.Spec
@@ -119,7 +125,11 @@ func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (recon
 	if err := r.client.Get(context.TODO(), request.NamespacedName, icp); err != nil {
 		log.Errorf("error getting IstioControlPlane icp: %s", err)
 	}
-	os, err := yaml.Marshal(u.Object["spec"])
+	var s specAlias
+	s = u.Object["spec"].(map[string]interface{})
+	os, err := util.MarshalWithJSONPB(&s)
+	
+	//os, err := yaml.Marshal(u.Object["spec"])
 	if err != nil {
 		return reconcile.Result{}, err
 	}
