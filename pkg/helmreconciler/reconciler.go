@@ -125,8 +125,11 @@ func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2
 	deps, dch := h.customizer.Input().GetProcessingOrder(manifests)
 	out := &v1alpha2.InstallStatus{Status: make(map[string]*v1alpha2.InstallStatus_VersionStatus)}
 
-	var wg sync.WaitGroup
+	// mu protects the shared InstallStatus out across goroutines
 	var mu sync.Mutex
+	// wg waits for all status processing goroutines to finish
+	var wg sync.WaitGroup
+
 	for c, m := range manifests {
 		c, m := c, m
 		wg.Add(1)
@@ -139,6 +142,7 @@ func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2
 				log.Infof("Dependency for %s has completed, proceeding.", c)
 			}
 
+			// Set status when reconciling starts
 			status := v1alpha2.InstallStatus_RECONCILING
 			mu.Lock()
 			if _, ok := out.Status[c]; !ok {
@@ -147,8 +151,11 @@ func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2
 			}
 			mu.Unlock()
 
+			// Process manifests and get the status result
 			errString := ""
-			if len(m) != 0 {
+			if len(m) == 0 {
+				status = v1alpha2.InstallStatus_NONE
+			} else {
 				status = v1alpha2.InstallStatus_HEALTHY
 				if cnt, err := h.ProcessManifest(m[0]); err != nil {
 					errString = err.Error()
@@ -158,6 +165,7 @@ func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2
 				}
 			}
 
+			// Update status based on the result
 			if status == v1alpha2.InstallStatus_NONE {
 				mu.Lock()
 				delete(out.Status, c)
@@ -182,7 +190,6 @@ func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2
 
 	return out
 }
-
 // Delete resources associated with the custom resource instance
 func (h *HelmReconciler) Delete() error {
 	allErrors := []error{}
