@@ -199,188 +199,66 @@ metadata:
     release: istio
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: ClusterRole
 metadata:
   name: istio-pilot-istio-control
   labels:
     app: pilot
     release: istio
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: istio-pilot-istio-control
-subjects:
-  - kind: ServiceAccount
-    name: istio-pilot-service-account
-    namespace: istio-control
+rules:
+- apiGroups: ["config.istio.io"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["rbac.istio.io"]
+  resources: ["*"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["security.istio.io"]
+  resources: ["*"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["networking.istio.io"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["authentication.istio.io"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["*"]
+- apiGroups: ["extensions"]
+  resources: ["ingresses", "ingresses/status"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["create", "get", "list", "watch", "update"]
+- apiGroups: [""]
+  resources: ["endpoints", "pods", "services", "namespaces", "nodes", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["create", "get", "watch", "list", "update", "delete"]
+- apiGroups: ["certificates.k8s.io"]
+  resources:
+    - "certificatesigningrequests"
+    - "certificatesigningrequests/approval"
+    - "certificatesigningrequests/status"
+  verbs: ["update", "create", "get", "delete"]
 ---
-apiVersion: v1
-kind: ConfigMap
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
 metadata:
+  name: istio-pilot
   namespace: istio-control
-  name: pilot-envoy-config
   labels:
+    app: pilot
     release: istio
-data:
-  envoy.yaml.tmpl: |-
-    admin:
-      access_log_path: /dev/null
-      address:
-        socket_address:
-          address: 127.0.0.1
-          port_value: 15000
-
-    static_resources:
-      clusters:
-      - name: in.15010
-        http2_protocol_options: {}
-        connect_timeout: 1.000s
-
-        hosts:
-        - socket_address:
-            address: 127.0.0.1
-            port_value: 15010
-
-        circuit_breakers:
-          thresholds:
-          - max_connections: 100000
-            max_pending_requests: 100000
-            max_requests: 100000
-            max_retries: 3
-
-    # TODO: telemetry using EDS
-    # TODO: other pilots using EDS, load balancing
-    # TODO: galley using EDS
-
-      - name: out.galley.15019
-        http2_protocol_options: {}
-        connect_timeout: 1.000s
-        type: STRICT_DNS
-
-        circuit_breakers:
-          thresholds:
-            - max_connections: 100000
-              max_pending_requests: 100000
-              max_requests: 100000
-              max_retries: 3
-
-        tls_context:
-          common_tls_context:
-            tls_certificates:
-            - certificate_chain:
-                filename: /etc/certs/cert-chain.pem
-              private_key:
-                filename: /etc/certs/key.pem
-            validation_context:
-              trusted_ca:
-                filename: /etc/certs/root-cert.pem
-              verify_subject_alt_name:
-              - spiffe://cluster.local/ns/istio-control/sa/istio-galley-service-account
-
-        hosts:
-          - socket_address:
-              address: istio-galley.istio-control
-              port_value: 15019
-
-
-      listeners:
-      - name: "in.15011"
-        address:
-          socket_address:
-            address: 0.0.0.0
-            port_value: 15011
-        filter_chains:
-        - filters:
-          - name: envoy.http_connection_manager
-            #typed_config
-            #"@type": "type.googleapis.com/",
-            config:
-              codec_type: HTTP2
-              stat_prefix: "15011"
-              http2_protocol_options:
-                max_concurrent_streams: 1073741824
-
-              access_log:
-              - name: envoy.file_access_log
-                config:
-                  path: /dev/stdout
-
-              http_filters:
-              - name: envoy.router
-
-              route_config:
-                name: "15011"
-
-                virtual_hosts:
-                - name: istio-pilot
-
-                  domains:
-                  - '*'
-
-                  routes:
-                  - match:
-                      prefix: /
-                    route:
-                      cluster: in.15010
-                      timeout: 0.000s
-                    decorator:
-                      operation: xDS
-
-          tls_context:
-            require_client_certificate: true
-            common_tls_context:
-              validation_context:
-                trusted_ca:
-                  filename: /etc/certs/root-cert.pem
-
-              alpn_protocols:
-              - h2
-
-              tls_certificates:
-              - certificate_chain:
-                  filename: /etc/certs/cert-chain.pem
-                private_key:
-                  filename: /etc/certs/key.pem
-
-
-      # Manual 'whitebox' mode
-      - name: "local.15019"
-        address:
-          socket_address:
-            address: 127.0.0.1
-            port_value: 15019
-        filter_chains:
-          - filters:
-              - name: envoy.http_connection_manager
-                config:
-                  codec_type: HTTP2
-                  stat_prefix: "15019"
-                  http2_protocol_options:
-                    max_concurrent_streams: 1073741824
-
-                  access_log:
-                    - name: envoy.file_access_log
-                      config:
-                        path: /dev/stdout
-
-                  http_filters:
-                    - name: envoy.router
-
-                  route_config:
-                    name: "15019"
-
-                    virtual_hosts:
-                      - name: istio-galley
-
-                        domains:
-                          - '*'
-
-                        routes:
-                          - match:
-                              prefix: /
-                            route:
-                              cluster: out.galley.15019
-                              timeout: 0.000s
+    istio: pilot
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: pilot
+      release: istio
+      istio: pilot
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -577,23 +455,6 @@ spec:
     tls:
       mode: DISABLE
 ---
-apiVersion: policy/v1beta1
-kind: PodDisruptionBudget
-metadata:
-  name: istio-pilot
-  namespace: istio-control
-  labels:
-    app: pilot
-    release: istio
-    istio: pilot
-spec:
-  minAvailable: 1
-  selector:
-    matchLabels:
-      app: pilot
-      release: istio
-      istio: pilot
----
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
@@ -616,49 +477,188 @@ spec:
     name: istio-pilot
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: ClusterRoleBinding
 metadata:
   name: istio-pilot-istio-control
   labels:
     app: pilot
     release: istio
-rules:
-- apiGroups: ["config.istio.io"]
-  resources: ["*"]
-  verbs: ["*"]
-- apiGroups: ["rbac.istio.io"]
-  resources: ["*"]
-  verbs: ["get", "watch", "list"]
-- apiGroups: ["security.istio.io"]
-  resources: ["*"]
-  verbs: ["get", "watch", "list"]
-- apiGroups: ["networking.istio.io"]
-  resources: ["*"]
-  verbs: ["*"]
-- apiGroups: ["authentication.istio.io"]
-  resources: ["*"]
-  verbs: ["*"]
-- apiGroups: ["apiextensions.k8s.io"]
-  resources: ["customresourcedefinitions"]
-  verbs: ["*"]
-- apiGroups: ["extensions"]
-  resources: ["ingresses", "ingresses/status"]
-  verbs: ["*"]
-- apiGroups: [""]
-  resources: ["configmaps"]
-  verbs: ["create", "get", "list", "watch", "update"]
-- apiGroups: [""]
-  resources: ["endpoints", "pods", "services", "namespaces", "nodes", "secrets"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["create", "get", "watch", "list", "update", "delete"]
-- apiGroups: ["certificates.k8s.io"]
-  resources:
-    - "certificatesigningrequests"
-    - "certificatesigningrequests/approval"
-    - "certificatesigningrequests/status"
-  verbs: ["update", "create", "get", "delete"]
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-pilot-istio-control
+subjects:
+  - kind: ServiceAccount
+    name: istio-pilot-service-account
+    namespace: istio-control
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: istio-control
+  name: pilot-envoy-config
+  labels:
+    release: istio
+data:
+  envoy.yaml.tmpl: |-
+    admin:
+      access_log_path: /dev/null
+      address:
+        socket_address:
+          address: 127.0.0.1
+          port_value: 15000
+
+    static_resources:
+      clusters:
+      - name: in.15010
+        http2_protocol_options: {}
+        connect_timeout: 1.000s
+
+        hosts:
+        - socket_address:
+            address: 127.0.0.1
+            port_value: 15010
+
+        circuit_breakers:
+          thresholds:
+          - max_connections: 100000
+            max_pending_requests: 100000
+            max_requests: 100000
+            max_retries: 3
+
+    # TODO: telemetry using EDS
+    # TODO: other pilots using EDS, load balancing
+    # TODO: galley using EDS
+
+      - name: out.galley.15019
+        http2_protocol_options: {}
+        connect_timeout: 1.000s
+        type: STRICT_DNS
+
+        circuit_breakers:
+          thresholds:
+            - max_connections: 100000
+              max_pending_requests: 100000
+              max_requests: 100000
+              max_retries: 3
+
+        tls_context:
+          common_tls_context:
+            tls_certificates:
+            - certificate_chain:
+                filename: /etc/certs/cert-chain.pem
+              private_key:
+                filename: /etc/certs/key.pem
+            validation_context:
+              trusted_ca:
+                filename: /etc/certs/root-cert.pem
+              verify_subject_alt_name:
+              - spiffe://cluster.local/ns/istio-control/sa/istio-galley-service-account
+
+        hosts:
+          - socket_address:
+              address: istio-galley.istio-control
+              port_value: 15019
+
+
+      listeners:
+      - name: "in.15011"
+        address:
+          socket_address:
+            address: 0.0.0.0
+            port_value: 15011
+        filter_chains:
+        - filters:
+          - name: envoy.http_connection_manager
+            #typed_config
+            #"@type": "type.googleapis.com/",
+            config:
+              codec_type: HTTP2
+              stat_prefix: "15011"
+              http2_protocol_options:
+                max_concurrent_streams: 1073741824
+
+              access_log:
+              - name: envoy.file_access_log
+                config:
+                  path: /dev/stdout
+
+              http_filters:
+              - name: envoy.router
+
+              route_config:
+                name: "15011"
+
+                virtual_hosts:
+                - name: istio-pilot
+
+                  domains:
+                  - '*'
+
+                  routes:
+                  - match:
+                      prefix: /
+                    route:
+                      cluster: in.15010
+                      timeout: 0.000s
+                    decorator:
+                      operation: xDS
+
+          tls_context:
+            require_client_certificate: true
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/certs/root-cert.pem
+
+              alpn_protocols:
+              - h2
+
+              tls_certificates:
+              - certificate_chain:
+                  filename: /etc/certs/cert-chain.pem
+                private_key:
+                  filename: /etc/certs/key.pem
+
+
+      # Manual 'whitebox' mode
+      - name: "local.15019"
+        address:
+          socket_address:
+            address: 127.0.0.1
+            port_value: 15019
+        filter_chains:
+          - filters:
+              - name: envoy.http_connection_manager
+                config:
+                  codec_type: HTTP2
+                  stat_prefix: "15019"
+                  http2_protocol_options:
+                    max_concurrent_streams: 1073741824
+
+                  access_log:
+                    - name: envoy.file_access_log
+                      config:
+                        path: /dev/stdout
+
+                  http_filters:
+                    - name: envoy.router
+
+                  route_config:
+                    name: "15019"
+
+                    virtual_hosts:
+                      - name: istio-galley
+
+                        domains:
+                          - '*'
+
+                        routes:
+                          - match:
+                              prefix: /
+                            route:
+                              cluster: out.galley.15019
+                              timeout: 0.000s
 ---
 
 # Resources for Prometheus component
