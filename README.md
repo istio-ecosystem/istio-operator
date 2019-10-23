@@ -118,10 +118,11 @@ the file deploy/operator.yaml to point to your docker hub:
           image: docker.io/<your-account>/operator
 ```
 
-Install the controller manifest:
+Install the controller manifest and example IstioControlResource CR:
 
 ```bash
 kubectl apply -k deploy/
+kubectl apply -f deploy/crds/istio_v1alpha2_istiocontrolplane_cr.yaml 
 ```
 
 This installs the controller into the cluster in the istio-operator namespace. The controller in turns installs
