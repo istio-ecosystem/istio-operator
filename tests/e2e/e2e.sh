@@ -93,7 +93,7 @@ done
 kubectl get pods --all-namespaces -o wide
 
 pushd "${ISTIO_DIR}" || exit
-  make istioctl
+  make istioctl-install
 
   HUB=gcr.io/istio-testing TAG=istio-testing go test -v -timeout 30m ./tests/e2e/tests/simple -args \
     --egress=false --ingress=false \
