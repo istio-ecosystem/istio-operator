@@ -95,5 +95,9 @@ kubectl get pods --all-namespaces -o wide
 pushd "${ISTIO_DIR}" || exit
   make istioctl
 
-  HUB=gcr.io/istio-testing TAG=istio-testing E2E_ARGS="--use_operator --test_logs_path=${ARTIFACTS}" make e2e_simple_run
+  HUB=gcr.io/istio-testing TAG=istio-testing go test -v -timeout 30m ./tests/e2e/tests/simple -args \
+    --egress=false --ingress=false \
+    --rbac_enable=false --cluster_wide \
+    --use_operator --test_logs_path="${ARTIFACTS}"
+
 popd
