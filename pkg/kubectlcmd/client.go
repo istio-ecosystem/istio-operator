@@ -97,7 +97,7 @@ func (c *Client) Apply(dryRun, verbose bool, kubeconfig, context, namespace stri
 		return stdout.String(), csError, fmt.Errorf("error running kubectl apply: %s", err)
 	}
 
-	logAndPrint("kubectl apply success")
+	log.Info("kubectl apply success")
 
 	return stdout.String(), csError, nil
 }

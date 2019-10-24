@@ -67,12 +67,6 @@ func manifestApplyCmd(rootArgs *rootArgs, maArgs *manifestApplyArgs) *cobra.Comm
 		Run: func(cmd *cobra.Command, args []string) {
 			// Passing cmd.OutOrStdXXX() allows capturing command output for e2e tests.
 			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
-			if !maArgs.skipConfirmation && maArgs.kubeConfigPath == "" && maArgs.context == "" {
-				if !confirm("Do you want to proceed? (y/N)", cmd.OutOrStdout()) {
-					cmd.Print("Cancelled.\n")
-					os.Exit(1)
-				}
-			}
 			manifestApply(rootArgs, maArgs, l)
 		}}
 }
