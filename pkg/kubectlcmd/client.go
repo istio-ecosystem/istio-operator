@@ -49,13 +49,21 @@ func (console) Run(c *exec.Cmd) error {
 
 // kubectlParams is a set of params passed to kubectl.
 type kubectlParams struct {
+	// dryRun, not actually run the cmd
 	dryRun     bool
+	// verbose, verbose to not print stdin to output
 	verbose    bool
+	// kubeconfig, the path to the kube config
 	kubeconfig string
+	// context, cluster context to identify a cluster
 	context    string
+	// namespace, k8s namespace to run the command
 	namespace  string
+	// stdin, cmd stdin input as string
 	stdin      string
+	// output, output mode for kubectl, i.e., -o, --output
 	output     string
+	// extraArgs, more args passed to kubectl
 	extraArgs  []string
 }
 
@@ -156,11 +164,7 @@ func logAndPrint(v ...interface{}) {
 	fmt.Println(s)
 }
 
-// Apply runs the `kubectl` command by specifying subcommands in subcmds with parameters:
-// dryRun to not actually run the cmd, verbose to not print stdin
-// kubeconfig, context to identify a cluster,
-// namespace to locate a k8s namespace, and
-// returns stdout, stderr, error getting from running this `kubectl` command.
+// kubectl runs the `kubectl` command by specifying subcommands in subcmds with kubectlParams
 func (c *Client) kubectl(subcmds []string, params *kubectlParams) (string, string, error) {
 	hasStdin := strings.TrimSpace(params.stdin) != ""
 	args := subcmds
