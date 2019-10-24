@@ -103,14 +103,6 @@ HUB=docker.io/<your-account> TAG=latest make docker.all
 ```
 
 This builds the controller binary and docker file, and pushes the image to the specified hub with the `latest` tag.
-
-Note: The container based build does not work in all setups due to security restrictions. If the above does not work for you,
-try the local build:
-
-```bash
-GOBIN=<your-bin-path> BUILD_WITH_CONTAINER=0 HUB=docker.io/<your-account> TAG=latest make docker.all
-```
-
 Once the images are pushed, configure kubectl to point to your cluster and install the controller. You should edit
 the file deploy/operator.yaml to point to your docker hub:
 
