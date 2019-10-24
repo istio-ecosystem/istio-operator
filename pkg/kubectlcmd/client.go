@@ -48,30 +48,38 @@ func (console) Run(c *exec.Cmd) error {
 }
 
 // kubectlParams is a set of params passed to kubectl.
+// dryRun - display the command but don't run it
+// verbose - dump the full manifest
+// kubeconfig, context - used to identify the cluster
+// namespace - k8s namespace for kubectl command
 type kubectlParams struct {
-	// dryRun, not actually run the cmd
-	dryRun     bool
-	// verbose, verbose to not print stdin to output
-	verbose    bool
-	// kubeconfig, the path to the kube config
+	// dryRun - display the command but don't run it
+	dryRun bool
+	// verbose - dump the full manifest
+	verbose bool
+	// kubeconfig - the path to the kube config
 	kubeconfig string
-	// context, cluster context to identify a cluster
-	context    string
-	// namespace, k8s namespace to run the command
-	namespace  string
-	// stdin, cmd stdin input as string
-	stdin      string
-	// output, output mode for kubectl, i.e., -o, --output
-	output     string
-	// extraArgs, more args passed to kubectl
-	extraArgs  []string
+	// context - used to identify the cluster
+	context string
+	// namespace - k8s namespace for kubectl command
+	namespace string
+	// stdin - cmd stdin input as string
+	stdin string
+	// output - output mode for kubectl, i.e., -o, --output
+	output string
+	// extraArgs - more args to be added to the kubectl command
+	extraArgs []string
 }
 
 // Apply runs the `kubectl apply` command with parameters:
-// dryRun to not actually run the cmd, verbose to not print manifest
-// kubeconfig, context to identify a cluster,
-// namespace to locate a k8s namespace, and
-// returns stdout, stderr, error getting from running this `kubectl` command.
+// dryRun - display the command but don't run it
+// verbose - dump the full manifest
+// kubeconfig, context - used to identify the cluster
+// namespace - k8s namespace for kubectl command
+// manifest - manifests to be applied to the cluster
+// extraArgs - more args to be added to the kubectl command
+//
+// It returns stdout, stderr from the `kubectl` command as strings, and error for errors external to kubectl.
 func (c *Client) Apply(dryRun, verbose bool, kubeconfig, context, namespace string,
 	manifest string, extraArgs ...string) (string, string, error) {
 	if strings.TrimSpace(manifest) == "" {
@@ -92,11 +100,15 @@ func (c *Client) Apply(dryRun, verbose bool, kubeconfig, context, namespace stri
 	return c.kubectl(subcmds, params)
 }
 
-// Delete runs the `kubectl delete` command with parameters:
-// dryRun to not actually run the cmd, verbose to not print manifest
-// kubeconfig, context to identify a cluster,
-// namespace to locate a k8s namespace, and
-// returns stdout, stderr, error getting from running this `kubectl` command.
+// Delete runs the `kubectl delete` command with the following parameters:
+// dryRun - display the command but don't run it
+// verbose - dump the full manifest
+// kubeconfig, context - used to identify the cluster
+// namespace - k8s namespace for kubectl command
+// manifest - manifests of resources to be deleted in the cluster
+// extraArgs - more args to be added to the kubectl command
+//
+// It returns stdout, stderr from the `kubectl` command as strings, and error for errors external to kubectl.
 func (c *Client) Delete(dryRun, verbose bool, kubeconfig, context, namespace string,
 	manifest string, extraArgs ...string) (string, string, error) {
 	if strings.TrimSpace(manifest) == "" {
@@ -118,9 +130,12 @@ func (c *Client) Delete(dryRun, verbose bool, kubeconfig, context, namespace str
 }
 
 // GetAll runs the `kubectl get all` with with parameters:
-// kubeconfig, context to identify a cluster,
-// namespace to locate a k8s namespace, and
-// returns stdout, stderr, error getting from running this `kubectl` command.
+// kubeconfig, context - used to identify the cluster
+// namespace - k8s namespace for kubectl command
+// output - output mode for kubectl
+// extraArgs - more args to be added to the kubectl command
+//
+// It returns stdout, stderr from the `kubectl` command as strings, and error for errors external to kubectl.
 func (c *Client) GetAll(kubeconfig, context, namespace, output string,
 	extraArgs ...string) (string, string, error) {
 	subcmds := []string{"get", "all"}
@@ -138,10 +153,13 @@ func (c *Client) GetAll(kubeconfig, context, namespace, output string,
 }
 
 // GetConfig runs the `kubectl get cm` command with parameters:
-// dryRun to not actually run the cmd, verbose to not print stdin
-// kubeconfig, context to identify a cluster,
-// namespace to locate a k8s namespace, and
-// returns stdout, stderr, error getting from running this `kubectl` command.
+// kubeconfig, context - used to identify the cluster
+// name - name of the config map to get
+// namespace - k8s namespace for kubectl command
+// output - output mode for kubectl
+// extraArgs - more args to be added to the kubectl command
+//
+// It returns stdout, stderr from the `kubectl` command as strings, and error for errors external to kubectl.
 func (c *Client) GetConfig(kubeconfig, context, name, namespace, output string,
 	extraArgs ...string) (string, string, error) {
 	subcmds := []string{"get", "cm", name}
@@ -211,11 +229,11 @@ func (c *Client) kubectl(subcmds []string, params *kubectlParams) (string, strin
 	csError := util.ConsolidateLog(stderr.String())
 
 	if err != nil {
-		logAndPrint("error running kubectl: %s", err)
+		log.Errorf("error running kubectl: %s", err)
 		return stdout.String(), csError, fmt.Errorf("error running kubectl: %s", err)
 	}
 
-	logAndPrint("kubectl success")
+	log.Infof("command succeeded: %s", cmdStr)
 
 	return stdout.String(), csError, nil
 }
