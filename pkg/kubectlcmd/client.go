@@ -48,10 +48,6 @@ func (console) Run(c *exec.Cmd) error {
 }
 
 // kubectlParams is a set of params passed to kubectl.
-// dryRun - display the command but don't run it
-// verbose - dump the full manifest
-// kubeconfig, context - used to identify the cluster
-// namespace - k8s namespace for kubectl command
 type kubectlParams struct {
 	// dryRun - display the command but don't run it
 	dryRun bool
