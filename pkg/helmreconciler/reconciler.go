@@ -157,6 +157,7 @@ func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2
 			}
 			mu.Lock()
 			out.Status[c].Status = status
+			out.Status[c].StatusString = v1alpha2.InstallStatus_Status_name[int32(status)]
 			if errString != "" {
 				out.Status[c].Error = errString
 			}
