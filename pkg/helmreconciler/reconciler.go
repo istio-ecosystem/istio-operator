@@ -127,7 +127,7 @@ func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2
 
 	// mu protects the shared InstallStatus out across goroutines
 	var mu sync.Mutex
-	// wg waits for all status processing goroutines to finish
+	// wg waits for all manifest processing goroutines to finish
 	var wg sync.WaitGroup
 
 	for c, m := range manifests {
@@ -190,6 +190,7 @@ func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2
 
 	return out
 }
+
 // Delete resources associated with the custom resource instance
 func (h *HelmReconciler) Delete() error {
 	allErrors := []error{}
