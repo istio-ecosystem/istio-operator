@@ -61,7 +61,7 @@ EOF
 }
 
 function setup_docker() {
-  HUB=istio-testing TAG=latest make -f Makefile.core.mk controller docker
+  HUB=istio-testing TAG=istio-testing make -f Makefile.core.mk controller docker
   kind --loglevel debug --name istio-testing load docker-image istio-testing/operator:istio-testing
 }
 
@@ -75,7 +75,7 @@ ISTIO_DIR="${GOPATH}/src/istio.io/istio"
 # Create a clone of the Istio repository
 if [[ ! -d "${ISTIO_DIR}" ]]
 then
-  git clone https://github.com/sdake/istio.git "${ISTIO_DIR}"
+  git clone https://github.com/istio/istio.git "${ISTIO_DIR}"
 fi
 
 # Create an operator manifest from the default control plane configuration
@@ -95,5 +95,5 @@ kubectl get pods --all-namespaces -o wide
 pushd "${ISTIO_DIR}" || exit
   make istioctl
 
-  HUB=gcr.io/istio-testing TAG=latest E2E_ARGS="--use_operator --test_logs_path=${ARTIFACTS}" make e2e_simple_run
+  HUB=gcr.io/istio-testing TAG=istio-testing E2E_ARGS="--use_operator --test_logs_path=${ARTIFACTS}" make e2e_simple_run
 popd
