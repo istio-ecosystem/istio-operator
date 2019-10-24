@@ -274,8 +274,8 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 	//  (https://github.com/kubernetes/kubernetes/issues/40635)
 	// Delete all resources for a disabled component
 	if len(objects) == 0 {
-		extraArgsGet := []string{"--all-namespaces", "--selector", componentLabel, "--output", "yaml"}
-		stdoutGet, stderrGet, err := kubectl.GetAll(opts.DryRun, opts.Kubeconfig, opts.Context, "", extraArgsGet...)
+		extraArgsGet := []string{"--all-namespaces", "--selector", componentLabel}
+		stdoutGet, stderrGet, err := kubectl.GetAll(opts.Kubeconfig, opts.Context, "", "yaml", extraArgsGet...)
 		if err != nil || strings.TrimSpace(stdoutGet) == "" {
 			return &ComponentApplyOutput{
 				Stdout: stdoutGet,
