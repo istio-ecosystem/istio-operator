@@ -166,18 +166,16 @@ func (h *HelmReconciler) processRecursive(manifests ChartManifestsMap) *v1alpha2
 			}
 
 			// Update status based on the result
+			mu.Lock()
 			if status == v1alpha2.InstallStatus_NONE {
-				mu.Lock()
 				delete(out.Status, c)
-				mu.Unlock()
 			} else {
-				mu.Lock()
 				out.Status[c].Status = status
 				if errString != "" {
 					out.Status[c].Error = errString
 				}
-				mu.Unlock()
 			}
+			mu.Unlock()
 
 			// Signal all the components that depend on us.
 			for _, ch := range deps[cn] {
