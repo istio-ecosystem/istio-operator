@@ -36287,7 +36287,7 @@ var _profilesDefaultYaml = []byte(`apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
   hub: gcr.io/istio-testing
-  tag: latest
+  tag: 1.4-dev
   defaultNamespace: istio-system
 
   # Traffic management feature
@@ -37030,6 +37030,9 @@ func profilesDefaultYaml() (*asset, error) {
 var _profilesDemoAuthYaml = []byte(`apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
+  hub: gcr.io/istio-testing
+  tag: 1.4-dev
+  defaultNamespace: istio-system
   gateways:
     components:
       egressGateway:
@@ -37159,6 +37162,9 @@ func profilesDemoAuthYaml() (*asset, error) {
 var _profilesDemoYaml = []byte(`apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
+  hub: gcr.io/istio-testing
+  tag: 1.4-dev
+  defaultNamespace: istio-system
   gateways:
     components:
       egressGateway:
@@ -37288,6 +37294,9 @@ func profilesDemoYaml() (*asset, error) {
 var _profilesMinimalYaml = []byte(`apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
+  hub: gcr.io/istio-testing
+  tag: 1.4-dev
+  defaultNamespace: istio-system
   policy:
     enabled: false
 
@@ -37340,6 +37349,9 @@ func profilesMinimalYaml() (*asset, error) {
 var _profilesSdsYaml = []byte(`apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
+  hub: gcr.io/istio-testing
+  tag: 1.4-dev
+  defaultNamespace: istio-system
   security:
     components:
       nodeAgent:
