@@ -24,7 +24,7 @@ function setup_docker() {
   HUB=istio-testing TAG=1.5-dev make controller docker
   kind --loglevel debug --name istio-testing load docker-image istio-testing/operator:1.5-dev
   kind --loglevel debug --name istio-testing load docker-image istio-testing/app:istio-testing
-  }
+}
 
 
 
@@ -63,6 +63,7 @@ export KUBECONFIG
 pushd "${ISTIO_DIR}" || exit
   HUB=istio-testing TAG=istio-testing make docker.app
 popd
+
 setup_docker
 
 
