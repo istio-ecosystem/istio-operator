@@ -69,5 +69,5 @@ setup_docker
 
 pushd "${ISTIO_DIR}" || exit
   make istioctl
-  HUB=istio-testing TAG=istio-testing E2E_ARGS="--use_operator --test_logs_path=${ARTIFACTS}" make e2e_simple_noauth_run
+  HUB=istio-testing TAG=istio-testing E2E_ARGS="--use_operator --use_local_cluster=true --test_logs_path=${ARTIFACTS}" make e2e_simple_noauth_run
 popd
