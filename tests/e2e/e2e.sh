@@ -18,11 +18,28 @@ set -eux
 
 export ARTIFACTS="${ARTIFACTS:-$(mktemp -d)}"
 ROOT=$(cd ../../../; pwd)
+HUB=istio-testing
+TAG=istio-testing
 
 function setup_docker() {
   HUB=istio-testing TAG=1.5-dev make controller docker
   kind --loglevel debug --name istio-testing load docker-image istio-testing/operator:1.5-dev
   }
+
+function build_kind_images() {
+  # Build just the images needed for the tests
+  for image in pilot proxyv2 app test_policybackend mixer citadel galley sidecar_injector kubectl node-agent-k8s; do
+     make docker.${image}
+  done
+
+  time load_kind_images
+}
+
+function load_kind_images() {
+	# Archived local images and load it into KinD's docker daemon
+	# Kubernetes in KinD can only access local images from its docker daemon.
+	docker images "${HUB}/*:${TAG}" --format '{{.Repository}}:{{.Tag}}' | xargs -n1 kind --loglevel debug --name istio-testing load docker-image
+}
 
 mkdir -p "${ARTIFACTS}/out"
 
@@ -60,6 +77,7 @@ setup_docker
 
 
 pushd "${ISTIO_DIR}" || exit
+  build_kind_images
   make istioctl
   HUB=istio-testing TAG=istio-testing E2E_ARGS="--use_operator --test_logs_path=${ARTIFACTS}" make e2e_simple_noauth_run
 popd
