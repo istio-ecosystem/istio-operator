@@ -12102,7 +12102,13 @@ func chartsIstioControlIstioDiscoveryTemplatesDeploymentYaml() (*asset, error) {
 	return a, nil
 }
 
-var _chartsIstioControlIstioDiscoveryTemplatesEnableMeshMtlsYaml = []byte(`{{ if .Values.clusterResources }}
+var _chartsIstioControlIstioDiscoveryTemplatesEnableMeshMtlsYaml = []byte(`{{- /*
+
+TODO(https://github.com/istio/istio/issues/18199) remove this configuration from charts once the operator starts managing it
+
+*/ -}}
+
+{{ if .Values.clusterResources }}
 # Destination rule to disable (m)TLS when talking to API server, as API server doesn't have sidecar.
 # Customer should add similar destination rules for other services that dont' have sidecar.
 apiVersion: networking.istio.io/v1alpha3
@@ -12122,6 +12128,17 @@ spec:
 
 {{- if .Values.global.mtls.enabled }}
 
+# Authentication policy to enable mutual TLS for all services (that have sidecar) in the mesh.
+apiVersion: "authentication.istio.io/v1alpha1"
+kind: "MeshPolicy"
+metadata:
+  name: "default"
+  labels:
+    release: {{ .Release.Name }}
+spec:
+  peers:
+  - mtls: {}
+---
 # Corresponding destination rule to configure client side to use mutual TLS when talking to
 # any service (host) in the mesh.
 apiVersion: networking.istio.io/v1alpha3
@@ -12138,7 +12155,18 @@ spec:
       mode: ISTIO_MUTUAL
 ---
 {{- else }}
-
+# Authentication policy to enable permissive mode for all services (that have sidecar) in the mesh.
+apiVersion: "authentication.istio.io/v1alpha1"
+kind: "MeshPolicy"
+metadata:
+  name: "default"
+  labels:
+    release: {{ .Release.Name }}
+spec:
+  peers:
+  - mtls:
+      mode: PERMISSIVE
+---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:

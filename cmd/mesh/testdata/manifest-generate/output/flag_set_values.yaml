@@ -2427,6 +2427,19 @@ spec:
 ---
 
 
+apiVersion: "authentication.istio.io/v1alpha1"
+kind: "MeshPolicy"
+metadata:
+  name: "default"
+  labels:
+    release: istio
+spec:
+  peers:
+  - mtls:
+      mode: PERMISSIVE
+---
+
+
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
