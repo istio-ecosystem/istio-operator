@@ -128,7 +128,7 @@ security:
     nodeAgent:
       enabled: false
   enabled: false
-tag: latest
+tag: 1.4-dev
 telemetry:
   components:
     telemetry:

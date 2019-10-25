@@ -1,3 +1,23 @@
+# CertManager component is disabled.
+
+# Citadel component is disabled.
+
+# Cni component is disabled.
+
+# EgressGateway component is disabled.
+
+# Galley component is disabled.
+
+# Grafana component is disabled.
+
+# IngressGateway component is disabled.
+
+# Injector component is disabled.
+
+# Kiali component is disabled.
+
+# NodeAgent component is disabled.
+
 # Resources for Pilot component
 
 apiVersion: autoscaling/v2beta1
@@ -522,7 +542,7 @@ spec:
           value: "true"
         - name: PILOT_ENABLE_PROTOCOL_SNIFFING_FOR_INBOUND
           value: "false"
-        image: gcr.io/istio-testing/pilot:latest
+        image: gcr.io/istio-testing/pilot:1.4-dev
         imagePullPolicy: Always
         name: discovery
         ports:
@@ -570,7 +590,7 @@ spec:
               fieldPath: status.podIP
         - name: SDS_ENABLED
           value: "false"
-        image: gcr.io/istio-testing/proxyv2:latest
+        image: gcr.io/istio-testing/proxyv2:1.4-dev
         imagePullPolicy: Always
         name: istio-proxy
         ports:
@@ -616,6 +636,19 @@ spec:
   trafficPolicy:
     tls:
       mode: DISABLE
+---
+
+
+apiVersion: "authentication.istio.io/v1alpha1"
+kind: "MeshPolicy"
+metadata:
+  name: "default"
+  labels:
+    release: istio
+spec:
+  peers:
+  - mtls:
+      mode: PERMISSIVE
 ---
 
 
@@ -686,6 +719,16 @@ metadata:
     app: pilot
     release: istio
 ---
+
+# Policy component is disabled.
+
+# Prometheus component is disabled.
+
+# PrometheusOperator component is disabled.
+
+# Telemetry component is disabled.
+
+# Tracing component is disabled.
 
 # Resources for crds component
 
