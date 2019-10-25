@@ -35,8 +35,7 @@ then
 fi
 
 # Create an operator manifest from the default control plane configuration
-#cd "${ROOT}/src/istio.io/operator"
-cd /Users/iris/oti/goProjects/istio.io/operator
+cd "${ROOT}/src/istio.io/operator"
 operator_manifest_files=( "deploy/namespace.yaml" "deploy/crds/istio_v1alpha2_istiocontrolplane_crd.yaml" "deploy/service_account.yaml" "deploy/clusterrole.yaml" "deploy/clusterrole_binding.yaml" "deploy/service.yaml" "deploy/operator.yaml" "deploy/crds/istio_v1alpha2_istiocontrolplane_cr.yaml" )
 
 # Generate the main manifest
