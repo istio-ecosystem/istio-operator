@@ -50,6 +50,8 @@ const (
 type upgradeArgs struct {
 	// inFilename is the path to the input IstioControlPlane CR.
 	inFilename string
+	// versionsURI is a URI pointing to a YAML formatted versions mapping.
+	versionsURI string
 	// kubeConfigPath is the path to kube config file.
 	kubeConfigPath string
 	// context is the cluster context in the kube config.
@@ -60,8 +62,6 @@ type upgradeArgs struct {
 	skipConfirmation bool
 	// force means directly applying the upgrade without eligibility checks.
 	force bool
-	// versionsURI is a URI pointing to a YAML formatted versions mapping.
-	versionsURI string
 	// showOverrides shows all changed values even if they are specified in inFilename.
 	showOverrides bool
 }
@@ -70,6 +70,8 @@ type upgradeArgs struct {
 func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 	cmd.PersistentFlags().StringVarP(&args.inFilename, "filename",
 		"f", "", "Path to file containing IstioControlPlane CustomResource")
+	cmd.PersistentFlags().StringVarP(&args.versionsURI, "versionsURI", "u",
+		versionsMapURL, "URI for operator versions to Istio versions map")
 	cmd.PersistentFlags().StringVarP(&args.kubeConfigPath, "kubeconfig",
 		"c", "", "Path to kube config")
 	cmd.PersistentFlags().StringVar(&args.context, "context", "",
@@ -86,8 +88,6 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 	cmd.PersistentFlags().BoolVar(&args.force, "force", false,
 		"Apply the upgrade without eligibility checks and testing for changes "+
 			"in profile default values")
-	cmd.PersistentFlags().StringVarP(&args.versionsURI, "versionsURI", "u",
-		versionsMapURL, "URI for operator versions to Istio versions map")
 }
 
 // Upgrade command upgrades Istio control plane in-place with eligibility checks

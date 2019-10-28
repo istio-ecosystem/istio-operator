@@ -187,10 +187,10 @@ func genYamlIgnoreOpt(yamlStr string) (cmp.Option, error) {
 func IsPathInTree(tree map[string]interface{}, path []string) (bool, error) {
 	// Clone a slice: https://github.com/go101/go101/wiki
 	remainPath := append(path[:0:0], path...)
-	return isPathInTree(tree, path, remainPath)
+	return isPathInTree(tree, remainPath)
 }
 
-func isPathInTree(tree map[string]interface{}, path []string, remainPath []string) (bool, error) {
+func isPathInTree(tree map[string]interface{}, remainPath []string) (bool, error) {
 	if len(remainPath) == 0 {
 		return false, nil
 	}
@@ -203,14 +203,14 @@ func isPathInTree(tree map[string]interface{}, path []string, remainPath []strin
 			remainPath = remainPath[1:]
 			switch node := val.(type) {
 			case map[string]interface{}:
-				return isPathInTree(node, path, remainPath)
+				return isPathInTree(node, remainPath)
 			case []interface{}:
 				for _, newNode := range node {
 					newMap, ok := newNode.(map[string]interface{})
 					if !ok {
 						return false, fmt.Errorf("fail to convert []interface{} to map[string]interface{}")
 					}
-					found, err := isPathInTree(newMap, path, remainPath)
+					found, err := isPathInTree(newMap, remainPath)
 					if found && err == nil {
 						return found, nil
 					}
