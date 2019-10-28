@@ -16,25 +16,18 @@ package mesh
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/ghodss/yaml"
 	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	"istio.io/operator/pkg/component/component"
-	"istio.io/operator/pkg/translate"
-
-	"istio.io/pkg/log"
-
 	"istio.io/operator/pkg/compare"
 	"istio.io/operator/pkg/hooks"
 	"istio.io/operator/pkg/manifest"
 	opversion "istio.io/operator/version"
+	"istio.io/pkg/log"
 )
 
 const (
@@ -115,33 +108,6 @@ func UpgradeCmd() *cobra.Command {
 	addFlags(cmd, rootArgs)
 	addUpgradeFlags(cmd, macArgs)
 	return cmd
-}
-
-func genOverlayICPS(filename string) (string, *v1alpha2.IstioControlPlaneSpec, error) {
-	if strings.TrimSpace(filename) == "" {
-		return "", nil, nil
-	}
-
-	b, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return "", nil, fmt.Errorf("could not read from file %s: %s", filename, err)
-	}
-	overlayICPS, _, err := unmarshalAndValidateICP(string(b))
-	if err != nil {
-		return "", nil, err
-	}
-
-	t, err := translate.NewTranslator(opversion.OperatorBinaryVersion.MinorVersion)
-	if err != nil {
-		return "", nil, err
-	}
-
-	overlayYAML, err := component.TranslateHelmValues(overlayICPS, t, "")
-	if err != nil {
-		return "", nil, err
-	}
-
-	return overlayYAML, overlayICPS, nil
 }
 
 // upgrade is the main function for Upgrade command

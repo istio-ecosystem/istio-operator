@@ -18,7 +18,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-
+	"strings"
 	"text/template"
 
 	"github.com/ghodss/yaml"
@@ -175,6 +175,33 @@ func genICPS(inFilename, profile, setOverlayYAML string, force bool, l *logger) 
 		return "", nil, err
 	}
 	return finalYAML, finalICPS, nil
+}
+
+func genOverlayICPS(filename string) (string, *v1alpha2.IstioControlPlaneSpec, error) {
+	if strings.TrimSpace(filename) == "" {
+		return "", nil, nil
+	}
+
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return "", nil, fmt.Errorf("could not read from file %s: %s", filename, err)
+	}
+	overlayICPS, _, err := unmarshalAndValidateICP(string(b))
+	if err != nil {
+		return "", nil, err
+	}
+
+	t, err := translate.NewTranslator(binversion.OperatorBinaryVersion.MinorVersion)
+	if err != nil {
+		return "", nil, err
+	}
+
+	overlayYAML, err := component.TranslateHelmValues(overlayICPS, t, "")
+	if err != nil {
+		return "", nil, err
+	}
+
+	return overlayYAML, overlayICPS, nil
 }
 
 func genProfile(helmValues bool, inFilename, profile, setOverlayYAML, configPath string, force bool, l *logger) (string, error) {
