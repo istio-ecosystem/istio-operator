@@ -17,12 +17,14 @@
 set -eux
 
 export ARTIFACTS="${ARTIFACTS:-$(mktemp -d)}"
+HUB="istio-testing"
+TAG="istio-testing"
 ROOT=$(cd ../../../; pwd)
 
 
 function setup_docker() {
-  HUB=istio-testing TAG=1.5-dev make controller docker
-  kind --loglevel debug --name istio-testing load docker-image istio-testing/operator:1.5-dev
+  HUB=gcr.io/istio-testing TAG=1.5-dev make controller docker
+  kind --loglevel debug --name istio-testing load docker-image gcr.io/istio-testing/operator:1.5-dev
   kind --loglevel debug --name istio-testing load docker-image istio-testing/app:istio-testing
 }
 
@@ -54,20 +56,15 @@ done
 pushd "${ISTIO_DIR}"
 # shellcheck disable=SC1091
 source "./prow/lib.sh"
-setup_kind_cluster kindest/node:v1.15.3
-popd
-
+setup_kind_cluster ""
 KUBECONFIG=$(kind get kubeconfig-path --name="istio-testing")
 export KUBECONFIG
-
-pushd "${ISTIO_DIR}" || exit
-  HUB=istio-testing TAG=istio-testing make docker.app
+HUB="${HUB}" TAG="${TAG}" make docker.app
 popd
 
 setup_docker
 
-
 pushd "${ISTIO_DIR}" || exit
   make istioctl
-  HUB=istio-testing TAG=istio-testing E2E_ARGS="--use_operator --use_local_cluster=true --test_logs_path=${ARTIFACTS}" make e2e_simple_noauth_run
+  HUB="${HUB}" TAG="${TAG}" E2E_ARGS="--use_operator --use_local_cluster=true --test_logs_path=${ARTIFACTS}" make e2e_simple_noauth_run
 popd
