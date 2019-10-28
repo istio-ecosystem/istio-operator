@@ -33,7 +33,6 @@ import (
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 
 	"istio.io/operator/pkg/util"
-
 	"istio.io/operator/pkg/compare"
 	"istio.io/pkg/log"
 )
