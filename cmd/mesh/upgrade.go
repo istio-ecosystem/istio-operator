@@ -16,12 +16,18 @@ package mesh
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/ghodss/yaml"
 	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
+
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/operator/pkg/component/component"
+	"istio.io/operator/pkg/translate"
 
 	"istio.io/pkg/log"
 
@@ -66,8 +72,8 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 		"c", "", "Path to kube config")
 	cmd.PersistentFlags().StringVar(&args.context, "context", "",
 		"The name of the kubeconfig context to use")
-	cmd.PersistentFlags().BoolVarP(&args.skipConfirmation, "skipConfirmation", "y", false,
-		"If skipConfirmation is set, skips the prompting confirmation for value changes in this upgrade")
+	cmd.PersistentFlags().BoolVar(&args.skipConfirmation, "skip-confirmation", false,
+		"If skip-confirmation is set, skips the prompting confirmation for value changes in this upgrade")
 	cmd.PersistentFlags().BoolVarP(&args.wait, "wait", "w", false,
 		"Wait, if set will wait until all Pods, Services, and minimum number of Pods "+
 			"of a Deployment are in a ready state before the command exits. "+
@@ -105,6 +111,33 @@ func UpgradeCmd() *cobra.Command {
 	addFlags(cmd, rootArgs)
 	addUpgradeFlags(cmd, macArgs)
 	return cmd
+}
+
+func genOverlayICPS(filename string) (string, *v1alpha2.IstioControlPlaneSpec, error) {
+	if strings.TrimSpace(filename) == "" {
+		return "", nil, nil
+	}
+
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return "", nil, fmt.Errorf("could not read from file %s: %s", filename, err)
+	}
+	overlayICPS, _, err := unmarshalAndValidateICP(string(b))
+	if err != nil {
+		return "", nil, err
+	}
+
+	t, err := translate.NewTranslator(opversion.OperatorBinaryVersion.MinorVersion)
+	if err != nil {
+		return "", nil, err
+	}
+
+	overlayYAML, err := component.TranslateHelmValues(overlayICPS, t, "")
+	if err != nil {
+		return "", nil, err
+	}
+
+	return overlayYAML, overlayICPS, nil
 }
 
 // upgrade is the main function for Upgrade command
@@ -168,7 +201,12 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	}
 	l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", currentVersion, targetVersion)
 
-	checkUpgradeValues(currentValues, targetValues, l)
+	// Generates overridden values from args.inFilename
+	overrideValues, _, err := genOverlayICPS(args.inFilename)
+	if err != nil {
+		return fmt.Errorf("failed to generate override values from file: %v, error: %v", args.inFilename, err)
+	}
+	checkUpgradeValues(currentValues, targetValues, overrideValues, l)
 	waitForConfirmation(args.skipConfirmation, l)
 
 	// Run pre-upgrade hooks
@@ -219,12 +257,12 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 }
 
 // checkUpgradeValues checks the upgrade eligibility by comparing the current values with the target values
-func checkUpgradeValues(curValues string, tarValues string, l *logger) {
-	diff := compare.YAMLCmp(curValues, tarValues)
+func checkUpgradeValues(curValues, tarValues, ignoreValues string, l *logger) {
+	diff := compare.YAMLCmpWithIgnore(curValues, tarValues, nil, ignoreValues)
 	if diff == "" {
 		l.logAndPrintf("Upgrade check: Values unchanged. The target values are identical to the current values.\n")
 	} else {
-		l.logAndPrintf("Upgrade check: Warning!!! the following values will be changed as part of upgrade. "+
+		l.logAndPrintf("Upgrade check: Warning!!! The following values will be changed as part of upgrade. "+
 			"If you have not overridden these values, they will change in your cluster. Please double check they are correct:\n%s", diff)
 	}
 }

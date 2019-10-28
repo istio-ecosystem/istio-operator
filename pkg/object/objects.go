@@ -527,7 +527,7 @@ func manifestDiff(aom, bom map[string]*K8sObject, im map[string]string, verbose 
 			diff = util.YAMLDiff(string(ay), string(by))
 		} else {
 			ignorePaths := objectIgnorePaths(ak, im)
-			diff = compare.YAMLCmpWithIgnore(string(ay), string(by), ignorePaths)
+			diff = compare.YAMLCmpWithIgnore(string(ay), string(by), ignorePaths, "")
 		}
 
 		if diff != "" {

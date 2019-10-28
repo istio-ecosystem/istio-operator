@@ -99,11 +99,11 @@ func (r *YAMLCmpReporter) String() string {
 
 // YAMLCmp compares two yaml texts, return a tree based diff text.
 func YAMLCmp(a, b string) string {
-	return YAMLCmpWithIgnore(a, b, nil)
+	return YAMLCmpWithIgnore(a, b, nil, "")
 }
 
 // YAMLCmpWithIgnore compares two yaml texts, and ignores paths in ignorePaths.
-func YAMLCmpWithIgnore(a, b string, ignorePaths []string) string {
+func YAMLCmpWithIgnore(a, b string, ignorePaths []string, ignoreYaml string) string {
 	ao, bo := make(map[string]interface{}), make(map[string]interface{})
 	if err := yaml.Unmarshal([]byte(a), &ao); err != nil {
 		return err.Error()
@@ -123,8 +123,13 @@ func YAMLCmpWithIgnore(a, b string, ignorePaths []string) string {
 		}
 	}
 
+	ignoreYamlOpt, err := genYamlIgnoreOpt(ignoreYaml)
+	if err != nil {
+		return err.Error()
+	}
+
 	var r YAMLCmpReporter
-	cmp.Equal(ao, bo, cmp.Reporter(&r), genPathIgnoreOpt(ignorePaths))
+	cmp.Equal(ao, bo, cmp.Reporter(&r), genPathIgnoreOpt(ignorePaths), ignoreYamlOpt)
 	return r.String()
 }
 
@@ -164,6 +169,59 @@ func UnmarshalInlineYaml(obj map[string]interface{}, targetPath string) (err err
 		}
 	}
 	return
+}
+
+// genPathIgnoreOpt returns a cmp.Option to ignore paths specified in parameter ignorePaths.
+func genYamlIgnoreOpt(yamlStr string) (cmp.Option, error) {
+	tree := make(map[string]interface{})
+	if err := yaml.Unmarshal([]byte(yamlStr), &tree); err != nil {
+		return nil, err
+	}
+	return cmp.FilterPath(func(curPath cmp.Path) bool {
+		up := pathToStringList(curPath)
+		found, _ := IsPathInTree(tree, up)
+		return found
+	}, cmp.Ignore()), nil
+}
+
+func IsPathInTree(tree map[string]interface{}, path []string) (bool, error) {
+	// Clone a slice: https://github.com/go101/go101/wiki
+	remainPath := append(path[:0:0], path...)
+	return isPathInTree(tree, path, remainPath)
+}
+
+func isPathInTree(tree map[string]interface{}, path []string, remainPath []string) (bool, error) {
+	if len(remainPath) == 0 {
+		return false, nil
+	}
+	for key, val := range tree {
+		if key == remainPath[0] {
+			// found it
+			if len(remainPath) == 1 {
+				return true, nil
+			}
+			remainPath = remainPath[1:]
+			switch node := val.(type) {
+			case map[string]interface{}:
+				return isPathInTree(node, path, remainPath)
+			case []interface{}:
+				for _, newNode := range node {
+					newMap, ok := newNode.(map[string]interface{})
+					if !ok {
+						return false, fmt.Errorf("fail to convert []interface{} to map[string]interface{}")
+					}
+					found, err := isPathInTree(newMap, path, remainPath)
+					if found && err == nil {
+						return found, nil
+					}
+				}
+			// leaf
+			default:
+				return false, nil
+			}
+		}
+	}
+	return false, nil
 }
 
 // genPathIgnoreOpt returns a cmp.Option to ignore paths specified in parameter ignorePaths.

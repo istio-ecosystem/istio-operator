@@ -674,7 +674,105 @@ metadata:
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			if got, want := YAMLCmpWithIgnore(tt.a, tt.b, tt.i), tt.want; !(got == want) {
+			if got, want := YAMLCmpWithIgnore(tt.a, tt.b, tt.i, ""), tt.want; !(got == want) {
+				t.Errorf("%s: got:%v, want:%v", tt.desc, got, want)
+			}
+		})
+	}
+}
+
+func TestYAMLCmpWithIgnoreTree(t *testing.T) {
+	tests := []struct {
+		desc string
+		a    string
+		b    string
+		i    []string
+		y    string
+		want interface{}
+	}{
+		{
+			desc: "ignore overrides",
+			a: `apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-system
+  labels:
+    app: istio-ingressgateway
+    release: istio
+spec:
+  hub: gcr.io/istio-testing
+  tag: latest`,
+			b: `apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-system
+  labels:
+    app: istio-ingressgateway
+    release: istio
+spec:
+  hub: docker.io/istio
+  tag: 1.3.3`,
+			y: `apiVersion: install.istio.io/v1alpha2
+kind: IstioControlPlane
+spec:
+  hub: docker.io/istio
+  tag: 1.3.3`,
+			want: ``,
+		},
+		{
+			desc: "ignore nested overrides",
+			a: `metadata:
+  name: istio-ingressgateway
+  labels:
+    app: istio-ingressgateway
+    release: istio-1.3.3`,
+			b: `metadata:
+  name: istio-ingressgateway
+  labels:
+    app: istio-ingressgateway
+    release: istio-1.3.2`,
+			y: `metadata:
+  labels:
+    release: istio-1.3.3`,
+			want: ``,
+		},
+		{
+			desc: "not ignore non-overrides",
+			a: `apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-system
+  labels:
+    app: istio-ingressgateway
+    release: istio
+spec:
+  hub: gcr.io/istio-testing
+  tag: latest`,
+			b: `apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-system
+  labels:
+    app: istio-ingressgateway
+    release: istio
+spec:
+  hub: docker.io/istio
+  tag: 1.3.3`,
+			y: `apiVersion: install.istio.io/v1alpha2
+kind: IstioControlPlane`,
+			want: `spec:
+  hub: gcr.io/istio-testing -> docker.io/istio
+  tag: latest -> 1.3.3
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			if got, want := YAMLCmpWithIgnore(tt.a, tt.b, tt.i, tt.y), tt.want; !(got == want) {
 				t.Errorf("%s: got:%v, want:%v", tt.desc, got, want)
 			}
 		})
