@@ -32,8 +32,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 
-	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/compare"
+	"istio.io/operator/pkg/util"
 	"istio.io/pkg/log"
 )
 
