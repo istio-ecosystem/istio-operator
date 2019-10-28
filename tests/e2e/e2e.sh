@@ -17,15 +17,14 @@
 set -eux
 
 export ARTIFACTS="${ARTIFACTS:-$(mktemp -d)}"
-HUB="istio-testing"
-TAG="istio-testing"
+HUB="gcr.io/istio-testing"
+TAG="latest"
 ROOT=$(cd ../../../; pwd)
 
 
 function setup_docker() {
-  HUB=gcr.io/istio-testing TAG=1.5-dev make controller docker
-  kind --loglevel debug --name istio-testing load docker-image gcr.io/istio-testing/operator:1.5-dev
-  kind --loglevel debug --name istio-testing load docker-image istio-testing/app:istio-testing
+  HUB=istio-testing TAG=1.5-dev make controller docker
+  kind --loglevel debug --name istio-testing load docker-image istio-testing/operator:1.5-dev
 }
 
 
@@ -42,7 +41,7 @@ fi
 
 # Create an operator manifest from the default control plane configuration
 cd "${ROOT}/src/istio.io/operator"
-operator_manifest_files=( "deploy/namespace.yaml" "deploy/crds/istio_v1alpha2_istiocontrolplane_crd.yaml" "deploy/service_account.yaml" "deploy/clusterrole.yaml" "deploy/clusterrole_binding.yaml" "deploy/service.yaml" "deploy/operator.yaml" "deploy/crds/istio_v1alpha2_istiocontrolplane_cr.yaml" )
+operator_manifest_files=( "deploy/namespace.yaml" "deploy/crds/istio_v1alpha2_istiocontrolplane_crd.yaml" "deploy/service_account.yaml" "deploy/clusterrole.yaml" "deploy/clusterrole_binding.yaml" "deploy/service.yaml" "tests/e2e/testdata/operator.yaml" "deploy/crds/istio_v1alpha2_istiocontrolplane_cr.yaml" )
 
 # Generate the main manifest
 rm -f "${ISTIO_DIR}"/install/kubernetes/istio-operator.yaml
@@ -57,11 +56,10 @@ pushd "${ISTIO_DIR}"
 # shellcheck disable=SC1091
 source "./prow/lib.sh"
 setup_kind_cluster ""
-KUBECONFIG=$(kind get kubeconfig-path --name="istio-testing")
-export KUBECONFIG
-HUB="${HUB}" TAG="${TAG}" make docker.app
 popd
 
+KUBECONFIG=$(kind get kubeconfig-path --name="istio-testing")
+export KUBECONFIG
 setup_docker
 
 pushd "${ISTIO_DIR}" || exit
