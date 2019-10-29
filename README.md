@@ -94,7 +94,7 @@ make mesh
 
 This will create a binary called `mesh` in ${GOPATH}/bin. Ensure this is in your PATH to run the examples below.
 
-#### Controller
+#### Controller (in cluster)
 
 Building a custom controller requires a Dockerhub (or similar) account. To build using the container based build:
 
@@ -119,6 +119,23 @@ kubectl apply -f deploy/crds/istio_v1alpha2_istiocontrolplane_cr.yaml
 
 This installs the controller into the cluster in the istio-operator namespace. The controller in turns installs
 the Istio control plane into the istio-system namespace by default.
+
+#### Controller (running locally)
+
+1. Set env $WATCH_NAMESPACE and $LEADER_ELECTION_NAMESPACE (default value is "istio-operator")
+
+1. From the operator repo root directory, run `go run ./cmd/manager/*.go server `
+
+To use Remote debugging with IntelliJ, replace above step 2 with following:
+
+1. From ./cmd/manager path run
+`
+dlv debug --headless --listen=:2345 --api-version=2 -- server
+`.
+
+1. In IntelliJ, create a new Go Remote debug configuration with default settings.
+
+1. Start debugging process and verify it is working. For example, try adding a breakpoint at Reconcile logic and apply a new CR.
 
 ### Relationship between the CLI and controller
 
