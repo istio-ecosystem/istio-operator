@@ -36703,7 +36703,7 @@ spec:
           address: "$(HOST_IP):8126"
       mtls:
         enabled: false
-        auto: false
+        auto: true
       imagePullSecrets: []
       arch:
         amd64: 2
@@ -37312,8 +37312,6 @@ spec:
     global:
       disablePolicyChecks: false
       controlPlaneSecurityEnabled: false
-      mtls:
-        auto: true
       proxy:
         accessLogFile: /dev/stdout
         resources:
