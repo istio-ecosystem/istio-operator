@@ -160,13 +160,13 @@ func ParseK8SYAMLToIstioControlPlaneSpec(yml string) (*v1alpha2.IstioControlPlan
 }
 
 // RenderToDir writes manifests to a local filesystem directory tree.
-func RenderToDir(manifests name.ManifestMap, outputDir string, dryRun, verbose bool) error {
+func RenderToDir(manifests name.ManifestMap, outputDir string, dryRun bool) error {
 	logAndPrint("Component dependencies tree: \n%s", installTreeString())
 	logAndPrint("Rendering manifests to output dir %s", outputDir)
-	return renderRecursive(manifests, installTree, outputDir, dryRun, verbose)
+	return renderRecursive(manifests, installTree, outputDir, dryRun)
 }
 
-func renderRecursive(manifests name.ManifestMap, installTree componentTree, outputDir string, dryRun, verbose bool) error {
+func renderRecursive(manifests name.ManifestMap, installTree componentTree, outputDir string, dryRun bool) error {
 	for k, v := range installTree {
 		componentName := string(k)
 		ym := manifests[k]
@@ -194,7 +194,7 @@ func renderRecursive(manifests name.ManifestMap, installTree componentTree, outp
 			// Leaf
 			return nil
 		}
-		if err := renderRecursive(manifests, kt, dirName, dryRun, verbose); err != nil {
+		if err := renderRecursive(manifests, kt, dirName, dryRun); err != nil {
 			return err
 		}
 	}
@@ -223,7 +223,7 @@ func ApplyAll(manifests name.ManifestMap, version version.Version, opts *Install
 	for c := range manifests {
 		logAndPrint("- %s", c)
 	}
-	logAndPrint("Component dependencies tree: \n%s", installTreeString())
+	log.Infof("Component dependencies tree: \n%s", installTreeString())
 	if err := initK8SRestClient(opts.Kubeconfig, opts.Context); err != nil {
 		return nil, err
 	}
@@ -239,15 +239,15 @@ func applyRecursive(manifests name.ManifestMap, version version.Version, opts *I
 		wg.Add(1)
 		go func() {
 			if s := dependencyWaitCh[c]; s != nil {
-				logAndPrint("%s is waiting on parent dependency...", c)
+				logAndPrint("%s is waiting on a prerequisite...", c)
 				<-s
-				logAndPrint("Parent dependency for %s has unblocked, proceeding.", c)
+				logAndPrint("Prerequisite for %s has completed, proceeding with install.", c)
 			}
 			out[c] = applyManifest(c, m, version, opts)
 
 			// Signal all the components that depend on us.
 			for _, ch := range componentDependencies[c] {
-				logAndPrint("unblocking child dependency %s.", ch)
+				log.Infof("unblocking child %s.", ch)
 				dependencyWaitCh[ch] <- struct{}{}
 			}
 			wg.Done()
@@ -267,8 +267,30 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 			Err: err,
 		}
 	}
+
+	componentLabel := fmt.Sprintf("%s=%s", istioComponentLabelStr, componentName)
+
+	// TODO: remove this when `kubectl --prune` supports empty objects
+	//  (https://github.com/kubernetes/kubernetes/issues/40635)
+	// Delete all resources for a disabled component
 	if len(objects) == 0 {
-		return &ComponentApplyOutput{}
+		extraArgsGet := []string{"--all-namespaces", "--selector", componentLabel}
+		stdoutGet, stderrGet, err := kubectl.GetAll(opts.Kubeconfig, opts.Context, "", "yaml", extraArgsGet...)
+		if err != nil || strings.TrimSpace(stdoutGet) == "" {
+			return &ComponentApplyOutput{
+				Stdout: stdoutGet,
+				Stderr: stderrGet,
+				Err:    err,
+			}
+		}
+
+		extraArgsDel := []string{"--selector", componentLabel}
+		stdoutDel, stderrDel, err := kubectl.Delete(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, "", stdoutGet, extraArgsDel...)
+		return &ComponentApplyOutput{
+			Stdout: stdoutDel,
+			Stderr: stderrDel,
+			Err:    err,
+		}
 	}
 
 	namespace, stdoutCRD, stderrCRD := "", "", ""
@@ -286,13 +308,12 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 	appliedObjects = append(appliedObjects, objects...)
 
 	extraArgs := []string{"--force"}
-	// Base components include namespaces and CRDs, pruning them will removes
-	// user configs, which makes it hard to roll back.
+	// Base components include namespaces and CRDs, pruning them will remove user configs, which makes it hard to roll back.
 	if componentName != name.IstioBaseComponentName {
-		extraArgs = append(extraArgs, "--prune", "--selector", fmt.Sprintf("%s=%s", istioComponentLabelStr, componentName))
+		extraArgs = append(extraArgs, "--prune", "--selector", componentLabel)
 	}
 
-	logAndPrint("kubectl applying manifest for component %s", componentName)
+	logAndPrint("Applying manifest for component %s", componentName)
 
 	crdObjects := cRDKindObjects(objects)
 	if len(crdObjects) > 0 {
@@ -327,7 +348,7 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 		}
 	}
 	stdout, stderr, err = kubectl.Apply(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, namespace, m, extraArgs...)
-	logAndPrint("finished applying manifest for component %s", componentName)
+	logAndPrint("Finished applying manifest for component %s", componentName)
 	ym, _ := objects.YAMLManifest()
 	return &ComponentApplyOutput{
 		Stdout:   stdoutCRD + "\n" + stdout,
