@@ -18,29 +18,6 @@
 
 # NodeAgent component is disabled.
 
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: pilot
-    istio: pilot
-    release: istio
-  name: istio-pilot
-  namespace: istio-control
-spec:
-  ports:
-  - name: grpc-xds
-    port: 11111
-  - name: https-xds
-    port: 15011
-  - name: http-legacy-discovery
-    port: 8080
-  - name: http-monitoring
-    port: 15014
-  selector:
-    istio: pilot
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -209,50 +186,69 @@ spec:
           secretName: istio.istio-pilot-service-account
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+apiVersion: v1
+kind: Service
 metadata:
-  name: istio-pilot-istio-control
+  labels:
+    app: pilot
+    istio: pilot
+    release: istio
+  name: istio-pilot
+  namespace: istio-control
+spec:
+  ports:
+  - name: grpc-xds
+    port: 11111
+  - name: https-xds
+    port: 15011
+  - name: http-legacy-discovery
+    port: 8080
+  - name: http-monitoring
+    port: 15014
+  selector:
+    istio: pilot
+
+---
+apiVersion: "authentication.istio.io/v1alpha1"
+kind: "MeshPolicy"
+metadata:
+  name: "default"
+  labels:
+    release: istio
+spec:
+  peers:
+  - mtls:
+      mode: PERMISSIVE
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-pilot-service-account
+  namespace: istio-control
   labels:
     app: pilot
     release: istio
-rules:
-- apiGroups: ["config.istio.io"]
-  resources: ["*"]
-  verbs: ["*"]
-- apiGroups: ["rbac.istio.io"]
-  resources: ["*"]
-  verbs: ["get", "watch", "list"]
-- apiGroups: ["security.istio.io"]
-  resources: ["*"]
-  verbs: ["get", "watch", "list"]
-- apiGroups: ["networking.istio.io"]
-  resources: ["*"]
-  verbs: ["*"]
-- apiGroups: ["authentication.istio.io"]
-  resources: ["*"]
-  verbs: ["*"]
-- apiGroups: ["apiextensions.k8s.io"]
-  resources: ["customresourcedefinitions"]
-  verbs: ["*"]
-- apiGroups: ["extensions"]
-  resources: ["ingresses", "ingresses/status"]
-  verbs: ["*"]
-- apiGroups: [""]
-  resources: ["configmaps"]
-  verbs: ["create", "get", "list", "watch", "update"]
-- apiGroups: [""]
-  resources: ["endpoints", "pods", "services", "namespaces", "nodes", "secrets"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["create", "get", "watch", "list", "update", "delete"]
-- apiGroups: ["certificates.k8s.io"]
-  resources:
-    - "certificatesigningrequests"
-    - "certificatesigningrequests/approval"
-    - "certificatesigningrequests/status"
-  verbs: ["update", "create", "get", "delete"]
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: pilot
+    release: istio
+  name: istio-pilot
+  namespace: istio-control
+spec:
+  maxReplicas: 5
+  metrics:
+  - resource:
+      name: cpu
+      targetAverageUtilization: 80
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: istio-pilot
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -531,7 +527,7 @@ data:
     # If true, automatically configure client side mTLS settings to match the corresponding service's
     # server side mTLS authentication policy, when destination rule for that service does not specify
     # TLS settings.
-    enableAutoMtls: false
+    enableAutoMtls: true
     config_sources:
     - address: localhost:15019
 
@@ -591,38 +587,6 @@ data:
       # Address where istio Pilot service is running
       discoveryAddress: istio-pilot.istio-control:15011
 ---
-apiVersion: "authentication.istio.io/v1alpha1"
-kind: "MeshPolicy"
-metadata:
-  name: "default"
-  labels:
-    release: istio
-spec:
-  peers:
-  - mtls:
-      mode: PERMISSIVE
----
-apiVersion: autoscaling/v2beta1
-kind: HorizontalPodAutoscaler
-metadata:
-  labels:
-    app: pilot
-    release: istio
-  name: istio-pilot
-  namespace: istio-control
-spec:
-  maxReplicas: 5
-  metrics:
-  - resource:
-      name: cpu
-      targetAverageUtilization: 80
-    type: Resource
-  minReplicas: 1
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: istio-pilot
----
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
@@ -666,14 +630,50 @@ spec:
       release: istio
       istio: pilot
 ---
-apiVersion: v1
-kind: ServiceAccount
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
 metadata:
-  name: istio-pilot-service-account
-  namespace: istio-control
+  name: istio-pilot-istio-control
   labels:
     app: pilot
     release: istio
+rules:
+- apiGroups: ["config.istio.io"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["rbac.istio.io"]
+  resources: ["*"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["security.istio.io"]
+  resources: ["*"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["networking.istio.io"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["authentication.istio.io"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["*"]
+- apiGroups: ["extensions"]
+  resources: ["ingresses", "ingresses/status"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["create", "get", "list", "watch", "update"]
+- apiGroups: [""]
+  resources: ["endpoints", "pods", "services", "namespaces", "nodes", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["create", "get", "watch", "list", "update", "delete"]
+- apiGroups: ["certificates.k8s.io"]
+  resources:
+    - "certificatesigningrequests"
+    - "certificatesigningrequests/approval"
+    - "certificatesigningrequests/status"
+  verbs: ["update", "create", "get", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
