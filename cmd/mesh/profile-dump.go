@@ -144,7 +144,7 @@ func genICPS(inFilename, profile, setOverlayYAML string, force bool, l *logger) 
 	// override from variables that are set during release build time.
 	hub := version.DockerInfo.Hub
 	tag := version.DockerInfo.Tag
-	if hub != "" && tag != "" {
+	if hub != "unknown" && tag != "unknown" {
 		buildHubTagOverlayYAML, err := generateHubTagOverlay(hub, tag)
 		if err != nil {
 			return "", nil, err
