@@ -86,6 +86,7 @@
 // ../../data/charts/istio-control/istio-discovery/templates/clusterrole.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/clusterrolebinding.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/configmap-envoy.yaml
+// ../../data/charts/istio-control/istio-discovery/templates/configmap-jwks.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/configmap.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/deployment.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/enable-mesh-mtls.yaml
@@ -11581,6 +11582,34 @@ func chartsIstioControlIstioDiscoveryTemplatesConfigmapEnvoyYaml() (*asset, erro
 	}
 
 	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/templates/configmap-envoy.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml = []byte(`{{- if .Values.pilot.jwksResolverExtraRootCA }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pilot-jwks-extra-cacerts{{ .Values.version }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    release: {{ .Release.Name }}
+data:
+  extra.pem: {{ .Values.pilot.jwksResolverExtraRootCA | quote }}
+{{- end }}
+`)
+
+func chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYamlBytes() ([]byte, error) {
+	return _chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml, nil
+}
+
+func chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml() (*asset, error) {
+	bytes, err := chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/templates/configmap-jwks.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -36644,7 +36673,7 @@ spec:
           address: "$(HOST_IP):8126"
       mtls:
         enabled: false
-        auto: false
+        auto: true
       imagePullSecrets: []
       arch:
         amd64: 2
@@ -38046,6 +38075,7 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/istio-control/istio-discovery/templates/clusterrole.yaml": chartsIstioControlIstioDiscoveryTemplatesClusterroleYaml,
 	"charts/istio-control/istio-discovery/templates/clusterrolebinding.yaml": chartsIstioControlIstioDiscoveryTemplatesClusterrolebindingYaml,
 	"charts/istio-control/istio-discovery/templates/configmap-envoy.yaml": chartsIstioControlIstioDiscoveryTemplatesConfigmapEnvoyYaml,
+	"charts/istio-control/istio-discovery/templates/configmap-jwks.yaml": chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml,
 	"charts/istio-control/istio-discovery/templates/configmap.yaml": chartsIstioControlIstioDiscoveryTemplatesConfigmapYaml,
 	"charts/istio-control/istio-discovery/templates/deployment.yaml": chartsIstioControlIstioDiscoveryTemplatesDeploymentYaml,
 	"charts/istio-control/istio-discovery/templates/enable-mesh-mtls.yaml": chartsIstioControlIstioDiscoveryTemplatesEnableMeshMtlsYaml,
@@ -38340,6 +38370,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 					"clusterrole.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesClusterroleYaml, map[string]*bintree{}},
 					"clusterrolebinding.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesClusterrolebindingYaml, map[string]*bintree{}},
 					"configmap-envoy.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesConfigmapEnvoyYaml, map[string]*bintree{}},
+					"configmap-jwks.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml, map[string]*bintree{}},
 					"configmap.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesConfigmapYaml, map[string]*bintree{}},
 					"deployment.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesDeploymentYaml, map[string]*bintree{}},
 					"enable-mesh-mtls.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesEnableMeshMtlsYaml, map[string]*bintree{}},
