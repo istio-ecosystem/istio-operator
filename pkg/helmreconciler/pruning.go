@@ -40,6 +40,17 @@ func (h *HelmReconciler) Prune(all bool) error {
 	if err != nil {
 		allErrors = append(allErrors, err)
 	}
+	//prune namespace created by istio operator at last
+	ns := []schema.GroupVersionKind{{
+		Group:   "",
+		Version: "v1",
+		Kind:    "Namespace",
+	},
+	}
+	err = h.PruneResources(ns, all, "")
+	if err != nil {
+		allErrors = append(allErrors, err)
+	}
 	return utilerrors.NewAggregate(allErrors)
 }
 

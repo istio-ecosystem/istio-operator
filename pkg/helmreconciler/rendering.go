@@ -185,6 +185,12 @@ func (h *HelmReconciler) ProcessObject(chartName string, obj *unstructured.Unstr
 		return utilerrors.NewAggregate(allErrors)
 	}
 
+	gvk := obj.GetObjectKind().GroupVersionKind()
+	update := true
+	if gvk.Kind == "Namespace" && gvk.Version == "v1" {
+		annotations := obj.GetAnnotations()
+		_, update = annotations["install.operator.istio.io/owner-generation"]
+	}
 	mutatedObj, err := h.customizer.Listener().BeginResource(chartName, obj)
 	if err != nil {
 		log.Errorf("error preprocessing object: %s", err)
@@ -197,7 +203,7 @@ func (h *HelmReconciler) ProcessObject(chartName string, obj *unstructured.Unstr
 	}
 
 	receiver := &unstructured.Unstructured{}
-	receiver.SetGroupVersionKind(mutatedObj.GetObjectKind().GroupVersionKind())
+	receiver.SetGroupVersionKind(gvk)
 	objectKey, _ := client.ObjectKeyFromObject(mutatedObj)
 
 	var patch Patch
@@ -219,17 +225,19 @@ func (h *HelmReconciler) ProcessObject(chartName string, obj *unstructured.Unstr
 				}
 			}
 		}
-	} else if patch, err = h.CreatePatch(receiver, mutatedObj); err == nil && patch != nil {
-		log.Info("updating existing resource")
-		mutatedObj, err = patch.Apply()
-		if err == nil {
-			if err = h.customizer.Listener().ResourceUpdated(mutatedObj, receiver); err != nil {
-				log.Errorf("unexpected error occurred during postprocessing of updated resource: %s", err)
-			}
-		} else {
-			listenerErr := h.customizer.Listener().ResourceError(obj, err)
-			if listenerErr != nil {
-				log.Errorf("unexpected error occurred invoking ResourceError on listener: %s", listenerErr)
+	} else if update {
+		if patch, err = h.CreatePatch(receiver, mutatedObj); err == nil && patch != nil {
+			log.Info("updating existing resource")
+			mutatedObj, err = patch.Apply()
+			if err == nil {
+				if err = h.customizer.Listener().ResourceUpdated(mutatedObj, receiver); err != nil {
+					log.Errorf("unexpected error occurred during postprocessing of updated resource: %s", err)
+				}
+			} else {
+				listenerErr := h.customizer.Listener().ResourceError(obj, err)
+				if listenerErr != nil {
+					log.Errorf("unexpected error occurred invoking ResourceError on listener: %s", listenerErr)
+				}
 			}
 		}
 	}
