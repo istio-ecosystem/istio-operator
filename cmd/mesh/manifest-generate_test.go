@@ -16,11 +16,12 @@ package mesh
 
 import (
 	"io/ioutil"
-	"istio.io/pkg/version"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"istio.io/pkg/version"
 
 	"istio.io/operator/pkg/object"
 	"istio.io/operator/pkg/util"
