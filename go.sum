@@ -262,6 +262,7 @@ github.com/istio/glog v0.0.0-20190424172949-d7cfb6fa2ccd h1:AJnLAbRpHRy2stiICRI1
 github.com/istio/glog v0.0.0-20190424172949-d7cfb6fa2ccd/go.mod h1:gF8UB8w1Mqkddo9AqNOPkiduBosB3HHkpC5ra96cDzw=
 github.com/istio/klog v0.0.0-20190424230111-fb7481ea8bcf h1:AshFubsUWsHMYfGoz5XLZOOF87wnop5O/Fjjnqjk8lY=
 github.com/istio/klog v0.0.0-20190424230111-fb7481ea8bcf/go.mod h1:9gnFtvcm4y+2DZMNXbO8Q7Ke2kUDomg7HhR/mEs5wVA=
+github.com/istio/viper v1.3.3-0.20190515210538-2789fed3109c/go.mod h1:ZiWeW+zYFKm7srdB9IoDzzZXaJaI5eL9QjNiN/DMA2s=
 github.com/jonboulle/clockwork v0.0.0-20141017032234-72f9bd7c4e0c/go.mod h1:Ii8DK3G1RaLaWxj9trq07+26W01tbo22gdxWY5EU2bo=
 github.com/jonboulle/clockwork v0.1.0 h1:VKV+ZcuP6l3yW9doeqz6ziZGgcynBVQO+obU0+0hcPo=
 github.com/jonboulle/clockwork v0.1.0/go.mod h1:Ii8DK3G1RaLaWxj9trq07+26W01tbo22gdxWY5EU2bo=
@@ -647,6 +648,8 @@ honnef.co/go/tools v0.0.0-20190523083050-ea95bdfd59fc/go.mod h1:rf3lG4BRIbNafJWh
 istio.io/api v0.0.0-20190515205759-982e5c3888c6/go.mod h1:hhLFQmpHia8zgaM37vb2ml9iS5NfNfqZGRt1pS9aVEo=
 istio.io/pkg v0.0.0-20191028190600-0e7c2e6f286c h1:z6Z8tJAegNfkYBFx/aRVkI/Pq90IYSc4BzxAAMqSliU=
 istio.io/pkg v0.0.0-20191028190600-0e7c2e6f286c/go.mod h1:O7Uqtzc1w7+NiEV2TUeO2yPoR+4GlwlDgSocYZMjBfs=
+istio.io/pkg v0.0.0-20191029184635-5c2f5ef63692 h1:MT7e5hpQ8cGtKCeWIjtdluEVkIhkN2tw4iVkAzhWHYA=
+istio.io/pkg v0.0.0-20191029184635-5c2f5ef63692/go.mod h1:O7Uqtzc1w7+NiEV2TUeO2yPoR+4GlwlDgSocYZMjBfs=
 k8s.io/api v0.0.0-20190620084959-7cf5895f2711 h1:BblVYz/wE5WtBsD/Gvu54KyBUTJMflolzc5I2DTvh50=
 k8s.io/api v0.0.0-20190620084959-7cf5895f2711/go.mod h1:TBhBqb1AWbBQbW3XRusr7n7E4v2+5ZY8r8sAMnyFC5A=
 k8s.io/apiextensions-apiserver v0.0.0-20190620085554-14e95df34f1f h1:+pHBUvIpLzm6H8VwRO+jMLcq5MIfaGq5xu/cBV676Ps=
