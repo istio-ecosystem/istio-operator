@@ -169,6 +169,7 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	}
 	l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", currentVersion, targetVersion)
 
+	// Read the overridden values from args.inFilename
 	overrideValues, _, err := genOverlayICPS(args.inFilename)
 	if err != nil {
 		return fmt.Errorf("failed to generate override values from file: %v, error: %v", args.inFilename, err)

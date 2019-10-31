@@ -23,6 +23,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"sigs.k8s.io/yaml"
 
+	"istio.io/operator/pkg/name"
+
 	"istio.io/operator/pkg/tpath"
 	"istio.io/pkg/log"
 )
@@ -179,43 +181,9 @@ func genYamlIgnoreOpt(yamlStr string) (cmp.Option, error) {
 	}
 	return cmp.FilterPath(func(curPath cmp.Path) bool {
 		up := pathToStringList(curPath)
-		found, _ := isPathInTree(tree, up)
+		_, found, _ := name.GetFromTreePath(tree, up)
 		return found
 	}, cmp.Ignore()), nil
-}
-
-func isPathInTree(tree map[string]interface{}, path []string) (bool, error) {
-	if len(path) == 0 {
-		return false, nil
-	}
-	for key, val := range tree {
-		if key == path[0] {
-			// found it
-			if len(path) == 1 {
-				return true, nil
-			}
-			remainPath := path[1:]
-			switch node := val.(type) {
-			case map[string]interface{}:
-				return isPathInTree(node, remainPath)
-			case []interface{}:
-				for _, newNode := range node {
-					newMap, ok := newNode.(map[string]interface{})
-					if !ok {
-						return false, fmt.Errorf("fail to convert []interface{} to map[string]interface{}")
-					}
-					found, err := isPathInTree(newMap, remainPath)
-					if found && err == nil {
-						return found, nil
-					}
-				}
-			// leaf
-			default:
-				return false, nil
-			}
-		}
-	}
-	return false, nil
 }
 
 // genPathIgnoreOpt returns a cmp.Option to ignore paths specified in parameter ignorePaths.
