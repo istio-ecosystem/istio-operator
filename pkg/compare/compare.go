@@ -179,28 +179,22 @@ func genYamlIgnoreOpt(yamlStr string) (cmp.Option, error) {
 	}
 	return cmp.FilterPath(func(curPath cmp.Path) bool {
 		up := pathToStringList(curPath)
-		found, _ := IsPathInTree(tree, up)
+		found, _ := isPathInTree(tree, up)
 		return found
 	}, cmp.Ignore()), nil
 }
 
-func IsPathInTree(tree map[string]interface{}, path []string) (bool, error) {
-	// Clone a slice: https://github.com/go101/go101/wiki
-	remainPath := append(path[:0:0], path...)
-	return isPathInTree(tree, remainPath)
-}
-
-func isPathInTree(tree map[string]interface{}, remainPath []string) (bool, error) {
-	if len(remainPath) == 0 {
+func isPathInTree(tree map[string]interface{}, path []string) (bool, error) {
+	if len(path) == 0 {
 		return false, nil
 	}
 	for key, val := range tree {
-		if key == remainPath[0] {
+		if key == path[0] {
 			// found it
-			if len(remainPath) == 1 {
+			if len(path) == 1 {
 				return true, nil
 			}
-			remainPath = remainPath[1:]
+			remainPath := path[1:]
 			switch node := val.(type) {
 			case map[string]interface{}:
 				return isPathInTree(node, remainPath)
