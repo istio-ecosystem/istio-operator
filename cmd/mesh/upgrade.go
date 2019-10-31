@@ -17,6 +17,7 @@ package mesh
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/ghodss/yaml"
@@ -113,6 +114,7 @@ func UpgradeCmd() *cobra.Command {
 // upgrade is the main function for Upgrade command
 func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	l.logAndPrintf("Client - istioctl version: %s\n", opversion.OperatorVersionString)
+	args.inFilename = strings.TrimSpace(args.inFilename)
 
 	// Generates values for args.inFilename ICP specs yaml
 	targetValues, err := genProfile(true, args.inFilename, "",
@@ -174,7 +176,6 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	if args.showOverrides {
 		checkUpgradeValues(currentValues, targetValues, "", l)
 	} else {
-		// Generates overridden values from args.inFilename
 		overrideValues, _, err := genOverlayICPS(args.inFilename)
 		if err != nil {
 			return fmt.Errorf("failed to generate override values from file: %v, error: %v", args.inFilename, err)

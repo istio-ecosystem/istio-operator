@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"strings"
 	"text/template"
 
 	"github.com/ghodss/yaml"
@@ -28,6 +27,7 @@ import (
 	"istio.io/operator/pkg/component/component"
 	"istio.io/operator/pkg/helm"
 	"istio.io/operator/pkg/manifest"
+	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/tpath"
 	"istio.io/operator/pkg/translate"
 	"istio.io/operator/pkg/util"
@@ -178,7 +178,7 @@ func genICPS(inFilename, profile, setOverlayYAML string, force bool, l *logger) 
 }
 
 func genOverlayICPS(filename string) (string, *v1alpha2.IstioControlPlaneSpec, error) {
-	if strings.TrimSpace(filename) == "" {
+	if filename == "" {
 		return "", nil, nil
 	}
 
@@ -191,17 +191,18 @@ func genOverlayICPS(filename string) (string, *v1alpha2.IstioControlPlaneSpec, e
 		return "", nil, err
 	}
 
-	t, err := translate.NewTranslator(binversion.OperatorBinaryVersion.MinorVersion)
+	globalVals := make(map[string]interface{})
+	_, err = name.SetFromPath(overlayICPS, "Values", &globalVals)
 	if err != nil {
 		return "", nil, err
 	}
 
-	overlayYAML, err := component.TranslateHelmValues(overlayICPS, t, "")
+	overlayValues, err := yaml.Marshal(globalVals)
 	if err != nil {
 		return "", nil, err
 	}
 
-	return overlayYAML, overlayICPS, nil
+	return string(overlayValues), overlayICPS, nil
 }
 
 func genProfile(helmValues bool, inFilename, profile, setOverlayYAML, configPath string, force bool, l *logger) (string, error) {
