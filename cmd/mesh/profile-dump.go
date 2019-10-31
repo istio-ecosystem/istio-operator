@@ -177,7 +177,7 @@ func genICPS(inFilename, profile, setOverlayYAML string, force bool, l *logger) 
 	return finalYAML, finalICPS, nil
 }
 
-func genOverlayICPS(filename string) (string, *v1alpha2.IstioControlPlaneSpec, error) {
+func genOverlayICPS(filename string, force bool) (string, *v1alpha2.IstioControlPlaneSpec, error) {
 	if filename == "" {
 		return "", nil, nil
 	}
@@ -186,7 +186,7 @@ func genOverlayICPS(filename string) (string, *v1alpha2.IstioControlPlaneSpec, e
 	if err != nil {
 		return "", nil, fmt.Errorf("could not read from file %s: %s", filename, err)
 	}
-	overlayICPS, _, err := unmarshalAndValidateICP(string(b))
+	overlayICPS, _, err := unmarshalAndValidateICP(string(b), force)
 	if err != nil {
 		return "", nil, err
 	}
