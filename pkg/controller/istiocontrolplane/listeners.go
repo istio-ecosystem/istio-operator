@@ -291,8 +291,9 @@ func (c *CitadelChartCustomizer) cleanCitadelResources(obj runtime.Object) error
 	cmNamespace := objAccessor.GetNamespace()
 	cmName := "istio-security"
 	prunedSecretTypeMap := map[string]bool{
-		"istio.io/key-and-cert": true,
-		"istio.io/ca-root":      true,
+		"istio.io/key-and-cert":     true,
+		"istio.io/ca-root":          true,
+		"istio.io/dns-key-and-cert": true,
 	}
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
