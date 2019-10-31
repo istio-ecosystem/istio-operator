@@ -56,8 +56,6 @@ type upgradeArgs struct {
 	skipConfirmation bool
 	// force means directly applying the upgrade without eligibility checks.
 	force bool
-	// showOverrides shows all changed values even if they are specified in inFilename.
-	showOverrides bool
 }
 
 // addUpgradeFlags adds upgrade related flags into cobra command
@@ -72,8 +70,6 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 		"The name of the kubeconfig context to use")
 	cmd.PersistentFlags().BoolVar(&args.skipConfirmation, "skip-confirmation", false,
 		"If skip-confirmation is set, skips the prompting confirmation for value changes in this upgrade")
-	cmd.PersistentFlags().BoolVar(&args.showOverrides, "show-overrides", false,
-		"If show-overrides is set, shows all changed values even if they are specified by --filename")
 	cmd.PersistentFlags().BoolVarP(&args.wait, "wait", "w", false,
 		"Wait, if set will wait until all Pods, Services, and minimum number of Pods "+
 			"of a Deployment are in a ready state before the command exits. "+
@@ -173,15 +169,11 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 	}
 	l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", currentVersion, targetVersion)
 
-	if args.showOverrides {
-		checkUpgradeValues(currentValues, targetValues, "", l)
-	} else {
-		overrideValues, _, err := genOverlayICPS(args.inFilename)
-		if err != nil {
-			return fmt.Errorf("failed to generate override values from file: %v, error: %v", args.inFilename, err)
-		}
-		checkUpgradeValues(currentValues, targetValues, overrideValues, l)
+	overrideValues, _, err := genOverlayICPS(args.inFilename)
+	if err != nil {
+		return fmt.Errorf("failed to generate override values from file: %v, error: %v", args.inFilename, err)
 	}
+	checkUpgradeValues(currentValues, targetValues, overrideValues, l)
 	waitForConfirmation(args.skipConfirmation, l)
 
 	// Run pre-upgrade hooks
