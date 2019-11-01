@@ -44,9 +44,9 @@ const (
 	upgradeSidecarMessage = "To upgrade the Istio data plane, you will need to re-inject it.\n" +
 		"If you’re using automatic sidecar injection, you can upgrade the sidecar by doing a rolling" +
 		" update for all the pods:\n" +
-		"    kubectl rollout restart deployment --namespace $NAMESPACE_WITH_AUTO_INJECTION\n" +
+		"    kubectl rollout restart deployment --namespace <namespace with auto injection>\n" +
 		"If you’re using manual injection, you can upgrade the sidecar by executing:\n" +
-		"    kubectl apply -f <(istioctl kube-inject -f $ORIGINAL_DEPLOYMENT_YAML)"
+		"    kubectl apply -f < (istioctl kube-inject -f <original application deployment yaml>)"
 )
 
 type upgradeArgs struct {
