@@ -116,13 +116,11 @@ type IstioChartCustomizerFactory struct {
 var _ helmreconciler.ChartCustomizerFactory = &IstioChartCustomizerFactory{}
 
 // NewChartCustomizer returns a new ChartCustomizer for the specific chart.
-// Currently, an IstioDefaultChartCustomizer is returned for all charts except: kiali
+// Currently, an IstioDefaultChartCustomizer is returned for all charts except: citadel
 func (f *IstioChartCustomizerFactory) NewChartCustomizer(chartName string) helmreconciler.ChartCustomizer {
 	switch chartName {
 	case "Citadel":
 		return NewCitadelChartCustomizer(chartName, f.ChartAnnotationKey)
-	case "Kiali":
-		return NewKialiChartCustomizer(chartName, f.ChartAnnotationKey)
 	default:
 		return NewIstioDefaultChartCustomizer(chartName, f.ChartAnnotationKey)
 	}
@@ -326,50 +324,4 @@ func (c *CitadelChartCustomizer) cleanCitadelResources(obj runtime.Object) error
 		}
 	}
 	return nil
-}
-
-// KialiChartCustomizer is a ChartCustomizer for the kiali chart
-type KialiChartCustomizer struct {
-	*IstioDefaultChartCustomizer
-}
-
-var _ helmreconciler.ChartCustomizer = &KialiChartCustomizer{}
-
-// NewKialiChartCustomizer creates a new KialiChartCustomizer
-func NewKialiChartCustomizer(chartName, chartAnnotationKey string) *KialiChartCustomizer {
-	return &KialiChartCustomizer{
-		IstioDefaultChartCustomizer: NewIstioDefaultChartCustomizer(chartName, chartAnnotationKey),
-	}
-}
-
-// BeginResource invokes the default BeginResource behavior for all resources and patches the grafana and jaeger URLs
-// in the "kiali" ConfigMap with the actual installed URLs.  (TODO)
-func (c *KialiChartCustomizer) BeginResource(chart string, obj runtime.Object) (runtime.Object, error) {
-	var err error
-	if obj, err = c.IstioDefaultChartCustomizer.BeginResource(c.ChartName, obj); err != nil {
-		return obj, err
-	}
-	switch obj.GetObjectKind().GroupVersionKind().Kind {
-	case "ConfigMap":
-		if obj, err = c.patchKialiConfigMap(obj); err != nil {
-			return obj, err
-		}
-	}
-	return obj, err
-}
-
-func (c *KialiChartCustomizer) patchKialiConfigMap(obj runtime.Object) (runtime.Object, error) {
-	// XXX: do we even need to check this?
-	if objAccessor, err := meta.Accessor(obj); err != nil || objAccessor.GetName() != "kiali" {
-		return obj, err
-	}
-	switch configMap := obj.(type) {
-	case *corev1.ConfigMap:
-		// TODO: patch jaeger and grafana urls
-		configMap.GroupVersionKind()
-	case *unstructured.Unstructured:
-		// TODO: patch jaeger and grafana urls
-		configMap.GroupVersionKind()
-	}
-	return obj, nil
 }
