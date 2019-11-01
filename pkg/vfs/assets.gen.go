@@ -3,6 +3,7 @@
 // ../../data/charts/crds/Chart.yaml
 // ../../data/charts/crds/files/crd-10.yaml
 // ../../data/charts/crds/files/crd-11.yaml
+// ../../data/charts/crds/files/crd-12.yaml
 // ../../data/charts/crds/files/crd-14.yaml
 // ../../data/charts/crds/files/crd-certmanager-10.yaml
 // ../../data/charts/crds/files/crd-certmanager-11.yaml
@@ -157,6 +158,7 @@
 // ../../data/charts/istio-telemetry/prometheus/templates/deployment.yaml
 // ../../data/charts/istio-telemetry/prometheus/templates/destination-rule.yaml
 // ../../data/charts/istio-telemetry/prometheus/templates/ingress.yaml
+// ../../data/charts/istio-telemetry/prometheus/templates/inrgess.yaml
 // ../../data/charts/istio-telemetry/prometheus/templates/service.yaml
 // ../../data/charts/istio-telemetry/prometheus/templates/serviceaccount.yaml
 // ../../data/charts/istio-telemetry/prometheus/templates/tests/test-prometheus-connection.yaml
@@ -5336,6 +5338,47 @@ func chartsCrdsFilesCrd11Yaml() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "charts/crds/files/crd-11.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsFilesCrd12Yaml = []byte(`kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: authorizationpolicies.rbac.istio.io
+  labels:
+    app: istio-pilot
+    istio: rbac
+    heritage: Tiller
+    release: istio
+spec:
+  group: rbac.istio.io
+  names:
+    kind: AuthorizationPolicy
+    plural: authorizationpolicies
+    singular: authorizationpolicy
+    categories:
+      - istio-io
+      - rbac-istio-io
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+---
+`)
+
+func chartsCrdsFilesCrd12YamlBytes() ([]byte, error) {
+	return _chartsCrdsFilesCrd12Yaml, nil
+}
+
+func chartsCrdsFilesCrd12Yaml() (*asset, error) {
+	bytes, err := chartsCrdsFilesCrd12YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/files/crd-12.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -32748,6 +32791,61 @@ func chartsIstioTelemetryPrometheusTemplatesIngressYaml() (*asset, error) {
 	return a, nil
 }
 
+var _chartsIstioTelemetryPrometheusTemplatesInrgessYaml = []byte(`{{- if .Values.prometheus.ingress.enabled -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: prometheus
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: prometheus
+    release: {{ .Release.Name }}
+  annotations:
+    {{- range $key, $value := .Values.prometheus.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  rules:
+{{- if .Values.prometheus.ingress.hosts }}
+    {{- range $host := .Values.prometheus.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: {{ if $.Values.prometheus.contextPath }} {{ $.Values.prometheus.contextPath }} {{ else }} / {{ end }}
+            backend:
+              serviceName: prometheus
+              servicePort: 9090
+    {{- end -}}
+{{- else }}
+    - http:
+        paths:
+          - path: {{ if .Values.prometheus.contextPath }} {{ .Values.prometheus.contextPath }} {{ else }} / {{ end }}
+            backend:
+              serviceName: prometheus
+              servicePort: 9090
+{{- end }}
+  {{- if .Values.prometheus.ingress.tls }}
+  tls:
+{{ toYaml .Values.prometheus.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}
+`)
+
+func chartsIstioTelemetryPrometheusTemplatesInrgessYamlBytes() ([]byte, error) {
+	return _chartsIstioTelemetryPrometheusTemplatesInrgessYaml, nil
+}
+
+func chartsIstioTelemetryPrometheusTemplatesInrgessYaml() (*asset, error) {
+	bytes, err := chartsIstioTelemetryPrometheusTemplatesInrgessYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-telemetry/prometheus/templates/inrgess.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _chartsIstioTelemetryPrometheusTemplatesServiceYaml = []byte(`apiVersion: v1
 kind: Service
 metadata:
@@ -38060,6 +38158,7 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/crds/Chart.yaml": chartsCrdsChartYaml,
 	"charts/crds/files/crd-10.yaml": chartsCrdsFilesCrd10Yaml,
 	"charts/crds/files/crd-11.yaml": chartsCrdsFilesCrd11Yaml,
+	"charts/crds/files/crd-12.yaml": chartsCrdsFilesCrd12Yaml,
 	"charts/crds/files/crd-14.yaml": chartsCrdsFilesCrd14Yaml,
 	"charts/crds/files/crd-certmanager-10.yaml": chartsCrdsFilesCrdCertmanager10Yaml,
 	"charts/crds/files/crd-certmanager-11.yaml": chartsCrdsFilesCrdCertmanager11Yaml,
@@ -38214,6 +38313,7 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/istio-telemetry/prometheus/templates/deployment.yaml": chartsIstioTelemetryPrometheusTemplatesDeploymentYaml,
 	"charts/istio-telemetry/prometheus/templates/destination-rule.yaml": chartsIstioTelemetryPrometheusTemplatesDestinationRuleYaml,
 	"charts/istio-telemetry/prometheus/templates/ingress.yaml": chartsIstioTelemetryPrometheusTemplatesIngressYaml,
+	"charts/istio-telemetry/prometheus/templates/inrgess.yaml": chartsIstioTelemetryPrometheusTemplatesInrgessYaml,
 	"charts/istio-telemetry/prometheus/templates/service.yaml": chartsIstioTelemetryPrometheusTemplatesServiceYaml,
 	"charts/istio-telemetry/prometheus/templates/serviceaccount.yaml": chartsIstioTelemetryPrometheusTemplatesServiceaccountYaml,
 	"charts/istio-telemetry/prometheus/templates/tests/test-prometheus-connection.yaml": chartsIstioTelemetryPrometheusTemplatesTestsTestPrometheusConnectionYaml,
@@ -38325,6 +38425,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"files": &bintree{nil, map[string]*bintree{
 				"crd-10.yaml": &bintree{chartsCrdsFilesCrd10Yaml, map[string]*bintree{}},
 				"crd-11.yaml": &bintree{chartsCrdsFilesCrd11Yaml, map[string]*bintree{}},
+				"crd-12.yaml": &bintree{chartsCrdsFilesCrd12Yaml, map[string]*bintree{}},
 				"crd-14.yaml": &bintree{chartsCrdsFilesCrd14Yaml, map[string]*bintree{}},
 				"crd-certmanager-10.yaml": &bintree{chartsCrdsFilesCrdCertmanager10Yaml, map[string]*bintree{}},
 				"crd-certmanager-11.yaml": &bintree{chartsCrdsFilesCrdCertmanager11Yaml, map[string]*bintree{}},
@@ -38536,6 +38637,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 					"deployment.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesDeploymentYaml, map[string]*bintree{}},
 					"destination-rule.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesDestinationRuleYaml, map[string]*bintree{}},
 					"ingress.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesIngressYaml, map[string]*bintree{}},
+					"inrgess.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesInrgessYaml, map[string]*bintree{}},
 					"service.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesServiceYaml, map[string]*bintree{}},
 					"serviceaccount.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesServiceaccountYaml, map[string]*bintree{}},
 					"tests": &bintree{nil, map[string]*bintree{
