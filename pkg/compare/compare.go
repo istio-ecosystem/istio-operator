@@ -181,8 +181,8 @@ func genYamlIgnoreOpt(yamlStr string) (cmp.Option, error) {
 	}
 	return cmp.FilterPath(func(curPath cmp.Path) bool {
 		up := pathToStringList(curPath)
-		_, found, _ := name.GetFromTreePath(tree, up)
-		return found
+		treeNode, found, _ := name.GetFromTreePath(tree, up)
+		return found && tpath.IsLeafNode(treeNode)
 	}, cmp.Ignore()), nil
 }
 
