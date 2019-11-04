@@ -121,6 +121,7 @@ $(types_v1alpha2_pb_gos) $(types_v1alpha2_pb_docs) $(types_v1alpha2_pb_pythons):
 	@cp -r ${TMPDIR}/pkg/* pkg/
 	@rm -fr ${TMPDIR}/pkg
 	@go run $(repo_dir)/pkg/apis/istio/fixup_structs/main.go -f $(types_v1alpha2_path)/istiocontrolplane_types.pb.go
+	@go run $(repo_dir)/pkg/apis/istio/fixup_structs/main.go -f $(types_v1alpha2_path)/istiocontrolplane_types_json.gen.go
 	@sed -i 's|<key,value,effect>|\&lt\;key,value,effect\&gt\;|g' $(types_v1alpha2_path)/v1alpha2.pb.html
 	@sed -i 's|<operator>|\&lt\;operator\&gt\;|g' $(types_v1alpha2_path)/v1alpha2.pb.html
 
@@ -141,6 +142,7 @@ $(values_v1alpha1_pb_gos) $(values_v1alpha1_pb_docs) $(values_v1alpha1_pb_python
 	@cp -r ${TMPDIR}/pkg/* pkg/
 	@rm -fr ${TMPDIR}/pkg
 	@go run $(repo_dir)/pkg/apis/istio/fixup_structs/main.go -f $(values_v1alpha1_path)/values_types.pb.go
+	@go run $(repo_dir)/pkg/apis/istio/fixup_structs/main.go -f $(values_v1alpha1_path)/values_types_json.gen.go
 
 generate-values: $(values_v1alpha1_pb_gos) $(values_v1alpha1_pb_docs) $(values_v1alpha1_pb_pythons)
 
