@@ -46,7 +46,6 @@
 // ../../data/charts/istio-cni/templates/daemonset.yaml
 // ../../data/charts/istio-cni/templates/serviceaccount.yaml
 // ../../data/charts/istio-cni/values.yaml
-// ../../data/charts/istio-cni/values_gke.yaml
 // ../../data/charts/istio-control/istio-autoinject/Chart.yaml
 // ../../data/charts/istio-control/istio-autoinject/NOTES.txt
 // ../../data/charts/istio-control/istio-autoinject/files/injection-template.yaml
@@ -86,7 +85,6 @@
 // ../../data/charts/istio-control/istio-discovery/templates/clusterrole.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/clusterrolebinding.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/configmap-envoy.yaml
-// ../../data/charts/istio-control/istio-discovery/templates/configmap-jwks.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/configmap.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/deployment.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/enable-mesh-mtls.yaml
@@ -8341,13 +8339,11 @@ func chartsGatewaysIstioIngressValuesYaml() (*asset, error) {
 
 var _chartsIstioCniChartYaml = []byte(`apiVersion: v1
 name: istio-cni
-version: 0.2.0
-appVersion: 0.2.0
-tillerVersion: ">=2.7.2-0"
+version: 1.1.0
 description: Helm chart for istio-cni components
 keywords:
+  - istio-cni
   - istio
-  - cni
 sources:
   - http://github.com/istio/cni
 engine: gotpl
@@ -8531,6 +8527,7 @@ spec:
           operator: Exists
         - effect: NoExecute
           operator: Exists
+      priorityClassName: system-cluster-critical
       serviceAccountName: istio-cni
       # Minimize downtime during a rolling upgrade or deletion; tell Kubernetes to do a "force
       # deletion": https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods.
@@ -8554,6 +8551,8 @@ spec:
                 configMapKeyRef:
                   name: istio-cni-config
                   key: cni_network_config
+            - name: CNI_NET_DIR
+              value: {{ default "/etc/cni/net.d" .Values.cni.cniConfDir }}
           volumeMounts:
             - mountPath: /host/opt/cni/bin
               name: cni-bin-dir
@@ -8633,9 +8632,11 @@ var _chartsIstioCniValuesYaml = []byte(`cni:
   cniBinDir: /opt/cni/bin
   cniConfDir: /etc/cni/net.d
   cniConfFileName: ""
+
   excludeNamespaces:
     - istio-system
 
+  # Custom annotations on pod level, if you need them
   podAnnotations: {}
 
   # If this value is set a RoleBinding will be created
@@ -8656,42 +8657,6 @@ func chartsIstioCniValuesYaml() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "charts/istio-cni/values.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
-}
-
-var _chartsIstioCniValues_gkeYaml = []byte(`cni:
-  hub: docker.io/tiswanso
-  tag: v0.1-dev
-  pullPolicy: Always
-
-  logLevel: info
-
-  # Configuration file to insert istio-cni plugin configuration
-  # by default this will be the first file found in the cni-conf-dir
-  # Example
-  # cniConfFileName: 10-calico.conflist
-
-  # CNI bin and conf dir override settings
-  # defaults:
-  cniBinDir: /home/kubernetes/bin
-  cniConfDir: /etc/cni/net.d
-
-  excludeNamespaces:
-    - istio-system
-`)
-
-func chartsIstioCniValues_gkeYamlBytes() ([]byte, error) {
-	return _chartsIstioCniValues_gkeYaml, nil
-}
-
-func chartsIstioCniValues_gkeYaml() (*asset, error) {
-	bytes, err := chartsIstioCniValues_gkeYamlBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "charts/istio-cni/values_gke.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -11583,34 +11548,6 @@ func chartsIstioControlIstioDiscoveryTemplatesConfigmapEnvoyYaml() (*asset, erro
 	}
 
 	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/templates/configmap-envoy.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
-}
-
-var _chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml = []byte(`{{- if .Values.pilot.jwksResolverExtraRootCA }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: pilot-jwks-extra-cacerts{{ .Values.version }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    release: {{ .Release.Name }}
-data:
-  extra.pem: {{ .Values.pilot.jwksResolverExtraRootCA | quote }}
-{{- end }}
-`)
-
-func chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYamlBytes() ([]byte, error) {
-	return _chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml, nil
-}
-
-func chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml() (*asset, error) {
-	bytes, err := chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYamlBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/templates/configmap-jwks.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -38085,7 +38022,6 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/istio-cni/templates/daemonset.yaml": chartsIstioCniTemplatesDaemonsetYaml,
 	"charts/istio-cni/templates/serviceaccount.yaml": chartsIstioCniTemplatesServiceaccountYaml,
 	"charts/istio-cni/values.yaml": chartsIstioCniValuesYaml,
-	"charts/istio-cni/values_gke.yaml": chartsIstioCniValues_gkeYaml,
 	"charts/istio-control/istio-autoinject/Chart.yaml": chartsIstioControlIstioAutoinjectChartYaml,
 	"charts/istio-control/istio-autoinject/NOTES.txt": chartsIstioControlIstioAutoinjectNotesTxt,
 	"charts/istio-control/istio-autoinject/files/injection-template.yaml": chartsIstioControlIstioAutoinjectFilesInjectionTemplateYaml,
@@ -38125,7 +38061,6 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/istio-control/istio-discovery/templates/clusterrole.yaml": chartsIstioControlIstioDiscoveryTemplatesClusterroleYaml,
 	"charts/istio-control/istio-discovery/templates/clusterrolebinding.yaml": chartsIstioControlIstioDiscoveryTemplatesClusterrolebindingYaml,
 	"charts/istio-control/istio-discovery/templates/configmap-envoy.yaml": chartsIstioControlIstioDiscoveryTemplatesConfigmapEnvoyYaml,
-	"charts/istio-control/istio-discovery/templates/configmap-jwks.yaml": chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml,
 	"charts/istio-control/istio-discovery/templates/configmap.yaml": chartsIstioControlIstioDiscoveryTemplatesConfigmapYaml,
 	"charts/istio-control/istio-discovery/templates/deployment.yaml": chartsIstioControlIstioDiscoveryTemplatesDeploymentYaml,
 	"charts/istio-control/istio-discovery/templates/enable-mesh-mtls.yaml": chartsIstioControlIstioDiscoveryTemplatesEnableMeshMtlsYaml,
@@ -38367,7 +38302,6 @@ var _bintree = &bintree{nil, map[string]*bintree{
 				"serviceaccount.yaml": &bintree{chartsIstioCniTemplatesServiceaccountYaml, map[string]*bintree{}},
 			}},
 			"values.yaml": &bintree{chartsIstioCniValuesYaml, map[string]*bintree{}},
-			"values_gke.yaml": &bintree{chartsIstioCniValues_gkeYaml, map[string]*bintree{}},
 		}},
 		"istio-control": &bintree{nil, map[string]*bintree{
 			"istio-autoinject": &bintree{nil, map[string]*bintree{
@@ -38421,7 +38355,6 @@ var _bintree = &bintree{nil, map[string]*bintree{
 					"clusterrole.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesClusterroleYaml, map[string]*bintree{}},
 					"clusterrolebinding.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesClusterrolebindingYaml, map[string]*bintree{}},
 					"configmap-envoy.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesConfigmapEnvoyYaml, map[string]*bintree{}},
-					"configmap-jwks.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml, map[string]*bintree{}},
 					"configmap.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesConfigmapYaml, map[string]*bintree{}},
 					"deployment.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesDeploymentYaml, map[string]*bintree{}},
 					"enable-mesh-mtls.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesEnableMeshMtlsYaml, map[string]*bintree{}},
