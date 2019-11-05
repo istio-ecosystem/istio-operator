@@ -26,6 +26,24 @@ func TestYAMLCmp(t *testing.T) {
 		want interface{}
 	}{
 		{
+			desc: "empty string into nil",
+			a:    `metadata: ""`,
+			b:    `metadata: `,
+			want: ``,
+		},
+		{
+			desc: "empty array into nil",
+			a:    `metadata: []`,
+			b:    `metadata: `,
+			want: ``,
+		},
+		{
+			desc: "empty map into nil",
+			a:    `metadata: {}`,
+			b:    `metadata: `,
+			want: ``,
+		},
+		{
 			desc: "two additional",
 			a: `apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
@@ -536,7 +554,7 @@ metadata:
 			i: []string{"metadata.annotations.checksum/config-volume"},
 			want: `metadata:
   annotations: map[checksum/config-volume:43d72e930ed33e3e01731f8bcbf31dbf02cb1c1fc53bcc09199ab45c0d031b60]
-    -> <nil>
+    ->
 `,
 		},
 		{
@@ -656,7 +674,99 @@ metadata:
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			if got, want := YAMLCmpWithIgnore(tt.a, tt.b, tt.i), tt.want; !(got == want) {
+			if got, want := YAMLCmpWithIgnore(tt.a, tt.b, tt.i, ""), tt.want; !(got == want) {
+				t.Errorf("%s: got:%v, want:%v", tt.desc, got, want)
+			}
+		})
+	}
+}
+
+func TestYAMLCmpWithIgnoreTree(t *testing.T) {
+	tests := []struct {
+		desc string
+		a    string
+		b    string
+		mask string
+		want interface{}
+	}{
+		{
+			desc: "ignore masked",
+			a: `
+ak: av
+bk:
+  b1k: b1v
+  b2k: b2v
+`,
+			b: `
+ak: av
+bk:
+  b1k: b1v-changed
+  b2k: b2v-changed
+`,
+			mask: `
+bk:
+  b1k: ignored
+  b2k: ignored
+`,
+			want: ``,
+		},
+		{
+			desc: "ignore nested masked",
+			a: `
+ak: av
+bk:
+  bbk:
+    b1k: b1v
+    b2k: b2v
+`,
+			b: `
+ak: av
+bk:
+  bbk:
+    b1k: b1v-changed
+    b2k: b2v-changed
+`,
+			mask: `
+bk:
+  bbk:
+    b1k: ignored
+`,
+			want: `bk:
+  bbk:
+    b2k: b2v -> b2v-changed
+`,
+		},
+		{
+			desc: "not ignore non-masked",
+			a: `
+ak: av
+bk:
+  bbk:
+    b1k: b1v
+    b2k: b2v
+`,
+			b: `
+ak: av
+bk:
+  bbk:
+    b1k: b1v-changed
+    b2k: b2v
+`,
+			mask: `
+bk:
+  bbk:
+    b1k:
+      bbb1k: ignored
+`,
+			want: `bk:
+  bbk:
+    b1k: b1v -> b1v-changed
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			if got, want := YAMLCmpWithIgnore(tt.a, tt.b, nil, tt.mask), tt.want; !(got == want) {
 				t.Errorf("%s: got:%v, want:%v", tt.desc, got, want)
 			}
 		})

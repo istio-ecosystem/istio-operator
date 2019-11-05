@@ -27,11 +27,13 @@ import (
 	"istio.io/operator/pkg/component/component"
 	"istio.io/operator/pkg/helm"
 	"istio.io/operator/pkg/manifest"
+	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/tpath"
 	"istio.io/operator/pkg/translate"
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/validate"
 	binversion "istio.io/operator/version"
+	"istio.io/pkg/version"
 )
 
 type profileDumpArgs struct {
@@ -104,7 +106,7 @@ func genICPS(inFilename, profile, setOverlayYAML string, force bool, l *logger) 
 		if err != nil {
 			return "", nil, fmt.Errorf("could not read values from file %s: %s", inFilename, err)
 		}
-		overlayICPS, overlayYAML, err = unmarshalAndValidateICP(string(b))
+		overlayICPS, overlayYAML, err = unmarshalAndValidateICP(string(b), force)
 		if err != nil {
 			return "", nil, err
 		}
@@ -133,15 +135,17 @@ func genICPS(inFilename, profile, setOverlayYAML string, force bool, l *logger) 
 		}
 	}
 
-	_, baseYAML, err := unmarshalAndValidateICP(baseCRYAML)
+	_, baseYAML, err := unmarshalAndValidateICP(baseCRYAML, force)
 	if err != nil {
 		return "", nil, err
 	}
 
 	// Due to the fact that base profile is compiled in before a tag can be created, we must allow an additional
 	// override from variables that are set during release build time.
-	if HubValueFromBuild != "" && TagValueFromBuild != "" {
-		buildHubTagOverlayYAML, err := generateHubTagOverlay(HubValueFromBuild, TagValueFromBuild)
+	hub := version.DockerInfo.Hub
+	tag := version.DockerInfo.Tag
+	if hub != "unknown" && tag != "unknown" {
+		buildHubTagOverlayYAML, err := generateHubTagOverlay(hub, tag)
 		if err != nil {
 			return "", nil, err
 		}
@@ -173,6 +177,34 @@ func genICPS(inFilename, profile, setOverlayYAML string, force bool, l *logger) 
 	return finalYAML, finalICPS, nil
 }
 
+func genOverlayICPS(filename string, force bool) (string, *v1alpha2.IstioControlPlaneSpec, error) {
+	if filename == "" {
+		return "", nil, nil
+	}
+
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return "", nil, fmt.Errorf("could not read from file %s: %s", filename, err)
+	}
+	overlayICPS, _, err := unmarshalAndValidateICP(string(b), force)
+	if err != nil {
+		return "", nil, err
+	}
+
+	globalVals := make(map[string]interface{})
+	_, err = name.SetFromPath(overlayICPS, "Values", &globalVals)
+	if err != nil {
+		return "", nil, err
+	}
+
+	overlayValues, err := yaml.Marshal(globalVals)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return string(overlayValues), overlayICPS, nil
+}
+
 func genProfile(helmValues bool, inFilename, profile, setOverlayYAML, configPath string, force bool, l *logger) (string, error) {
 	finalYAML, finalICPS, err := genICPS(inFilename, profile, setOverlayYAML, force, l)
 	if err != nil {
@@ -199,7 +231,7 @@ func genProfile(helmValues bool, inFilename, profile, setOverlayYAML, configPath
 	return finalYAML, err
 }
 
-func unmarshalAndValidateICP(crYAML string) (*v1alpha2.IstioControlPlaneSpec, string, error) {
+func unmarshalAndValidateICP(crYAML string, force bool) (*v1alpha2.IstioControlPlaneSpec, string, error) {
 	// TODO: add GVK handling as appropriate.
 	if crYAML == "" {
 		return &v1alpha2.IstioControlPlaneSpec{}, "", nil
@@ -209,7 +241,9 @@ func unmarshalAndValidateICP(crYAML string) (*v1alpha2.IstioControlPlaneSpec, st
 		return nil, "", fmt.Errorf("could not unmarshal the overlay file: %s\n\nOriginal YAML:\n%s", err, crYAML)
 	}
 	if errs := validate.CheckIstioControlPlaneSpec(icps, false); len(errs) != 0 {
-		return nil, "", fmt.Errorf("input file failed validation with the following errors: %s\n\nOriginal YAML:\n%s", errs, crYAML)
+		if !force {
+			return nil, "", fmt.Errorf("input file failed validation with the following errors: %s\n\nOriginal YAML:\n%s", errs, crYAML)
+		}
 	}
 	icpsYAML, err := util.MarshalWithJSONPB(icps)
 	if err != nil {

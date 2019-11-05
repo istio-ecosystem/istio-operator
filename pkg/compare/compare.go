@@ -17,10 +17,13 @@ package compare
 import (
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"sigs.k8s.io/yaml"
+
+	"istio.io/operator/pkg/name"
 
 	"istio.io/operator/pkg/tpath"
 	"istio.io/pkg/log"
@@ -49,12 +52,17 @@ func (r *YAMLCmpReporter) Report(rs cmp.Result) {
 	if !rs.Equal() {
 		vx, vy := r.path.Last().Values()
 		var dm string
-		if vx.IsValid() && !vy.IsValid() {
+		isNonEmptyX := isValidAndNonEmpty(vx)
+		isNonEmptyY := isValidAndNonEmpty(vy)
+		if isNonEmptyX && !isNonEmptyY {
 			dm = fmt.Sprintf("%v ->", vx)
-		} else if !vx.IsValid() && vy.IsValid() {
+		} else if !isNonEmptyX && isNonEmptyY {
 			dm = fmt.Sprintf("-> %v", vy)
-		} else if vx.IsValid() && vy.IsValid() {
+		} else if isNonEmptyX && isNonEmptyY {
 			dm = fmt.Sprintf("%v -> %v", vx, vy)
+		} else {
+			// ignore the case that both x and y are invalid or empty
+			return
 		}
 		if r.diffTree == nil {
 			r.diffTree = make(map[string]interface{})
@@ -63,6 +71,20 @@ func (r *YAMLCmpReporter) Report(rs cmp.Result) {
 			panic(err)
 		}
 	}
+}
+
+func isValidAndNonEmpty(v reflect.Value) bool {
+	if !v.IsValid() {
+		return false
+	}
+	k := v.Kind()
+	switch k {
+	case reflect.Interface:
+		return isValidAndNonEmpty(v.Elem())
+	case reflect.Array, reflect.Chan, reflect.Map, reflect.Slice, reflect.String:
+		return v.Len() > 0
+	}
+	return true
 }
 
 // String returns a text representation of diff tree.
@@ -79,11 +101,11 @@ func (r *YAMLCmpReporter) String() string {
 
 // YAMLCmp compares two yaml texts, return a tree based diff text.
 func YAMLCmp(a, b string) string {
-	return YAMLCmpWithIgnore(a, b, nil)
+	return YAMLCmpWithIgnore(a, b, nil, "")
 }
 
 // YAMLCmpWithIgnore compares two yaml texts, and ignores paths in ignorePaths.
-func YAMLCmpWithIgnore(a, b string, ignorePaths []string) string {
+func YAMLCmpWithIgnore(a, b string, ignorePaths []string, ignoreYaml string) string {
 	ao, bo := make(map[string]interface{}), make(map[string]interface{})
 	if err := yaml.Unmarshal([]byte(a), &ao); err != nil {
 		return err.Error()
@@ -103,8 +125,13 @@ func YAMLCmpWithIgnore(a, b string, ignorePaths []string) string {
 		}
 	}
 
+	ignoreYamlOpt, err := genYamlIgnoreOpt(ignoreYaml)
+	if err != nil {
+		return err.Error()
+	}
+
 	var r YAMLCmpReporter
-	cmp.Equal(ao, bo, cmp.Reporter(&r), genPathIgnoreOpt(ignorePaths))
+	cmp.Equal(ao, bo, cmp.Reporter(&r), genPathIgnoreOpt(ignorePaths), ignoreYamlOpt)
 	return r.String()
 }
 
@@ -144,6 +171,19 @@ func UnmarshalInlineYaml(obj map[string]interface{}, targetPath string) (err err
 		}
 	}
 	return
+}
+
+// genPathIgnoreOpt returns a cmp.Option to ignore paths specified in parameter ignorePaths.
+func genYamlIgnoreOpt(yamlStr string) (cmp.Option, error) {
+	tree := make(map[string]interface{})
+	if err := yaml.Unmarshal([]byte(yamlStr), &tree); err != nil {
+		return nil, err
+	}
+	return cmp.FilterPath(func(curPath cmp.Path) bool {
+		up := pathToStringList(curPath)
+		treeNode, found, _ := name.GetFromTreePath(tree, up)
+		return found && tpath.IsLeafNode(treeNode)
+	}, cmp.Ignore()), nil
 }
 
 // genPathIgnoreOpt returns a cmp.Option to ignore paths specified in parameter ignorePaths.

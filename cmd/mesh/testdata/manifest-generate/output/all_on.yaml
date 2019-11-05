@@ -573,9 +573,6 @@ spec:
         - --monitoringPort=15014
         - --validation-port=9443
         - --log_output_level=default:info
-        - --validation.tls.clientCertificate=/etc/dnscerts/cert-chain.pem
-        - --validation.tls.privateKey=/etc/dnscerts/key.pem
-        - --validation.tls.caCertificates=/etc/dnscerts/root-cert.pem
         image: gcr.io/istio-testing/galley:latest
         imagePullPolicy: Always
         livenessProbe:
@@ -608,9 +605,6 @@ spec:
         volumeMounts:
         - mountPath: /etc/certs
           name: istio-certs
-          readOnly: true
-        - mountPath: /etc/dnscerts
-          name: dnscerts
           readOnly: true
         - mountPath: /etc/config
           name: config
@@ -667,9 +661,6 @@ spec:
       - name: istio-certs
         secret:
           secretName: istio.istio-galley-service-account
-      - name: dnscerts
-        secret:
-          secretName: dns.istio-galley-service-account
       - configMap:
           name: galley-envoy-config
         name: envoy-config
@@ -1296,7 +1287,7 @@ spec:
         name: config-volume
       - name: certs
         secret:
-          secretName: dns.istio-sidecar-injector-service-account
+          secretName: istio.istio-sidecar-injector-service-account
       - configMap:
           items:
           - key: config
@@ -1397,7 +1388,7 @@ metadata:
     istio: sidecar-injector
 data:
   values: |-
-    {"certmanager":{"enabled":false,"hub":"quay.io/jetstack","image":"cert-manager-controller","namespace":"istio-system","tag":"v0.6.2"},"clusterResources":true,"cni":{"enabled":false,"namespace":"istio-system"},"galley":{"enableAnalysis":false,"enabled":true,"image":"galley","namespace":"istio-system"},"gateways":{"istio-egressgateway":{"autoscaleEnabled":true,"enabled":false,"env":{"ISTIO_META_ROUTER_MODE":"sni-dnat"},"namespace":"istio-system","ports":[{"name":"http2","port":80},{"name":"https","port":443},{"name":"tls","port":15443,"targetPort":15443}],"secretVolumes":[{"mountPath":"/etc/istio/egressgateway-certs","name":"egressgateway-certs","secretName":"istio-egressgateway-certs"},{"mountPath":"/etc/istio/egressgateway-ca-certs","name":"egressgateway-ca-certs","secretName":"istio-egressgateway-ca-certs"}],"type":"ClusterIP","zvpn":{"enabled":true,"suffix":"global"}},"istio-ingressgateway":{"applicationPorts":"","autoscaleEnabled":true,"debug":"info","domain":"","enabled":true,"env":{"ISTIO_META_ROUTER_MODE":"sni-dnat"},"meshExpansionPorts":[{"name":"tcp-pilot-grpc-tls","port":15011,"targetPort":15011},{"name":"tcp-citadel-grpc-tls","port":8060,"targetPort":8060},{"name":"tcp-dns-tls","port":853,"targetPort":853}],"namespace":"istio-system","ports":[{"name":"status-port","port":15020,"targetPort":15020},{"name":"http2","port":80,"targetPort":80},{"name":"https","port":443},{"name":"kiali","port":15029,"targetPort":15029},{"name":"prometheus","port":15030,"targetPort":15030},{"name":"grafana","port":15031,"targetPort":15031},{"name":"tracing","port":15032,"targetPort":15032},{"name":"tls","port":15443,"targetPort":15443}],"sds":{"enabled":false,"image":"node-agent-k8s","resources":{"limits":{"cpu":"2000m","memory":"1024Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}},"secretVolumes":[{"mountPath":"/etc/istio/ingressgateway-certs","name":"ingressgateway-certs","secretName":"istio-ingressgateway-certs"},{"mountPath":"/etc/istio/ingressgateway-ca-certs","name":"ingressgateway-ca-certs","secretName":"istio-ingressgateway-ca-certs"}],"type":"LoadBalancer","zvpn":{"enabled":true,"suffix":"global"}}},"global":{"arch":{"amd64":2,"ppc64le":2,"s390x":2},"certificates":[{"dnsNames":["istio-galley.istio-system.svc","istio-galley.istio-system"],"secretName":"dns.istio-galley-service-account"},{"dnsNames":["istio-sidecar-injector.istio-system.svc","istio-sidecar-injector.istio-system"],"secretName":"dns.istio-sidecar-injector-service-account"}],"configNamespace":"istio-system","configValidation":true,"controlPlaneSecurityEnabled":true,"defaultNodeSelector":{},"defaultPodDisruptionBudget":{"enabled":true},"defaultResources":{"requests":{"cpu":"10m"}},"disablePolicyChecks":true,"enableHelmTest":false,"enableTracing":true,"enabled":true,"hub":"gcr.io/istio-testing","imagePullPolicy":"Always","imagePullSecrets":[],"istioNamespace":"istio-system","k8sIngress":{"enableHttps":false,"enabled":false,"gatewayName":"ingressgateway"},"localityLbSetting":{"enabled":true},"logAsJson":false,"logging":{"level":"default:info"},"meshExpansion":{"enabled":false,"useILB":false},"meshNetworks":{},"mtls":{"auto":true,"enabled":false},"multiCluster":{"clusterName":"","enabled":false},"namespace":"istio-system","network":"","omitSidecarInjectorConfigMap":false,"oneNamespace":false,"operatorManageWebhooks":false,"outboundTrafficPolicy":{"mode":"ALLOW_ANY"},"policyCheckFailOpen":false,"policyNamespace":"istio-system","priorityClassName":"","prometheusNamespace":"istio-system","proxy":{"accessLogEncoding":"TEXT","accessLogFile":"","accessLogFormat":"","autoInject":"enabled","clusterDomain":"cluster.local","componentLogLevel":"misc:error","concurrency":2,"dnsRefreshRate":"300s","enableCoreDump":false,"envoyAccessLogService":{"enabled":false},"envoyMetricsService":{"enabled":false,"tcpKeepalive":{"interval":"10s","probes":3,"time":"10s"},"tlsSettings":{"mode":"DISABLE","subjectAltNames":[]}},"envoyStatsd":{"enabled":false},"excludeIPRanges":"","excludeInboundPorts":"","excludeOutboundPorts":"","image":"proxyv2","includeIPRanges":"*","includeInboundPorts":"*","kubevirtInterfaces":"","logLevel":"warning","privileged":false,"protocolDetectionTimeout":"100ms","readinessFailureThreshold":30,"readinessInitialDelaySeconds":1,"readinessPeriodSeconds":2,"resources":{"limits":{"cpu":"2000m","memory":"1024Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"statusPort":15020,"tracer":"zipkin"},"proxy_init":{"image":"proxyv2","resources":{"limits":{"cpu":"100m","memory":"50Mi"},"requests":{"cpu":"10m","memory":"10Mi"}}},"sds":{"enabled":false,"udsPath":""},"securityNamespace":"istio-system","tag":"latest","telemetryNamespace":"istio-system","tracer":{"datadog":{"address":"$(HOST_IP):8126"},"lightstep":{"accessToken":"","address":"","cacertPath":"","secure":true},"zipkin":{"address":""}},"trustDomain":"","useMCP":true},"grafana":{"accessMode":"ReadWriteMany","contextPath":"/grafana","dashboardProviders":{"dashboardproviders.yaml":{"apiVersion":1,"providers":[{"disableDeletion":false,"folder":"istio","name":"istio","options":{"path":"/var/lib/grafana/dashboards/istio"},"orgId":1,"type":"file"}]}},"datasources":{"datasources.yaml":{"apiVersion":1}},"enabled":false,"env":{},"envSecrets":{},"image":{"repository":"grafana/grafana","tag":"6.3.6"},"ingress":{"enabled":false,"hosts":["grafana.local"]},"namespace":"istio-system","nodeSelector":{},"persist":false,"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"replicaCount":1,"security":{"enabled":false,"passphraseKey":"passphrase","secretName":"grafana","usernameKey":"username"},"service":{"annotations":{},"externalPort":3000,"name":"http","type":"ClusterIP"},"storageClassName":"","tolerations":[]},"istio_cni":{"enabled":false},"istiocoredns":{"coreDNSImage":"coredns/coredns","coreDNSPluginImage":"istio/coredns-plugin:0.2-istio-1.1","coreDNSTag":"1.6.2","enabled":false},"kiali":{"contextPath":"/kiali","createDemoSecret":true,"dashboard":{"passphraseKey":"passphrase","secretName":"kiali","usernameKey":"username","viewOnlyMode":false},"enabled":false,"hub":"docker.io/kiali","ingress":{"enabled":false,"hosts":["kiali.local"]},"namespace":"istio-system","nodeSelector":{},"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"replicaCount":1,"security":{"cert_file":"/kiali-cert/cert-chain.pem","enabled":false,"private_key_file":"/kiali-cert/key.pem"},"tag":"v1.4.2"},"mixer":{"adapters":{"kubernetesenv":{"enabled":true},"prometheus":{"enabled":true,"metricsExpiryDuration":"10m"},"stackdriver":{"auth":{"apiKey":"","appCredentials":false,"serviceAccountPath":""},"enabled":false,"tracer":{"enabled":false,"sampleProbability":1}},"stdio":{"enabled":false,"outputAsJson":false},"useAdapterCRDs":false},"policy":{"adapters":{"kubernetesenv":{"enabled":true},"useAdapterCRDs":false},"autoscaleEnabled":true,"enabled":true,"image":"mixer","namespace":"istio-system","sessionAffinityEnabled":false},"telemetry":{"autoscaleEnabled":true,"enabled":true,"image":"mixer","loadshedding":{"latencyThreshold":"100ms","mode":"enforce"},"namespace":"istio-system","nodeSelector":{},"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"replicaCount":1,"reportBatchMaxEntries":100,"reportBatchMaxTime":"1s","sessionAffinityEnabled":false,"tolerations":[],"useMCP":true}},"nodeagent":{"enabled":false,"image":"node-agent-k8s","namespace":"istio-system"},"pilot":{"appNamespaces":[],"autoscaleEnabled":true,"autoscaleMax":5,"autoscaleMin":1,"configMap":true,"configNamespace":"istio-config","cpu":{"targetAverageUtilization":80},"enableProtocolSniffingForInbound":false,"enableProtocolSniffingForOutbound":true,"enabled":true,"env":{},"image":"pilot","ingress":{"ingressClass":"istio","ingressControllerMode":"OFF","ingressService":"istio-ingressgateway"},"keepaliveMaxServerConnectionAge":"30m","meshNetworks":{"networks":{}},"namespace":"istio-system","nodeSelector":{},"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"policy":{"enabled":false},"replicaCount":1,"telemetry":{"enabled":true},"tolerations":[],"traceSampling":1,"useMCP":true},"prometheus":{"contextPath":"/prometheus","enabled":true,"hub":"docker.io/prom","ingress":{"enabled":false,"hosts":["prometheus.local"]},"namespace":"istio-system","nodeSelector":{},"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"replicaCount":1,"retention":"6h","scrapeInterval":"15s","security":{"enabled":true},"tag":"v2.12.0","tolerations":[]},"security":{"dnsCerts":{"istio-pilot-service-account.istio-control":"istio-pilot.istio-control"},"enableNamespacesByDefault":true,"enabled":true,"image":"citadel","namespace":"istio-system","selfSigned":true,"trustDomain":"cluster.local"},"sidecarInjectorWebhook":{"alwaysInjectSelector":[],"enableNamespacesByDefault":false,"enabled":true,"image":"sidecar_injector","injectLabel":"istio-injection","injectedAnnotations":{},"namespace":"istio-system","neverInjectSelector":[],"nodeSelector":{},"objectSelector":{"autoInject":true,"enabled":false},"podAnnotations":{},"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"replicaCount":1,"resources":{},"rewriteAppHTTPProbe":false,"rollingMaxSurge":"100%","rollingMaxUnavailable":"25%","selfSigned":false,"tolerations":[]},"tracing":{"enabled":false,"ingress":{"enabled":false},"jaeger":{"accessMode":"ReadWriteMany","enabled":false,"hub":"docker.io/jaegertracing","memory":{"max_traces":50000},"namespace":"istio-system","persist":false,"spanStorageType":"badger","storageClassName":"","tag":"1.14"},"nodeSelector":{},"opencensus":{"exporters":{"stackdriver":{"enable_tracing":true}},"hub":"docker.io/omnition","resources":{"limits":{"cpu":"1","memory":"2Gi"},"requests":{"cpu":"200m","memory":"400Mi"}},"tag":"0.1.9"},"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"provider":"jaeger","service":{"annotations":{},"externalPort":9411,"name":"http-query","type":"ClusterIP"},"zipkin":{"hub":"docker.io/openzipkin","javaOptsHeap":700,"maxSpans":500000,"node":{"cpus":2},"probeStartupDelay":200,"queryPort":9411,"resources":{"limits":{"cpu":"300m","memory":"900Mi"},"requests":{"cpu":"150m","memory":"900Mi"}},"tag":"2.14.2"}},"version":""}
+    {"certmanager":{"enabled":false,"hub":"quay.io/jetstack","image":"cert-manager-controller","namespace":"istio-system","tag":"v0.6.2"},"clusterResources":true,"cni":{"enabled":false,"namespace":"istio-system"},"galley":{"enableAnalysis":false,"enabled":true,"image":"galley","namespace":"istio-system"},"gateways":{"istio-egressgateway":{"autoscaleEnabled":true,"enabled":false,"env":{"ISTIO_META_ROUTER_MODE":"sni-dnat"},"namespace":"istio-system","ports":[{"name":"http2","port":80},{"name":"https","port":443},{"name":"tls","port":15443,"targetPort":15443}],"secretVolumes":[{"mountPath":"/etc/istio/egressgateway-certs","name":"egressgateway-certs","secretName":"istio-egressgateway-certs"},{"mountPath":"/etc/istio/egressgateway-ca-certs","name":"egressgateway-ca-certs","secretName":"istio-egressgateway-ca-certs"}],"type":"ClusterIP","zvpn":{"enabled":true,"suffix":"global"}},"istio-ingressgateway":{"applicationPorts":"","autoscaleEnabled":true,"debug":"info","domain":"","enabled":true,"env":{"ISTIO_META_ROUTER_MODE":"sni-dnat"},"meshExpansionPorts":[{"name":"tcp-pilot-grpc-tls","port":15011,"targetPort":15011},{"name":"tcp-citadel-grpc-tls","port":8060,"targetPort":8060},{"name":"tcp-dns-tls","port":853,"targetPort":853}],"namespace":"istio-system","ports":[{"name":"status-port","port":15020,"targetPort":15020},{"name":"http2","port":80,"targetPort":80},{"name":"https","port":443},{"name":"kiali","port":15029,"targetPort":15029},{"name":"prometheus","port":15030,"targetPort":15030},{"name":"grafana","port":15031,"targetPort":15031},{"name":"tracing","port":15032,"targetPort":15032},{"name":"tls","port":15443,"targetPort":15443}],"sds":{"enabled":false,"image":"node-agent-k8s","resources":{"limits":{"cpu":"2000m","memory":"1024Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}},"secretVolumes":[{"mountPath":"/etc/istio/ingressgateway-certs","name":"ingressgateway-certs","secretName":"istio-ingressgateway-certs"},{"mountPath":"/etc/istio/ingressgateway-ca-certs","name":"ingressgateway-ca-certs","secretName":"istio-ingressgateway-ca-certs"}],"type":"LoadBalancer","zvpn":{"enabled":true,"suffix":"global"}}},"global":{"arch":{"amd64":2,"ppc64le":2,"s390x":2},"certificates":[],"configNamespace":"istio-system","configValidation":true,"controlPlaneSecurityEnabled":true,"defaultNodeSelector":{},"defaultPodDisruptionBudget":{"enabled":true},"defaultResources":{"requests":{"cpu":"10m"}},"disablePolicyChecks":true,"enableHelmTest":false,"enableTracing":true,"enabled":true,"hub":"gcr.io/istio-testing","imagePullPolicy":"Always","imagePullSecrets":[],"istioNamespace":"istio-system","k8sIngress":{"enableHttps":false,"enabled":false,"gatewayName":"ingressgateway"},"localityLbSetting":{"enabled":true},"logAsJson":false,"logging":{"level":"default:info"},"meshExpansion":{"enabled":false,"useILB":false},"meshNetworks":{},"mtls":{"auto":true,"enabled":false},"multiCluster":{"clusterName":"","enabled":false},"namespace":"istio-system","network":"","omitSidecarInjectorConfigMap":false,"oneNamespace":false,"operatorManageWebhooks":false,"outboundTrafficPolicy":{"mode":"ALLOW_ANY"},"policyCheckFailOpen":false,"policyNamespace":"istio-system","priorityClassName":"","prometheusNamespace":"istio-system","proxy":{"accessLogEncoding":"TEXT","accessLogFile":"","accessLogFormat":"","autoInject":"enabled","clusterDomain":"cluster.local","componentLogLevel":"misc:error","concurrency":2,"dnsRefreshRate":"300s","enableCoreDump":false,"envoyAccessLogService":{"enabled":false},"envoyMetricsService":{"enabled":false,"tcpKeepalive":{"interval":"10s","probes":3,"time":"10s"},"tlsSettings":{"mode":"DISABLE","subjectAltNames":[]}},"envoyStatsd":{"enabled":false},"excludeIPRanges":"","excludeInboundPorts":"","excludeOutboundPorts":"","image":"proxyv2","includeIPRanges":"*","includeInboundPorts":"*","kubevirtInterfaces":"","logLevel":"warning","privileged":false,"protocolDetectionTimeout":"100ms","readinessFailureThreshold":30,"readinessInitialDelaySeconds":1,"readinessPeriodSeconds":2,"resources":{"limits":{"cpu":"2000m","memory":"1024Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"statusPort":15020,"tracer":"zipkin"},"proxy_init":{"image":"proxyv2","resources":{"limits":{"cpu":"100m","memory":"50Mi"},"requests":{"cpu":"10m","memory":"10Mi"}}},"sds":{"enabled":false,"udsPath":""},"securityNamespace":"istio-system","tag":"latest","telemetryNamespace":"istio-system","tracer":{"datadog":{"address":"$(HOST_IP):8126"},"lightstep":{"accessToken":"","address":"","cacertPath":"","secure":true},"zipkin":{"address":""}},"trustDomain":"","useMCP":true},"grafana":{"accessMode":"ReadWriteMany","contextPath":"/grafana","dashboardProviders":{"dashboardproviders.yaml":{"apiVersion":1,"providers":[{"disableDeletion":false,"folder":"istio","name":"istio","options":{"path":"/var/lib/grafana/dashboards/istio"},"orgId":1,"type":"file"}]}},"datasources":{"datasources.yaml":{"apiVersion":1}},"enabled":false,"env":{},"envSecrets":{},"image":{"repository":"grafana/grafana","tag":"6.3.6"},"ingress":{"enabled":false,"hosts":["grafana.local"]},"namespace":"istio-system","nodeSelector":{},"persist":false,"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"replicaCount":1,"security":{"enabled":false,"passphraseKey":"passphrase","secretName":"grafana","usernameKey":"username"},"service":{"annotations":{},"externalPort":3000,"name":"http","type":"ClusterIP"},"storageClassName":"","tolerations":[]},"istio_cni":{"enabled":false},"istiocoredns":{"coreDNSImage":"coredns/coredns","coreDNSPluginImage":"istio/coredns-plugin:0.2-istio-1.1","coreDNSTag":"1.6.2","enabled":false},"kiali":{"contextPath":"/kiali","createDemoSecret":true,"dashboard":{"passphraseKey":"passphrase","secretName":"kiali","usernameKey":"username","viewOnlyMode":false},"enabled":false,"hub":"docker.io/kiali","ingress":{"enabled":false,"hosts":["kiali.local"]},"namespace":"istio-system","nodeSelector":{},"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"replicaCount":1,"security":{"cert_file":"/kiali-cert/cert-chain.pem","enabled":false,"private_key_file":"/kiali-cert/key.pem"},"tag":"v1.4.2"},"mixer":{"adapters":{"kubernetesenv":{"enabled":true},"prometheus":{"enabled":true,"metricsExpiryDuration":"10m"},"stackdriver":{"auth":{"apiKey":"","appCredentials":false,"serviceAccountPath":""},"enabled":false,"tracer":{"enabled":false,"sampleProbability":1}},"stdio":{"enabled":false,"outputAsJson":false},"useAdapterCRDs":false},"policy":{"adapters":{"kubernetesenv":{"enabled":true},"useAdapterCRDs":false},"autoscaleEnabled":true,"enabled":true,"image":"mixer","namespace":"istio-system","sessionAffinityEnabled":false},"telemetry":{"autoscaleEnabled":true,"enabled":true,"image":"mixer","loadshedding":{"latencyThreshold":"100ms","mode":"enforce"},"namespace":"istio-system","nodeSelector":{},"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"replicaCount":1,"reportBatchMaxEntries":100,"reportBatchMaxTime":"1s","sessionAffinityEnabled":false,"tolerations":[],"useMCP":true}},"nodeagent":{"enabled":false,"image":"node-agent-k8s","namespace":"istio-system"},"pilot":{"appNamespaces":[],"autoscaleEnabled":true,"autoscaleMax":5,"autoscaleMin":1,"configMap":true,"configNamespace":"istio-config","cpu":{"targetAverageUtilization":80},"enableProtocolSniffingForInbound":false,"enableProtocolSniffingForOutbound":true,"enabled":true,"env":{},"image":"pilot","ingress":{"ingressClass":"istio","ingressControllerMode":"OFF","ingressService":"istio-ingressgateway"},"keepaliveMaxServerConnectionAge":"30m","meshNetworks":{"networks":{}},"namespace":"istio-system","nodeSelector":{},"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"policy":{"enabled":false},"replicaCount":1,"telemetry":{"enabled":true},"tolerations":[],"traceSampling":1,"useMCP":true},"prometheus":{"contextPath":"/prometheus","enabled":true,"hub":"docker.io/prom","ingress":{"enabled":false,"hosts":["prometheus.local"]},"namespace":"istio-system","nodeSelector":{},"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"replicaCount":1,"retention":"6h","scrapeInterval":"15s","security":{"enabled":true},"tag":"v2.12.0","tolerations":[]},"security":{"dnsCerts":{"istio-pilot-service-account.istio-control":"istio-pilot.istio-control"},"enableNamespacesByDefault":true,"enabled":true,"image":"citadel","namespace":"istio-system","selfSigned":true,"trustDomain":"cluster.local"},"sidecarInjectorWebhook":{"alwaysInjectSelector":[],"enableNamespacesByDefault":false,"enabled":true,"image":"sidecar_injector","injectLabel":"istio-injection","injectedAnnotations":{},"namespace":"istio-system","neverInjectSelector":[],"nodeSelector":{},"objectSelector":{"autoInject":true,"enabled":false},"podAnnotations":{},"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"replicaCount":1,"resources":{},"rewriteAppHTTPProbe":false,"rollingMaxSurge":"100%","rollingMaxUnavailable":"25%","selfSigned":false,"tolerations":[]},"tracing":{"enabled":false,"ingress":{"enabled":false},"jaeger":{"accessMode":"ReadWriteMany","enabled":false,"hub":"docker.io/jaegertracing","memory":{"max_traces":50000},"namespace":"istio-system","persist":false,"spanStorageType":"badger","storageClassName":"","tag":"1.14"},"nodeSelector":{},"opencensus":{"exporters":{"stackdriver":{"enable_tracing":true}},"hub":"docker.io/omnition","resources":{"limits":{"cpu":"1","memory":"2Gi"},"requests":{"cpu":"200m","memory":"400Mi"}},"tag":"0.1.9"},"podAntiAffinityLabelSelector":[],"podAntiAffinityTermLabelSelector":[],"provider":"jaeger","service":{"annotations":{},"externalPort":9411,"name":"http-query","type":"ClusterIP"},"zipkin":{"hub":"docker.io/openzipkin","javaOptsHeap":700,"maxSpans":500000,"node":{"cpus":2},"probeStartupDelay":200,"queryPort":9411,"resources":{"limits":{"cpu":"300m","memory":"900Mi"},"requests":{"cpu":"150m","memory":"900Mi"}},"tag":"2.14.2"}},"version":""}
 
   config: |-
     policy: enabled
@@ -2115,6 +2106,10 @@ data:
     rollingMaxUnavailable: 25%
     telemetry:
       enabled: true
+      v1:
+        enabled: false
+      v2:
+        enabled: true
     tolerations: []
     traceSampling: 1
     useMCP: true
@@ -2131,8 +2126,8 @@ data:
     reportBatchMaxEntries: 100
     # reportBatchMaxTime is the max waiting time before the telemetry data of a request is sent to the mixer server
     reportBatchMaxTime: 1s
-    mixerReportServer: istio-telemetry.istio-system.svc.cluster.local:15004
     mixerCheckServer: istio-policy.istio-system.svc.cluster.local:15004
+    disableMixerHttpReports: true
 
     disablePolicyChecks: true
 
@@ -2186,14 +2181,7 @@ data:
     # The DNS certificate provisioning is enabled by default now so it get tested.
     # TODO (lei-tang): we'll decide whether enable it by default or not before Istio 1.4 Release.
     certificates:
-      - dnsNames:
-        - istio-galley.istio-system.svc
-        - istio-galley.istio-system
-        secretName: dns.istio-galley-service-account
-      - dnsNames:
-        - istio-sidecar-injector.istio-system.svc
-        - istio-sidecar-injector.istio-system
-        secretName: dns.istio-sidecar-injector-service-account
+      []
 
     defaultConfig:
       #
@@ -2502,6 +2490,120 @@ metadata:
   labels:
     app: pilot
     release: istio
+---
+
+
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: metadata-exchange
+spec:
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: ANY # inbound, outbound, and gateway
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.http_connection_manager"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.wasm
+          config:
+            config:
+              configuration: envoy.wasm.metadata_exchange
+              vm_config:
+                runtime: envoy.wasm.runtime.null
+                code:
+                  inline_string: envoy.wasm.metadata_exchange
+---
+
+
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: stats-filter
+spec:
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_OUTBOUND
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.http_connection_manager"
+              subFilter:
+                name: "envoy.router"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.wasm
+          config:
+            config:
+              root_id: stats_outbound
+              configuration: |
+                {
+                  "debug": "false",
+                  "stat_prefix": "istio",
+                }
+              vm_config:
+                vm_id: stats_outbound
+                runtime: envoy.wasm.runtime.null
+                code:
+                  inline_string: envoy.wasm.stats
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.http_connection_manager"
+              subFilter:
+                name: "envoy.router"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.wasm
+          config:
+            config:
+              root_id: stats_inbound
+              configuration: |
+                {
+                  "debug": "false",
+                  "stat_prefix": "istio",
+                }
+              vm_config:
+                vm_id: stats_inbound
+                runtime: envoy.wasm.runtime.null
+                code:
+                  inline_string: envoy.wasm.stats
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.http_connection_manager"
+              subFilter:
+                name: "envoy.router"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.wasm
+          config:
+            config:
+              root_id: stats_outbound
+              configuration: |
+                {
+                  "debug": "false",
+                  "stat_prefix": "istio",
+                }
+              vm_config:
+                vm_id: stats_outbound
+                runtime: envoy.wasm.runtime.null
+                code:
+                  inline_string: envoy.wasm.stats
 ---
 
 # Resources for Policy component
@@ -3499,8 +3601,6 @@ spec:
       valueType: BOOL
     quota.cache_hit:
       valueType: BOOL
-    context.proxy_version:
-      valueType: STRING
 ---
 
 
@@ -4792,6 +4892,8 @@ metadata:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: mixer
@@ -4873,6 +4975,153 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    heritage: Tiller
+    istio: security
+    release: istio
+  name: authorizationpolicies.security.istio.io
+spec:
+  group: security.istio.io
+  names:
+    categories:
+    - istio-io
+    - security-istio-io
+    kind: AuthorizationPolicy
+    plural: authorizationpolicies
+    singular: authorizationpolicy
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration for access control on workloads. See more details
+            at: https://istio.io/docs/reference/config/security/v1beta1/authorization-policy.html'
+          properties:
+            rules:
+              description: Optional.
+              items:
+                properties:
+                  from:
+                    description: Optional.
+                    items:
+                      properties:
+                        source:
+                          description: Source specifies the source of a request.
+                          properties:
+                            ipBlocks:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            namespaces:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            principals:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            requestPrincipals:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                          type: object
+                      type: object
+                    type: array
+                  to:
+                    description: Optional.
+                    items:
+                      properties:
+                        operation:
+                          description: Operation specifies the operation of a request.
+                          properties:
+                            hosts:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            methods:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            paths:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            ports:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                          type: object
+                      type: object
+                    type: array
+                  when:
+                    description: Optional.
+                    items:
+                      properties:
+                        key:
+                          description: The name of an Istio attribute.
+                          format: string
+                          type: string
+                        values:
+                          description: The allowed values for the attribute.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                      type: object
+                    type: array
+                type: object
+              type: array
+            selector:
+              description: Optional.
+              properties:
+                matchLabels:
+                  additionalProperties:
+                    format: string
+                    type: string
+                  type: object
+              type: object
+          type: object
+      type: object
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+
+
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: istio-pilot
@@ -4964,6 +5213,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: istio-pilot
@@ -5002,7 +5253,7 @@ spec:
       properties:
         spec:
           description: 'Configuration affecting load balancing, outlier detection,
-            etc. See more details at: https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule.html'
+            etc. See more details at: https://istio.io/docs/reference/config/networking/destination-rule.html'
           properties:
             exportTo:
               description: A list of namespaces to which this destination rule is
@@ -5737,6 +5988,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: istio-pilot
@@ -5761,7 +6014,7 @@ spec:
       properties:
         spec:
           description: 'Customizing Envoy configuration generated by Istio. See more
-            details at: https://istio.io/docs/reference/config/networking/v1alpha3/envoy-filter.html'
+            details at: https://istio.io/docs/reference/config/networking/envoy-filter.html'
           properties:
             configPatches:
               description: One or more patches with match conditions.
@@ -6037,6 +6290,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: istio-pilot
@@ -6063,7 +6318,7 @@ spec:
       properties:
         spec:
           description: 'Configuration affecting edge load balancer. See more details
-            at: https://istio.io/docs/reference/config/networking/v1alpha3/gateway.html'
+            at: https://istio.io/docs/reference/config/networking/gateway.html'
           properties:
             selector:
               additionalProperties:
@@ -6190,6 +6445,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: istio-mixer
@@ -6288,6 +6545,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: istio-mixer
@@ -6504,6 +6763,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: istio-citadel
@@ -7195,11 +7456,6 @@ spec:
                 applied on.
               items:
                 properties:
-                  labels:
-                    additionalProperties:
-                      format: string
-                      type: string
-                    type: object
                   name:
                     description: The name must be a short name from the service registry.
                     format: string
@@ -7240,6 +7496,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: istio-citadel
@@ -7930,11 +8188,6 @@ spec:
                 applied on.
               items:
                 properties:
-                  labels:
-                    additionalProperties:
-                      format: string
-                      type: string
-                    type: object
                   name:
                     description: The name must be a short name from the service registry.
                     format: string
@@ -7975,6 +8228,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: istio-mixer
@@ -8060,6 +8315,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: istio-mixer
@@ -8149,6 +8406,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: mixer
@@ -8242,6 +8501,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: mixer
@@ -8402,6 +8663,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: istio-pilot
@@ -8449,7 +8712,7 @@ spec:
       properties:
         spec:
           description: 'Configuration affecting service registry. See more details
-            at: https://istio.io/docs/reference/config/networking/v1alpha3/service-entry.html'
+            at: https://istio.io/docs/reference/config/networking/service-entry.html'
           properties:
             addresses:
               description: The virtual IP addresses associated with the service.
@@ -8551,6 +8814,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: mixer
@@ -8756,6 +9021,8 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: mixer
@@ -8872,6 +9139,138 @@ status:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: sidecars.networking.istio.io
+spec:
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: Sidecar
+    plural: sidecars
+    singular: sidecar
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration affecting network reachability of a sidecar.
+            See more details at: https://istio.io/docs/reference/config/networking/sidecar.html'
+          properties:
+            egress:
+              items:
+                properties:
+                  bind:
+                    format: string
+                    type: string
+                  captureMode:
+                    enum:
+                    - DEFAULT
+                    - IPTABLES
+                    - NONE
+                    type: string
+                  hosts:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  port:
+                    description: The port associated with the listener.
+                    properties:
+                      name:
+                        description: Label assigned to the port.
+                        format: string
+                        type: string
+                      number:
+                        description: A valid non-negative integer port number.
+                        type: integer
+                      protocol:
+                        description: The protocol exposed on the port.
+                        format: string
+                        type: string
+                    type: object
+                type: object
+              type: array
+            ingress:
+              items:
+                properties:
+                  bind:
+                    description: The IP to which the listener should be bound.
+                    format: string
+                    type: string
+                  captureMode:
+                    enum:
+                    - DEFAULT
+                    - IPTABLES
+                    - NONE
+                    type: string
+                  defaultEndpoint:
+                    format: string
+                    type: string
+                  port:
+                    description: The port associated with the listener.
+                    properties:
+                      name:
+                        description: Label assigned to the port.
+                        format: string
+                        type: string
+                      number:
+                        description: A valid non-negative integer port number.
+                        type: integer
+                      protocol:
+                        description: The protocol exposed on the port.
+                        format: string
+                        type: string
+                    type: object
+                type: object
+              type: array
+            outboundTrafficPolicy:
+              description: This allows to configure the outbound traffic policy.
+              properties:
+                mode:
+                  enum:
+                  - REGISTRY_ONLY
+                  - ALLOW_ANY
+                  type: string
+              type: object
+            workloadSelector:
+              properties:
+                labels:
+                  additionalProperties:
+                    format: string
+                    type: string
+                  type: object
+              type: object
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+
+
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   creationTimestamp: null
   labels:
     app: istio-pilot
@@ -8914,7 +9313,7 @@ spec:
       properties:
         spec:
           description: 'Configuration affecting label/content routing, sni routing,
-            etc. See more details at: https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service.html'
+            etc. See more details at: https://istio.io/docs/reference/config/networking/virtual-service.html'
           properties:
             exportTo:
               description: A list of namespaces to which this virtual service is exported.
@@ -9595,6 +9994,8 @@ metadata:
     chart: istio
     heritage: Tiller
     release: istio
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -9625,6 +10026,8 @@ metadata:
     chart: istio
     heritage: Tiller
     release: istio
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -9655,6 +10058,8 @@ metadata:
     chart: istio
     heritage: Tiller
     release: istio
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -9685,6 +10090,8 @@ metadata:
     chart: istio
     heritage: Tiller
     release: istio
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   group: config.istio.io
   names:
@@ -9701,277 +10108,6 @@ spec:
     - name: v1alpha2
       served: true
       storage: true
----
-
-
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  creationTimestamp: null
-  labels:
-    app: istio-pilot
-    chart: istio
-    heritage: Tiller
-    release: istio
-  name: sidecars.networking.istio.io
-spec:
-  group: networking.istio.io
-  names:
-    categories:
-    - istio-io
-    - networking-istio-io
-    kind: Sidecar
-    plural: sidecars
-    singular: sidecar
-  scope: Namespaced
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          description: 'Configuration affecting network reachability of a sidecar.
-            See more details at: https://istio.io/docs/reference/config/networking/v1alpha3/sidecar.html'
-          properties:
-            egress:
-              items:
-                properties:
-                  bind:
-                    format: string
-                    type: string
-                  captureMode:
-                    enum:
-                    - DEFAULT
-                    - IPTABLES
-                    - NONE
-                    type: string
-                  hosts:
-                    items:
-                      format: string
-                      type: string
-                    type: array
-                  port:
-                    description: The port associated with the listener.
-                    properties:
-                      name:
-                        description: Label assigned to the port.
-                        format: string
-                        type: string
-                      number:
-                        description: A valid non-negative integer port number.
-                        type: integer
-                      protocol:
-                        description: The protocol exposed on the port.
-                        format: string
-                        type: string
-                    type: object
-                type: object
-              type: array
-            ingress:
-              items:
-                properties:
-                  bind:
-                    description: The ip to which the listener should be bound.
-                    format: string
-                    type: string
-                  captureMode:
-                    enum:
-                    - DEFAULT
-                    - IPTABLES
-                    - NONE
-                    type: string
-                  defaultEndpoint:
-                    format: string
-                    type: string
-                  port:
-                    description: The port associated with the listener.
-                    properties:
-                      name:
-                        description: Label assigned to the port.
-                        format: string
-                        type: string
-                      number:
-                        description: A valid non-negative integer port number.
-                        type: integer
-                      protocol:
-                        description: The protocol exposed on the port.
-                        format: string
-                        type: string
-                    type: object
-                type: object
-              type: array
-            outboundTrafficPolicy:
-              description: This allows to configure the outbound traffic policy.
-              properties:
-                mode:
-                  enum:
-                  - REGISTRY_ONLY
-                  - ALLOW_ANY
-                  type: string
-              type: object
-            workloadSelector:
-              properties:
-                labels:
-                  additionalProperties:
-                    format: string
-                    type: string
-                  type: object
-              type: object
-          type: object
-      type: object
-  versions:
-  - name: v1alpha3
-    served: true
-    storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
----
-
-
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  creationTimestamp: null
-  labels:
-    app: istio-pilot
-    heritage: Tiller
-    istio: security
-    release: istio
-  name: authorizationpolicies.security.istio.io
-spec:
-  group: security.istio.io
-  names:
-    categories:
-    - istio-io
-    - security-istio-io
-    kind: AuthorizationPolicy
-    plural: authorizationpolicies
-    singular: authorizationpolicy
-  scope: Namespaced
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          description: 'Configuration for access control on workloads. See more details
-            at: https://istio.io/docs/reference/config/security/v1beta1/authorization-policy.html'
-          properties:
-            rules:
-              description: Optional.
-              items:
-                properties:
-                  from:
-                    description: Optional.
-                    items:
-                      properties:
-                        source:
-                          description: Source specifies the source of a request.
-                          properties:
-                            ipBlocks:
-                              description: Optional.
-                              items:
-                                format: string
-                                type: string
-                              type: array
-                            namespaces:
-                              description: Optional.
-                              items:
-                                format: string
-                                type: string
-                              type: array
-                            principals:
-                              description: Optional.
-                              items:
-                                format: string
-                                type: string
-                              type: array
-                            requestPrincipals:
-                              description: Optional.
-                              items:
-                                format: string
-                                type: string
-                              type: array
-                          type: object
-                      type: object
-                    type: array
-                  to:
-                    description: Optional.
-                    items:
-                      properties:
-                        operation:
-                          description: Operation specifies the operation of a request.
-                          properties:
-                            hosts:
-                              description: Optional.
-                              items:
-                                format: string
-                                type: string
-                              type: array
-                            methods:
-                              description: Optional.
-                              items:
-                                format: string
-                                type: string
-                              type: array
-                            paths:
-                              description: Optional.
-                              items:
-                                format: string
-                                type: string
-                              type: array
-                            ports:
-                              description: Optional.
-                              items:
-                                format: string
-                                type: string
-                              type: array
-                          type: object
-                      type: object
-                    type: array
-                  when:
-                    description: Optional.
-                    items:
-                      properties:
-                        key:
-                          description: The name of an Istio attribute.
-                          format: string
-                          type: string
-                        values:
-                          description: The allowed values for the attribute.
-                          items:
-                            format: string
-                            type: string
-                          type: array
-                      type: object
-                    type: array
-                type: object
-              type: array
-            selector:
-              description: Optional.
-              properties:
-                matchLabels:
-                  additionalProperties:
-                    format: string
-                    type: string
-                  type: object
-              type: object
-          type: object
-      type: object
-  versions:
-  - name: v1beta1
-    served: true
-    storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 
 

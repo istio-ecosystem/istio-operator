@@ -32,9 +32,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 
-	"istio.io/operator/pkg/util"
-
 	"istio.io/operator/pkg/compare"
+	"istio.io/operator/pkg/util"
 	"istio.io/pkg/log"
 )
 
@@ -215,7 +214,7 @@ func (o *K8sObject) AddLabels(labels map[string]string) {
 // K8sObjects holds a collection of k8s objects, so that we can filter / sequence them
 type K8sObjects []*K8sObject
 
-// ParseK8sObjectsFromYAMLManifest returns a K8sObjects represetation of manifest.
+// ParseK8sObjectsFromYAMLManifest returns a K8sObjects representation of manifest.
 func ParseK8sObjectsFromYAMLManifest(manifest string) (K8sObjects, error) {
 	var b bytes.Buffer
 
@@ -527,7 +526,7 @@ func manifestDiff(aom, bom map[string]*K8sObject, im map[string]string, verbose 
 			diff = util.YAMLDiff(string(ay), string(by))
 		} else {
 			ignorePaths := objectIgnorePaths(ak, im)
-			diff = compare.YAMLCmpWithIgnore(string(ay), string(by), ignorePaths)
+			diff = compare.YAMLCmpWithIgnore(string(ay), string(by), ignorePaths, "")
 		}
 
 		if diff != "" {
