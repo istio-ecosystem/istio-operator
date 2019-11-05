@@ -36602,6 +36602,7 @@ spec:
       network: network1
       meshExpansion:
         enabled: true
+    pilot:
       meshNetworks:
         network1:
           endpoints:
