@@ -228,16 +228,21 @@ func GetFromTreePath(inputTree map[string]interface{}, path util.Path) (interfac
 		return val, true, nil
 	}
 	switch newRoot := val.(type) {
+	case string:
+		return nil, false, nil
 	case map[string]interface{}:
 		return GetFromTreePath(newRoot, path[1:])
 	case []interface{}:
 		for _, node := range newRoot {
-			nextVal, found, err := GetFromTreePath(node.(map[string]interface{}), path[1:])
-			if err != nil {
-				continue
-			}
-			if found {
-				return nextVal, true, nil
+			switch nt := node.(type) {
+			case map[string]interface{}:
+				nextVal, found, err := GetFromTreePath(nt, path[1:])
+				if err != nil {
+					continue
+				}
+				if found {
+					return nextVal, true, nil
+				}
 			}
 		}
 		return nil, false, nil
