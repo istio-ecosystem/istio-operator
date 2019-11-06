@@ -259,7 +259,6 @@ func GetNodeByPath(treeNode interface{}, path util.Path) (interface{}, bool) {
 	default:
 		return nil, false
 	}
-	panic("unreachable path")
 }
 
 // TODO Merge this into existing WritePathContext method (istio/istio#15494)
