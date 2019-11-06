@@ -250,7 +250,7 @@ func GetNodeByPath(treeNode interface{}, path util.Path) (interface{}, bool) {
 		return GetNodeByPath(val, path[1:])
 	case []interface{}:
 		for _, nn := range nt {
-			np, found := GetNodeByPath(nn, path[1:])
+			np, found := GetNodeByPath(nn, path)
 			if found {
 				return np, true
 			}

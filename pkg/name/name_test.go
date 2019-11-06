@@ -18,85 +18,149 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/ghodss/yaml"
+
 	"istio.io/operator/pkg/util"
 )
 
 func TestGetFromTreePath(t *testing.T) {
 	type args struct {
-		inputTree map[string]interface{}
+		inputTree string
 		path      util.Path
 	}
 
 	tests := []struct {
 		name    string
 		args    args
-		want    interface{}
+		want    string
 		found   bool
 		wantErr bool
 	}{
 		{
 			name: "found string node",
 			args: args{
-				inputTree: map[string]interface{}{
-					"k1": "v1",
-				},
+				inputTree: `
+k1: v1
+`,
 				path: util.Path{"k1"},
 			},
-			want:    "v1",
+			want: `
+v1
+`,
 			found:   true,
 			wantErr: false,
 		},
 		{
 			name: "found tree node",
 			args: args{
-				inputTree: map[string]interface{}{
-					"k1": map[string]interface{}{
-						"k2": "v2",
-					},
-				},
+				inputTree: `
+k1:
+ k2: v2
+`,
 				path: util.Path{"k1"},
 			},
-			want: map[string]interface{}{
-				"k2": "v2",
-			},
+			want: `
+k2: v2
+`,
 			found:   true,
 			wantErr: false,
 		},
 		{
 			name: "path is longer than tree depth, string node",
 			args: args{
-				inputTree: map[string]interface{}{
-					"k1": "v1",
-				},
+				inputTree: `
+k1: v1
+`,
 				path: util.Path{"k1", "k2"},
 			},
-			want:    nil,
+			want:    "",
 			found:   false,
 			wantErr: false,
 		},
 		{
 			name: "path is longer than tree depth, array node",
 			args: args{
-				inputTree: map[string]interface{}{
-					"k1": []interface{}{
-						"v1",
-					},
-				},
+				inputTree: `
+k1: v1
+`,
 				path: util.Path{"k1", "k2"},
 			},
-			want:    nil,
+			want:    "",
 			found:   false,
+			wantErr: false,
+		},
+		{
+			name: "string in map array tree",
+			args: args{
+				inputTree: `
+a:
+  b:
+  - name: n1
+    value: v1
+  - name: n2
+    list:
+    - v21
+    - v22
+`,
+				path: util.Path{"a", "b", "name"},
+			},
+			want: `
+n1
+`,
+			found:   true,
+			wantErr: false,
+		},
+		{
+			name: "node in map array tree",
+			args: args{
+				inputTree: `
+a:
+  b:
+    c: val1
+    list1:
+    - i1: val1
+    - i2: val2
+    - i3a: key1
+      i3b:
+        list2:
+        - i1: val1
+        - i2: val2
+        - i3a: key1
+          i3b:
+            i1: va11
+`,
+				path: util.Path{"a", "b", "list1", "i3b"},
+			},
+			want: `
+list2:
+- i1: val1
+- i2: val2
+- i3a: key1
+  i3b:
+    i1: va11
+`,
+			found:   true,
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, found, err := GetFromTreePath(tt.args.inputTree, tt.args.path)
+			tree := make(map[string]interface{})
+			if err := yaml.Unmarshal([]byte(tt.args.inputTree), &tree); err != nil {
+				t.Fatal(err)
+			}
+			got, found, err := GetFromTreePath(tree, tt.args.path)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetFromTreePath() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
+
+			var wantTree interface{}
+			if err := yaml.Unmarshal([]byte(tt.want), &wantTree); err != nil {
+				t.Fatal(err)
+			}
+
+			if !reflect.DeepEqual(got, wantTree) {
 				t.Errorf("GetFromTreePath() got = %v, want %v", got, tt.want)
 			}
 			if found != tt.found {
