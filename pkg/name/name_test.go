@@ -111,6 +111,25 @@ n1
 			wantErr: false,
 		},
 		{
+			name: "path not in map array tree",
+			args: args{
+				inputTree: `
+a:
+  b:
+  - name: n1
+    value: v1
+  - name: n2
+    list:
+    - v21
+    - v22
+`,
+				path: util.Path{"a", "b", "unknown"},
+			},
+			want:    ``,
+			found:   false,
+			wantErr: false,
+		},
+		{
 			name: "node in map array tree",
 			args: args{
 				inputTree: `
