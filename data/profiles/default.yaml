@@ -1,6 +1,10 @@
 apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
+  hub: gcr.io/istio-testing
+  tag: 1.4-dev
+  defaultNamespace: istio-system
+
   # Traffic management feature
   trafficManagement:
     enabled: true
