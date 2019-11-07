@@ -440,19 +440,6 @@ spec:
 ---
 
 
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: prometheus
-  namespace: istio-control
-spec:
-  host: prometheus
-  trafficPolicy:
-    tls:
-      mode: DISABLE
----
-
-
 apiVersion: v1
 kind: Service
 metadata:
