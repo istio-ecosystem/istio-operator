@@ -112,6 +112,9 @@ rules:
 - apiGroups: [""]
   resources: ["endpoints", "pods", "services", "nodes", "replicationcontrollers"]
   verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["replicasets"]
+  verbs: ["get", "list", "watch"]
 ---
 
 
@@ -129,6 +132,24 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: istio-pilot-service-account
+    namespace: istio-system
+---
+
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-reader-istio-system
+  labels:
+    app: istio-reader
+    release: istio
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-reader-istio-system
+subjects:
+  - kind: ServiceAccount
+    name: istio-reader-service-account
     namespace: istio-system
 ---
 
@@ -384,7 +405,7 @@ data:
 
     # The trust domain corresponds to the trust root of a system.
     # Refer to https://github.com/spiffe/spiffe/blob/master/standards/SPIFFE-ID.md#21-trust-domain
-    trustDomain: ""
+    trustDomain: "cluster.local"
 
     #  The trust domain aliases represent the aliases of trust_domain.
     #  For example, if we have
@@ -541,6 +562,7 @@ spec:
         - cluster.local
         - --secureGrpcAddr
         - ""
+        - --trust-domain=cluster.local
         - --keepaliveMaxServerConnectionAge
         - 30m
         env:
@@ -563,7 +585,7 @@ spec:
         - name: PILOT_ENABLE_PROTOCOL_SNIFFING_FOR_INBOUND
           value: "false"
         image: gcr.io/istio-testing/pilot:1.4-dev
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         name: discovery
         ports:
         - containerPort: 8080
@@ -592,6 +614,7 @@ spec:
         - /var/lib/envoy/envoy.yaml.tmpl
         - --controlPlaneAuthPolicy
         - MUTUAL_TLS
+        - --trust-domain=cluster.local
         env:
         - name: POD_NAME
           valueFrom:
@@ -611,7 +634,7 @@ spec:
         - name: SDS_ENABLED
           value: "false"
         image: gcr.io/istio-testing/proxyv2:1.4-dev
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         name: istio-proxy
         ports:
         - containerPort: 15011
@@ -644,21 +667,6 @@ spec:
 ---
 
 
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: "api-server"
-  namespace: istio-system
-  labels:
-    release: istio
-spec:
-  host: "kubernetes.default.svc.cluster.local"
-  trafficPolicy:
-    tls:
-      mode: DISABLE
----
-
-
 apiVersion: "authentication.istio.io/v1alpha1"
 kind: "MeshPolicy"
 metadata:
@@ -669,21 +677,6 @@ spec:
   peers:
   - mtls:
       mode: PERMISSIVE
----
-
-
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: "default"
-  namespace: istio-system
-  labels:
-    release: istio
-spec:
-  host: "*.local"
-  trafficPolicy:
-    tls:
-      mode: DISABLE
 ---
 
 
@@ -737,6 +730,17 @@ metadata:
   namespace: istio-system
   labels:
     app: pilot
+    release: istio
+---
+
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-reader-service-account
+  namespace: istio-system
+  labels:
+    app: istio-reader
     release: istio
 ---
 
