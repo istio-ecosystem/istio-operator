@@ -36892,7 +36892,7 @@ spec:
           requests:
             cpu: 10m
             memory: 10Mi
-      imagePullPolicy: Always
+      imagePullPolicy: IfNotPresent
       certificates: []
       operatorManageWebhooks: false
       controlPlaneSecurityEnabled: true
@@ -36935,7 +36935,7 @@ spec:
         enabled: true
       priorityClassName: ""
       useMCP: true
-      trustDomain: ""
+      trustDomain: "cluster.local"
       outboundTrafficPolicy:
         mode: ALLOW_ANY
       sds:
@@ -37167,7 +37167,7 @@ spec:
       replicaCount: 1
       image:
         repository: grafana/grafana
-        tag: 6.3.6
+        tag: 6.4.3
       persist: false
       storageClassName: ""
       accessMode: ReadWriteMany
@@ -37275,8 +37275,8 @@ spec:
     kiali:
       enabled: false
       replicaCount: 1
-      hub: docker.io/kiali
-      tag: v1.4.2
+      hub: quay.io/kiali
+      tag: v1.9
       contextPath: /kiali
       nodeSelector: {}
       podAntiAffinityLabelSelector: []
