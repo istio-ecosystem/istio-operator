@@ -162,8 +162,8 @@ _OUTBOUNDTRAFFICPOLICYCONFIG_MODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=10325,
-  serialized_end=10365,
+  serialized_start=10353,
+  serialized_end=10393,
 )
 _sym_db.RegisterEnumDescriptor(_OUTBOUNDTRAFFICPOLICYCONFIG_MODE)
 
@@ -1416,42 +1416,49 @@ _GLOBALCONFIG = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='useMCP', full_name='v1alpha1.GlobalConfig.useMCP', index=34,
+      name='trustDomainAliases', full_name='v1alpha1.GlobalConfig.trustDomainAliases', index=34,
+      number=42, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='useMCP', full_name='v1alpha1.GlobalConfig.useMCP', index=35,
       number=35, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='logAsJson', full_name='v1alpha1.GlobalConfig.logAsJson', index=35,
+      name='logAsJson', full_name='v1alpha1.GlobalConfig.logAsJson', index=36,
       number=36, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='omitSidecarInjectorConfigMap', full_name='v1alpha1.GlobalConfig.omitSidecarInjectorConfigMap', index=36,
+      name='omitSidecarInjectorConfigMap', full_name='v1alpha1.GlobalConfig.omitSidecarInjectorConfigMap', index=37,
       number=38, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='network', full_name='v1alpha1.GlobalConfig.network', index=37,
+      name='network', full_name='v1alpha1.GlobalConfig.network', index=38,
       number=39, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='certificates', full_name='v1alpha1.GlobalConfig.certificates', index=38,
+      name='certificates', full_name='v1alpha1.GlobalConfig.certificates', index=39,
       number=40, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='operatorManageWebhooks', full_name='v1alpha1.GlobalConfig.operatorManageWebhooks', index=39,
+      name='operatorManageWebhooks', full_name='v1alpha1.GlobalConfig.operatorManageWebhooks', index=40,
       number=41, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -1470,7 +1477,7 @@ _GLOBALCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=3523,
-  serialized_end=5341,
+  serialized_end=5369,
 )
 
 
@@ -1500,8 +1507,8 @@ _GLOBALLOGGINGCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5343,
-  serialized_end=5379,
+  serialized_start=5371,
+  serialized_end=5407,
 )
 
 
@@ -1792,8 +1799,8 @@ _INGRESSGATEWAYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5382,
-  serialized_end=6886,
+  serialized_start=5410,
+  serialized_end=6914,
 )
 
 
@@ -1837,8 +1844,8 @@ _INGRESSGATEWAYSDSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6888,
-  serialized_end=7013,
+  serialized_start=6916,
+  serialized_end=7041,
 )
 
 
@@ -1875,8 +1882,8 @@ _INGRESSGATEWAYZVPNCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7015,
-  serialized_end=7102,
+  serialized_start=7043,
+  serialized_end=7130,
 )
 
 
@@ -1906,8 +1913,8 @@ _KUBERNETESENVMIXERADAPTERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7104,
-  serialized_end=7182,
+  serialized_start=7132,
+  serialized_end=7210,
 )
 
 
@@ -1951,8 +1958,8 @@ _KUBERNETESINGRESSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7185,
-  serialized_end=7325,
+  serialized_start=7213,
+  serialized_end=7353,
 )
 
 
@@ -1989,8 +1996,8 @@ _LOADSHEDDINGCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7327,
-  serialized_end=7403,
+  serialized_start=7355,
+  serialized_end=7431,
 )
 
 
@@ -2027,8 +2034,8 @@ _MTLSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7405,
-  serialized_end=7504,
+  serialized_start=7433,
+  serialized_end=7532,
 )
 
 
@@ -2065,8 +2072,8 @@ _MESHEXPANSIONCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7506,
-  serialized_end=7616,
+  serialized_start=7534,
+  serialized_end=7644,
 )
 
 
@@ -2124,8 +2131,8 @@ _MIXERTELEMETRYADAPTERSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7619,
-  serialized_end=7939,
+  serialized_start=7647,
+  serialized_end=7967,
 )
 
 
@@ -2183,8 +2190,8 @@ _MIXERPOLICYADAPTERSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7942,
-  serialized_end=8259,
+  serialized_start=7970,
+  serialized_end=8287,
 )
 
 
@@ -2228,8 +2235,8 @@ _MIXERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8262,
-  serialized_end=8429,
+  serialized_start=8290,
+  serialized_end=8457,
 )
 
 
@@ -2329,8 +2336,8 @@ _MIXERPOLICYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8432,
-  serialized_end=8895,
+  serialized_start=8460,
+  serialized_end=8923,
 )
 
 
@@ -2537,8 +2544,8 @@ _MIXERTELEMETRYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8898,
-  serialized_end=9962,
+  serialized_start=8926,
+  serialized_end=9990,
 )
 
 
@@ -2575,8 +2582,8 @@ _MULTICLUSTERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9964,
-  serialized_end=10050,
+  serialized_start=9992,
+  serialized_end=10078,
 )
 
 
@@ -2627,8 +2634,8 @@ _NODEAGENTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10053,
-  serialized_end=10233,
+  serialized_start=10081,
+  serialized_end=10261,
 )
 
 
@@ -2659,8 +2666,8 @@ _OUTBOUNDTRAFFICPOLICYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10236,
-  serialized_end=10365,
+  serialized_start=10264,
+  serialized_end=10393,
 )
 
 
@@ -2930,8 +2937,8 @@ _PILOTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10368,
-  serialized_end=11915,
+  serialized_start=10396,
+  serialized_end=11943,
 )
 
 
@@ -2975,8 +2982,8 @@ _PILOTINGRESSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11918,
-  serialized_end=12048,
+  serialized_start=11946,
+  serialized_end=12076,
 )
 
 
@@ -3006,8 +3013,8 @@ _PILOTPOLICYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12050,
-  serialized_end=12114,
+  serialized_start=12078,
+  serialized_end=12142,
 )
 
 
@@ -3037,8 +3044,8 @@ _PILOTTELEMETRYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12116,
-  serialized_end=12183,
+  serialized_start=12144,
+  serialized_end=12211,
 )
 
 
@@ -3089,8 +3096,8 @@ _PORTSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12185,
-  serialized_end=12264,
+  serialized_start=12213,
+  serialized_end=12292,
 )
 
 
@@ -3225,8 +3232,8 @@ _PROMETHEUSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12267,
-  serialized_end=13004,
+  serialized_start=12295,
+  serialized_end=13032,
 )
 
 
@@ -3263,8 +3270,8 @@ _PROMETHEUSMIXERADAPTERCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13007,
-  serialized_end=13140,
+  serialized_start=13035,
+  serialized_end=13168,
 )
 
 
@@ -3294,8 +3301,8 @@ _PROMETHEUSSECURITYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13142,
-  serialized_end=13213,
+  serialized_start=13170,
+  serialized_end=13241,
 )
 
 
@@ -3332,8 +3339,8 @@ _PROMETHEUSSERVICECONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13216,
-  serialized_end=13357,
+  serialized_start=13244,
+  serialized_end=13385,
 )
 
 
@@ -3370,8 +3377,8 @@ _PROMETHEUSSERVICENODEPORTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13359,
-  serialized_end=13451,
+  serialized_start=13387,
+  serialized_end=13479,
 )
 
 
@@ -3625,8 +3632,8 @@ _PROXYCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13454,
-  serialized_end=14628,
+  serialized_start=13482,
+  serialized_end=14656,
 )
 
 
@@ -3670,8 +3677,8 @@ _ENVOYACCESSLOGCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14630,
-  serialized_end=14725,
+  serialized_start=14658,
+  serialized_end=14753,
 )
 
 
@@ -3708,8 +3715,8 @@ _PROXYINITCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14727,
-  serialized_end=14799,
+  serialized_start=14755,
+  serialized_end=14827,
 )
 
 
@@ -3746,8 +3753,8 @@ _RESOURCESREQUESTSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14801,
-  serialized_end=14855,
+  serialized_start=14829,
+  serialized_end=14883,
 )
 
 
@@ -3805,8 +3812,8 @@ _SDSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14858,
-  serialized_end=15085,
+  serialized_start=14886,
+  serialized_end=15113,
 )
 
 
@@ -3850,8 +3857,8 @@ _SECRETVOLUME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15087,
-  serialized_end=15154,
+  serialized_start=15115,
+  serialized_end=15182,
 )
 
 

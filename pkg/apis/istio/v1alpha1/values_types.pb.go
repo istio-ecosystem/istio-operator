@@ -1441,6 +1441,8 @@ type GlobalConfig struct {
 	Tracer *TracerConfig `protobuf:"bytes,33,opt,name=tracer,proto3" json:"tracer,omitempty"`
 	// Specifies the trust domain that corresponds to the root cert of CA.
 	TrustDomain string `protobuf:"bytes,34,opt,name=trustDomain,proto3" json:"trustDomain,omitempty"`
+	// The trust domain aliases represent the aliases of trustDomain.
+	TrustDomainAliases []string `protobuf:"bytes,42,rep,name=trustDomainAliases,proto3" json:"trustDomainAliases,omitempty"`
 	// Controls whether to use of Mesh Configuration Protocol to distribute configuration.
 	UseMCP                       *protobuf.BoolValue            `protobuf:"bytes,35,opt,name=useMCP,proto3" json:"useMCP,omitempty"`
 	LogAsJson                    *protobuf.BoolValue            `protobuf:"bytes,36,opt,name=logAsJson,proto3" json:"logAsJson,omitempty"`
@@ -1714,6 +1716,13 @@ func (m *GlobalConfig) GetTrustDomain() string {
 		return m.TrustDomain
 	}
 	return ""
+}
+
+func (m *GlobalConfig) GetTrustDomainAliases() []string {
+	if m != nil {
+		return m.TrustDomainAliases
+	}
+	return nil
 }
 
 func (m *GlobalConfig) GetUseMCP() *protobuf.BoolValue {
