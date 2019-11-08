@@ -2,7 +2,7 @@
 title: v1alpha1
 layout: protoc-gen-docs
 generator: protoc-gen-docs
-number_of_entries: 82
+number_of_entries: 83
 ---
 <h2 id="AddonIngressConfig">AddonIngressConfig</h2>
 <section>
@@ -1588,6 +1588,62 @@ No
 <tr id="GlobalConfig-operatorManageWebhooks">
 <td><code>operatorManageWebhooks</code></td>
 <td><code><a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#boolvalue">BoolValue</a></code></td>
+<td>
+</td>
+<td>
+No
+</td>
+</tr>
+<tr id="GlobalConfig-istioRemote">
+<td><code>istioRemote</code></td>
+<td><code><a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#boolvalue">BoolValue</a></code></td>
+<td>
+<p>Settings for remote cluster.</p>
+
+</td>
+<td>
+No
+</td>
+</tr>
+<tr id="GlobalConfig-createRemoteSvcEndpoints">
+<td><code>createRemoteSvcEndpoints</code></td>
+<td><code><a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#boolvalue">BoolValue</a></code></td>
+<td>
+</td>
+<td>
+No
+</td>
+</tr>
+<tr id="GlobalConfig-remotePilotCreateSvcEndpoint">
+<td><code>remotePilotCreateSvcEndpoint</code></td>
+<td><code><a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#boolvalue">BoolValue</a></code></td>
+<td>
+</td>
+<td>
+No
+</td>
+</tr>
+<tr id="GlobalConfig-remotePolicyAddress">
+<td><code>remotePolicyAddress</code></td>
+<td><code>string</code></td>
+<td>
+</td>
+<td>
+No
+</td>
+</tr>
+<tr id="GlobalConfig-remotePilotAddress">
+<td><code>remotePilotAddress</code></td>
+<td><code>string</code></td>
+<td>
+</td>
+<td>
+No
+</td>
+</tr>
+<tr id="GlobalConfig-remoteTelemetryAddress">
+<td><code>remoteTelemetryAddress</code></td>
+<td><code>string</code></td>
 <td>
 </td>
 <td>
@@ -3744,6 +3800,39 @@ No
 
 <p>See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/</p>
 
+</td>
+<td>
+No
+</td>
+</tr>
+<tr id="PilotConfig-configSource">
+<td><code>configSource</code></td>
+<td><code><a href="#PilotConfigSource">PilotConfigSource</a></code></td>
+<td>
+</td>
+<td>
+No
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<h2 id="PilotConfigSource">PilotConfigSource</h2>
+<section>
+<table class="message-fields">
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr id="PilotConfigSource-subscribedResources">
+<td><code>subscribedResources</code></td>
+<td><code>string</code></td>
+<td>
 </td>
 <td>
 No
