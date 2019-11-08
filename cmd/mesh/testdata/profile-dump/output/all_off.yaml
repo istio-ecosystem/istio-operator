@@ -590,6 +590,10 @@ values:
     replicaCount: 1
     telemetry:
       enabled: true
+      v1:
+        enabled: true
+      v2:
+        enabled: false
     tolerations: []
     traceSampling: 1
     useMCP: true
