@@ -1450,6 +1450,7 @@ type GlobalConfig struct {
 	Network                      string                         `protobuf:"bytes,39,opt,name=network,proto3" json:"network,omitempty"`
 	Certificates                 []map[string]interface{} `protobuf:"bytes,40,opt,name=certificates,proto3" json:"certificates,omitempty"`
 	OperatorManageWebhooks       *protobuf.BoolValue            `protobuf:"bytes,41,opt,name=operatorManageWebhooks,proto3" json:"operatorManageWebhooks,omitempty"`
+	PodDNSSearchNamespaces       []string                 `protobuf:"bytes,43,rep,name=podDNSSearchNamespaces,proto3" json:"podDNSSearchNamespaces,omitempty"`
 	XXX_NoUnkeyedLiteral         struct{}                       `json:"-"`
 	XXX_unrecognized             []byte                         `json:"-"`
 	XXX_sizecache                int32                          `json:"-"`
@@ -1763,6 +1764,13 @@ func (m *GlobalConfig) GetCertificates() []map[string]interface{} {
 func (m *GlobalConfig) GetOperatorManageWebhooks() *protobuf.BoolValue {
 	if m != nil {
 		return m.OperatorManageWebhooks
+	}
+	return nil
+}
+
+func (m *GlobalConfig) GetPodDNSSearchNamespaces() []string {
+	if m != nil {
+		return m.PodDNSSearchNamespaces
 	}
 	return nil
 }

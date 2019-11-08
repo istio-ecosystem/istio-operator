@@ -495,7 +495,7 @@ message GlobalConfig {
 
   google.protobuf.BoolValue operatorManageWebhooks = 41;
 
-  // The next available key is 43
+  repeated string podDNSSearchNamespaces = 43;
 }
 
 // GlobalLoggingConfig specifies the global logging level settings for the Istio control plane components.
@@ -1261,8 +1261,6 @@ message ProxyConfig {
   google.protobuf.Duration drainDuration = 29;
 
   string connectTimeout = 30;
-
-  repeated string podDnsSearchNamespaces = 31;
 
   google.protobuf.Duration parentShutdownDuration = 32;
 }
