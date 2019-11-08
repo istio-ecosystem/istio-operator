@@ -82,6 +82,8 @@
 // ../../data/charts/istio-control/istio-config/values.yaml
 // ../../data/charts/istio-control/istio-discovery/Chart.yaml
 // ../../data/charts/istio-control/istio-discovery/NOTES.txt
+// ../../data/charts/istio-control/istio-discovery/metadata-exchange-v2.yaml
+// ../../data/charts/istio-control/istio-discovery/stats-filter-v2.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/_affinity.tpl
 // ../../data/charts/istio-control/istio-discovery/templates/_helpers.tpl
 // ../../data/charts/istio-control/istio-discovery/templates/autoscale.yaml
@@ -94,6 +96,7 @@
 // ../../data/charts/istio-control/istio-discovery/templates/poddisruptionbudget.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/service.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/serviceaccount.yaml
+// ../../data/charts/istio-control/istio-discovery/templates/telemetryv2.yaml
 // ../../data/charts/istio-control/istio-discovery/values.yaml
 // ../../data/charts/istio-policy/Chart.yaml
 // ../../data/charts/istio-policy/templates/_affinity.tpl
@@ -6590,7 +6593,7 @@ spec:
           - serviceAccountToken:
               path: istio-token
               expirationSeconds: 43200
-              audience: {{ .Values.global.trustDomain }}
+              audience: {{ .Values.global.sds.token.aud }}
       {{- end }}
       {{ if .Values.global.sds.enabled }}
       - name: sdsudspath
@@ -7691,7 +7694,7 @@ spec:
           - serviceAccountToken:
               path: istio-token
               expirationSeconds: 43200
-              audience: {{ .Values.global.trustDomain }}
+              audience: {{ .Values.global.sds.token.aud }}
       {{- end }}
       - name: istio-certs
         secret:
@@ -11303,6 +11306,146 @@ func chartsIstioControlIstioDiscoveryNotesTxt() (*asset, error) {
 	return a, nil
 }
 
+var _chartsIstioControlIstioDiscoveryMetadataExchangeV2Yaml = []byte(`apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: metadata-exchange
+spec:
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: ANY # inbound, outbound, and gateway
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.http_connection_manager"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.wasm
+          config:
+            config:
+              configuration: envoy.wasm.metadata_exchange
+              vm_config:
+                runtime: envoy.wasm.runtime.null
+                code:
+                  inline_string: envoy.wasm.metadata_exchange`)
+
+func chartsIstioControlIstioDiscoveryMetadataExchangeV2YamlBytes() ([]byte, error) {
+	return _chartsIstioControlIstioDiscoveryMetadataExchangeV2Yaml, nil
+}
+
+func chartsIstioControlIstioDiscoveryMetadataExchangeV2Yaml() (*asset, error) {
+	bytes, err := chartsIstioControlIstioDiscoveryMetadataExchangeV2YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/metadata-exchange-v2.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsIstioControlIstioDiscoveryStatsFilterV2Yaml = []byte(`apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: stats-filter
+spec:
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_OUTBOUND
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.http_connection_manager"
+              subFilter:
+                name: "envoy.router"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.wasm
+          config:
+            config:
+              root_id: stats_outbound
+              configuration: |
+                {
+                  "debug": "false",
+                  "stat_prefix": "istio",
+                }
+              vm_config:
+                vm_id: stats_outbound
+                runtime: envoy.wasm.runtime.null
+                code:
+                  inline_string: envoy.wasm.stats
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.http_connection_manager"
+              subFilter:
+                name: "envoy.router"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.wasm
+          config:
+            config:
+              root_id: stats_inbound
+              configuration: |
+                {
+                  "debug": "false",
+                  "stat_prefix": "istio",
+                }
+              vm_config:
+                vm_id: stats_inbound
+                runtime: envoy.wasm.runtime.null
+                code:
+                  inline_string: envoy.wasm.stats
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.http_connection_manager"
+              subFilter:
+                name: "envoy.router"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.wasm
+          config:
+            config:
+              root_id: stats_outbound
+              configuration: |
+                {
+                  "debug": "false",
+                  "stat_prefix": "istio",
+                }
+              vm_config:
+                vm_id: stats_outbound
+                runtime: envoy.wasm.runtime.null
+                code:
+                  inline_string: envoy.wasm.stats`)
+
+func chartsIstioControlIstioDiscoveryStatsFilterV2YamlBytes() ([]byte, error) {
+	return _chartsIstioControlIstioDiscoveryStatsFilterV2Yaml, nil
+}
+
+func chartsIstioControlIstioDiscoveryStatsFilterV2Yaml() (*asset, error) {
+	bytes, err := chartsIstioControlIstioDiscoveryStatsFilterV2YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/stats-filter-v2.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _chartsIstioControlIstioDiscoveryTemplates_affinityTpl = []byte(`{{/* affinity - https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ */}}
 
 {{- define "nodeaffinity" }}
@@ -11861,7 +12004,6 @@ data:
     disableMixerHttpReports: false
     {{- end }}
 
-
     {{- if .Values.pilot.policy.enabled }}
 
     # Set the following variable to true to disable policy checks by the Mixer.
@@ -12294,7 +12436,7 @@ spec:
         projected:
           sources:
           - serviceAccountToken:
-              audience: {{ .Values.global.trustDomain }}
+              audience: {{ .Values.global.sds.token.aud }}
               expirationSeconds: 43200
               path: istio-token
       {{- end }}
@@ -12551,6 +12693,27 @@ func chartsIstioControlIstioDiscoveryTemplatesServiceaccountYaml() (*asset, erro
 	return a, nil
 }
 
+var _chartsIstioControlIstioDiscoveryTemplatesTelemetryv2Yaml = []byte(`{{- if and .Values.pilot.telemetry.enabled .Values.pilot.telemetry.v2.enabled }}
+{{ .Files.Get "metadata-exchange-v2.yaml" }}
+---
+{{ .Files.Get "stats-filter-v2.yaml" }}
+{{- end }}`)
+
+func chartsIstioControlIstioDiscoveryTemplatesTelemetryv2YamlBytes() ([]byte, error) {
+	return _chartsIstioControlIstioDiscoveryTemplatesTelemetryv2Yaml, nil
+}
+
+func chartsIstioControlIstioDiscoveryTemplatesTelemetryv2Yaml() (*asset, error) {
+	bytes, err := chartsIstioControlIstioDiscoveryTemplatesTelemetryv2YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/templates/telemetryv2.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _chartsIstioControlIstioDiscoveryValuesYaml = []byte(`#.Values.pilot for discovery and mesh wide config
 
 ## Discovery Settings
@@ -12649,11 +12812,14 @@ pilot:
     ingressClass: istio
 
   telemetry:
-    # Will not define mixerCheckServer and mixerReportServer
     enabled: true
     v1:
+      # Will define mixerCheckServer and mixerReportServer
       enabled: true
+
     v2:
+      # For Null VM case now. If enabled, will set disableMixerHttpReports to true and not define mixerReportServer
+      # also enable metadata exchange and stats filter.
       enabled: false
 
   policy:
@@ -13396,7 +13562,7 @@ spec:
         projected:
           sources:
           - serviceAccountToken:
-              audience: {{ .Values.global.trustDomain }}
+              audience: {{ .Values.global.sds.token.aud }}
               expirationSeconds: 43200
               path: istio-token
       {{- end }}
@@ -28646,8 +28812,8 @@ rules:
       - nodes
       - pods
       - pods/log
-      - services
       - replicationcontrollers
+      - services
     verbs:
       - get
       - list
@@ -28655,8 +28821,8 @@ rules:
   - apiGroups: ["extensions", "apps"]
     resources:
       - deployments
-      - statefulsets
       - replicasets
+      - statefulsets
     verbs:
       - get
       - list
@@ -28713,8 +28879,8 @@ rules:
       - nodes
       - pods
       - pods/log
-      - services
       - replicationcontrollers
+      - services
     verbs:
       - get
       - list
@@ -28722,8 +28888,8 @@ rules:
   - apiGroups: ["extensions", "apps"]
     resources:
       - deployments
-      - statefulsets
       - replicasets
+      - statefulsets
     verbs:
       - get
       - list
@@ -28759,6 +28925,7 @@ rules:
       - monitoringdashboards
     verbs:
       - get
+      - list
 `)
 
 func chartsIstioTelemetryKialiTemplatesClusterroleYamlBytes() ([]byte, error) {
@@ -28852,7 +29019,7 @@ data:
     external_services:
       istio:
         url_service_version: http://istio-pilot.{{ .Values.global.configNamespace }}:8080/version
-      jaeger:
+      tracing:
         url: {{ .Values.kiali.dashboard.jaegerURL }}
       grafana:
         url: {{ .Values.kiali.dashboard.grafanaURL }}
@@ -30804,7 +30971,7 @@ spec:
         projected:
           sources:
           - serviceAccountToken:
-              audience: {{ .Values.global.trustDomain }}
+              audience: {{ .Values.global.sds.token.aud }}
               expirationSeconds: 43200
               path: istio-token
       {{- end }}
@@ -36961,6 +37128,10 @@ spec:
         ingressClass: istio
       telemetry:
         enabled: true
+        v1:
+          enabled: true
+        v2:
+          enabled: false
       policy:
         enabled: false
       useMCP: true
@@ -38221,6 +38392,8 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/istio-control/istio-config/values.yaml": chartsIstioControlIstioConfigValuesYaml,
 	"charts/istio-control/istio-discovery/Chart.yaml": chartsIstioControlIstioDiscoveryChartYaml,
 	"charts/istio-control/istio-discovery/NOTES.txt": chartsIstioControlIstioDiscoveryNotesTxt,
+	"charts/istio-control/istio-discovery/metadata-exchange-v2.yaml": chartsIstioControlIstioDiscoveryMetadataExchangeV2Yaml,
+	"charts/istio-control/istio-discovery/stats-filter-v2.yaml": chartsIstioControlIstioDiscoveryStatsFilterV2Yaml,
 	"charts/istio-control/istio-discovery/templates/_affinity.tpl": chartsIstioControlIstioDiscoveryTemplates_affinityTpl,
 	"charts/istio-control/istio-discovery/templates/_helpers.tpl": chartsIstioControlIstioDiscoveryTemplates_helpersTpl,
 	"charts/istio-control/istio-discovery/templates/autoscale.yaml": chartsIstioControlIstioDiscoveryTemplatesAutoscaleYaml,
@@ -38233,6 +38406,7 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/istio-control/istio-discovery/templates/poddisruptionbudget.yaml": chartsIstioControlIstioDiscoveryTemplatesPoddisruptionbudgetYaml,
 	"charts/istio-control/istio-discovery/templates/service.yaml": chartsIstioControlIstioDiscoveryTemplatesServiceYaml,
 	"charts/istio-control/istio-discovery/templates/serviceaccount.yaml": chartsIstioControlIstioDiscoveryTemplatesServiceaccountYaml,
+	"charts/istio-control/istio-discovery/templates/telemetryv2.yaml": chartsIstioControlIstioDiscoveryTemplatesTelemetryv2Yaml,
 	"charts/istio-control/istio-discovery/values.yaml": chartsIstioControlIstioDiscoveryValuesYaml,
 	"charts/istio-policy/Chart.yaml": chartsIstioPolicyChartYaml,
 	"charts/istio-policy/templates/_affinity.tpl": chartsIstioPolicyTemplates_affinityTpl,
@@ -38516,6 +38690,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"istio-discovery": &bintree{nil, map[string]*bintree{
 				"Chart.yaml": &bintree{chartsIstioControlIstioDiscoveryChartYaml, map[string]*bintree{}},
 				"NOTES.txt": &bintree{chartsIstioControlIstioDiscoveryNotesTxt, map[string]*bintree{}},
+				"metadata-exchange-v2.yaml": &bintree{chartsIstioControlIstioDiscoveryMetadataExchangeV2Yaml, map[string]*bintree{}},
+				"stats-filter-v2.yaml": &bintree{chartsIstioControlIstioDiscoveryStatsFilterV2Yaml, map[string]*bintree{}},
 				"templates": &bintree{nil, map[string]*bintree{
 					"_affinity.tpl": &bintree{chartsIstioControlIstioDiscoveryTemplates_affinityTpl, map[string]*bintree{}},
 					"_helpers.tpl": &bintree{chartsIstioControlIstioDiscoveryTemplates_helpersTpl, map[string]*bintree{}},
@@ -38529,6 +38705,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 					"poddisruptionbudget.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesPoddisruptionbudgetYaml, map[string]*bintree{}},
 					"service.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesServiceYaml, map[string]*bintree{}},
 					"serviceaccount.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesServiceaccountYaml, map[string]*bintree{}},
+					"telemetryv2.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesTelemetryv2Yaml, map[string]*bintree{}},
 				}},
 				"values.yaml": &bintree{chartsIstioControlIstioDiscoveryValuesYaml, map[string]*bintree{}},
 			}},

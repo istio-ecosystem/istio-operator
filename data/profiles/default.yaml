@@ -389,6 +389,10 @@ spec:
         ingressClass: istio
       telemetry:
         enabled: true
+        v1:
+          enabled: true
+        v2:
+          enabled: false
       policy:
         enabled: false
       useMCP: true
