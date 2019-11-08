@@ -502,7 +502,15 @@ message GlobalConfig {
 
   google.protobuf.BoolValue operatorManageWebhooks = 41;
 
-  // The next available key is 44
+  // Settings for remote cluster.
+  google.protobuf.BoolValue istioRemote = 44;
+  google.protobuf.BoolValue createRemoteSvcEndpoints = 45;
+  google.protobuf.BoolValue remotePilotCreateSvcEndpoint = 46;
+  string remotePolicyAddress = 47;
+  string remotePilotAddress = 48;
+  string remoteTelemetryAddress = 49;
+
+  // The next available key is 50
 }
 
 // GlobalLoggingConfig specifies the global logging level settings for the Istio control plane components.
@@ -1028,6 +1036,8 @@ message PilotConfig {
   //
   // See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   TypeMapStringInterface podAnnotations = 30;
+
+  PilotConfigSource configSource = 31;
 }
 
 // Controls legacy k8s ingress. Only one pilot profile should enable ingress support.
@@ -1064,6 +1074,10 @@ message PilotPolicyConfig {
 message PilotTelemetryConfig {
   // Controls whether telemetry is exported for Pilot.
   google.protobuf.BoolValue enabled = 1;
+}
+
+message PilotConfigSource {
+  string subscribedResources = 1;
 }
 
 // Configuration for a port.
