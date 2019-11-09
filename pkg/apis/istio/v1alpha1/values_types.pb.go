@@ -1456,16 +1456,21 @@ type GlobalConfig struct {
 	Network                      string                         `protobuf:"bytes,39,opt,name=network,proto3" json:"network,omitempty"`
 	Certificates                 []map[string]interface{} `protobuf:"bytes,40,opt,name=certificates,proto3" json:"certificates,omitempty"`
 	OperatorManageWebhooks       *protobuf.BoolValue            `protobuf:"bytes,41,opt,name=operatorManageWebhooks,proto3" json:"operatorManageWebhooks,omitempty"`
-	// Settings for remote cluster.
-	IstioRemote                  *protobuf.BoolValue `protobuf:"bytes,44,opt,name=istioRemote,proto3" json:"istioRemote,omitempty"`
-	CreateRemoteSvcEndpoints     *protobuf.BoolValue `protobuf:"bytes,45,opt,name=createRemoteSvcEndpoints,proto3" json:"createRemoteSvcEndpoints,omitempty"`
+	// Controls whether to use the Istio remote control plane
+	IstioRemote              *protobuf.BoolValue `protobuf:"bytes,44,opt,name=istioRemote,proto3" json:"istioRemote,omitempty"`
+	CreateRemoteSvcEndpoints *protobuf.BoolValue `protobuf:"bytes,45,opt,name=createRemoteSvcEndpoints,proto3" json:"createRemoteSvcEndpoints,omitempty"`
+	// If set, a selector-less service and endpoint for istio-pilot are created with the remotePilotAddress IP,
+	// which ensures the istio-pilot. is DNS resolvable in the remote cluster.
 	RemotePilotCreateSvcEndpoint *protobuf.BoolValue `protobuf:"bytes,46,opt,name=remotePilotCreateSvcEndpoint,proto3" json:"remotePilotCreateSvcEndpoint,omitempty"`
-	RemotePolicyAddress          string              `protobuf:"bytes,47,opt,name=remotePolicyAddress,proto3" json:"remotePolicyAddress,omitempty"`
-	RemotePilotAddress           string              `protobuf:"bytes,48,opt,name=remotePilotAddress,proto3" json:"remotePilotAddress,omitempty"`
-	RemoteTelemetryAddress       string              `protobuf:"bytes,49,opt,name=remoteTelemetryAddress,proto3" json:"remoteTelemetryAddress,omitempty"`
-	XXX_NoUnkeyedLiteral         struct{}            `json:"-"`
-	XXX_unrecognized             []byte              `json:"-"`
-	XXX_sizecache                int32               `json:"-"`
+	// Specifies the Istio control plane’s policy Pod IP address or remote cluster DNS resolvable hostname.
+	RemotePolicyAddress string `protobuf:"bytes,47,opt,name=remotePolicyAddress,proto3" json:"remotePolicyAddress,omitempty"`
+	// Specifies the Istio control plane’s pilot Pod IP address or remote cluster DNS resolvable hostname.
+	RemotePilotAddress string `protobuf:"bytes,48,opt,name=remotePilotAddress,proto3" json:"remotePilotAddress,omitempty"`
+	// Specifies the Istio control plane’s telemetry Pod IP address or remote cluster DNS resolvable hostname
+	RemoteTelemetryAddress string   `protobuf:"bytes,49,opt,name=remoteTelemetryAddress,proto3" json:"remoteTelemetryAddress,omitempty"`
+	XXX_NoUnkeyedLiteral   struct{} `json:"-"`
+	XXX_unrecognized       []byte   `json:"-"`
+	XXX_sizecache          int32    `json:"-"`
 }
 
 func (m *GlobalConfig) Reset()         { *m = GlobalConfig{} }
@@ -3405,11 +3410,14 @@ type PilotConfig struct {
 	// K8s annotations for pods.
 	//
 	// See: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-	PodAnnotations       map[string]interface{} `protobuf:"bytes,30,opt,name=podAnnotations,proto3" json:"podAnnotations,omitempty"`
-	ConfigSource         *PilotConfigSource      `protobuf:"bytes,31,opt,name=configSource,proto3" json:"configSource,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
-	XXX_unrecognized     []byte                  `json:"-"`
-	XXX_sizecache        int32                   `json:"-"`
+	PodAnnotations map[string]interface{} `protobuf:"bytes,30,opt,name=podAnnotations,proto3" json:"podAnnotations,omitempty"`
+	// ConfigSource describes a source of configuration data for networking
+	// rules, and other Istio configuration artifacts. Multiple data sources
+	// can be configured for a single control plane.
+	ConfigSource         *PilotConfigSource `protobuf:"bytes,31,opt,name=configSource,proto3" json:"configSource,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *PilotConfig) Reset()         { *m = PilotConfig{} }
@@ -3798,7 +3806,11 @@ func (m *PilotTelemetryConfig) GetEnabled() *protobuf.BoolValue {
 	return nil
 }
 
+// PilotConfigSource describes information about a configuration store inside a
+// mesh. A single control plane instance can interact with one or more data
+// sources.
 type PilotConfigSource struct {
+	// Describes the source of configuration, if nothing is specified default is MCP.
 	SubscribedResources  string   `protobuf:"bytes,1,opt,name=subscribedResources,proto3" json:"subscribedResources,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

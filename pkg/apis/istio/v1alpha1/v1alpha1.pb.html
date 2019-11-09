@@ -1598,7 +1598,7 @@ No
 <td><code>istioRemote</code></td>
 <td><code><a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#boolvalue">BoolValue</a></code></td>
 <td>
-<p>Settings for remote cluster.</p>
+<p>Controls whether to use the Istio remote control plane</p>
 
 </td>
 <td>
@@ -1618,6 +1618,9 @@ No
 <td><code>remotePilotCreateSvcEndpoint</code></td>
 <td><code><a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#boolvalue">BoolValue</a></code></td>
 <td>
+<p>If set, a selector-less service and endpoint for istio-pilot are created with the remotePilotAddress IP,
+which ensures the istio-pilot. is DNS resolvable in the remote cluster.</p>
+
 </td>
 <td>
 No
@@ -1627,6 +1630,8 @@ No
 <td><code>remotePolicyAddress</code></td>
 <td><code>string</code></td>
 <td>
+<p>Specifies the Istio control plane’s policy Pod IP address or remote cluster DNS resolvable hostname.</p>
+
 </td>
 <td>
 No
@@ -1636,6 +1641,8 @@ No
 <td><code>remotePilotAddress</code></td>
 <td><code>string</code></td>
 <td>
+<p>Specifies the Istio control plane’s pilot Pod IP address or remote cluster DNS resolvable hostname.</p>
+
 </td>
 <td>
 No
@@ -1645,6 +1652,8 @@ No
 <td><code>remoteTelemetryAddress</code></td>
 <td><code>string</code></td>
 <td>
+<p>Specifies the Istio control plane’s telemetry Pod IP address or remote cluster DNS resolvable hostname</p>
+
 </td>
 <td>
 No
@@ -3809,6 +3818,10 @@ No
 <td><code>configSource</code></td>
 <td><code><a href="#PilotConfigSource">PilotConfigSource</a></code></td>
 <td>
+<p>ConfigSource describes a source of configuration data for networking
+rules, and other Istio configuration artifacts. Multiple data sources
+can be configured for a single control plane.</p>
+
 </td>
 <td>
 No
@@ -3819,6 +3832,10 @@ No
 </section>
 <h2 id="PilotConfigSource">PilotConfigSource</h2>
 <section>
+<p>PilotConfigSource describes information about a configuration store inside a
+mesh. A single control plane instance can interact with one or more data
+sources.</p>
+
 <table class="message-fields">
 <thead>
 <tr>
@@ -3833,6 +3850,8 @@ No
 <td><code>subscribedResources</code></td>
 <td><code>string</code></td>
 <td>
+<p>Describes the source of configuration, if nothing is specified default is MCP.</p>
+
 </td>
 <td>
 No
