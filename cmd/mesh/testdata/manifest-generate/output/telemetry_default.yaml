@@ -25,6 +25,24 @@ rules:
 ---
 
 
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-reader-istio-control
+  labels:
+    app: istio-reader
+    release: istio
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-reader-istio-control
+subjects:
+  - kind: ServiceAccount
+    name: istio-reader-service-account
+    namespace: istio-control
+---
+
+
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -5220,6 +5238,17 @@ metadata:
     istio-injection: disabled
 ---
 
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-reader-service-account
+  namespace: istio-control
+  labels:
+    app: istio-reader
+    release: istio
+---
+
 # CertManager component is disabled.
 
 # Citadel component is disabled.
@@ -5700,7 +5729,7 @@ apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   labels:
-    app: istio-telemetry
+    app: mixer
     release: istio
   name: istio-telemetry
   namespace: istio-control
@@ -5994,7 +6023,7 @@ spec:
       destination_principal: destination.principal | "unknown"
       destination_app: destination.labels["app"] | "unknown"
       destination_version: destination.labels["version"] | "unknown"
-      destination_service: destination.service.host | request.host | "unknown"
+      destination_service: destination.service.host | conditional((destination.service.name | "unknown") == "unknown", "unknown", request.host)
       destination_service_name: destination.service.name | "unknown"
       destination_service_namespace: destination.service.namespace | "unknown"
       request_protocol: api.protocol | context.protocol | "unknown"
@@ -6031,7 +6060,7 @@ spec:
       destination_principal: destination.principal | "unknown"
       destination_app: destination.labels["app"] | "unknown"
       destination_version: destination.labels["version"] | "unknown"
-      destination_service: destination.service.host | request.host | "unknown"
+      destination_service: destination.service.host | conditional((destination.service.name | "unknown") == "unknown", "unknown", request.host)
       destination_service_name: destination.service.name | "unknown"
       destination_service_namespace: destination.service.namespace | "unknown"
       request_protocol: api.protocol | context.protocol | "unknown"
@@ -6068,7 +6097,7 @@ spec:
       destination_principal: destination.principal | "unknown"
       destination_app: destination.labels["app"] | "unknown"
       destination_version: destination.labels["version"] | "unknown"
-      destination_service: destination.service.host | request.host | "unknown"
+      destination_service: destination.service.host | conditional((destination.service.name | "unknown") == "unknown", "unknown", request.host)
       destination_service_name: destination.service.name | "unknown"
       destination_service_namespace: destination.service.namespace | "unknown"
       request_protocol: api.protocol | context.protocol | "unknown"
@@ -6105,7 +6134,7 @@ spec:
       destination_principal: destination.principal | "unknown"
       destination_app: destination.labels["app"] | "unknown"
       destination_version: destination.labels["version"] | "unknown"
-      destination_service: destination.service.host | request.host | "unknown"
+      destination_service: destination.service.host | conditional((destination.service.name | "unknown") == "unknown", "unknown", request.host)
       destination_service_name: destination.service.name | "unknown"
       destination_service_namespace: destination.service.namespace | "unknown"
       request_protocol: api.protocol | context.protocol | "unknown"
@@ -6142,7 +6171,7 @@ spec:
       destination_principal: destination.principal | "unknown"
       destination_app: destination.labels["app"] | "unknown"
       destination_version: destination.labels["version"] | "unknown"
-      destination_service: destination.service.host | request.host | "unknown"
+      destination_service: destination.service.host | "unknown"
       destination_service_name: destination.service.name | "unknown"
       destination_service_namespace: destination.service.namespace | "unknown"
       connection_security_policy: conditional((context.reporter.kind | "inbound") == "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls", "none"))
@@ -6175,7 +6204,7 @@ spec:
       destination_principal: destination.principal | "unknown"
       destination_app: destination.labels["app"] | "unknown"
       destination_version: destination.labels["version"] | "unknown"
-      destination_service: destination.service.host | request.host | "unknown"
+      destination_service: destination.service.host | "unknown"
       destination_service_name: destination.service.name | "unknown"
       destination_service_namespace: destination.service.namespace | "unknown"
       connection_security_policy: conditional((context.reporter.kind | "inbound") == "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls", "none"))
@@ -6956,7 +6985,6 @@ metadata:
   labels:
     app: istio-mixer
     istio: mixer
-    istio-mixer-type: telemetry
     release: istio
   name: istio-telemetry
   namespace: istio-control
@@ -6975,7 +7003,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        app: istio-telemetry
+        app: telemetry
         istio: mixer
         istio-mixer-type: telemetry
     spec:
@@ -7137,7 +7165,7 @@ metadata:
   name: istio-telemetry
   namespace: istio-control
   labels:
-    app: istio-telemetry
+    app: telemetry
     release: istio
     istio: mixer
     istio-mixer-type: telemetry
@@ -7145,7 +7173,7 @@ spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app: istio-telemetry
+      app: telemetry
       release: istio
       istio: mixer
       istio-mixer-type: telemetry
@@ -7158,7 +7186,7 @@ metadata:
   name: istio-telemetry
   namespace: istio-control
   labels:
-    app: istio-telemetry
+    app: mixer
     istio: mixer
     release: istio
 spec:

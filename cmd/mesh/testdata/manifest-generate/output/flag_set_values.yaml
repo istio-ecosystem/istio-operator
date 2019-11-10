@@ -25,6 +25,24 @@ rules:
 ---
 
 
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-reader-istio-system
+  labels:
+    app: istio-reader
+    release: istio
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-reader-istio-system
+subjects:
+  - kind: ServiceAccount
+    name: istio-reader-service-account
+    namespace: istio-system
+---
+
+
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -5220,6 +5238,17 @@ metadata:
     istio-injection: disabled
 ---
 
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-reader-service-account
+  namespace: istio-system
+  labels:
+    app: istio-reader
+    release: istio
+---
+
 # CertManager component is disabled.
 
 # Resources for Citadel component
@@ -5268,7 +5297,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: citadel
+    app: security
     istio: citadel
     release: istio
   name: istio-citadel
@@ -5358,7 +5387,7 @@ metadata:
   name: istio-citadel
   namespace: istio-system
   labels:
-    app: citadel
+    app: security
     istio: citadel
     release: istio
 spec:
@@ -5377,7 +5406,7 @@ metadata:
   name: istio-citadel
   namespace: istio-system
   labels:
-    app: citadel
+    app: security
     istio: citadel
     release: istio
 
@@ -5400,6 +5429,7 @@ metadata:
   name: istio-citadel-service-account
   namespace: istio-system
   labels:
+    app: security
     release: istio
 ---
 
@@ -5962,6 +5992,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   labels:
     app: istio-ingressgateway
+    istio: ingressgateway
     release: istio
   name: istio-ingressgateway
   namespace: istio-system
@@ -6237,6 +6268,7 @@ metadata:
   labels:
     app: istio-ingressgateway
     release: istio
+    istio: ingressgateway
 spec:
   type: LoadBalancer
   selector:
@@ -6406,7 +6438,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: sidecar-injector
+    app: sidecarInjectorWebhook
     istio: sidecar-injector
     release: istio
   name: istio-sidecar-injector
@@ -6584,7 +6616,7 @@ metadata:
   name: istio-sidecar-injector
   namespace: istio-system
   labels:
-    app: sidecar-injector
+    app: sidecarInjectorWebhook
     release: istio
     istio: sidecar-injector
 spec:
@@ -6602,7 +6634,7 @@ metadata:
   name: istio-sidecar-injector-service-account
   namespace: istio-system
   labels:
-    app: sidecar-injector
+    app: sidecarInjectorWebhook
     release: istio
     istio: sidecar-injector
 ---
@@ -7118,24 +7150,6 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: istio-pilot-service-account
-    namespace: istio-system
----
-
-
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: istio-reader-istio-system
-  labels:
-    app: istio-reader
-    release: istio
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: istio-reader-istio-system
-subjects:
-  - kind: ServiceAccount
-    name: istio-reader-service-account
     namespace: istio-system
 ---
 
@@ -7726,24 +7740,13 @@ metadata:
     release: istio
 ---
 
-
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: istio-reader-service-account
-  namespace: istio-system
-  labels:
-    app: istio-reader
-    release: istio
----
-
 # Resources for Policy component
 
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   labels:
-    app: istio-policy
+    app: mixer
     release: istio
   name: istio-policy
   namespace: istio-system
@@ -7843,7 +7846,6 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: istio-policy
       istio: mixer
       istio-mixer-type: policy
   strategy:
@@ -7855,7 +7857,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        app: istio-policy
+        app: policy
         istio: mixer
         istio-mixer-type: policy
     spec:
@@ -8006,7 +8008,7 @@ metadata:
   name: istio-policy
   namespace: istio-system
   labels:
-    app: istio-policy
+    app: policy
     release: istio
     istio: mixer
     istio-mixer-type: policy
@@ -8014,7 +8016,7 @@ spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app: istio-policy
+      app: policy
       release: istio
       istio: mixer
       istio-mixer-type: policy
@@ -8027,7 +8029,7 @@ metadata:
   name: istio-policy
   namespace: istio-system
   labels:
-    app: istio-policy
+    app: mixer
     istio: mixer
     release: istio
 spec:
@@ -8039,7 +8041,8 @@ spec:
   - name: http-policy-monitoring
     port: 15014
   selector:
-    app: istio-policy
+    istio: mixer
+    istio-mixer-type: policy
 ---
 
 
@@ -8507,7 +8510,7 @@ apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   labels:
-    app: istio-telemetry
+    app: mixer
     release: istio
   name: istio-telemetry
   namespace: istio-system
@@ -8801,7 +8804,7 @@ spec:
       destination_principal: destination.principal | "unknown"
       destination_app: destination.labels["app"] | "unknown"
       destination_version: destination.labels["version"] | "unknown"
-      destination_service: destination.service.host | request.host | "unknown"
+      destination_service: destination.service.host | conditional((destination.service.name | "unknown") == "unknown", "unknown", request.host)
       destination_service_name: destination.service.name | "unknown"
       destination_service_namespace: destination.service.namespace | "unknown"
       request_protocol: api.protocol | context.protocol | "unknown"
@@ -8838,7 +8841,7 @@ spec:
       destination_principal: destination.principal | "unknown"
       destination_app: destination.labels["app"] | "unknown"
       destination_version: destination.labels["version"] | "unknown"
-      destination_service: destination.service.host | request.host | "unknown"
+      destination_service: destination.service.host | conditional((destination.service.name | "unknown") == "unknown", "unknown", request.host)
       destination_service_name: destination.service.name | "unknown"
       destination_service_namespace: destination.service.namespace | "unknown"
       request_protocol: api.protocol | context.protocol | "unknown"
@@ -8875,7 +8878,7 @@ spec:
       destination_principal: destination.principal | "unknown"
       destination_app: destination.labels["app"] | "unknown"
       destination_version: destination.labels["version"] | "unknown"
-      destination_service: destination.service.host | request.host | "unknown"
+      destination_service: destination.service.host | conditional((destination.service.name | "unknown") == "unknown", "unknown", request.host)
       destination_service_name: destination.service.name | "unknown"
       destination_service_namespace: destination.service.namespace | "unknown"
       request_protocol: api.protocol | context.protocol | "unknown"
@@ -8912,7 +8915,7 @@ spec:
       destination_principal: destination.principal | "unknown"
       destination_app: destination.labels["app"] | "unknown"
       destination_version: destination.labels["version"] | "unknown"
-      destination_service: destination.service.host | request.host | "unknown"
+      destination_service: destination.service.host | conditional((destination.service.name | "unknown") == "unknown", "unknown", request.host)
       destination_service_name: destination.service.name | "unknown"
       destination_service_namespace: destination.service.namespace | "unknown"
       request_protocol: api.protocol | context.protocol | "unknown"
@@ -8949,7 +8952,7 @@ spec:
       destination_principal: destination.principal | "unknown"
       destination_app: destination.labels["app"] | "unknown"
       destination_version: destination.labels["version"] | "unknown"
-      destination_service: destination.service.host | request.host | "unknown"
+      destination_service: destination.service.host | "unknown"
       destination_service_name: destination.service.name | "unknown"
       destination_service_namespace: destination.service.namespace | "unknown"
       connection_security_policy: conditional((context.reporter.kind | "inbound") == "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls", "none"))
@@ -8982,7 +8985,7 @@ spec:
       destination_principal: destination.principal | "unknown"
       destination_app: destination.labels["app"] | "unknown"
       destination_version: destination.labels["version"] | "unknown"
-      destination_service: destination.service.host | request.host | "unknown"
+      destination_service: destination.service.host | "unknown"
       destination_service_name: destination.service.name | "unknown"
       destination_service_namespace: destination.service.namespace | "unknown"
       connection_security_policy: conditional((context.reporter.kind | "inbound") == "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls", "none"))
@@ -9763,7 +9766,6 @@ metadata:
   labels:
     app: istio-mixer
     istio: mixer
-    istio-mixer-type: telemetry
     release: istio
   name: istio-telemetry
   namespace: istio-system
@@ -9782,7 +9784,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        app: istio-telemetry
+        app: telemetry
         istio: mixer
         istio-mixer-type: telemetry
     spec:
@@ -9944,7 +9946,7 @@ metadata:
   name: istio-telemetry
   namespace: istio-system
   labels:
-    app: istio-telemetry
+    app: telemetry
     release: istio
     istio: mixer
     istio-mixer-type: telemetry
@@ -9952,7 +9954,7 @@ spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app: istio-telemetry
+      app: telemetry
       release: istio
       istio: mixer
       istio-mixer-type: telemetry
@@ -9965,7 +9967,7 @@ metadata:
   name: istio-telemetry
   namespace: istio-system
   labels:
-    app: istio-telemetry
+    app: mixer
     istio: mixer
     release: istio
 spec:
