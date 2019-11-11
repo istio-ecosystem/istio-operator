@@ -319,6 +319,26 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 
 	logAndPrint("Applying manifest for component %s", componentName)
 
+	stdoutNs, stderrNs := "", ""
+	nsObjects := nsKindObjects(objects)
+	if len(nsObjects) > 0 {
+		mns, err := nsObjects.JSONManifest()
+		if err != nil {
+			return &ComponentApplyOutput{
+				Err: err,
+			}
+		}
+
+		stdoutNs, stderrNs, err = kubectl.Apply(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, namespace, mns, extraArgs...)
+		if err != nil {
+			return &ComponentApplyOutput{
+				Stdout: stdoutNs,
+				Stderr: stderrNs,
+				Err:    err,
+			}
+		}
+	}
+
 	crdObjects := cRDKindObjects(objects)
 	if len(crdObjects) > 0 {
 		mcrd, err := crdObjects.JSONManifest()
@@ -402,6 +422,16 @@ func cRDKindObjects(objects object.K8sObjects) object.K8sObjects {
 	var ret object.K8sObjects
 	for _, o := range objects {
 		if o.Kind == "CustomResourceDefinition" {
+			ret = append(ret, o)
+		}
+	}
+	return ret
+}
+
+func nsKindObjects(objects object.K8sObjects) object.K8sObjects {
+	var ret object.K8sObjects
+	for _, o := range objects {
+		if o.Kind == "Namespace" {
 			ret = append(ret, o)
 		}
 	}
