@@ -297,7 +297,7 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 		}
 	}
 
-	namespace, stdoutCRD, stderrCRD := "", "", ""
+	namespace := ""
 	for _, o := range objects {
 		o.AddLabels(map[string]string{istioComponentLabelStr: string(componentName)})
 		o.AddLabels(map[string]string{operatorLabelStr: operatorReconcileStr})
@@ -319,7 +319,7 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 
 	logAndPrint("Applying manifest for component %s", componentName)
 
-	stdoutNs, stderrNs := "", ""
+	stdout, stderr := "", ""
 	nsObjects := nsKindObjects(objects)
 	if len(nsObjects) > 0 {
 		mns, err := nsObjects.JSONManifest()
@@ -329,11 +329,11 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 			}
 		}
 
-		stdoutNs, stderrNs, err = kubectl.Apply(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, namespace, mns, extraArgs...)
+		stdout, stderr, err = kubectl.Apply(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, namespace, mns, extraArgs...)
 		if err != nil {
 			return &ComponentApplyOutput{
-				Stdout: stdoutNs,
-				Stderr: stderrNs,
+				Stdout: stdout,
+				Stderr: stderr,
 				Err:    err,
 			}
 		}
@@ -348,35 +348,38 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 			}
 		}
 
-		stdoutCRD, stderrCRD, err = kubectl.Apply(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, namespace, mcrd, extraArgs...)
+		stdoutCRD, stderrCRD, err := kubectl.Apply(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, namespace, mcrd, extraArgs...)
+		stdout += "\n" + stdoutCRD
+		stderr += "\n" + stderrCRD
 		if err != nil {
 			// Not all Istio components are robust to not yet created CRDs.
 			if err := waitForCRDs(objects, opts.DryRun); err != nil {
 				return &ComponentApplyOutput{
-					Stdout: stdoutCRD,
-					Stderr: stderrCRD,
+					Stdout: stdout,
+					Stderr: stderr,
 					Err:    err,
 				}
 			}
 		}
 	}
 
-	stdout, stderr := "", ""
-	nonCrdObjects := nonCRDKindObjects(objects)
-	m, err := nonCrdObjects.JSONManifest()
+	nonNsCrdObjects := nonNsCRDKindObjects(objects)
+	m, err := nonNsCrdObjects.JSONManifest()
 	if err != nil {
 		return &ComponentApplyOutput{
-			Stdout: stdoutCRD,
-			Stderr: stderrCRD,
+			Stdout: stdout,
+			Stderr: stderr,
 			Err:    err,
 		}
 	}
-	stdout, stderr, err = kubectl.Apply(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, namespace, m, extraArgs...)
+	stdoutNonNsCrd, stderrNonNsCrd, err := kubectl.Apply(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, namespace, m, extraArgs...)
+	stdout += "\n" + stdoutNonNsCrd
+	stderr += "\n" + stderrNonNsCrd
 	logAndPrint("Finished applying manifest for component %s", componentName)
 	ym, _ := objects.YAMLManifest()
 	return &ComponentApplyOutput{
-		Stdout:   stdoutCRD + "\n" + stdout,
-		Stderr:   stderrCRD + "\n" + stderr,
+		Stdout:   stdout,
+		Stderr:   stderr,
 		Manifest: ym,
 		Err:      err,
 	}
@@ -438,10 +441,10 @@ func nsKindObjects(objects object.K8sObjects) object.K8sObjects {
 	return ret
 }
 
-func nonCRDKindObjects(objects object.K8sObjects) object.K8sObjects {
+func nonNsCRDKindObjects(objects object.K8sObjects) object.K8sObjects {
 	var ret object.K8sObjects
 	for _, o := range objects {
-		if o.Kind != "CustomResourceDefinition" {
+		if o.Kind != "Namespace" && o.Kind != "CustomResourceDefinition" {
 			ret = append(ret, o)
 		}
 	}
