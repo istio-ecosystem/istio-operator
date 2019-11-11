@@ -351,7 +351,6 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 	}
 
 	nonNsCrdObjects := objectsNotInLists(objects, nsObjects, crdObjects)
-	nonNsCrdObjects = nonNsCRDKindObjects(objects)
 	m, err := nonNsCrdObjects.JSONManifest()
 	if err != nil {
 		return buildComponentApplyOutput(stdout, stderr, "", err)
