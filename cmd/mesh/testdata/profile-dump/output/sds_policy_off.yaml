@@ -592,12 +592,6 @@ values:
     policy:
       enabled: false
     replicaCount: 1
-    telemetry:
-      enabled: true
-      v1:
-        enabled: true
-      v2:
-        enabled: false
     tolerations: []
     traceSampling: 1
     useMCP: true
@@ -637,6 +631,10 @@ values:
       enabled: false
     rewriteAppHTTPProbe: false
     selfSigned: false
+  telemetry:
+    enabled: true
+    v2:
+      enabled: false
   tracing:
     enabled: false
     ingress:
