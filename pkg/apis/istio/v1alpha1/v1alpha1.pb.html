@@ -3727,17 +3727,6 @@ No
 No
 </td>
 </tr>
-<tr id="PilotConfig-telemetry">
-<td><code>telemetry</code></td>
-<td><code><a href="#PilotTelemetryConfig">PilotTelemetryConfig</a></code></td>
-<td>
-<p>Controls whether telemetry is exported for Pilot.</p>
-
-</td>
-<td>
-No
-</td>
-</tr>
 <tr id="PilotConfig-rollingMaxSurge">
 <td><code>rollingMaxSurge</code></td>
 <td><code><a href="#TypeIntOrStringForPB">TypeIntOrStringForPB</a></code></td>
@@ -3931,56 +3920,6 @@ No
 <td><code><a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#boolvalue">BoolValue</a></code></td>
 <td>
 <p>Controls whether Istio policy is applied to Pilot.</p>
-
-</td>
-<td>
-No
-</td>
-</tr>
-</tbody>
-</table>
-</section>
-<h2 id="PilotTelemetryConfig">PilotTelemetryConfig</h2>
-<section>
-<p>Controls whether telemetry is exported for Pilot.</p>
-
-<table class="message-fields">
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Description</th>
-<th>Required</th>
-</tr>
-</thead>
-<tbody>
-<tr id="PilotTelemetryConfig-enabled">
-<td><code>enabled</code></td>
-<td><code><a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#boolvalue">BoolValue</a></code></td>
-<td>
-<p>Controls whether telemetry is exported for Pilot.</p>
-
-</td>
-<td>
-No
-</td>
-</tr>
-<tr id="PilotTelemetryConfig-v1">
-<td><code>v1</code></td>
-<td><code><a href="#PilotTelemetryV1Config">PilotTelemetryV1Config</a></code></td>
-<td>
-<p>Use telemetry v1.</p>
-
-</td>
-<td>
-No
-</td>
-</tr>
-<tr id="PilotTelemetryConfig-v2">
-<td><code>v2</code></td>
-<td><code><a href="#PilotTelemetryV1Config">PilotTelemetryV1Config</a></code></td>
-<td>
-<p>Use telemetry v2.</p>
 
 </td>
 <td>
@@ -5623,6 +5562,45 @@ No
 </tbody>
 </table>
 </section>
+<h2 id="TelemetryConfig">TelemetryConfig</h2>
+<section>
+<p>Controls telemetry configuration</p>
+
+<table class="message-fields">
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr id="TelemetryConfig-enabled">
+<td><code>enabled</code></td>
+<td><code><a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#boolvalue">BoolValue</a></code></td>
+<td>
+<p>Controls whether telemetry is exported for Pilot.</p>
+
+</td>
+<td>
+No
+</td>
+</tr>
+<tr id="TelemetryConfig-v2">
+<td><code>v2</code></td>
+<td><code><a href="#PilotTelemetryV1Config">PilotTelemetryV1Config</a></code></td>
+<td>
+<p>Use telemetry v2.</p>
+
+</td>
+<td>
+No
+</td>
+</tr>
+</tbody>
+</table>
+</section>
 <h2 id="TracerConfig">TracerConfig</h2>
 <section>
 <p>Configuration for each of the supported tracers.</p>
@@ -6429,6 +6407,17 @@ No
 <td><code>pilot</code></td>
 <td><code><a href="#PilotConfig">PilotConfig</a></code></td>
 <td>
+</td>
+<td>
+No
+</td>
+</tr>
+<tr id="Values-telemetry">
+<td><code>telemetry</code></td>
+<td><code><a href="#TelemetryConfig">TelemetryConfig</a></code></td>
+<td>
+<p>Controls whether telemetry is exported for Pilot.</p>
+
 </td>
 <td>
 No
