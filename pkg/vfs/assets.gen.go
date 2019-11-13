@@ -12954,7 +12954,7 @@ telemetry:
   v2:
     # For Null VM case now. If enabled, will set disableMixerHttpReports to true and not define mixerReportServer
     # also enable metadata exchange and stats filter.
-    enabled: true
+    enabled: false
 `)
 
 func chartsIstioControlIstioDiscoveryValuesYamlBytes() ([]byte, error) {
