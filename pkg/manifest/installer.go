@@ -321,13 +321,13 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 
 		stdoutNs, stderrNs, err := kubectl.Apply(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, namespace, mns, extraArgs...)
 		stdout += "\n" + stdoutNs
-		stderr += "\n" + stderrNs
+		outerr := stderr + "\n" + stderrNs
 		if err != nil {
-			return buildComponentApplyOutput(stdout, stderr, "", err)
+			return buildComponentApplyOutput(stdout, outerr, "", err)
 		}
 
 		if err := waitForResources(nsObjects, opts); err != nil {
-			return buildComponentApplyOutput(stdout, stderr, "", err)
+			return buildComponentApplyOutput(stdout, outerr, "", err)
 		}
 	}
 
