@@ -690,15 +690,23 @@ spec:
       coreDNSTag: 1.6.2
       coreDNSPluginImage: istio/coredns-plugin:0.2-istio-1.1
 
+    kialiOperator:
+      enabled: false
+      namespace: kiali-operator
+
     kiali:
       enabled: false
       replicaCount: 1
       hub: quay.io/kiali
       tag: v1.9
+
       contextPath: /kiali
       nodeSelector: {}
       podAntiAffinityLabelSelector: []
       podAntiAffinityTermLabelSelector: []
+      resources: {}
+      tolerations: []
+
       ingress:
         enabled: false
         hosts:
@@ -707,8 +715,6 @@ spec:
         tls:
       dashboard:
         secretName: kiali
-        usernameKey: username
-        passphraseKey: passphrase
         viewOnlyMode: false
         grafanaURL:
         jaegerURL:
@@ -716,8 +722,6 @@ spec:
       createDemoSecret: false
       security:
         enabled: false
-        cert_file: /kiali-cert/cert-chain.pem
-        private_key_file: /kiali-cert/key.pem
 
     # TODO: derive from operator API
     version: ""

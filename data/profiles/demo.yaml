@@ -107,6 +107,10 @@ spec:
     tracing:
       enabled: true
 
+    kialiOperator:
+      enabled: true
+      namespace: kiali-operator
+
     kiali:
       enabled: true
       createDemoSecret: true
