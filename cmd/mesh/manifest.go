@@ -165,6 +165,7 @@ func genApplyManifests(setOverlay []string, inFilename string, force bool, dryRu
 func isStderrOkay(stderr string) bool {
 	trimmedStdErr := strings.TrimSpace(stderr)
 	ignoreList := []string{
+		// TODO: remove when https://github.com/kubernetes/kubernetes/issues/82154 is fixed.
 		"Warning: kubectl apply should be used on resource created by either kubectl create --save-config or kubectl apply",
 	}
 	for _, ignore := range ignoreList {
