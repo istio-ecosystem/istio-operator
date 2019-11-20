@@ -146,7 +146,7 @@ func genApplyManifests(setOverlay []string, inFilename string, force bool, dryRu
 			l.logAndPrintf("\n%s\n%s", cs, strings.Repeat("=", len(cs)))
 		}
 
-		if strings.TrimSpace(out[cn].Stderr) != "" {
+		if !isStderrOkay(out[cn].Stderr) {
 			l.logAndPrint("Error detail:\n", out[cn].Stderr, "\n")
 			gotError = true
 		}
@@ -160,6 +160,19 @@ func genApplyManifests(setOverlay []string, inFilename string, force bool, dryRu
 	}
 
 	return nil
+}
+
+func isStderrOkay(stderr string) bool {
+	trimmedStdErr := strings.TrimSpace(stderr)
+	ignoreList := []string{
+		"Warning: kubectl apply should be used on resource created by either kubectl create --save-config or kubectl apply",
+	}
+	for _, ignore := range ignoreList {
+		if strings.HasPrefix(trimmedStdErr, ignore) {
+			return true
+		}
+	}
+	return trimmedStdErr == ""
 }
 
 // fetchInstallPackageFromURL downloads installation packages from specified URL.
