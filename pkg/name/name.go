@@ -20,11 +20,6 @@ import (
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/tpath"
 	"istio.io/operator/pkg/util"
-	"istio.io/pkg/log"
-)
-
-var (
-	scope = log.RegisterScope("name", "name", 0)
 )
 
 // FeatureName is a feature name string, typed to constrain allowed values.

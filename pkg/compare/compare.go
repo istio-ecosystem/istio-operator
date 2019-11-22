@@ -38,10 +38,6 @@ type YAMLCmpReporter struct {
 	diffTree map[string]interface{}
 }
 
-var (
-	scope = log.RegisterScope("compare", "YAML comparison", 0)
-)
-
 // PushStep implements interface to keep track of current path by pushing.
 // a step into YAMLCmpReporter.path
 func (r *YAMLCmpReporter) PushStep(ps cmp.PathStep) {
