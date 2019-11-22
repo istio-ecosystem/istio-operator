@@ -295,11 +295,14 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 			return buildComponentApplyOutput(stdout, stderr, appliedObjects, err), appliedObjects
 		}
 
+		delObjects, err := object.ParseK8sObjectsFromYAMLManifest(stdoutGet)
+		if err != nil {
+			return buildComponentApplyOutput(stdout, stderr, appliedObjects, err), appliedObjects
+		}
 		extraArgsDel := []string{"--selector", componentLabel}
 		stdoutDel, stderrDel, err := kubectl.Delete(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, "", stdoutGet, extraArgsDel...)
 		stdout += "\n" + stdoutDel
 		stderr += "\n" + stderrDel
-		delObjects, err := object.ParseK8sObjectsFromYAMLManifest(stdoutGet)
 		if err != nil {
 			return buildComponentApplyOutput(stdout, stderr, appliedObjects, err), appliedObjects
 		}
