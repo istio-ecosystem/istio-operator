@@ -301,7 +301,6 @@ func chartsBaseChartYaml() (*asset, error) {
 var _chartsBaseFilesCrd10Yaml = []byte(`apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: mixer
     chart: istio
@@ -370,18 +369,11 @@ spec:
   - name: v1alpha2
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-pilot
     heritage: Tiller
@@ -460,18 +452,11 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-pilot
     chart: istio
@@ -1232,18 +1217,11 @@ spec:
   - name: v1alpha3
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-pilot
     chart: istio
@@ -1531,18 +1509,11 @@ spec:
   - name: v1alpha3
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-pilot
     chart: istio
@@ -1683,18 +1654,11 @@ spec:
   - name: v1alpha3
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-mixer
     chart: istio
@@ -1780,18 +1744,11 @@ spec:
   - name: v1alpha2
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-mixer
     chart: istio
@@ -1995,18 +1952,11 @@ spec:
   - name: v1alpha2
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-citadel
     chart: istio
@@ -2730,18 +2680,11 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-citadel
     chart: istio
@@ -3464,18 +3407,11 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-mixer
     chart: istio
@@ -3548,18 +3484,11 @@ spec:
   - name: v1alpha2
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-mixer
     chart: istio
@@ -3636,18 +3565,11 @@ spec:
   - name: v1alpha2
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: mixer
     chart: istio
@@ -3728,18 +3650,11 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: mixer
     chart: istio
@@ -3887,18 +3802,11 @@ spec:
   - name: v1alpha2
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-pilot
     chart: istio
@@ -4035,18 +3943,11 @@ spec:
   - name: v1alpha3
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: mixer
     chart: istio
@@ -4239,18 +4140,11 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: mixer
     chart: istio
@@ -4354,18 +4248,11 @@ spec:
   - name: v1alpha1
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-pilot
     chart: istio
@@ -5068,12 +4955,7 @@ spec:
   - name: v1alpha3
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
+
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -5102,6 +4984,7 @@ spec:
     - name: v1alpha2
       served: true
       storage: true
+      
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -5130,6 +5013,7 @@ spec:
     - name: v1alpha2
       served: true
       storage: true
+
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -5158,6 +5042,7 @@ spec:
     - name: v1alpha2
       served: true
       storage: true
+
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -5186,6 +5071,7 @@ spec:
     - name: v1alpha2
       served: true
       storage: true
+
 ---
 `)
 
@@ -5207,7 +5093,6 @@ func chartsBaseFilesCrd10Yaml() (*asset, error) {
 var _chartsBaseFilesCrd11Yaml = []byte(`apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-pilot
     chart: istio
@@ -5323,12 +5208,7 @@ spec:
   - name: v1alpha3
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
+
 ---
 `)
 
@@ -5350,7 +5230,6 @@ func chartsBaseFilesCrd11Yaml() (*asset, error) {
 var _chartsBaseFilesCrd14Yaml = []byte(`apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   labels:
     app: istio-pilot
     heritage: Tiller
@@ -5481,12 +5360,7 @@ spec:
   - name: v1beta1
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
+
 ---
 `)
 
@@ -31086,8 +30960,8 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: metadata.namespace
-        {{- if .Values.mixer.env }}
-        {{- range $key, $val := .Values.mixer.env }}
+        {{- if .Values.mixer.telemetry.env }}
+        {{- range $key, $val := .Values.mixer.telemetry.env }}
         - name: {{ $key }}
           value: "{{ $val }}"
         {{- end }}
@@ -32286,9 +32160,6 @@ func chartsIstioTelemetryMixerTelemetryTemplatesStackdriverYaml() (*asset, error
 }
 
 var _chartsIstioTelemetryMixerTelemetryValuesYaml = []byte(`mixer:
-  env:
-    # max procs should be ceil(cpu limit + 1)
-    GOMAXPROCS: "6"
 
   adapters:
     # stdio is a debug adapter in istio-telemetry, it is not recommended for production use.
@@ -32335,6 +32206,10 @@ var _chartsIstioTelemetryMixerTelemetryValuesYaml = []byte(`mixer:
     cpu:
       targetAverageUtilization: 80
     sessionAffinityEnabled: false
+
+    env:
+      # max procs should be ceil(cpu limit + 1)
+      GOMAXPROCS: "6"
 
     # mixer load shedding configuration.
     # When mixer detects that it is overloaded, it starts rejecting grpc requests.
@@ -34003,6 +33878,13 @@ var _chartsIstioTelemetryTracingTemplates_affinityTpl = []byte(`{{/* affinity - 
           - {{ $key }}
           {{- end }}
         {{- end }}
+        {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.tracing.nodeSelector -}}
+        {{- range $key, $val := $nodeSelector }}
+        - key: {{ $key }}
+          operator: In
+          values:
+          - {{ $val | quote }}
+        {{- end }}
 {{- end }}
 
 {{- define "nodeAffinityPreferredDuringScheduling" }}
@@ -34554,7 +34436,7 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   ports:
-    - port: {{ .Values.tracing.service.externalPort }}
+    - port: {{ .Values.tracing.zipkin.queryPort }}
       targetPort: {{ .Values.tracing.zipkin.queryPort }}
       protocol: TCP
       name: {{ .Values.tracing.service.name }}
@@ -34694,7 +34576,7 @@ tracing:
     annotations: {}
     name: http-query
     type: ClusterIP
-    externalPort: 9411
+    externalPort: 80
 
   ingress:
     enabled: false
