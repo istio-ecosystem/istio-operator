@@ -89,7 +89,7 @@ func VerifyInstallCommand() *cobra.Command {
 `,
 		RunE: func(c *cobra.Command, args []string) error {
 			l = newLogger(rArgs.logToStdErr, c.OutOrStderr(), c.OutOrStderr())
-			return verifyInstall(rArgs, vArgs, args, l)
+			return verifyInstall(vArgs, args, l)
 		},
 	}
 	addRootFlags(verifyInstallCmd, rArgs)
@@ -129,7 +129,7 @@ func addVerifyInstallFlags(cmd *cobra.Command, v *verifyInstallArgs) {
 	v.fileNameFlags = fileNameFlags
 }
 
-func verifyInstall(r *rootArgs, v *verifyInstallArgs, args []string, l *logger) error {
+func verifyInstall(v *verifyInstallArgs, args []string, l *logger) error {
 	options := v.fileNameFlags.ToOptions()
 	if len(options.Filenames) == 0 && v.set == nil {
 		if len(args) != 0 {
