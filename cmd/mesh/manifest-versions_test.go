@@ -32,7 +32,7 @@ func TestGetVersionCompatibleMap(t *testing.T) {
 	type args struct {
 		versionsURI string
 		binVersion  *goversion.Version
-		l           *logger
+		l           *Logger
 	}
 
 	testDataDir = filepath.Join(repoRootDir, "cmd/mesh/testdata/manifest-versions")
