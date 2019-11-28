@@ -54,6 +54,7 @@ func configLogs(logToStdErr bool) error {
 	}
 	return log.Configure(opt)
 }
+
 //Logger is the struct used for mesh command
 type Logger struct {
 	logToStdErr bool
