@@ -111,8 +111,6 @@ func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (recon
 		return reconcile.Result{}, err
 	}
 	deleted := u.GetDeletionTimestamp() != nil
-	finalizers := u.GetFinalizers()
-	finalizerIndex := indexOf(finalizers, finalizer)
 
 	// declare read-only icp instance to create the reconciler
 	icp := &v1alpha2.IstioControlPlane{}
@@ -132,48 +130,13 @@ func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (recon
 	log.Infof("Got IstioControlPlaneSpec: \n\n%s\n", string(os))
 
 	if deleted {
-		if finalizerIndex < 0 {
-			log.Info("IstioControlPlane deleted")
-			return reconcile.Result{}, nil
-		}
-		log.Info("Deleting IstioControlPlane")
-
 		reconciler, err := r.factory.New(icp, r.client)
 		if err == nil {
 			err = reconciler.Delete()
 		} else {
 			log.Errorf("failed to create reconciler: %s", err)
 		}
-		// TODO: for now, nuke the resources, regardless of errors
-		finalizers = append(finalizers[:finalizerIndex], finalizers[finalizerIndex+1:]...)
-		u.SetFinalizers(finalizers)
-		finalizerError := r.client.Update(context.TODO(), u)
-		for retryCount := 0; errors.IsConflict(finalizerError) && retryCount < finalizerMaxRetries; retryCount++ {
-			// workaround for https://github.com/kubernetes/kubernetes/issues/73098 for k8s < 1.14
-			// TODO: make this error message more meaningful.
-			log.Info("conflict during finalizer removal, retrying")
-			_ = r.client.Get(context.TODO(), request.NamespacedName, u)
-			finalizers = u.GetFinalizers()
-			finalizerIndex = indexOf(finalizers, finalizer)
-			finalizers = append(finalizers[:finalizerIndex], finalizers[finalizerIndex+1:]...)
-			u.SetFinalizers(finalizers)
-			finalizerError = r.client.Update(context.TODO(), u)
-		}
-		if finalizerError != nil {
-			log.Errorf("error removing finalizer: %s", finalizerError)
-			return reconcile.Result{}, finalizerError
-		}
 		return reconcile.Result{}, err
-	} else if finalizerIndex < 0 {
-		// TODO: make this error message more meaningful.
-		log.Infof("Adding finalizer %v", finalizer)
-		finalizers = append(finalizers, finalizer)
-		u.SetFinalizers(finalizers)
-		err = r.client.Update(context.TODO(), u)
-		if err != nil {
-			log.Errorf("Failed to update IstioControlPlane with finalizer, %v", err)
-			return reconcile.Result{}, err
-		}
 	}
 
 	log.Info("Updating IstioControlPlane")
