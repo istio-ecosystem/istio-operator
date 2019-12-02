@@ -93,7 +93,7 @@ func run() {
 
 	leaderElectionNS, leaderElectionEnabled := getLeaderElectionNamespace()
 	if !leaderElectionEnabled {
-		log.Warn("Leader election namespace not set. Leader election is disabled.")
+		log.Warn("Leader election namespace not set. Leader election is disabled. NOT APPROPRIATE FOR PRODUCTION USE!")
 	}
 
 	// Get a config to talk to the apiserver
