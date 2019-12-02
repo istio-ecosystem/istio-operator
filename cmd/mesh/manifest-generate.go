@@ -35,6 +35,8 @@ type manifestGenerateArgs struct {
 	set []string
 	// force proceeds even if there are validation errors
 	force bool
+	// noBase suppresses the generation of CRDs for the output manifest.
+	noBase bool
 }
 
 func addManifestGenerateFlags(cmd *cobra.Command, args *manifestGenerateArgs) {
@@ -42,6 +44,7 @@ func addManifestGenerateFlags(cmd *cobra.Command, args *manifestGenerateArgs) {
 	cmd.PersistentFlags().StringVarP(&args.outFilename, "output", "o", "", "Manifest output directory path")
 	cmd.PersistentFlags().StringSliceVarP(&args.set, "set", "s", nil, SetFlagHelpStr)
 	cmd.PersistentFlags().BoolVar(&args.force, "force", false, "Proceed even with validation errors")
+	cmd.PersistentFlags().BoolVar(&args.noBase, "no-base", false, "Omit generation of base resources like namespaces and CRDs")
 }
 
 func manifestGenerateCmd(rootArgs *rootArgs, mgArgs *manifestGenerateArgs) *cobra.Command {
@@ -74,6 +77,12 @@ func manifestGenerate(args *rootArgs, mgArgs *manifestGenerateArgs, l *Logger) e
 	manifests, err := GenManifests(mgArgs.inFilename, overlayFromSet, mgArgs.force, l)
 	if err != nil {
 		return err
+	}
+
+	// For manifest generation, give the option of omitting the base component resources, in case user want to
+	// generate some individual component YAML only.
+	if mgArgs.noBase {
+		delete(manifests, name.IstioBaseComponentName)
 	}
 
 	if mgArgs.outFilename == "" {
