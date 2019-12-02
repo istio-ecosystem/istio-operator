@@ -11600,7 +11600,7 @@ var _chartsGatewaysIstioEgressTemplates_affinityTpl = []byte(`{{/* affinity - ht
           values:
         {{- range $key, $val := .global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .global.defaultNodeSelector .nodeSelector -}}
@@ -11608,7 +11608,7 @@ var _chartsGatewaysIstioEgressTemplates_affinityTpl = []byte(`{{/* affinity - ht
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -11621,7 +11621,7 @@ var _chartsGatewaysIstioEgressTemplates_affinityTpl = []byte(`{{/* affinity - ht
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -11650,7 +11650,7 @@ var _chartsGatewaysIstioEgressTemplates_affinityTpl = []byte(`{{/* affinity - ht
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -11668,7 +11668,7 @@ var _chartsGatewaysIstioEgressTemplates_affinityTpl = []byte(`{{/* affinity - ht
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -11984,12 +11984,6 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          {{- if $gateway.sds }}
-          {{- if $gateway.sds.enabled }}
-          - name: ISTIO_META_USER_SDS
-            value: "true"
-          {{- end }}
-          {{- end }}
           {{- if $gateway.env }}
           {{- range $key, $val := $gateway.env }}
           - name: {{ $key }}
@@ -12262,32 +12256,7 @@ func chartsGatewaysIstioEgressTemplatesServiceYaml() (*asset, error) {
 	return a, nil
 }
 
-var _chartsGatewaysIstioEgressTemplatesServiceaccountYaml = []byte(`{{ $gateway := index .Values "gateways" "istio-egressgateway" }}
-{{ if ($gateway.sds) and ($gateway.sds.enabled) }}
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: istio-egressgateway-sds
-  namespace: {{ .Release.Namespace }}
-rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "watch", "list"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: istio-egressgateway-sds
-  namespace: {{ .Release.Namespace }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: istio-egressgateway-sds
-subjects:
-- kind: ServiceAccount
-  name: istio-egressgateway-service-account
----
-apiVersion: v1
+var _chartsGatewaysIstioEgressTemplatesServiceaccountYaml = []byte(`apiVersion: v1
 kind: ServiceAccount
 {{- if .Values.global.imagePullSecrets }}
 imagePullSecrets:
@@ -12301,7 +12270,6 @@ metadata:
   labels:
     app: istio-egressgateway
     release: {{ .Release.Name }}
-{{ end }}
 `)
 
 func chartsGatewaysIstioEgressTemplatesServiceaccountYamlBytes() ([]byte, error) {
@@ -12376,20 +12344,6 @@ gateways:
     - name: egressgateway-ca-certs
       secretName: istio-egressgateway-ca-certs
       mountPath: /etc/istio/egressgateway-ca-certs
-
-    sds:
-      # If true, ingress gateway fetches credentials from SDS server to handle TLS connections.
-      enabled: false
-      # SDS server that watches kubernetes secrets and provisions credentials to ingress gateway.
-      # This server runs in the same pod as ingress gateway.
-      image: node-agent-k8s
-      resources:
-        requests:
-          cpu: 100m
-          memory: 128Mi
-        limits:
-          cpu: 2000m
-          memory: 1024Mi
 
     configVolumes: []
     additionalContainers: []
@@ -12557,7 +12511,7 @@ var _chartsGatewaysIstioIngressTemplates_affinityTpl = []byte(`{{/* affinity - h
           values:
         {{- range $key, $val := .global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .global.defaultNodeSelector .nodeSelector -}}
@@ -12565,7 +12519,7 @@ var _chartsGatewaysIstioIngressTemplates_affinityTpl = []byte(`{{/* affinity - h
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -12578,7 +12532,7 @@ var _chartsGatewaysIstioIngressTemplates_affinityTpl = []byte(`{{/* affinity - h
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -12607,7 +12561,7 @@ var _chartsGatewaysIstioIngressTemplates_affinityTpl = []byte(`{{/* affinity - h
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -12625,7 +12579,7 @@ var _chartsGatewaysIstioIngressTemplates_affinityTpl = []byte(`{{/* affinity - h
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -14811,7 +14765,7 @@ var _chartsIstioControlIstioAutoinjectTemplates_affinityTpl = []byte(`{{/* affin
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.sidecarInjectorWebhook.nodeSelector -}}
@@ -14819,7 +14773,7 @@ var _chartsIstioControlIstioAutoinjectTemplates_affinityTpl = []byte(`{{/* affin
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -14832,7 +14786,7 @@ var _chartsIstioControlIstioAutoinjectTemplates_affinityTpl = []byte(`{{/* affin
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -14861,7 +14815,7 @@ var _chartsIstioControlIstioAutoinjectTemplates_affinityTpl = []byte(`{{/* affin
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -14879,7 +14833,7 @@ var _chartsIstioControlIstioAutoinjectTemplates_affinityTpl = []byte(`{{/* affin
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -15088,6 +15042,11 @@ data:
         {{- else }}
           address: zipkin.{{ .Values.global.telemetryNamespace }}:9411
         {{- end }}
+      {{- else if eq .Values.global.proxy.tracer "datadog" }}
+      tracing:
+        datadog:
+          # Address of the DataDog Agent
+          address: {{ .Values.global.tracer.datadog.address }}
       {{- end }}
 
     {{- if .Values.global.controlPlaneSecurityEnabled }}
@@ -15739,7 +15698,7 @@ var _chartsIstioControlIstioConfigTemplates_affinityTpl = []byte(`{{/* affinity 
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.galley.nodeSelector -}}
@@ -15747,7 +15706,7 @@ var _chartsIstioControlIstioConfigTemplates_affinityTpl = []byte(`{{/* affinity 
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -15760,7 +15719,7 @@ var _chartsIstioControlIstioConfigTemplates_affinityTpl = []byte(`{{/* affinity 
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -15789,7 +15748,7 @@ var _chartsIstioControlIstioConfigTemplates_affinityTpl = []byte(`{{/* affinity 
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -15807,7 +15766,7 @@ var _chartsIstioControlIstioConfigTemplates_affinityTpl = []byte(`{{/* affinity 
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -16030,6 +15989,7 @@ data:
             config:
               codec_type: HTTP2
               stat_prefix: "15010"
+              stream_idle_timeout: 0s
               http2_protocol_options:
                 max_concurrent_streams: 1073741824
 
@@ -16215,6 +16175,9 @@ spec:
           - --enable-reconcileWebhookConfiguration=false
   {{- else }}
           - --enable-reconcileWebhookConfiguration=true
+  {{- end }}
+  {{- if .Values.galley.enableServiceDiscovery }}
+          - --enableServiceDiscovery=true
   {{- end }}
           - --enable-server=true
   {{- if .Values.galley.enableAnalysis }}
@@ -16640,6 +16603,8 @@ var _chartsIstioControlIstioConfigValuesYaml = []byte(`galley:
   rollingMaxSurge: 100%
   rollingMaxUnavailable: 25%
 
+  enableServiceDiscovery: false
+
   resources:
     requests:
       cpu: 100m
@@ -16904,7 +16869,7 @@ var _chartsIstioControlIstioDiscoveryTemplates_affinityTpl = []byte(`{{/* affini
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.pilot.nodeSelector -}}
@@ -16912,7 +16877,7 @@ var _chartsIstioControlIstioDiscoveryTemplates_affinityTpl = []byte(`{{/* affini
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -16925,7 +16890,7 @@ var _chartsIstioControlIstioDiscoveryTemplates_affinityTpl = []byte(`{{/* affini
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -16954,7 +16919,7 @@ var _chartsIstioControlIstioDiscoveryTemplates_affinityTpl = []byte(`{{/* affini
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -16972,7 +16937,7 @@ var _chartsIstioControlIstioDiscoveryTemplates_affinityTpl = []byte(`{{/* affini
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -17098,6 +17063,9 @@ rules:
     - "certificatesigningrequests/approval"
     - "certificatesigningrequests/status"
   verbs: ["update", "create", "get", "delete"]
+- apiGroups: ["discovery.k8s.io"]
+  resources: ["endpointslices"]
+  verbs: ["get", "list", "watch"]
 ---
 {{ end }}
 `)
@@ -17235,6 +17203,7 @@ data:
             config:
               codec_type: HTTP2
               stat_prefix: "15011"
+              stream_idle_timeout: 0s
               http2_protocol_options:
                 max_concurrent_streams: 1073741824
 
@@ -17293,6 +17262,7 @@ data:
                 config:
                   codec_type: HTTP2
                   stat_prefix: "15019"
+                  stream_idle_timeout: 0s
                   http2_protocol_options:
                     max_concurrent_streams: 1073741824
 
@@ -17530,12 +17500,18 @@ data:
     enableAutoMtls: {{ .Values.global.mtls.auto }}
 
     {{- if .Values.pilot.useMCP }}
-    config_sources:
+    configSources:
     {{- if .Values.global.controlPlaneSecurityEnabled }}
     - address: localhost:15019
     {{- else }}
     - address: istio-galley.{{ .Values.global.configNamespace }}:9901
     {{- end }}
+    {{- if .Values.pilot.configSource.subscribedResources }}
+      subscribedResources:
+    {{- range .Values.pilot.configSource.subscribedResources }}
+        - {{ . }}
+    {{- end }}
+    {{- end}}
     {{- end }}
 
     outboundTrafficPolicy:
@@ -18183,7 +18159,8 @@ spec:
               vm_config:
                 runtime: envoy.wasm.runtime.null
                 code:
-                  inline_string: envoy.wasm.metadata_exchange
+                  local:
+                    inline_string: envoy.wasm.metadata_exchange
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
@@ -18221,7 +18198,8 @@ spec:
                 vm_id: stats_outbound
                 runtime: envoy.wasm.runtime.null
                 code:
-                  inline_string: envoy.wasm.stats
+                  local:
+                    inline_string: envoy.wasm.stats
     - applyTo: HTTP_FILTER
       match:
         context: SIDECAR_INBOUND
@@ -18247,7 +18225,8 @@ spec:
                 vm_id: stats_inbound
                 runtime: envoy.wasm.runtime.null
                 code:
-                  inline_string: envoy.wasm.stats
+                  local:
+                    inline_string: envoy.wasm.stats
     - applyTo: HTTP_FILTER
       match:
         context: GATEWAY
@@ -18273,7 +18252,8 @@ spec:
                 vm_id: stats_outbound
                 runtime: envoy.wasm.runtime.null
                 code:
-                  inline_string: envoy.wasm.stats
+                  local:
+                    inline_string: envoy.wasm.stats
 {{- end }}
 
 `)
@@ -18337,7 +18317,14 @@ pilot:
   # You can use jwksResolverExtraRootCA to provide a root certificate
   # in PEM format. This will then be trusted by pilot when resolving
   # JWKS URIs.
-  jwksResolverExtraRootCA:
+  jwksResolverExtraRootCA: ""
+
+  # This is used to set the source of configuration for
+  # the associated address in configSource, if nothing is specificed
+  # the default MCP is assumed. The alternative option is SERVICE_REGISTRY
+  # which describes the source is only forwarding synthetic service entries
+  configSource:
+    subscribedResources: []
 
   plugins: []
 
@@ -18368,7 +18355,7 @@ pilot:
   keepaliveMaxServerConnectionAge: 30m
 
   # Additional labels to apply to the deployment.
-  deploymentLabels:
+  deploymentLabels: {}
 
 
   ## Mesh config settings
@@ -18491,7 +18478,7 @@ var _chartsIstioPolicyTemplates_affinityTpl = []byte(`{{/* affinity - https://ku
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.mixer.policy.nodeSelector -}}
@@ -18499,7 +18486,7 @@ var _chartsIstioPolicyTemplates_affinityTpl = []byte(`{{/* affinity - https://ku
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -18512,7 +18499,7 @@ var _chartsIstioPolicyTemplates_affinityTpl = []byte(`{{/* affinity - https://ku
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -18541,7 +18528,7 @@ var _chartsIstioPolicyTemplates_affinityTpl = []byte(`{{/* affinity - https://ku
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -18559,7 +18546,7 @@ var _chartsIstioPolicyTemplates_affinityTpl = []byte(`{{/* affinity - https://ku
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -19601,7 +19588,7 @@ var _chartsIstioTelemetryGrafanaDashboardsCitadelDashboardJson = []byte(`{
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"citadel\", pod_name=~\"istio-citadel-.*\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container=~\"citadel\", pod=~\"istio-citadel-.*\"}[1m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Citadel CPU usage rate",
@@ -20847,7 +20834,7 @@ var _chartsIstioTelemetryGrafanaDashboardsGalleyDashboardJson = []byte(`{
           "refId": "H"
         },
         {
-          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container_name=~\"galley\", pod_name=~\"istio-galley-.*\"})",
+          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container=~\"galley\", pod=~\"istio-galley-.*\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Total (kis)",
@@ -20932,17 +20919,17 @@ var _chartsIstioTelemetryGrafanaDashboardsGalleyDashboardJson = []byte(`{
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"galley\", pod_name=~\"istio-galley-.*\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container=~\"galley\", pod=~\"istio-galley-.*\"}[1m]))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Total (k8s)",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"galley\", pod_name=~\"istio-galley-.*\"}[1m])) by (container_name)",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container=~\"galley\", pod=~\"istio-galley-.*\"}[1m])) by (container)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{ container }} (k8s)",
           "refId": "B"
         },
         {
@@ -21038,10 +21025,10 @@ var _chartsIstioTelemetryGrafanaDashboardsGalleyDashboardJson = []byte(`{
           "refId": "A"
         },
         {
-          "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\",container_name=~\"galley\", pod_name=~\"istio-galley-.*\"}",
+          "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\",container=~\"galley\", pod=~\"istio-galley-.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} ",
+          "legendFormat": "{{ container }} ",
           "refId": "B"
         }
       ],
@@ -23455,7 +23442,7 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(sum(irate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",pod_name=~\"istio-telemetry-.*\",container_name=~\"mixer|istio-proxy\"}[1m]))/ (round(sum(irate(istio_requests_total[1m])), 0.001)/1000))/ (sum(irate(istio_requests_total{source_workload=\"istio-ingressgateway\"}[1m])) >bool 10)",
+          "expr": "(sum(irate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",pod=~\"istio-telemetry-.*\",container=~\"mixer|istio-proxy\"}[1m]))/ (round(sum(irate(istio_requests_total[1m])), 0.001)/1000))/ (sum(irate(istio_requests_total{source_workload=\"istio-ingressgateway\"}[1m])) >bool 10)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -23463,7 +23450,7 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
           "refId": "A"
         },
         {
-          "expr": "(sum(irate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",pod_name=~\"istio-ingressgateway-.*\",container_name=\"istio-proxy\"}[1m])) / (round(sum(irate(istio_requests_total{source_workload=\"istio-ingressgateway\", reporter=\"source\"}[1m])), 0.001)/1000))",
+          "expr": "(sum(irate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",pod=~\"istio-ingressgateway-.*\",container=\"istio-proxy\"}[1m])) / (round(sum(irate(istio_requests_total{source_workload=\"istio-ingressgateway\", reporter=\"source\"}[1m])), 0.001)/1000))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -23471,14 +23458,14 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
           "refId": "B"
         },
         {
-          "expr": "(sum(irate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",namespace!=\"istio-system\",container_name=\"istio-proxy\"}[1m]))/ (round(sum(irate(istio_requests_total[1m])), 0.001)/1000))/ (sum(irate(istio_requests_total{source_workload=\"istio-ingressgateway\"}[1m])) >bool 10)",
+          "expr": "(sum(irate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",namespace!=\"istio-system\",container=\"istio-proxy\"}[1m]))/ (round(sum(irate(istio_requests_total[1m])), 0.001)/1000))/ (sum(irate(istio_requests_total{source_workload=\"istio-ingressgateway\"}[1m])) >bool 10)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "istio-proxy",
           "refId": "C"
         },
         {
-          "expr": "(sum(irate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",pod_name=~\"istio-policy-.*\",container_name=~\"mixer|istio-proxy\"}[1m]))/ (round(sum(irate(istio_requests_total[1m])), 0.001)/1000))/ (sum(irate(istio_requests_total{source_workload=\"istio-ingressgateway\"}[1m])) >bool 10)",
+          "expr": "(sum(irate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",pod=~\"istio-policy-.*\",container=~\"mixer|istio-proxy\"}[1m]))/ (round(sum(irate(istio_requests_total[1m])), 0.001)/1000))/ (sum(irate(istio_requests_total{source_workload=\"istio-ingressgateway\"}[1m])) >bool 10)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "istio-policy",
@@ -23562,28 +23549,28 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",pod_name=~\"istio-telemetry-.*\",container_name=~\"mixer|istio-proxy\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",pod=~\"istio-telemetry-.*\",container=~\"mixer|istio-proxy\"}[1m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "istio-telemetry",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",pod_name=~\"istio-ingressgateway-.*\",container_name=\"istio-proxy\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",pod=~\"istio-ingressgateway-.*\",container=\"istio-proxy\"}[1m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "istio-ingressgateway",
           "refId": "B"
         },
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",namespace!=\"istio-system\",container_name=\"istio-proxy\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",namespace!=\"istio-system\",container=\"istio-proxy\"}[1m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "istio-proxy",
           "refId": "C"
         },
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",pod_name=~\"istio-policy-.*\",container_name=~\"mixer|istio-proxy\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",pod=~\"istio-policy-.*\",container=~\"mixer|istio-proxy\"}[1m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "istio-policy",
@@ -23680,28 +23667,28 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",pod_name=~\"istio-telemetry-.*\"}) / (sum(irate(istio_requests_total[1m])) / 1000)) / (sum(irate(istio_requests_total{source_workload=\"istio-ingressgateway\"}[1m])) >bool 10)",
+          "expr": "(sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",pod=~\"istio-telemetry-.*\"}) / (sum(irate(istio_requests_total[1m])) / 1000)) / (sum(irate(istio_requests_total{source_workload=\"istio-ingressgateway\"}[1m])) >bool 10)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "istio-telemetry / 1k rps",
           "refId": "A"
         },
         {
-          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",pod_name=~\"istio-ingressgateway-.*\"}) / count(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",pod_name=~\"istio-ingressgateway-.*\",container_name!=\"POD\"})",
+          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",pod=~\"istio-ingressgateway-.*\"}) / count(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",pod=~\"istio-ingressgateway-.*\",container!=\"POD\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "per istio-ingressgateway",
           "refId": "B"
         },
         {
-          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",namespace!=\"istio-system\",container_name=\"istio-proxy\"}) / count(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",namespace!=\"istio-system\",container_name=\"istio-proxy\"})",
+          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",namespace!=\"istio-system\",container=\"istio-proxy\"}) / count(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",namespace!=\"istio-system\",container=\"istio-proxy\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "per istio proxy",
           "refId": "C"
         },
         {
-          "expr": "(sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",pod_name=~\"istio-policy-.*\"}) / (sum(irate(istio_requests_total[1m])) / 1000))/ (sum(irate(istio_requests_total{source_workload=\"istio-ingressgateway\"}[1m])) >bool 10)",
+          "expr": "(sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",pod=~\"istio-policy-.*\"}) / (sum(irate(istio_requests_total[1m])) / 1000))/ (sum(irate(istio_requests_total{source_workload=\"istio-ingressgateway\"}[1m])) >bool 10)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "istio-policy / 1k rps",
@@ -24001,11 +23988,11 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container_name=\"istio-proxy\"})",
+          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container=\"istio-proxy\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{ container }} (k8s)",
           "refId": "B",
           "step": 2
         }
@@ -24088,7 +24075,7 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=\"istio-proxy\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container=\"istio-proxy\"}[1m]))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -24175,10 +24162,10 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container_name=\"istio-proxy\"})",
+          "expr": "sum(container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container=\"istio-proxy\"})",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }}",
+          "legendFormat": "{{ container }}",
           "refId": "B",
           "step": 2
         }
@@ -24333,7 +24320,7 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
           "step": 2
         },
         {
-          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container_name=~\"discovery|istio-proxy\", pod_name=~\"istio-pilot-.*\"})",
+          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container=~\"discovery|istio-proxy\", pod=~\"istio-pilot-.*\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -24342,11 +24329,11 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
           "step": 2
         },
         {
-          "expr": "container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container_name=~\"discovery|istio-proxy\", pod_name=~\"istio-pilot-.*\"}",
+          "expr": "container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container=~\"discovery|istio-proxy\", pod=~\"istio-pilot-.*\"}",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{ container }} (k8s)",
           "refId": "B",
           "step": 2
         }
@@ -24429,7 +24416,7 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"discovery|istio-proxy\", pod_name=~\"istio-pilot-.*\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container=~\"discovery|istio-proxy\", pod=~\"istio-pilot-.*\"}[1m]))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -24438,11 +24425,11 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
           "step": 2
         },
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"discovery|istio-proxy\", pod_name=~\"istio-pilot-.*\"}[1m])) by (container_name)",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container=~\"discovery|istio-proxy\", pod=~\"istio-pilot-.*\"}[1m])) by (container)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{ container }} (k8s)",
           "refId": "B",
           "step": 2
         },
@@ -24544,10 +24531,10 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
           "refId": "A"
         },
         {
-          "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container_name=~\"discovery|istio-proxy\", pod_name=~\"istio-pilot-.*\"}",
+          "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container=~\"discovery|istio-proxy\", pod=~\"istio-pilot-.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }}",
+          "legendFormat": "{{ container }}",
           "refId": "B",
           "step": 2
         }
@@ -24788,7 +24775,7 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
           "step": 2
         },
         {
-          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*\"})",
+          "expr": "sum(container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container=~\"mixer|istio-proxy\", pod=~\"istio-telemetry-.*\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -24797,11 +24784,11 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
           "step": 2
         },
         {
-          "expr": "container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*\"}",
+          "expr": "container_memory_usage_bytes{job=\"kubernetes-cadvisor\",container=~\"mixer|istio-proxy\", pod=~\"istio-telemetry-.*\"}",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{ container }} (k8s)",
           "refId": "B",
           "step": 2
         }
@@ -24884,7 +24871,7 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*\"}[1m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container=~\"mixer|istio-proxy\", pod=~\"istio-telemetry-.*\"}[1m]))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -24893,11 +24880,11 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
           "step": 2
         },
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*\"}[1m])) by (container_name)",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container=~\"mixer|istio-proxy\", pod=~\"istio-telemetry-.*\"}[1m])) by (container)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }} (k8s)",
+          "legendFormat": "{{ container }} (k8s)",
           "refId": "B",
           "step": 2
         },
@@ -24999,10 +24986,10 @@ var _chartsIstioTelemetryGrafanaDashboardsIstioPerformanceDashboardJson = []byte
           "refId": "A"
         },
         {
-          "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*\"}",
+          "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container=~\"mixer|istio-proxy\", pod=~\"istio-telemetry-.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ container_name }}",
+          "legendFormat": "{{ container }}",
           "refId": "B",
           "step": 2
         }
@@ -30397,7 +30384,7 @@ var _chartsIstioTelemetryGrafanaDashboardsMixerDashboardJson = []byte(`{
           "refId": "G"
         },
         {
-          "expr": "sum(label_replace(container_memory_usage_bytes{job=\"kubernetes-cadvisor\", container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*|istio-policy-.*\"}, \"service\", \"$1\" , \"pod_name\", \"(istio-telemetry|istio-policy)-.*\")) by (service)",
+          "expr": "sum(label_replace(container_memory_usage_bytes{job=\"kubernetes-cadvisor\", container=~\"mixer|istio-proxy\", pod=~\"istio-telemetry-.*|istio-policy-.*\"}, \"service\", \"$1\" , \"pod\", \"(istio-telemetry|istio-policy)-.*\")) by (service)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -30405,11 +30392,11 @@ var _chartsIstioTelemetryGrafanaDashboardsMixerDashboardJson = []byte(`{
           "refId": "C"
         },
         {
-          "expr": "sum(label_replace(container_memory_usage_bytes{job=\"kubernetes-cadvisor\", container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*|istio-policy-.*\"}, \"service\", \"$1\" , \"pod_name\", \"(istio-telemetry|istio-policy)-.*\")) by (container_name, service)",
+          "expr": "sum(label_replace(container_memory_usage_bytes{job=\"kubernetes-cadvisor\", container=~\"mixer|istio-proxy\", pod=~\"istio-telemetry-.*|istio-policy-.*\"}, \"service\", \"$1\" , \"pod\", \"(istio-telemetry|istio-policy)-.*\")) by (container, service)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ service }} - {{ container_name }} (k8s)",
+          "legendFormat": "{{ service }} - {{ container }} (k8s)",
           "refId": "B"
         }
       ],
@@ -30490,7 +30477,7 @@ var _chartsIstioTelemetryGrafanaDashboardsMixerDashboardJson = []byte(`{
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*|istio-policy-.*\"}[1m])) by (pod_name), \"service\", \"$1\" , \"pod_name\", \"(istio-telemetry|istio-policy)-.*\")",
+          "expr": "label_replace(sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container=~\"mixer|istio-proxy\", pod=~\"istio-telemetry-.*|istio-policy-.*\"}[1m])) by (pod), \"service\", \"$1\" , \"pod\", \"(istio-telemetry|istio-policy)-.*\")",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -30498,11 +30485,11 @@ var _chartsIstioTelemetryGrafanaDashboardsMixerDashboardJson = []byte(`{
           "refId": "A"
         },
         {
-          "expr": "label_replace(sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*|istio-policy-.*\"}[1m])) by (container_name, pod_name), \"service\", \"$1\" , \"pod_name\", \"(istio-telemetry|istio-policy)-.*\")",
+          "expr": "label_replace(sum(rate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container=~\"mixer|istio-proxy\", pod=~\"istio-telemetry-.*|istio-policy-.*\"}[1m])) by (container, pod), \"service\", \"$1\" , \"pod\", \"(istio-telemetry|istio-policy)-.*\")",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
-          "legendFormat": "{{ service }} - {{ container_name }} (k8s)",
+          "legendFormat": "{{ service }} - {{ container }} (k8s)",
           "refId": "B"
         },
         {
@@ -30601,10 +30588,10 @@ var _chartsIstioTelemetryGrafanaDashboardsMixerDashboardJson = []byte(`{
           "refId": "A"
         },
         {
-          "expr": "sum(label_replace(container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*|istio-policy-.*\"}, \"service\", \"$1\" , \"pod_name\", \"(istio-telemetry|istio-policy)-.*\")) by (container_name, service)",
+          "expr": "sum(label_replace(container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container=~\"mixer|istio-proxy\", pod=~\"istio-telemetry-.*|istio-policy-.*\"}, \"service\", \"$1\" , \"pod\", \"(istio-telemetry|istio-policy)-.*\")) by (container, service)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ service }} - {{ container_name }}",
+          "legendFormat": "{{ service }} - {{ container }}",
           "refId": "B"
         }
       ],
@@ -32183,7 +32170,7 @@ var _chartsIstioTelemetryGrafanaDashboardsPilotDashboardJson = []byte(`{
           "step": 2
         },
         {
-          "expr": "container_memory_usage_bytes{job=\"kubernetes-cadvisor\", container_name=~\"discovery\", pod_name=~\"istio-pilot-.*\"}",
+          "expr": "container_memory_usage_bytes{job=\"kubernetes-cadvisor\", container=~\"discovery\", pod=~\"istio-pilot-.*\"}",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -32192,7 +32179,7 @@ var _chartsIstioTelemetryGrafanaDashboardsPilotDashboardJson = []byte(`{
           "step": 2
         },
         {
-          "expr": "container_memory_usage_bytes{job=\"kubernetes-cadvisor\", container_name=~\"istio-proxy\", pod_name=~\"istio-pilot-.*\"}",
+          "expr": "container_memory_usage_bytes{job=\"kubernetes-cadvisor\", container=~\"istio-proxy\", pod=~\"istio-pilot-.*\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Sidecar (container)",
@@ -32277,7 +32264,7 @@ var _chartsIstioTelemetryGrafanaDashboardsPilotDashboardJson = []byte(`{
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(irate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=\"discovery\", pod_name=~\"istio-pilot-.*\"}[1m]))",
+          "expr": "sum(irate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container=\"discovery\", pod=~\"istio-pilot-.*\"}[1m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Discovery (container)",
@@ -32293,7 +32280,7 @@ var _chartsIstioTelemetryGrafanaDashboardsPilotDashboardJson = []byte(`{
           "step": 2
         },
         {
-          "expr": "sum(irate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container_name=\"istio-proxy\", pod_name=~\"istio-pilot-.*\"}[1m]))",
+          "expr": "sum(irate(container_cpu_usage_seconds_total{job=\"kubernetes-cadvisor\",container=\"istio-proxy\", pod=~\"istio-pilot-.*\"}[1m]))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -32380,7 +32367,7 @@ var _chartsIstioTelemetryGrafanaDashboardsPilotDashboardJson = []byte(`{
       "steppedLine": false,
       "targets": [
         {
-          "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container_name=\"discovery\", pod_name=~\"istio-pilot-.*\"}",
+          "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container=\"discovery\", pod=~\"istio-pilot-.*\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Discovery",
@@ -32388,7 +32375,7 @@ var _chartsIstioTelemetryGrafanaDashboardsPilotDashboardJson = []byte(`{
           "step": 2
         },
         {
-          "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container_name=\"istio-proxy\", pod_name=~\"istio-pilot-.*\"}",
+          "expr": "container_fs_usage_bytes{job=\"kubernetes-cadvisor\", container=\"istio-proxy\", pod=~\"istio-pilot-.*\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Sidecar",
@@ -33629,7 +33616,7 @@ var _chartsIstioTelemetryGrafanaTemplates_affinityTpl = []byte(`{{/* affinity - 
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.grafana.nodeSelector -}}
@@ -33637,7 +33624,7 @@ var _chartsIstioTelemetryGrafanaTemplates_affinityTpl = []byte(`{{/* affinity - 
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -33650,7 +33637,7 @@ var _chartsIstioTelemetryGrafanaTemplates_affinityTpl = []byte(`{{/* affinity - 
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -33679,7 +33666,7 @@ var _chartsIstioTelemetryGrafanaTemplates_affinityTpl = []byte(`{{/* affinity - 
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -33697,7 +33684,7 @@ var _chartsIstioTelemetryGrafanaTemplates_affinityTpl = []byte(`{{/* affinity - 
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -34122,8 +34109,8 @@ var _chartsIstioTelemetryGrafanaValuesYaml = []byte(`grafana:
     name: http
     type: ClusterIP
     externalPort: 3000
-    loadBalancerIP:
-    loadBalancerSourceRanges:
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: ""
 
   ingress:
     enabled: false
@@ -34285,7 +34272,7 @@ var _chartsIstioTelemetryKialiTemplates_affinityTpl = []byte(`{{/* affinity - ht
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.kiali.nodeSelector -}}
@@ -34293,7 +34280,7 @@ var _chartsIstioTelemetryKialiTemplates_affinityTpl = []byte(`{{/* affinity - ht
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -34306,7 +34293,7 @@ var _chartsIstioTelemetryKialiTemplates_affinityTpl = []byte(`{{/* affinity - ht
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -34335,7 +34322,7 @@ var _chartsIstioTelemetryKialiTemplates_affinityTpl = []byte(`{{/* affinity - ht
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -34353,7 +34340,7 @@ var _chartsIstioTelemetryKialiTemplates_affinityTpl = []byte(`{{/* affinity - ht
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -34915,8 +34902,8 @@ kiali:
 
     viewOnlyMode: false # Bind the service account to a role with only read access
 
-    grafanaURL:  # If you have Grafana installed and it is accessible to client browsers, then set this to its external URL. Kiali will redirect users to this URL when Grafana metrics are to be shown.
-    jaegerURL:  # If you have Jaeger installed and it is accessible to client browsers, then set this property to its external URL. Kiali will redirect users to this URL when Jaeger tracing is to be shown.
+    grafanaURL: "" # If you have Grafana installed and it is accessible to client browsers, then set this to its external URL. Kiali will redirect users to this URL when Grafana metrics are to be shown.
+    jaegerURL: "" # If you have Jaeger installed and it is accessible to client browsers, then set this property to its external URL. Kiali will redirect users to this URL when Jaeger tracing is to be shown.
 
   createDemoSecret: true # When true, a secret will be created with a default username and password. Useful for demos.
 
@@ -34990,7 +34977,7 @@ var _chartsIstioTelemetryMixerTelemetryTemplates_affinityTpl = []byte(`{{/* affi
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.mixer.telemetry.nodeSelector -}}
@@ -34998,7 +34985,7 @@ var _chartsIstioTelemetryMixerTelemetryTemplates_affinityTpl = []byte(`{{/* affi
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -35011,7 +34998,7 @@ var _chartsIstioTelemetryMixerTelemetryTemplates_affinityTpl = []byte(`{{/* affi
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -35040,7 +35027,7 @@ var _chartsIstioTelemetryMixerTelemetryTemplates_affinityTpl = []byte(`{{/* affi
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -35058,7 +35045,7 @@ var _chartsIstioTelemetryMixerTelemetryTemplates_affinityTpl = []byte(`{{/* affi
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -36484,6 +36471,7 @@ data:
                 config:
                   codec_type: HTTP2
                   stat_prefix: "15019"
+                  stream_idle_timeout: 0s
                   http2_protocol_options:
                     max_concurrent_streams: 1073741824
 
@@ -36649,8 +36637,8 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: metadata.namespace
-        {{- if .Values.mixer.env }}
-        {{- range $key, $val := .Values.mixer.env }}
+        {{- if .Values.mixer.telemetry.env }}
+        {{- range $key, $val := .Values.mixer.telemetry.env }}
         - name: {{ $key }}
           value: "{{ $val }}"
         {{- end }}
@@ -37849,9 +37837,6 @@ func chartsIstioTelemetryMixerTelemetryTemplatesStackdriverYaml() (*asset, error
 }
 
 var _chartsIstioTelemetryMixerTelemetryValuesYaml = []byte(`mixer:
-  env:
-    # max procs should be ceil(cpu limit + 1)
-    GOMAXPROCS: "6"
 
   adapters:
     # stdio is a debug adapter in istio-telemetry, it is not recommended for production use.
@@ -37898,6 +37883,10 @@ var _chartsIstioTelemetryMixerTelemetryValuesYaml = []byte(`mixer:
     cpu:
       targetAverageUtilization: 80
     sessionAffinityEnabled: false
+
+    env:
+      # max procs should be ceil(cpu limit + 1)
+      GOMAXPROCS: "6"
 
     # mixer load shedding configuration.
     # When mixer detects that it is overloaded, it starts rejecting grpc requests.
@@ -38011,7 +38000,7 @@ var _chartsIstioTelemetryPrometheusTemplates_affinityTpl = []byte(`{{/* affinity
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.prometheus.nodeSelector -}}
@@ -38019,7 +38008,7 @@ var _chartsIstioTelemetryPrometheusTemplates_affinityTpl = []byte(`{{/* affinity
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -38032,7 +38021,7 @@ var _chartsIstioTelemetryPrometheusTemplates_affinityTpl = []byte(`{{/* affinity
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -38061,7 +38050,7 @@ var _chartsIstioTelemetryPrometheusTemplates_affinityTpl = []byte(`{{/* affinity
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -38079,7 +38068,7 @@ var _chartsIstioTelemetryPrometheusTemplates_affinityTpl = []byte(`{{/* affinity
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -38875,7 +38864,7 @@ var _chartsIstioTelemetryPrometheusOperatorTemplates_affinityTpl = []byte(`{{/* 
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.prometheus.nodeSelector -}}
@@ -38883,7 +38872,7 @@ var _chartsIstioTelemetryPrometheusOperatorTemplates_affinityTpl = []byte(`{{/* 
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -38896,7 +38885,7 @@ var _chartsIstioTelemetryPrometheusOperatorTemplates_affinityTpl = []byte(`{{/* 
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -38925,7 +38914,7 @@ var _chartsIstioTelemetryPrometheusOperatorTemplates_affinityTpl = []byte(`{{/* 
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -38943,7 +38932,7 @@ var _chartsIstioTelemetryPrometheusOperatorTemplates_affinityTpl = []byte(`{{/* 
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -39563,8 +39552,15 @@ var _chartsIstioTelemetryTracingTemplates_affinityTpl = []byte(`{{/* affinity - 
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
+        {{- end }}
+        {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.tracing.nodeSelector -}}
+        {{- range $key, $val := $nodeSelector }}
+        - key: {{ $key }}
+          operator: In
+          values:
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -39577,7 +39573,7 @@ var _chartsIstioTelemetryTracingTemplates_affinityTpl = []byte(`{{/* affinity - 
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -39606,7 +39602,7 @@ var _chartsIstioTelemetryTracingTemplates_affinityTpl = []byte(`{{/* affinity - 
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -39624,7 +39620,7 @@ var _chartsIstioTelemetryTracingTemplates_affinityTpl = []byte(`{{/* affinity - 
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -40117,7 +40113,7 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   ports:
-    - port: {{ .Values.tracing.service.externalPort }}
+    - port: {{ .Values.tracing.zipkin.queryPort }}
       targetPort: {{ .Values.tracing.zipkin.queryPort }}
       protocol: TCP
       name: {{ .Values.tracing.service.name }}
@@ -40141,7 +40137,7 @@ spec:
   type: {{ .Values.tracing.service.type }}
   ports:
     - name: {{ .Values.tracing.service.name }}
-      port: {{ .Values.tracing.service.externalPort }}
+      port: 80
       protocol: TCP
 {{ if eq .Values.tracing.provider "jaeger" }}
       targetPort: 16686
@@ -40257,7 +40253,7 @@ tracing:
     annotations: {}
     name: http-query
     type: ClusterIP
-    externalPort: 9411
+    externalPort: 80
 
   ingress:
     enabled: false
@@ -40331,7 +40327,7 @@ var _chartsIstiocorednsTemplates_affinityTpl = []byte(`{{/* affinity - https://k
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.istiocoredns.nodeSelector -}}
@@ -40339,7 +40335,7 @@ var _chartsIstiocorednsTemplates_affinityTpl = []byte(`{{/* affinity - https://k
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -40352,7 +40348,7 @@ var _chartsIstiocorednsTemplates_affinityTpl = []byte(`{{/* affinity - https://k
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -40381,7 +40377,7 @@ var _chartsIstiocorednsTemplates_affinityTpl = []byte(`{{/* affinity - https://k
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -40399,7 +40395,7 @@ var _chartsIstiocorednsTemplates_affinityTpl = []byte(`{{/* affinity - https://k
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -40827,7 +40823,7 @@ var _chartsSecurityCertmanagerTemplates_affinityTpl = []byte(`{{/* affinity - ht
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.certmanager.nodeSelector -}}
@@ -40835,7 +40831,7 @@ var _chartsSecurityCertmanagerTemplates_affinityTpl = []byte(`{{/* affinity - ht
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -40848,7 +40844,7 @@ var _chartsSecurityCertmanagerTemplates_affinityTpl = []byte(`{{/* affinity - ht
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -40877,7 +40873,7 @@ var _chartsSecurityCertmanagerTemplates_affinityTpl = []byte(`{{/* affinity - ht
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -40895,7 +40891,7 @@ var _chartsSecurityCertmanagerTemplates_affinityTpl = []byte(`{{/* affinity - ht
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -41293,7 +41289,7 @@ var _chartsSecurityCitadelTemplates_affinityTpl = []byte(`{{/* affinity - https:
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.security.nodeSelector -}}
@@ -41301,7 +41297,7 @@ var _chartsSecurityCitadelTemplates_affinityTpl = []byte(`{{/* affinity - https:
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -41314,7 +41310,7 @@ var _chartsSecurityCitadelTemplates_affinityTpl = []byte(`{{/* affinity - https:
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -41343,7 +41339,7 @@ var _chartsSecurityCitadelTemplates_affinityTpl = []byte(`{{/* affinity - https:
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -41361,7 +41357,7 @@ var _chartsSecurityCitadelTemplates_affinityTpl = []byte(`{{/* affinity - https:
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
@@ -41938,7 +41934,7 @@ var _chartsSecurityNodeagentTemplates_affinityTpl = []byte(`{{/* affinity - http
           values:
         {{- range $key, $val := .Values.global.arch }}
           {{- if gt ($val | int) 0 }}
-          - {{ $key }}
+          - {{ $key | quote }}
           {{- end }}
         {{- end }}
         {{- $nodeSelector := default .Values.global.defaultNodeSelector .Values.nodeagent.nodeSelector -}}
@@ -41946,7 +41942,7 @@ var _chartsSecurityNodeagentTemplates_affinityTpl = []byte(`{{/* affinity - http
         - key: {{ $key }}
           operator: In
           values:
-          - {{ $val }}
+          - {{ $val | quote }}
         {{- end }}
 {{- end }}
 
@@ -41959,7 +41955,7 @@ var _chartsSecurityNodeagentTemplates_affinityTpl = []byte(`{{/* affinity - http
         - key: beta.kubernetes.io/arch
           operator: In
           values:
-          - {{ $key }}
+          - {{ $key | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -41988,7 +41984,7 @@ var _chartsSecurityNodeagentTemplates_affinityTpl = []byte(`{{/* affinity - http
           values:
           {{- $vals := split "," $item.values }}
           {{- range $i, $v := $vals }}
-          - {{ $v }}
+          - {{ $v | quote }}
           {{- end }}
           {{- end }}
       topologyKey: {{ $item.topologyKey }}
@@ -42006,7 +42002,7 @@ var _chartsSecurityNodeagentTemplates_affinityTpl = []byte(`{{/* affinity - http
             values:
             {{- $vals := split "," $item.values }}
             {{- range $i, $v := $vals }}
-            - {{ $v }}
+            - {{ $v | quote }}
             {{- end }}
             {{- end }}
         topologyKey: {{ $item.topologyKey }}
