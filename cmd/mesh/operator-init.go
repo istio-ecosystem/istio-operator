@@ -113,7 +113,7 @@ func operatorInit(args *rootArgs, oiArgs *operatorInitArgs, l *logger, apply man
 	// Error here likely indicates Deployment is missing. If some other K8s error, we will hit it again later.
 	already, _ := isControllerInstalled(oiArgs.kubeConfigPath, oiArgs.context, oiArgs.operatorNamespace)
 	if already {
-		l.logAndPrintf("Operator controller is already installed in %s namespace, updating.", oiArgs.istioNamespace)
+		l.logAndPrintf("Operator controller is already installed in %s namespace, updating.", oiArgs.operatorNamespace)
 	}
 
 	l.logAndPrintf("Using operator Deployment image: %s/operator:%s", oiArgs.hub, oiArgs.tag)
@@ -212,7 +212,7 @@ func getCRAndNamespaceFromFile(filePath string, l *logger) (customResource strin
 
 // chartsRootDir, helmBaseDir, componentName, namespace string) (TemplateRenderer, error) {
 func renderOperatorManifest(args *rootArgs, oiArgs *operatorInitArgs, l *logger) (string, error) {
-	r, err := helm.NewHelmRenderer("", "../operator", "Operator", oiArgs.operatorNamespace)
+	r, err := helm.NewHelmRenderer("", "../operator", istioControllerComponentName, oiArgs.operatorNamespace)
 	if err != nil {
 		return "", err
 	}
