@@ -38044,12 +38044,6 @@ func profilesEmptyYaml() (*asset, error) {
 var _profilesMinimalYaml = []byte(`apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
-  base:
-    enabled: false
-
-  trafficManagement:
-    enabled: false
-
   policy:
     enabled: false
 
