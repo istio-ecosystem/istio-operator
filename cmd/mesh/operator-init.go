@@ -64,7 +64,7 @@ const (
 )
 
 // manifestApplier is used for test dependency injection.
-type manifestApplier func(manifestStr, componentName string, opts *kubectlcmd.Options, verbose bool, l *logger) bool
+type manifestApplier func(manifestStr, componentName string, opts *kubectlcmd.Options, verbose bool, l *Logger) bool
 
 var (
 	defaultManifestApplier = applyManifest
@@ -101,13 +101,13 @@ func operatorInitCmd(rootArgs *rootArgs, oiArgs *operatorInitArgs) *cobra.Comman
 		Long:  "The init subcommand installs the Istio operator controller in the cluster.",
 		Args:  cobra.ExactArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
-			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
+			l := NewLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
 			operatorInit(rootArgs, oiArgs, l, defaultManifestApplier)
 		}}
 }
 
 // operatorInit installs the Istio operator controller into the cluster.
-func operatorInit(args *rootArgs, oiArgs *operatorInitArgs, l *logger, apply manifestApplier) {
+func operatorInit(args *rootArgs, oiArgs *operatorInitArgs, l *Logger, apply manifestApplier) {
 	initLogsOrExit(args)
 
 	// Error here likely indicates Deployment is missing. If some other K8s error, we will hit it again later.
@@ -158,7 +158,7 @@ func operatorInit(args *rootArgs, oiArgs *operatorInitArgs, l *logger, apply man
 	l.logAndPrint("\n*** Success. ***\n")
 }
 
-func applyManifest(manifestStr, componentName string, opts *kubectlcmd.Options, verbose bool, l *logger) bool {
+func applyManifest(manifestStr, componentName string, opts *kubectlcmd.Options, verbose bool, l *Logger) bool {
 	l.logAndPrint("")
 	// Specifically don't prune operator installation since it leads to a lot of resources being reapplied.
 	opts.Prune = pointer.BoolPtr(false)
@@ -187,7 +187,7 @@ func applyManifest(manifestStr, componentName string, opts *kubectlcmd.Options, 
 	return success
 }
 
-func getCRAndNamespaceFromFile(filePath string, l *logger) (customResource string, istioNamespace string, err error) {
+func getCRAndNamespaceFromFile(filePath string, l *Logger) (customResource string, istioNamespace string, err error) {
 	if filePath == "" {
 		return "", "", nil
 	}
@@ -211,7 +211,7 @@ func getCRAndNamespaceFromFile(filePath string, l *logger) (customResource strin
 }
 
 // chartsRootDir, helmBaseDir, componentName, namespace string) (TemplateRenderer, error) {
-func renderOperatorManifest(args *rootArgs, oiArgs *operatorInitArgs, l *logger) (string, error) {
+func renderOperatorManifest(args *rootArgs, oiArgs *operatorInitArgs, l *Logger) (string, error) {
 	r, err := helm.NewHelmRenderer("", "../operator", istioControllerComponentName, oiArgs.operatorNamespace)
 	if err != nil {
 		return "", err

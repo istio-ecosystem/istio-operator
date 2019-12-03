@@ -33,7 +33,7 @@ type operatorRemoveArgs struct {
 	force bool
 }
 
-type manifestDeleter func(manifestStr, componentName string, opts *kubectlcmd.Options, l *logger) bool
+type manifestDeleter func(manifestStr, componentName string, opts *kubectlcmd.Options, l *Logger) bool
 
 var (
 	defaultManifestDeleter = deleteManifest
@@ -51,13 +51,13 @@ func operatorRemoveCmd(rootArgs *rootArgs, orArgs *operatorRemoveArgs) *cobra.Co
 		Long:  "The remove subcommand removes the Istio operator controller from the cluster.",
 		Args:  cobra.ExactArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
-			l := newLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
+			l := NewLogger(rootArgs.logToStdErr, cmd.OutOrStdout(), cmd.OutOrStderr())
 			operatorRemove(rootArgs, orArgs, l, defaultManifestDeleter)
 		}}
 }
 
 // operatorRemove removes the Istio operator controller from the cluster.
-func operatorRemove(args *rootArgs, orArgs *operatorRemoveArgs, l *logger, deleteManifestFunc manifestDeleter) {
+func operatorRemove(args *rootArgs, orArgs *operatorRemoveArgs, l *Logger, deleteManifestFunc manifestDeleter) {
 	initLogsOrExit(args)
 
 	installed, err := isControllerInstalled(orArgs.kubeConfigPath, orArgs.context, orArgs.operatorNamespace)
@@ -101,7 +101,7 @@ func operatorRemove(args *rootArgs, orArgs *operatorRemoveArgs, l *logger, delet
 	l.logAndPrint("\n*** Success. ***\n")
 }
 
-func deleteManifest(manifestStr, componentName string, opts *kubectlcmd.Options, l *logger) bool {
+func deleteManifest(manifestStr, componentName string, opts *kubectlcmd.Options, l *Logger) bool {
 	l.logAndPrintf("Deleting manifest for component %s...", componentName)
 	objs, err := object.ParseK8sObjectsFromYAMLManifest(manifestStr)
 	stdout, stderr, err := kubectlcmd.New().Delete(manifestStr, opts)
