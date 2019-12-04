@@ -216,6 +216,7 @@
 // ../../data/charts/security/nodeagent/templates/daemonset.yaml
 // ../../data/charts/security/nodeagent/templates/serviceaccount.yaml
 // ../../data/charts/security/nodeagent/values.yaml
+// ../../data/examples/googleca/values-istio-google-ca.yaml
 // ../../data/examples/multicluster/values-istio-multicluster-gateways.yaml
 // ../../data/examples/multicluster/values-istio-multicluster-primary.yaml
 // ../../data/examples/vm/values-istio-meshexpansion-gateways.yaml
@@ -37327,6 +37328,48 @@ func chartsSecurityNodeagentValuesYaml() (*asset, error) {
 	return a, nil
 }
 
+var _examplesGooglecaValuesIstioGoogleCaYaml = []byte(`apiVersion: install.istio.io/v1alpha2
+kind: IstioControlPlane
+spec:
+  security:
+    components:
+      nodeAgent:
+        enabled: true
+  values:
+    global:
+      controlPlaneSecurityEnabled: true
+      mtls:
+        enabled: true
+      sds:
+        enabled: true
+        udsPath: "unix:/var/run/sds/uds_path"
+        token:
+          aud: "istio-ca"
+      useMCP: true
+    nodeagent:
+      image: node-agent-k8s
+      env:
+        CA_PROVIDER: "GoogleCA"
+        CA_ADDR: "meshca.googleapis.com:443"
+        PLUGINS: "GoogleTokenExchange"
+        GKE_CLUSTER_URL: ""
+`)
+
+func examplesGooglecaValuesIstioGoogleCaYamlBytes() ([]byte, error) {
+	return _examplesGooglecaValuesIstioGoogleCaYaml, nil
+}
+
+func examplesGooglecaValuesIstioGoogleCaYaml() (*asset, error) {
+	bytes, err := examplesGooglecaValuesIstioGoogleCaYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "examples/googleca/values-istio-google-ca.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _examplesMulticlusterValuesIstioMulticlusterGatewaysYaml = []byte(`apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
@@ -39286,6 +39329,7 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/security/nodeagent/templates/daemonset.yaml": chartsSecurityNodeagentTemplatesDaemonsetYaml,
 	"charts/security/nodeagent/templates/serviceaccount.yaml": chartsSecurityNodeagentTemplatesServiceaccountYaml,
 	"charts/security/nodeagent/values.yaml": chartsSecurityNodeagentValuesYaml,
+	"examples/googleca/values-istio-google-ca.yaml": examplesGooglecaValuesIstioGoogleCaYaml,
 	"examples/multicluster/values-istio-multicluster-gateways.yaml": examplesMulticlusterValuesIstioMulticlusterGatewaysYaml,
 	"examples/multicluster/values-istio-multicluster-primary.yaml": examplesMulticlusterValuesIstioMulticlusterPrimaryYaml,
 	"examples/vm/values-istio-meshexpansion-gateways.yaml": examplesVmValuesIstioMeshexpansionGatewaysYaml,
@@ -39649,6 +39693,9 @@ var _bintree = &bintree{nil, map[string]*bintree{
 		}},
 	}},
 	"examples": &bintree{nil, map[string]*bintree{
+		"googleca": &bintree{nil, map[string]*bintree{
+			"values-istio-google-ca.yaml": &bintree{examplesGooglecaValuesIstioGoogleCaYaml, map[string]*bintree{}},
+		}},
 		"multicluster": &bintree{nil, map[string]*bintree{
 			"values-istio-multicluster-gateways.yaml": &bintree{examplesMulticlusterValuesIstioMulticlusterGatewaysYaml, map[string]*bintree{}},
 			"values-istio-multicluster-primary.yaml": &bintree{examplesMulticlusterValuesIstioMulticlusterPrimaryYaml, map[string]*bintree{}},
