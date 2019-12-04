@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"istio.io/pkg/log"
+	"k8s.io/apimachinery/pkg/types"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -80,8 +81,17 @@ func NewIstioStatusUpdater(instance *v1alpha2.IstioControlPlane) helmreconciler.
 
 // EndReconcile updates the status field on the IstioControlPlane instance based on the resulting err parameter.
 func (u *IstioStatusUpdater) EndReconcile(_ runtime.Object, status *v1alpha2.InstallStatus) error {
-	u.instance.Status = status
-	return u.reconciler.GetClient().Status().Update(context.TODO(), u.instance)
+	icp := &v1alpha2.IstioControlPlane{}
+	namespacedName := types.NamespacedName{
+		Name:      u.instance.Name,
+		Namespace: u.instance.Namespace,
+	}
+	if err := u.reconciler.GetClient().Get(context.TODO(), namespacedName, icp); err != nil {
+		return fmt.Errorf("Failed to get IstioControlPlane before updating status due to %v", err)
+	} else {
+		icp.Status = status
+		return u.reconciler.GetClient().Status().Update(context.TODO(), icp)
+	}
 }
 
 // RegisterReconciler registers the HelmReconciler with this object
