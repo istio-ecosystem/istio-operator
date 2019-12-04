@@ -52,7 +52,7 @@ func TestOperatorInit(t *testing.T) {
 		istioNamespace:    "istio-test-namespace",
 	}
 
-	operatorInit(rootArgs, oiArgs, newLogger(rootArgs.logToStdErr, os.Stdout, os.Stderr), mockApplyManifest)
+	operatorInit(rootArgs, oiArgs, NewLogger(rootArgs.logToStdErr, os.Stdout, os.Stderr), mockApplyManifest)
 	gotYAML := ""
 	for _, ao := range applyOutput {
 		gotYAML += ao.manifest
@@ -106,7 +106,7 @@ func TestOperatorInit(t *testing.T) {
 	}
 }
 
-func mockApplyManifest(manifestStr, componentName string, opts *kubectlcmd.Options, _ bool, _ *logger) bool {
+func mockApplyManifest(manifestStr, componentName string, opts *kubectlcmd.Options, _ bool, _ *Logger) bool {
 	applyOutput = append(applyOutput, applyParams{
 		componentName: componentName,
 		manifest:      manifestStr,
@@ -129,7 +129,7 @@ func TestOperatorRemove(t *testing.T) {
 		force: true,
 	}
 
-	operatorRemove(rootArgs, orArgs, newLogger(rootArgs.logToStdErr, os.Stdout, os.Stderr), mockDeleteManifest)
+	operatorRemove(rootArgs, orArgs, NewLogger(rootArgs.logToStdErr, os.Stdout, os.Stderr), mockDeleteManifest)
 	gotYAML := deleteOutput
 
 	fmt.Println(gotYAML)
@@ -150,7 +150,7 @@ func TestOperatorRemove(t *testing.T) {
 	}
 }
 
-func mockDeleteManifest(manifestStr, _ string, _ *kubectlcmd.Options, _ *logger) bool {
+func mockDeleteManifest(manifestStr, _ string, _ *kubectlcmd.Options, _ *Logger) bool {
 	deleteOutput = manifestStr
 	return true
 }
