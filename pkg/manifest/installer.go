@@ -50,7 +50,7 @@ import (
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/object"
 	"istio.io/operator/pkg/util"
-	"istio.io/operator/pkg/version"
+	pkgversion "istio.io/operator/pkg/version"
 	"istio.io/pkg/log"
 )
 
@@ -203,7 +203,7 @@ func renderRecursive(manifests name.ManifestMap, installTree componentTree, outp
 }
 
 // ApplyAll applies all given manifests using kubectl client.
-func ApplyAll(manifests name.ManifestMap, version version.Version, opts *kubectlcmd.Options) (CompositeOutput, error) {
+func ApplyAll(manifests name.ManifestMap, version pkgversion.Version, opts *kubectlcmd.Options) (CompositeOutput, error) {
 	logAndPrint("Preparing manifests for these components:")
 	for c := range manifests {
 		logAndPrint("- %s", c)
@@ -216,7 +216,7 @@ func ApplyAll(manifests name.ManifestMap, version version.Version, opts *kubectl
 	return applyRecursive(manifests, version, opts)
 }
 
-func applyRecursive(manifests name.ManifestMap, version version.Version, opts *kubectlcmd.Options) (CompositeOutput, error) {
+func applyRecursive(manifests name.ManifestMap, version pkgversion.Version, opts *kubectlcmd.Options) (CompositeOutput, error) {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	out := CompositeOutput{}
@@ -231,7 +231,7 @@ func applyRecursive(manifests name.ManifestMap, version version.Version, opts *k
 				<-s
 				log.Infof("Prerequisite for %s has completed, proceeding with install.", c)
 			}
-			applyOut, appliedObjects := ApplyManifest(c, m, version, opts)
+			applyOut, appliedObjects := ApplyManifest(c, m, version.String(), opts)
 			mu.Lock()
 			out[c] = applyOut
 			allAppliedObjects = append(allAppliedObjects, appliedObjects...)
@@ -252,7 +252,7 @@ func applyRecursive(manifests name.ManifestMap, version version.Version, opts *k
 	return out, nil
 }
 
-func ApplyManifest(componentName name.ComponentName, manifestStr string, version version.Version,
+func ApplyManifest(componentName name.ComponentName, manifestStr, version string,
 	opts *kubectlcmd.Options) (*ComponentApplyOutput, object.K8sObjects) {
 	stdout, stderr := "", ""
 	appliedObjects := object.K8sObjects{}
@@ -300,7 +300,7 @@ func ApplyManifest(componentName name.ComponentName, manifestStr string, version
 	for _, o := range objects {
 		o.AddLabels(map[string]string{istioComponentLabelStr: string(componentName)})
 		o.AddLabels(map[string]string{operatorLabelStr: operatorReconcileStr})
-		o.AddLabels(map[string]string{istioVersionLabelStr: version.String()})
+		o.AddLabels(map[string]string{istioVersionLabelStr: version})
 	}
 
 	opts.ExtraArgs = []string{"--force", "--selector", componentLabel}

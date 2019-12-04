@@ -104,6 +104,10 @@ func operatorRemove(args *rootArgs, orArgs *operatorRemoveArgs, l *Logger, delet
 func deleteManifest(manifestStr, componentName string, opts *kubectlcmd.Options, l *Logger) bool {
 	l.logAndPrintf("Deleting manifest for component %s...", componentName)
 	objs, err := object.ParseK8sObjectsFromYAMLManifest(manifestStr)
+	if err != nil {
+		l.logAndPrint("Parse error: ", err, "\n")
+		return false
+	}
 	stdout, stderr, err := kubectlcmd.New().Delete(manifestStr, opts)
 
 	success := true

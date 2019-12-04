@@ -162,7 +162,7 @@ func applyManifest(manifestStr, componentName string, opts *kubectlcmd.Options, 
 	l.logAndPrint("")
 	// Specifically don't prune operator installation since it leads to a lot of resources being reapplied.
 	opts.Prune = pointer.BoolPtr(false)
-	out, objs := manifest.ApplyManifest(name.ComponentName(componentName), manifestStr, version.OperatorBinaryVersion, opts)
+	out, objs := manifest.ApplyManifest(name.ComponentName(componentName), manifestStr, version.OperatorBinaryVersion.String(), opts)
 
 	success := true
 	if out.Err != nil {
@@ -203,7 +203,7 @@ func getCRAndNamespaceFromFile(filePath string, l *Logger) (customResource strin
 
 	b, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		return "", "", fmt.Errorf("Could not read values from file %s: %s", filePath, err)
+		return "", "", fmt.Errorf("could not read values from file %s: %s", filePath, err)
 	}
 	customResource = string(b)
 	istioNamespace = mergedICPS.DefaultNamespace
@@ -211,7 +211,7 @@ func getCRAndNamespaceFromFile(filePath string, l *Logger) (customResource strin
 }
 
 // chartsRootDir, helmBaseDir, componentName, namespace string) (TemplateRenderer, error) {
-func renderOperatorManifest(args *rootArgs, oiArgs *operatorInitArgs, l *Logger) (string, error) {
+func renderOperatorManifest(_ *rootArgs, oiArgs *operatorInitArgs, _ *Logger) (string, error) {
 	r, err := helm.NewHelmRenderer("", "../operator", istioControllerComponentName, oiArgs.operatorNamespace)
 	if err != nil {
 		return "", err
@@ -245,18 +245,6 @@ tag: {{.Tag}}
 	}
 	log.Infof("Installing operator charts with the following values:\n%s", vals)
 	return r.RenderManifest(vals)
-}
-
-// Apply is the right operation but emits an annoying warning which we don't want to surface.
-func filterApplyWarning(errStr string) string {
-	var out []string
-	filterStr := "Warning: kubectl apply should be used on resource created by either kubectl create"
-	for _, l := range strings.Split(errStr, "\n") {
-		if !strings.Contains(l, filterStr) {
-			out = append(out, l)
-		}
-	}
-	return strings.Join(out, "\n")
 }
 
 func genNamespaceResource(namespace string) string {
