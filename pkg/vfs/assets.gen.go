@@ -107,6 +107,7 @@
 // ../../data/charts/istio-policy/templates/clusterrole.yaml
 // ../../data/charts/istio-policy/templates/clusterrolebinding.yaml
 // ../../data/charts/istio-policy/templates/config.yaml
+// ../../data/charts/istio-policy/templates/configmap-envoy.yaml
 // ../../data/charts/istio-policy/templates/deployment.yaml
 // ../../data/charts/istio-policy/templates/poddisruptionbudget.yaml
 // ../../data/charts/istio-policy/templates/service.yaml
@@ -10571,6 +10572,54 @@ data:
                     route:
                       cluster: in.9901
                       timeout: 0.000s
+        {{- if .Values.global.sds.enabled }}
+          tls_context:
+            common_tls_context:
+              alpn_protocols:
+              - h2
+              tls_certificate_sds_secret_configs:
+              - name: default
+                sds_config:
+                  api_config_source:
+                    api_type: GRPC
+                    grpc_services:
+                    - google_grpc:
+                        target_uri: {{ .Values.global.sds.udsPath }}
+                        channel_credentials:
+                          local_credentials: {}
+                        call_credentials:
+                        - from_plugin:
+                            name: envoy.grpc_credentials.file_based_metadata
+                            config:
+                              header_key: istio_sds_credentials_header-bin
+                              secret_data:
+                                filename: /var/run/secrets/tokens/istio-token
+                        credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                        stat_prefix: sdsstat
+              combined_validation_context:
+                default_validation_context:
+                  verify_subject_alt_name: []
+                validation_context_sds_secret_config:
+                  name: ROOTCA
+                  sds_config:
+                    api_config_source:
+                      api_type: GRPC
+                      grpc_services:
+                      - google_grpc:
+                          target_uri: {{ .Values.global.sds.udsPath }}
+                          channel_credentials:
+                            local_credentials: {}
+                          call_credentials:
+                          - from_plugin:
+                              name: envoy.grpc_credentials.file_based_metadata
+                              config:
+                                header_key: istio_sds_credentials_header-bin
+                                secret_data:
+                                  filename: /var/run/secrets/tokens/istio-token
+                          credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                          stat_prefix: sdsstat
+            require_client_certificate: true
+        {{- else }}
           tls_context:
             common_tls_context:
               alpn_protocols:
@@ -10584,6 +10633,7 @@ data:
                 trusted_ca:
                   filename: /etc/certs/root-cert.pem
             require_client_certificate: true
+        {{- end }}
 {{- end }}
 ---
 `)
@@ -10839,11 +10889,19 @@ spec:
 {{ toYaml .Values.global.defaultResources | indent 12 }}
 {{- end }}
           volumeMounts:
+          - name: envoy-config
+            mountPath: /var/lib/istio/galley/envoy
+          {{- if .Values.global.sds.enabled }}
+          - name: sds-uds-path
+            mountPath: /var/run/sds
+            readOnly: true
+          - name: istio-token
+            mountPath: /var/run/secrets/tokens
+          {{ else }}
           - name: istio-certs
             mountPath: /etc/certs
             readOnly: true
-          - name: envoy-config
-            mountPath: /var/lib/istio/galley/envoy
+          {{- end }}
 {{- end }}
 
       volumes:
@@ -10851,6 +10909,18 @@ spec:
       - name: istio-certs
         secret:
           secretName: istio.istio-galley-service-account
+      {{- if .Values.global.sds.enabled }}
+      - hostPath:
+          path: /var/run/sds
+        name: sds-uds-path
+      - name: istio-token
+        projected:
+          sources:
+          - serviceAccountToken:
+              audience: {{ .Values.global.sds.token.aud }}
+              expirationSeconds: 43200
+              path: istio-token
+      {{- end }}
   {{- end }}
   {{- if .Values.global.certificates }}
       - name: dnscerts
@@ -11716,7 +11786,57 @@ data:
               max_pending_requests: 100000
               max_requests: 100000
               max_retries: 3
-
+        hosts:
+          - socket_address:
+              address: istio-galley.{{ .Values.global.configNamespace }}
+              port_value: 15019
+      {{- if .Values.global.controlPlaneSecurityEnabled }}
+      {{- if .Values.global.sds.enabled }}
+        tls_context:
+          common_tls_context:
+            tls_certificate_sds_secret_configs:
+            - name: default
+              sds_config:
+                api_config_source:
+                  api_type: GRPC
+                  grpc_services:
+                  - google_grpc:
+                      target_uri: {{ .Values.global.sds.udsPath }}
+                      channel_credentials:
+                        local_credentials: {}
+                      call_credentials:
+                      - from_plugin:
+                          name: envoy.grpc_credentials.file_based_metadata
+                          config:
+                            header_key: istio_sds_credentials_header-bin
+                            secret_data:
+                              filename: /var/run/secrets/tokens/istio-token
+                      credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                      stat_prefix: sdsstat
+            combined_validation_context:
+              default_validation_context:
+                verify_subject_alt_name:
+                - spiffe://{{ .Values.global.trustDomain }}/ns/{{ .Values.global.configNamespace }}/sa/istio-galley-service-account
+              validation_context_sds_secret_config:
+                name: ROOTCA
+                sds_config:
+                  api_config_source:
+                    api_type: GRPC
+                    grpc_services:
+                    - google_grpc:
+                        target_uri: {{ .Values.global.sds.udsPath }}
+                        channel_credentials:
+                          local_credentials: {}
+                        call_credentials:
+                        - from_plugin:
+                            name: envoy.grpc_credentials.file_based_metadata
+                            config:
+                              header_key: istio_sds_credentials_header-bin
+                              secret_data:
+                                filename: /var/run/secrets/tokens/istio-token
+                        credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                        stat_prefix: sdsstat
+      {{- else }}
         tls_context:
           common_tls_context:
             tls_certificates:
@@ -11729,12 +11849,8 @@ data:
                 filename: /etc/certs/root-cert.pem
               verify_subject_alt_name:
               - spiffe://{{ .Values.global.trustDomain }}/ns/{{ .Values.global.configNamespace }}/sa/istio-galley-service-account
-
-        hosts:
-          - socket_address:
-              address: istio-galley.{{ .Values.global.configNamespace }}
-              port_value: 15019
-
+      {{- end }}
+      {{- end }}
 
       listeners:
       - name: "in.15011"
@@ -11779,21 +11895,68 @@ data:
                     decorator:
                       operation: xDS
 
+        {{- if .Values.global.sds.enabled }}
           tls_context:
-            require_client_certificate: true
             common_tls_context:
-              validation_context:
-                trusted_ca:
-                  filename: /etc/certs/root-cert.pem
-
               alpn_protocols:
               - h2
-
+              tls_certificate_sds_secret_configs:
+              - name: default
+                sds_config:
+                  api_config_source:
+                    api_type: GRPC
+                    grpc_services:
+                    - google_grpc:
+                        target_uri: {{ .Values.global.sds.udsPath }}
+                        channel_credentials:
+                          local_credentials: {}
+                        call_credentials:
+                        - from_plugin:
+                            name: envoy.grpc_credentials.file_based_metadata
+                            config:
+                              header_key: istio_sds_credentials_header-bin
+                              secret_data:
+                                filename: /var/run/secrets/tokens/istio-token
+                        credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                        stat_prefix: sdsstat
+              combined_validation_context:
+                default_validation_context:
+                  verify_subject_alt_name: []
+                validation_context_sds_secret_config:
+                  name: ROOTCA
+                  sds_config:
+                    api_config_source:
+                      api_type: GRPC
+                      grpc_services:
+                      - google_grpc:
+                          target_uri: {{ .Values.global.sds.udsPath }}
+                          channel_credentials:
+                            local_credentials: {}
+                          call_credentials:
+                          - from_plugin:
+                              name: envoy.grpc_credentials.file_based_metadata
+                              config:
+                                header_key: istio_sds_credentials_header-bin
+                                secret_data:
+                                  filename: /var/run/secrets/tokens/istio-token
+                          credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                          stat_prefix: sdsstat
+            require_client_certificate: true
+        {{- else }}
+          tls_context:
+            common_tls_context:
+              alpn_protocols:
+              - h2
               tls_certificates:
               - certificate_chain:
                   filename: /etc/certs/cert-chain.pem
                 private_key:
                   filename: /etc/certs/key.pem
+              validation_context:
+                trusted_ca:
+                  filename: /etc/certs/root-cert.pem
+            require_client_certificate: true
+        {{- end }}
 
 
       # Manual 'whitebox' mode
@@ -12353,9 +12516,6 @@ spec:
 {{ toYaml .Values.global.defaultResources | trim | indent 12 }}
 {{- end }}
           volumeMounts:
-          - name: istio-certs
-            mountPath: /etc/certs
-            readOnly: true
           - name: pilot-envoy-config
             mountPath: /var/lib/envoy
           {{- if .Values.global.sds.enabled }}
@@ -12364,6 +12524,10 @@ spec:
             readOnly: true
           - name: istio-token
             mountPath: /var/run/secrets/tokens
+          {{ else }}
+          - name: istio-certs
+            mountPath: /etc/certs
+            readOnly: true
           {{- end }}
 {{- end }}
       volumes:
@@ -12378,6 +12542,11 @@ spec:
               audience: {{ .Values.global.sds.token.aud }}
               expirationSeconds: 43200
               path: istio-token
+      {{ else }}
+      - name: istio-certs
+        secret:
+          secretName: istio.istio-pilot-service-account
+          optional: true
       {{- end }}
       - name: config-volume
         configMap:
@@ -12385,12 +12554,6 @@ spec:
       - name: pilot-envoy-config
         configMap:
           name: pilot-envoy-config{{ .Values.version }}
-  {{- if .Values.global.controlPlaneSecurityEnabled}}
-      - name: istio-certs
-        secret:
-          secretName: istio.istio-pilot-service-account
-          optional: true
-  {{- end }}
       affinity:
       {{- include "nodeaffinity" . | indent 6 }}
       {{- include "podAntiAffinity" . | indent 6 }}
@@ -13428,6 +13591,504 @@ func chartsIstioPolicyTemplatesConfigYaml() (*asset, error) {
 	return a, nil
 }
 
+var _chartsIstioPolicyTemplatesConfigmapEnvoyYaml = []byte(`apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: policy-envoy-config
+  labels:
+    release: {{ .Release.Name }}
+data:
+  # Explicitly defined - moved from istio/istio/pilot/docker.
+  envoy.yaml.tmpl: |-
+    admin:
+      access_log_path: /dev/null
+      address:
+        socket_address:
+          address: 127.0.0.1
+          port_value: 15000
+    stats_config:
+      use_all_default_tags: false
+      stats_tags:
+      - tag_name: cluster_name
+        regex: '^cluster\.((.+?(\..+?\.svc\.cluster\.local)?)\.)'
+      - tag_name: tcp_prefix
+        regex: '^tcp\.((.*?)\.)\w+?$'
+      - tag_name: response_code
+        regex: '_rq(_(\d{3}))$'
+      - tag_name: response_code_class
+        regex: '_rq(_(\dxx))$'
+      - tag_name: http_conn_manager_listener_prefix
+        regex: '^listener(?=\.).*?\.http\.(((?:[_.[:digit:]]*|[_\[\]aAbBcCdDeEfF[:digit:]]*))\.)'
+      - tag_name: http_conn_manager_prefix
+        regex: '^http\.(((?:[_.[:digit:]]*|[_\[\]aAbBcCdDeEfF[:digit:]]*))\.)'
+      - tag_name: listener_address
+        regex: '^listener\.(((?:[_.[:digit:]]*|[_\[\]aAbBcCdDeEfF[:digit:]]*))\.)'
+
+    static_resources:
+      clusters:
+      - name: prometheus_stats
+        type: STATIC
+        connect_timeout: 0.250s
+        lb_policy: ROUND_ROBIN
+        hosts:
+        - socket_address:
+            protocol: TCP
+            address: 127.0.0.1
+            port_value: 15000
+
+      - circuit_breakers:
+          thresholds:
+          - max_connections: 100000
+            max_pending_requests: 100000
+            max_requests: 100000
+            max_retries: 3
+        connect_timeout: 1.000s
+        hosts:
+        - pipe:
+            path: /sock/mixer.socket
+        http2_protocol_options: {}
+        name: inbound_9092
+
+      - circuit_breakers:
+          thresholds:
+          - max_connections: 100000
+            max_pending_requests: 100000
+            max_requests: 100000
+            max_retries: 3
+        connect_timeout: 1.000s
+        hosts:
+        - socket_address:
+            address: istio-telemetry
+            port_value: 15004
+        http2_protocol_options: {}
+        name: mixer_report_server
+
+    {{- if .Values.global.controlPlaneSecurityEnabled }}
+    {{- if .Values.global.sds.enabled }}
+        tls_context:
+          common_tls_context:
+            tls_certificate_sds_secret_configs:
+            - name: default
+              sds_config:
+                api_config_source:
+                  api_type: GRPC
+                  grpc_services:
+                  - google_grpc:
+                      target_uri: {{ .Values.global.sds.udsPath }}
+                      channel_credentials:
+                        local_credentials: {}
+                      call_credentials:
+                      - from_plugin:
+                          name: envoy.grpc_credentials.file_based_metadata
+                          config:
+                            header_key: istio_sds_credentials_header-bin
+                            secret_data:
+                              filename: /var/run/secrets/tokens/istio-token
+                      credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                      stat_prefix: sdsstat
+            combined_validation_context:
+              default_validation_context:
+                verify_subject_alt_name:
+                - spiffe://{{ .Values.global.trustDomain }}/ns/{{ .Values.global.configNamespace }}/sa/istio-mixer-service-account
+              validation_context_sds_secret_config:
+                name: ROOTCA
+                sds_config:
+                  api_config_source:
+                    api_type: GRPC
+                    grpc_services:
+                    - google_grpc:
+                        target_uri: {{ .Values.global.sds.udsPath }}
+                        channel_credentials:
+                          local_credentials: {}
+                        call_credentials:
+                        - from_plugin:
+                            name: envoy.grpc_credentials.file_based_metadata
+                            config:
+                              header_key: istio_sds_credentials_header-bin
+                              secret_data:
+                                filename: /var/run/secrets/tokens/istio-token
+                        credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                        stat_prefix: sdsstat
+    {{- else }}
+        tls_context:
+          common_tls_context:
+            tls_certificates:
+            - certificate_chain:
+                filename: /etc/certs/cert-chain.pem
+              private_key:
+                filename: /etc/certs/key.pem
+            validation_context:
+              trusted_ca:
+                filename: /etc/certs/root-cert.pem
+              verify_subject_alt_name:
+              - spiffe://{{ .Values.global.trustDomain }}/ns/{{ .Values.global.configNamespace }}/sa/istio-mixer-service-account
+    {{- end }}
+    {{- end }}
+        type: STRICT_DNS
+        dns_lookup_family: V4_ONLY
+
+      - name: out.galley.15019
+        http2_protocol_options: {}
+        connect_timeout: 1.000s
+        type: STRICT_DNS
+
+        circuit_breakers:
+          thresholds:
+            - max_connections: 100000
+              max_pending_requests: 100000
+              max_requests: 100000
+              max_retries: 3
+        hosts:
+          - socket_address:
+              address: istio-galley.{{ .Values.global.configNamespace }}
+              port_value: 15019
+      {{- if .Values.global.controlPlaneSecurityEnabled }}
+      {{- if .Values.global.sds.enabled }}
+        tls_context:
+          common_tls_context:
+            tls_certificate_sds_secret_configs:
+            - name: default
+              sds_config:
+                api_config_source:
+                  api_type: GRPC
+                  grpc_services:
+                  - google_grpc:
+                      target_uri: {{ .Values.global.sds.udsPath }}
+                      channel_credentials:
+                        local_credentials: {}
+                      call_credentials:
+                      - from_plugin:
+                          name: envoy.grpc_credentials.file_based_metadata
+                          config:
+                            header_key: istio_sds_credentials_header-bin
+                            secret_data:
+                              filename: /var/run/secrets/tokens/istio-token
+                      credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                      stat_prefix: sdsstat
+            combined_validation_context:
+              default_validation_context:
+                verify_subject_alt_name:
+                - spiffe://{{ .Values.global.trustDomain }}/ns/{{ .Values.global.configNamespace }}/sa/istio-galley-service-account
+              validation_context_sds_secret_config:
+                name: ROOTCA
+                sds_config:
+                  api_config_source:
+                    api_type: GRPC
+                    grpc_services:
+                    - google_grpc:
+                        target_uri: {{ .Values.global.sds.udsPath }}
+                        channel_credentials:
+                          local_credentials: {}
+                        call_credentials:
+                        - from_plugin:
+                            name: envoy.grpc_credentials.file_based_metadata
+                            config:
+                              header_key: istio_sds_credentials_header-bin
+                              secret_data:
+                                filename: /var/run/secrets/tokens/istio-token
+                        credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                        stat_prefix: sdsstat
+      {{- else }}
+        tls_context:
+          common_tls_context:
+            tls_certificates:
+            - certificate_chain:
+                filename: /etc/certs/cert-chain.pem
+              private_key:
+                filename: /etc/certs/key.pem
+            validation_context:
+              trusted_ca:
+                filename: /etc/certs/root-cert.pem
+              verify_subject_alt_name:
+              - spiffe://{{ .Values.global.trustDomain }}/ns/{{ .Values.global.configNamespace }}/sa/istio-galley-service-account
+      {{- end }}
+      {{- end }}
+
+      listeners:
+      - name: "15090"
+        address:
+          socket_address:
+            protocol: TCP
+            address: 0.0.0.0
+            port_value: 15090
+        filter_chains:
+        - filters:
+          - name: envoy.http_connection_manager
+            config:
+              codec_type: AUTO
+              stat_prefix: stats
+              route_config:
+                virtual_hosts:
+                - name: backend
+                  domains:
+                  - '*'
+                  routes:
+                  - match:
+                      prefix: /stats/prometheus
+                    route:
+                      cluster: prometheus_stats
+              http_filters:
+              - name: envoy.router
+
+      - name: "15004"
+        address:
+          socket_address:
+            address: 0.0.0.0
+            port_value: 15004
+        filter_chains:
+        - filters:
+          - config:
+              codec_type: HTTP2
+              http2_protocol_options:
+                max_concurrent_streams: 1073741824
+              generate_request_id: true
+              http_filters:
+              - config:
+                  default_destination_service: istio-policy.{{ .Release.Namespace }}.svc.cluster.local
+                  service_configs:
+                    istio-policy.{{ .Release.Namespace }}.svc.cluster.local:
+                      disable_check_calls: true
+    {{"{{"}}- if .DisableReportCalls {{"}}"}}
+                      disable_report_calls: true
+    {{"{{"}}- end {{"}}"}}
+                      mixer_attributes:
+                        attributes:
+                          destination.service.host:
+                            string_value: istio-policy.{{ .Release.Namespace }}.svc.cluster.local
+                          destination.service.uid:
+                            string_value: istio://{{ .Release.Namespace }}/services/istio-policy
+                          destination.service.name:
+                            string_value: istio-policy
+                          destination.service.namespace:
+                            string_value: {{ .Release.Namespace }}
+                          destination.uid:
+                            string_value: kubernetes://{{"{{"}} .PodName {{"}}"}}.{{ .Release.Namespace }}
+                          destination.namespace:
+                            string_value: {{.Release.Namespace }}
+                          destination.ip:
+                            bytes_value: {{"{{"}} .PodIP {{"}}"}}
+                          destination.port:
+                            int64_value: 15004
+                          context.reporter.kind:
+                            string_value: inbound
+                          context.reporter.uid:
+                            string_value: kubernetes://{{"{{"}} .PodName {{"}}"}}.{{ .Release.Namespace }}
+                  transport:
+                    check_cluster: mixer_check_server
+                    report_cluster: mixer_report_server
+                    attributes_for_mixer_proxy:
+                      attributes:
+                        source.uid:
+                          string_value: kubernetes://{{"{{"}} .PodName {{"}}"}}.{{ .Release.Namespace }}
+                name: mixer
+              - name: envoy.router
+              route_config:
+                name: "15004"
+                virtual_hosts:
+                - domains:
+                  - '*'
+                  name: istio-policy.{{ .Release.Namespace }}.svc.cluster.local
+                  routes:
+                  - decorator:
+                      operation: Check
+                    match:
+                      prefix: /
+                    route:
+                      cluster: inbound_9092
+                      timeout: 0.000s
+              stat_prefix: "15004"
+            name: envoy.http_connection_manager
+    {{- if .Values.global.controlPlaneSecurityEnabled }}
+        {{- if .Values.global.sds.enabled }}
+          tls_context:
+            common_tls_context:
+              alpn_protocols:
+              - h2
+              tls_certificate_sds_secret_configs:
+              - name: default
+                sds_config:
+                  api_config_source:
+                    api_type: GRPC
+                    grpc_services:
+                    - google_grpc:
+                        target_uri: {{ .Values.global.sds.udsPath }}
+                        channel_credentials:
+                          local_credentials: {}
+                        call_credentials:
+                        - from_plugin:
+                            name: envoy.grpc_credentials.file_based_metadata
+                            config:
+                              header_key: istio_sds_credentials_header-bin
+                              secret_data:
+                                filename: /var/run/secrets/tokens/istio-token
+                        credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                        stat_prefix: sdsstat
+              combined_validation_context:
+                default_validation_context:
+                  verify_subject_alt_name: []
+                validation_context_sds_secret_config:
+                  name: ROOTCA
+                  sds_config:
+                    api_config_source:
+                      api_type: GRPC
+                      grpc_services:
+                      - google_grpc:
+                          target_uri: {{ .Values.global.sds.udsPath }}
+                          channel_credentials:
+                            local_credentials: {}
+                          call_credentials:
+                          - from_plugin:
+                              name: envoy.grpc_credentials.file_based_metadata
+                              config:
+                                header_key: istio_sds_credentials_header-bin
+                                secret_data:
+                                  filename: /var/run/secrets/tokens/istio-token
+                          credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                          stat_prefix: sdsstat
+            require_client_certificate: true
+        {{- else }}
+          tls_context:
+            common_tls_context:
+              alpn_protocols:
+              - h2
+              tls_certificates:
+              - certificate_chain:
+                  filename: /etc/certs/cert-chain.pem
+                private_key:
+                  filename: /etc/certs/key.pem
+              validation_context:
+                trusted_ca:
+                  filename: /etc/certs/root-cert.pem
+            require_client_certificate: true
+        {{- end }}
+    {{- end }}
+
+      - name: "9091"
+        address:
+          socket_address:
+            address: 0.0.0.0
+            port_value: 9091
+        filter_chains:
+        - filters:
+          - config:
+              codec_type: HTTP2
+              http2_protocol_options:
+                max_concurrent_streams: 1073741824
+              generate_request_id: true
+              http_filters:
+              - config:
+                  default_destination_service: istio-policy.{{ .Release.Namespace }}.svc.cluster.local
+                  service_configs:
+                    istio-policy.{{ .Release.Namespace }}.svc.cluster.local:
+                      disable_check_calls: true
+    {{"{{"}}- if .DisableReportCalls {{"}}"}}
+                      disable_report_calls: true
+    {{"{{"}}- end {{"}}"}}
+                      mixer_attributes:
+                        attributes:
+                          destination.service.host:
+                            string_value: istio-policy.{{ .Release.Namespace }}.svc.cluster.local
+                          destination.service.uid:
+                            string_value: istio://{{ .Release.Namespace }}/services/istio-policy
+                          destination.service.name:
+                            string_value: istio-policy
+                          destination.service.namespace:
+                            string_value: {{ .Release.Namespace }}
+                          destination.uid:
+                            string_value: kubernetes://{{"{{"}} .PodName {{"}}"}}.{{ .Release.Namespace }}
+                          destination.namespace:
+                            string_value: {{.Release.Namespace }}
+                          destination.ip:
+                            bytes_value: {{"{{"}} .PodIP {{"}}"}}
+                          destination.port:
+                            int64_value: 9091
+                          context.reporter.kind:
+                            string_value: inbound
+                          context.reporter.uid:
+                            string_value: kubernetes://{{"{{"}} .PodName {{"}}"}}.{{ .Release.Namespace }}
+                  transport:
+                    check_cluster: mixer_check_server
+                    report_cluster: mixer_report_server
+                    attributes_for_mixer_proxy:
+                      attributes:
+                        source.uid:
+                          string_value: kubernetes://{{"{{"}} .PodName {{"}}"}}.{{ .Release.Namespace }}
+                name: mixer
+              - name: envoy.router
+              route_config:
+                name: "9091"
+                virtual_hosts:
+                - domains:
+                  - '*'
+                  name: istio-policy.{{ .Release.Namespace }}.svc.cluster.local
+                  routes:
+                  - decorator:
+                      operation: Check
+                    match:
+                      prefix: /
+                    route:
+                      cluster: inbound_9092
+                      timeout: 0.000s
+              stat_prefix: "9091"
+            name: envoy.http_connection_manager
+        name: "9091"
+
+      - name: "local.15019"
+        address:
+          socket_address:
+            address: 127.0.0.1
+            port_value: 15019
+        filter_chains:
+          - filters:
+              - name: envoy.http_connection_manager
+                config:
+                  codec_type: HTTP2
+                  stat_prefix: "15019"
+                  http2_protocol_options:
+                    max_concurrent_streams: 1073741824
+
+                  access_log:
+                    - name: envoy.file_access_log
+                      config:
+                        path: /dev/stdout
+
+                  http_filters:
+                    - name: envoy.router
+
+                  route_config:
+                    name: "15019"
+
+                    virtual_hosts:
+                      - name: istio-galley
+
+                        domains:
+                          - '*'
+
+                        routes:
+                          - match:
+                              prefix: /
+                            route:
+                              cluster: out.galley.15019
+                              timeout: 0.000s
+---
+`)
+
+func chartsIstioPolicyTemplatesConfigmapEnvoyYamlBytes() ([]byte, error) {
+	return _chartsIstioPolicyTemplatesConfigmapEnvoyYaml, nil
+}
+
+func chartsIstioPolicyTemplatesConfigmapEnvoyYaml() (*asset, error) {
+	bytes, err := chartsIstioPolicyTemplatesConfigmapEnvoyYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-policy/templates/configmap-envoy.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _chartsIstioPolicyTemplatesDeploymentYaml = []byte(`apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13490,6 +14151,9 @@ spec:
         secret:
           secretName: policy-adapter-secret
           optional: true
+      - name: policy-envoy-config
+        configMap:
+          name: policy-envoy-config
       affinity:
       {{- include "nodeaffinity" . | indent 6 }}
       {{- include "podAntiAffinity" . | indent 6 }}
@@ -13525,7 +14189,7 @@ spec:
 {{- end }}
 {{- if .Values.global.useMCP }}
     {{- if .Values.global.controlPlaneSecurityEnabled}}
-          - --configStoreURL=mcps://istio-galley.{{ .Values.global.configNamespace }}.svc:15019
+          - --configStoreURL=mcp://localhost:15019
     {{- else }}
           - --configStoreURL=mcp://istio-galley.{{ .Values.global.configNamespace }}.svc:9901
     {{- end }}
@@ -13599,7 +14263,7 @@ spec:
         - --serviceCluster
         - istio-policy
         - --templateFile
-        - /etc/istio/proxy/envoy_policy.yaml.tmpl
+        - /var/lib/envoy/envoy.yaml.tmpl
       {{- if .Values.global.controlPlaneSecurityEnabled }}
         - --controlPlaneAuthPolicy
         - MUTUAL_TLS
@@ -13638,15 +14302,18 @@ spec:
 {{ toYaml .Values.global.defaultResources | indent 10 }}
 {{- end }}
         volumeMounts:
-        - name: istio-certs
-          mountPath: /etc/certs
-          readOnly: true
+        - name: policy-envoy-config
+          mountPath: /var/lib/envoy
         {{- if .Values.global.sds.enabled }}
         - name: sds-uds-path
           mountPath: /var/run/sds
           readOnly: true
         - name: istio-token
           mountPath: /var/run/secrets/tokens
+        {{ else }}
+        - name: istio-certs
+          mountPath: /etc/certs
+          readOnly: true
         {{- end }}
         - name: uds-socket
           mountPath: /sock
@@ -30593,7 +31260,57 @@ data:
               max_pending_requests: 100000
               max_requests: 100000
               max_retries: 3
-
+        hosts:
+          - socket_address:
+              address: istio-galley.{{ .Values.global.configNamespace }}
+              port_value: 15019
+      {{- if .Values.global.controlPlaneSecurityEnabled }}
+      {{- if .Values.global.sds.enabled }}
+        tls_context:
+          common_tls_context:
+            tls_certificate_sds_secret_configs:
+            - name: default
+              sds_config:
+                api_config_source:
+                  api_type: GRPC
+                  grpc_services:
+                  - google_grpc:
+                      target_uri: {{ .Values.global.sds.udsPath }}
+                      channel_credentials:
+                        local_credentials: {}
+                      call_credentials:
+                      - from_plugin:
+                          name: envoy.grpc_credentials.file_based_metadata
+                          config:
+                            header_key: istio_sds_credentials_header-bin
+                            secret_data:
+                              filename: /var/run/secrets/tokens/istio-token
+                      credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                      stat_prefix: sdsstat
+            combined_validation_context:
+              default_validation_context:
+                verify_subject_alt_name:
+                - spiffe://{{ .Values.global.trustDomain }}/ns/{{ .Values.global.configNamespace }}/sa/istio-galley-service-account
+              validation_context_sds_secret_config:
+                name: ROOTCA
+                sds_config:
+                  api_config_source:
+                    api_type: GRPC
+                    grpc_services:
+                    - google_grpc:
+                        target_uri: {{ .Values.global.sds.udsPath }}
+                        channel_credentials:
+                          local_credentials: {}
+                        call_credentials:
+                        - from_plugin:
+                            name: envoy.grpc_credentials.file_based_metadata
+                            config:
+                              header_key: istio_sds_credentials_header-bin
+                              secret_data:
+                                filename: /var/run/secrets/tokens/istio-token
+                        credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                        stat_prefix: sdsstat
+      {{- else }}
         tls_context:
           common_tls_context:
             tls_certificates:
@@ -30606,12 +31323,8 @@ data:
                 filename: /etc/certs/root-cert.pem
               verify_subject_alt_name:
               - spiffe://{{ .Values.global.trustDomain }}/ns/{{ .Values.global.configNamespace }}/sa/istio-galley-service-account
-
-        hosts:
-          - socket_address:
-              address: istio-galley.{{ .Values.global.configNamespace }}
-              port_value: 15019
-
+      {{- end }}
+      {{- end }}
 
       listeners:
       - name: "15090"
@@ -30704,6 +31417,54 @@ data:
               stat_prefix: "15004"
             name: envoy.http_connection_manager
     {{- if .Values.global.controlPlaneSecurityEnabled }}
+        {{- if .Values.global.sds.enabled }}
+          tls_context:
+            common_tls_context:
+              alpn_protocols:
+              - h2
+              tls_certificate_sds_secret_configs:
+              - name: default
+                sds_config:
+                  api_config_source:
+                    api_type: GRPC
+                    grpc_services:
+                    - google_grpc:
+                        target_uri: {{ .Values.global.sds.udsPath }}
+                        channel_credentials:
+                          local_credentials: {}
+                        call_credentials:
+                        - from_plugin:
+                            name: envoy.grpc_credentials.file_based_metadata
+                            config:
+                              header_key: istio_sds_credentials_header-bin
+                              secret_data:
+                                filename: /var/run/secrets/tokens/istio-token
+                        credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                        stat_prefix: sdsstat
+              combined_validation_context:
+                default_validation_context:
+                  verify_subject_alt_name: []
+                validation_context_sds_secret_config:
+                  name: ROOTCA
+                  sds_config:
+                    api_config_source:
+                      api_type: GRPC
+                      grpc_services:
+                      - google_grpc:
+                          target_uri: {{ .Values.global.sds.udsPath }}
+                          channel_credentials:
+                            local_credentials: {}
+                          call_credentials:
+                          - from_plugin:
+                              name: envoy.grpc_credentials.file_based_metadata
+                              config:
+                                header_key: istio_sds_credentials_header-bin
+                                secret_data:
+                                  filename: /var/run/secrets/tokens/istio-token
+                          credentials_factory_name: envoy.grpc_credentials.file_based_metadata
+                          stat_prefix: sdsstat
+            require_client_certificate: true
+        {{- else }}
           tls_context:
             common_tls_context:
               alpn_protocols:
@@ -30717,6 +31478,7 @@ data:
                 trusted_ca:
                   filename: /etc/certs/root-cert.pem
             require_client_certificate: true
+        {{- end }}
     {{- end }}
 
       - name: "9091"
@@ -31050,15 +31812,16 @@ spec:
         volumeMounts:
         - name: telemetry-envoy-config
           mountPath: /var/lib/envoy
-        - name: istio-certs
-          mountPath: /etc/certs
-          readOnly: true
         {{- if .Values.global.sds.enabled }}
         - name: sds-uds-path
           mountPath: /var/run/sds
           readOnly: true
         - name: istio-token
           mountPath: /var/run/secrets/tokens
+        {{ else }}
+        - name: istio-certs
+          mountPath: /etc/certs
+          readOnly: true
         {{- end }}
         - name: uds-socket
           mountPath: /sock
@@ -38414,6 +39177,7 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/istio-policy/templates/clusterrole.yaml": chartsIstioPolicyTemplatesClusterroleYaml,
 	"charts/istio-policy/templates/clusterrolebinding.yaml": chartsIstioPolicyTemplatesClusterrolebindingYaml,
 	"charts/istio-policy/templates/config.yaml": chartsIstioPolicyTemplatesConfigYaml,
+	"charts/istio-policy/templates/configmap-envoy.yaml": chartsIstioPolicyTemplatesConfigmapEnvoyYaml,
 	"charts/istio-policy/templates/deployment.yaml": chartsIstioPolicyTemplatesDeploymentYaml,
 	"charts/istio-policy/templates/poddisruptionbudget.yaml": chartsIstioPolicyTemplatesPoddisruptionbudgetYaml,
 	"charts/istio-policy/templates/service.yaml": chartsIstioPolicyTemplatesServiceYaml,
@@ -38722,6 +39486,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 				"clusterrole.yaml": &bintree{chartsIstioPolicyTemplatesClusterroleYaml, map[string]*bintree{}},
 				"clusterrolebinding.yaml": &bintree{chartsIstioPolicyTemplatesClusterrolebindingYaml, map[string]*bintree{}},
 				"config.yaml": &bintree{chartsIstioPolicyTemplatesConfigYaml, map[string]*bintree{}},
+				"configmap-envoy.yaml": &bintree{chartsIstioPolicyTemplatesConfigmapEnvoyYaml, map[string]*bintree{}},
 				"deployment.yaml": &bintree{chartsIstioPolicyTemplatesDeploymentYaml, map[string]*bintree{}},
 				"poddisruptionbudget.yaml": &bintree{chartsIstioPolicyTemplatesPoddisruptionbudgetYaml, map[string]*bintree{}},
 				"service.yaml": &bintree{chartsIstioPolicyTemplatesServiceYaml, map[string]*bintree{}},
