@@ -30,6 +30,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 
+	"istio.io/operator/pkg/util"
 	"istio.io/pkg/log"
 )
 
@@ -181,12 +182,12 @@ func (o *K8sObject) YAML() ([]byte, error) {
 }
 
 // YAMLDebugString returns a YAML representation of the K8sObject, or an error string if the K8sObject cannot be rendered to YAML.
-func (o *K8sObject) YAMLDebugString() (string, error) {
+func (o *K8sObject) YAMLDebugString() string {
 	y, err := o.YAML()
 	if err != nil {
-		return "", err
+		return err.Error()
 	}
-	return string(y), nil
+	return string(y)
 }
 
 // AddLabels adds labels to the K8sObject.
@@ -362,4 +363,25 @@ func (o *K8sObject) Valid() bool {
 		return false
 	}
 	return true
+}
+
+// Equal returns true if o and other are both valid and equal to each other.
+func (o *K8sObject) Equal(other *K8sObject) bool {
+	if o == nil {
+		return other == nil
+	}
+	if other == nil {
+		return o == nil
+	}
+
+	ay, err := o.YAML()
+	if err != nil {
+		return false
+	}
+	by, err := other.YAML()
+	if err != nil {
+		return false
+	}
+
+	return util.IsYAMLEqual(string(ay), string(by))
 }

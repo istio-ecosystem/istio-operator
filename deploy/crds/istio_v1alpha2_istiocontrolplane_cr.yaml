@@ -2,8 +2,17 @@
 apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 metadata:
-  namespace: istio-operator
+  namespace: istio-system
   name: example-istiocontrolplane
 spec:
   profile: demo
-...
+  tag: 1.4.0
+  trafficManagement:
+    components:
+      pilot:
+        k8s:
+          resources:
+            requests:
+              cpu: 1235m
+              memory: 1G
+
