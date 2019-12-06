@@ -28,7 +28,6 @@ import (
 	"istio.io/operator/pkg/compare"
 	"istio.io/operator/pkg/hooks"
 	"istio.io/operator/pkg/manifest"
-	"istio.io/operator/pkg/tpath"
 	opversion "istio.io/operator/version"
 	"istio.io/pkg/log"
 )
@@ -121,13 +120,6 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 	l.logAndPrintf("Client - istioctl version: %s\n", opversion.OperatorVersionString)
 	args.inFilename = strings.TrimSpace(args.inFilename)
 
-	// Generates values for args.inFilename ICP specs yaml
-	targetValues, err := genProfile(true, args.inFilename, "",
-		"", "", args.force, l)
-	if err != nil {
-		return fmt.Errorf("failed to generate values from file: %v, error: %v", args.inFilename, err)
-	}
-
 	// Generate ICPS objects
 	targetICPSYaml, targetICPS, err := genICPS(args.inFilename, "", "", "", args.force, l)
 	if err != nil {
@@ -163,13 +155,6 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 		return fmt.Errorf("failed to read the current Istio version, error: %v", err)
 	}
 
-	// Read the current Istio installation values from the cluster
-	currentValues, err := readValuesFromInjectorConfigMap(kubeClient, istioNamespace)
-	if err != nil && !args.force {
-		return fmt.Errorf("failed to read the current Istio installation values, "+
-			"error: %v", err)
-	}
-
 	// Check if the upgrade currentVersion -> targetVersion is supported
 	err = checkSupportedVersions(currentVersion, targetVersion, args.versionsURI, l)
 	if err != nil && !args.force {
@@ -178,14 +163,11 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 	}
 	l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", currentVersion, targetVersion)
 
-	// Read the overridden values from args.inFilename
-	// TODO: Is this correct? Seems to be checking only the overlays under global. Other parts in ICPS can be
-	// overlaid too.
-	overrideValues, overrideICPSYaml, err := genOverlayICPS(args.inFilename, args.force)
+	// Read the overridden ICPS from args.inFilename
+	overrideICPSYaml, err := genOverlayICPS(args.inFilename)
 	if err != nil {
 		return fmt.Errorf("failed to generate override values from file: %v, error: %v", args.inFilename, err)
 	}
-	checkUpgradeValues(currentValues, targetValues, overrideValues, l)
 
 	// Generates ICPS for args.inFilename ICP specs yaml
 	currentICPSYaml, _, err := genICPS(args.inFilename, "", "", currentVersion, args.force, l)
@@ -193,7 +175,7 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 		return fmt.Errorf("failed to generate ICPS from file: %s for the current version: %s, error: %v",
 			args.inFilename, currentVersion, err)
 	}
-	checkUpgradeValues(currentICPSYaml, targetICPSYaml, overrideICPSYaml, l)
+	checkUpgradeICPS(currentICPSYaml, targetICPSYaml, overrideICPSYaml, l)
 
 	waitForConfirmation(args.skipConfirmation, l)
 
@@ -246,11 +228,11 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 	return nil
 }
 
-// checkUpgradeValues checks the upgrade eligibility by comparing the current values with the target values
-func checkUpgradeValues(curValues, tarValues, ignoreValues string, l *Logger) {
-	diff := compare.YAMLCmpWithIgnore(curValues, tarValues, nil, ignoreValues)
+// checkUpgradeICPS checks the upgrade eligibility by comparing the current ICPS with the target ICPS
+func checkUpgradeICPS(curICPS, tarICPS, ignoreICPS string, l *Logger) {
+	diff := compare.YAMLCmpWithIgnore(curICPS, tarICPS, nil, ignoreICPS)
 	if diff == "" {
-		l.logAndPrintf("Upgrade check: Values unchanged. The target values are identical to the current values.\n")
+		l.logAndPrintf("Upgrade check: ICPS unchanged. The target values are identical to the current values.\n")
 	} else {
 		l.logAndPrintf("Upgrade check: Warning!!! The following values will be changed as part of upgrade. "+
 			"If you have not overridden these values, they will change in your cluster. Please double check they are correct:\n%s", diff)
@@ -404,33 +386,16 @@ func identicalVersions(cv []manifest.ComponentVersion) bool {
 	return true
 }
 
-// genOverlayICPS reads an ICP from filename and returns an unmarshaled and validated ICPS from the spec field of ICP.
-// It separately returns a string which represents just the overlay values in the returned ICPS.
-func genOverlayICPS(filename string, force bool) (string, string, error) {
+// genOverlayICPS reads an ICPS from filename and returns the YAML of it
+func genOverlayICPS(filename string) (string, error) {
 	if filename == "" {
-		return "", "", nil
+		return "", nil
 	}
 
 	overlayICPSYaml, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return "", "", fmt.Errorf("could not read from file %s: %s", filename, err)
-	}
-	overlayICPS, _, err := unmarshalAndValidateICP(string(overlayICPSYaml), force)
-	if err != nil {
-		return "", "", err
+		return "", fmt.Errorf("could not read from file %s: %s", filename, err)
 	}
 
-	// FIXME: if we treat Values separately (not sure that we should), we must also consider UnvalidatedValues.
-	globalVals := make(map[string]interface{})
-	_, err = tpath.SetFromPath(overlayICPS, "Values", &globalVals)
-	if err != nil {
-		return "", "", err
-	}
-
-	overlayValues, err := yaml.Marshal(globalVals)
-	if err != nil {
-		return "", "", err
-	}
-
-	return string(overlayValues), string(overlayICPSYaml), nil
+	return string(overlayICPSYaml), nil
 }
