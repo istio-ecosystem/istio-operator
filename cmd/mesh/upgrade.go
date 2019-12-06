@@ -21,9 +21,6 @@ import (
 	"strings"
 	"time"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	"istio.io/operator/pkg/tpath"
-
 	"github.com/ghodss/yaml"
 	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
@@ -31,6 +28,7 @@ import (
 	"istio.io/operator/pkg/compare"
 	"istio.io/operator/pkg/hooks"
 	"istio.io/operator/pkg/manifest"
+	"istio.io/operator/pkg/tpath"
 	opversion "istio.io/operator/version"
 	"istio.io/pkg/log"
 )
@@ -131,7 +129,7 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 	}
 
 	// Generate ICPS objects
-	_, targetICPS, err := genICPS(args.inFilename, "", "", args.force, l)
+	targetICPSYaml, targetICPS, err := genICPS(args.inFilename, "", "", "", args.force, l)
 	if err != nil {
 		return fmt.Errorf("failed to generate ICPS from file %s, error: %s", args.inFilename, err)
 	}
@@ -183,11 +181,20 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 	// Read the overridden values from args.inFilename
 	// TODO: Is this correct? Seems to be checking only the overlays under global. Other parts in ICPS can be
 	// overlaid too.
-	overrideValues, _, err := genOverlayICPS(args.inFilename, args.force)
+	overrideValues, overrideICPSYaml, err := genOverlayICPS(args.inFilename, args.force)
 	if err != nil {
 		return fmt.Errorf("failed to generate override values from file: %v, error: %v", args.inFilename, err)
 	}
 	checkUpgradeValues(currentValues, targetValues, overrideValues, l)
+
+	// Generates ICPS for args.inFilename ICP specs yaml
+	currentICPSYaml, _, err := genICPS(args.inFilename, "", "", currentVersion, args.force, l)
+	if err != nil {
+		return fmt.Errorf("failed to generate ICPS from file: %s for the current version: %s, error: %v",
+			args.inFilename, currentVersion, err)
+	}
+	checkUpgradeValues(currentICPSYaml, targetICPSYaml, overrideICPSYaml, l)
+
 	waitForConfirmation(args.skipConfirmation, l)
 
 	// Run pre-upgrade hooks
@@ -399,31 +406,31 @@ func identicalVersions(cv []manifest.ComponentVersion) bool {
 
 // genOverlayICPS reads an ICP from filename and returns an unmarshaled and validated ICPS from the spec field of ICP.
 // It separately returns a string which represents just the overlay values in the returned ICPS.
-func genOverlayICPS(filename string, force bool) (string, *v1alpha2.IstioControlPlaneSpec, error) {
+func genOverlayICPS(filename string, force bool) (string, string, error) {
 	if filename == "" {
-		return "", nil, nil
+		return "", "", nil
 	}
 
-	b, err := ioutil.ReadFile(filename)
+	overlayICPSYaml, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return "", nil, fmt.Errorf("could not read from file %s: %s", filename, err)
+		return "", "", fmt.Errorf("could not read from file %s: %s", filename, err)
 	}
-	overlayICPS, _, err := unmarshalAndValidateICP(string(b), force)
+	overlayICPS, _, err := unmarshalAndValidateICP(string(overlayICPSYaml), force)
 	if err != nil {
-		return "", nil, err
+		return "", "", err
 	}
 
 	// FIXME: if we treat Values separately (not sure that we should), we must also consider UnvalidatedValues.
 	globalVals := make(map[string]interface{})
 	_, err = tpath.SetFromPath(overlayICPS, "Values", &globalVals)
 	if err != nil {
-		return "", nil, err
+		return "", "", err
 	}
 
 	overlayValues, err := yaml.Marshal(globalVals)
 	if err != nil {
-		return "", nil, err
+		return "", "", err
 	}
 
-	return string(overlayValues), overlayICPS, nil
+	return string(overlayValues), string(overlayICPSYaml), nil
 }
