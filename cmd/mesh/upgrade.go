@@ -169,8 +169,10 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 		return fmt.Errorf("failed to generate override values from file: %v, error: %v", args.inFilename, err)
 	}
 
-	// Generates ICPS for args.inFilename ICP specs yaml
-	currentICPSYaml, _, err := genICPS(args.inFilename, "", "", currentVersion, args.force, l)
+	// Generates ICPS for args.inFilename ICP specs yaml. Param force is set to true to
+	// skip the validation because the code only has the validation proto for the
+	// target version.
+	currentICPSYaml, _, err := genICPS(args.inFilename, "", "", currentVersion, true, l)
 	if err != nil {
 		return fmt.Errorf("failed to generate ICPS from file: %s for the current version: %s, error: %v",
 			args.inFilename, currentVersion, err)
