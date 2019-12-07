@@ -21,7 +21,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ghodss/yaml"
 	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
 
@@ -249,36 +248,6 @@ func waitForConfirmation(skipConfirmation bool, l *Logger) {
 	if !confirm("Confirm to proceed [y/N]?", os.Stdout) {
 		l.logAndFatalf("Abort.")
 	}
-}
-
-// readValuesFromInjectorConfigMap reads the values from the config map of sidecar-injector.
-func readValuesFromInjectorConfigMap(kubeClient manifest.ExecClient, istioNamespace string) (string, error) {
-	configMapList, err := kubeClient.ConfigMapForSelector(istioNamespace, "istio=sidecar-injector")
-	if err != nil || len(configMapList.Items) == 0 {
-		return "", fmt.Errorf("failed to retrieve sidecar-injector config map: %v", err)
-	}
-
-	jsonValues := ""
-	foundValues := false
-	for _, item := range configMapList.Items {
-		if item.Name == "istio-sidecar-injector" && item.Data != nil {
-			jsonValues, foundValues = item.Data["values"]
-			if foundValues {
-				break
-			}
-		}
-	}
-
-	if !foundValues {
-		return "", fmt.Errorf("failed to find values in sidecar-injector config map: %v", configMapList)
-	}
-
-	yamlValues, err := yaml.JSONToYAML([]byte(jsonValues))
-	if err != nil {
-		return "", fmt.Errorf("jsonToYAML failed to parse values:\n%v\nError:\n%v", yamlValues, err)
-	}
-
-	return string(yamlValues), nil
 }
 
 // checkSupportedVersions checks if the upgrade cur -> tar is supported by the tool
