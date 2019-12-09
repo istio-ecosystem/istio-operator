@@ -16,14 +16,27 @@ package istiocontrolplane
 
 import (
 	"context"
+	"fmt"
 
+	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
+	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv2beta1 "k8s.io/api/autoscaling/v2beta1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/api/extensions/v1beta1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+
 	"k8s.io/apimachinery/pkg/util/sets"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
@@ -69,7 +82,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	if err != nil {
 		return err
 	}
-
+	//watch for changes to Istio resources
+	err = watchIstioResources(c)
+	if err != nil {
+		return err
+	}
 	log.Info("Controller added")
 	return nil
 }
@@ -93,9 +110,19 @@ type ReconcileIstioControlPlane struct {
 func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	log.Info("Reconciling IstioControlPlane")
 
+	ns := request.Namespace
+	if ns == "" {
+		ns = defaultNs
+	} else {
+		defaultNs = ns
+	}
+	reqNamespacedName := types.NamespacedName{
+		Name:      request.Name,
+		Namespace: ns,
+	}
 	// declare read-only icp instance to create the reconciler
 	icp := &v1alpha2.IstioControlPlane{}
-	if err := r.client.Get(context.TODO(), request.NamespacedName, icp); err != nil {
+	if err := r.client.Get(context.TODO(), reqNamespacedName, icp); err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
@@ -153,7 +180,7 @@ func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (recon
 	}
 
 	log.Info("Updating IstioControlPlane")
-	reconciler, err := r.factory.New(icp, r.client)
+	reconciler, err := r.getOrCreateReconciler(icp)
 	if err == nil {
 		err = reconciler.Reconcile()
 		if err != nil {
@@ -164,4 +191,102 @@ func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (recon
 	}
 
 	return reconcile.Result{}, err
+}
+
+var (
+	defaultNs   string
+	reconcilers = map[string]*helmreconciler.HelmReconciler{}
+)
+
+func reconcilersMapKey(icp *v1alpha2.IstioControlPlane) string {
+	return fmt.Sprintf("%s/%s", icp.Namespace, icp.Name)
+}
+
+var ownedResourcePredicates = predicate.Funcs{
+	CreateFunc: func(_ event.CreateEvent) bool {
+		// no action
+		return false
+	},
+	GenericFunc: func(_ event.GenericEvent) bool {
+		// no action
+		return false
+	},
+	DeleteFunc: func(e event.DeleteEvent) bool {
+		object, err := meta.Accessor(e.Object)
+		log.Debugf("got delete event for %s.%s", object.GetName(), object.GetNamespace())
+		if err != nil {
+			return false
+		}
+		if object.GetLabels()[OwnerNameKey] != "" {
+			return true
+		}
+		return false
+	},
+	UpdateFunc: func(e event.UpdateEvent) bool {
+		object, err := meta.Accessor(e.ObjectNew)
+		log.Debugf("got update event for %s.%s", object.GetName(), object.GetNamespace())
+		if err != nil {
+			return false
+		}
+		if object.GetLabels()[OwnerNameKey] != "" {
+			return true
+		}
+		return false
+	},
+}
+
+func (r *ReconcileIstioControlPlane) getOrCreateReconciler(icp *v1alpha2.IstioControlPlane) (*helmreconciler.HelmReconciler, error) {
+	key := reconcilersMapKey(icp)
+	var err error
+	var reconciler *helmreconciler.HelmReconciler
+	if reconciler, ok := reconcilers[key]; ok {
+		reconciler.SetNeedUpdateAndPrune(false)
+		oldInstance := reconciler.GetInstance()
+		reconciler.SetInstance(icp)
+		if reconciler.GetInstance().GetGeneration() != oldInstance.GetGeneration() {
+			//regenerate the reconciler
+			if reconciler, err = r.factory.New(icp, r.client); err == nil {
+				reconcilers[key] = reconciler
+			}
+		}
+		return reconciler, err
+	}
+	//not found - generate the reconciler
+	if reconciler, err = r.factory.New(icp, r.client); err == nil {
+		reconcilers[key] = reconciler
+	}
+	return reconciler, err
+}
+
+// Watch changes for Istio resources managed by the operator
+func watchIstioResources(c controller.Controller) error {
+	for _, t := range []runtime.Object{
+		&corev1.ServiceAccount{TypeMeta: metav1.TypeMeta{Kind: "ServiceAccount", APIVersion: "v1"}},
+		&rbacv1.Role{TypeMeta: metav1.TypeMeta{Kind: "ClusterRole", APIVersion: "v1"}},
+		&rbacv1.RoleBinding{TypeMeta: metav1.TypeMeta{Kind: "ClusterRoleBinding", APIVersion: "v1"}},
+		&rbacv1.ClusterRole{TypeMeta: metav1.TypeMeta{Kind: "ClusterRole", APIVersion: "v1"}},
+		&rbacv1.ClusterRoleBinding{TypeMeta: metav1.TypeMeta{Kind: "ClusterRoleBinding", APIVersion: "v1"}},
+		&corev1.ConfigMap{TypeMeta: metav1.TypeMeta{Kind: "ConfigMap", APIVersion: "v1"}},
+		&corev1.Service{TypeMeta: metav1.TypeMeta{Kind: "Service", APIVersion: "v1"}},
+		&appsv1.Deployment{TypeMeta: metav1.TypeMeta{Kind: "Deployment", APIVersion: "v1"}},
+		&appsv1.DaemonSet{TypeMeta: metav1.TypeMeta{Kind: "DaemonSet", APIVersion: "v1"}},
+		&autoscalingv2beta1.HorizontalPodAutoscaler{TypeMeta: metav1.TypeMeta{Kind: "HorizontalPodAutoscaler", APIVersion: "v2beta1"}},
+		&admissionregistrationv1beta1.MutatingWebhookConfiguration{TypeMeta: metav1.TypeMeta{Kind: "MutatingWebhookConfiguration", APIVersion: "v1beta1"}},
+		&v1beta1.Deployment{TypeMeta: metav1.TypeMeta{Kind: "Deployment", APIVersion: "v1beta1"}},
+	} {
+		err := c.Watch(&source.Kind{Type: t}, &handler.EnqueueRequestsFromMapFunc{
+			ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
+				log.Debugf("watch a change for istio resource: %s.%s", a.Meta.GetName(), a.Meta.GetNamespace())
+				return []reconcile.Request{
+					{NamespacedName: types.NamespacedName{
+						Name: a.Meta.GetLabels()[OwnerNameKey],
+					}},
+				}
+			}),
+		}, ownedResourcePredicates)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
