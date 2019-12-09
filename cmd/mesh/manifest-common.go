@@ -110,7 +110,7 @@ func genApplyManifests(setOverlay []string, inFilename string, force bool, dryRu
 }
 
 // GenManifests generate manifest from input file and setOverLay
-func GenManifests(inFilename string, setOverlayYAML string, force bool, l *Logger) (name.ManifestMap, *v1alpha2.IstioControlPlaneSpec, error) {
+func GenManifests(inFilename string, setOverlayYAML string, force bool, l *logger) (name.ManifestMap, *v1alpha2.IstioControlPlaneSpec, error) {
 	mergedYAML, err := genProfile(false, inFilename, "", setOverlayYAML, "", force, l)
 	if err != nil {
 		return nil, nil, err
