@@ -1123,13 +1123,22 @@ message TelemetryConfig {
   // Controls whether telemetry is exported for Pilot.
   google.protobuf.BoolValue enabled = 1;
 
+  // Use telemetry v1.
+  TelemetryV1Config v1 = 2;
+
   // Use telemetry v2.
   TelemetryV2Config v2 = 3;
 }
 
 // Controls whether pilot will configure telemetry v1.
-message TelemetryV2Config {
+message TelemetryV1Config {
   // Controls whether pilot will configure telemetry v1.
+  google.protobuf.BoolValue enabled = 1;
+}
+
+// Controls whether pilot will configure telemetry v2.
+message TelemetryV2Config {
+  // Controls whether pilot will configure telemetry v2.
   google.protobuf.BoolValue enabled = 1;
 
   TelemetryV2PrometheusConfig prometheus = 2;

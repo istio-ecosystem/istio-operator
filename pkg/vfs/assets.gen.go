@@ -6518,10 +6518,11 @@ spec:
             readOnly: true
           - name: istio-token
             mountPath: /var/run/secrets/tokens
-          {{- end }}
+          {{- else }}
           - name: istio-certs
             mountPath: /etc/certs
             readOnly: true
+          {{- end }}
           {{- range $gateway.secretVolumes }}
           - name: {{ .name }}
             mountPath: {{ .mountPath | quote }}
@@ -6547,11 +6548,12 @@ spec:
       - name: sdsudspath
         hostPath:
           path: /var/run/sds
-      {{- end }}
+      {{- else }}
       - name: istio-certs
         secret:
           secretName: istio.default
           optional: true
+      {{- end }}
       {{- range $gateway.secretVolumes }}
       - name: {{ .name }}
         secret:
@@ -7617,10 +7619,11 @@ spec:
           {{- if $gateway.sds.enabled }}
           - name: ingressgatewaysdsudspath
             mountPath: /var/run/ingress_gateway
-          {{- end }}
+          {{- else }}
           - name: istio-certs
             mountPath: /etc/certs
             readOnly: true
+          {{- end }}
           {{- range $gateway.secretVolumes }}
           - name: {{ .name }}
             mountPath: {{ .mountPath | quote }}
@@ -7645,11 +7648,12 @@ spec:
               path: istio-token
               expirationSeconds: 43200
               audience: {{ .Values.global.sds.token.aud }}
-      {{- end }}
+      {{- else }}
       - name: istio-certs
         secret:
           secretName: istio.istio-ingressgateway-service-account
           optional: true
+      {{- end }}
       {{- range $gateway.secretVolumes }}
       - name: {{ .name }}
         secret:
@@ -11927,12 +11931,15 @@ data:
 
     {{- else }}
 
+    {{- if .Values.mixer.policy.enabled }}
     {{- if .Values.global.controlPlaneSecurityEnabled }}
     mixerCheckServer: istio-policy.{{ .Values.global.policyNamespace }}.svc.{{ .Values.global.proxy.clusterDomain }}:15004
     {{- else }}
     mixerCheckServer: istio-policy.{{ .Values.global.policyNamespace }}.svc.{{ .Values.global.proxy.clusterDomain }}:9091
     {{- end }}
-    {{- if .Values.telemetry.enabled}}
+    {{- end }}
+
+    {{- if and .Values.telemetry.v1.enabled .Values.telemetry.enabled}}
     {{- if .Values.global.controlPlaneSecurityEnabled }}
     mixerReportServer: istio-telemetry.{{ .Values.global.telemetryNamespace }}.svc.{{ .Values.global.proxy.clusterDomain }}:15004
     {{- else }}
@@ -13017,13 +13024,16 @@ mixer:
 
 telemetry:
   enabled: true
+  v1:
+    # Set true to enable Mixer based telemetry
+    enabled: true
   v2:
     # For Null VM case now. If enabled, will set disableMixerHttpReports to true and not define mixerReportServer
     # also enable metadata exchange and stats filter.
     enabled: false
     # Indicate if prometheus stats filter is enabled or not
     prometheus:
-      enabled: false
+      enabled: true
     # stackdriver filter settings.
     stackdriver:
       enabled: false
@@ -38038,6 +38048,8 @@ spec:
       useMCP: true
     telemetry:
       enabled: true
+      v1:
+        enabled: true
       v2:
         # For Null VM case now. If enabled, will set disableMixerHttpReports to true and not define mixerReportServer
         # also enable metadata exchange and stats filter.

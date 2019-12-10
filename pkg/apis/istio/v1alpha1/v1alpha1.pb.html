@@ -2,7 +2,7 @@
 title: v1alpha1
 layout: protoc-gen-docs
 generator: protoc-gen-docs
-number_of_entries: 88
+number_of_entries: 89
 ---
 <h2 id="AddonIngressConfig">AddonIngressConfig</h2>
 <section>
@@ -5843,6 +5843,17 @@ No
 No
 </td>
 </tr>
+<tr id="TelemetryConfig-v1">
+<td><code>v1</code></td>
+<td><code><a href="#TelemetryV1Config">TelemetryV1Config</a></code></td>
+<td>
+<p>Use telemetry v1.</p>
+
+</td>
+<td>
+No
+</td>
+</tr>
 <tr id="TelemetryConfig-v2">
 <td><code>v2</code></td>
 <td><code><a href="#TelemetryV2Config">TelemetryV2Config</a></code></td>
@@ -5857,9 +5868,37 @@ No
 </tbody>
 </table>
 </section>
-<h2 id="TelemetryV2Config">TelemetryV2Config</h2>
+<h2 id="TelemetryV1Config">TelemetryV1Config</h2>
 <section>
 <p>Controls whether pilot will configure telemetry v1.</p>
+
+<table class="message-fields">
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr id="TelemetryV1Config-enabled">
+<td><code>enabled</code></td>
+<td><code><a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#boolvalue">BoolValue</a></code></td>
+<td>
+<p>Controls whether pilot will configure telemetry v1.</p>
+
+</td>
+<td>
+No
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<h2 id="TelemetryV2Config">TelemetryV2Config</h2>
+<section>
+<p>Controls whether pilot will configure telemetry v2.</p>
 
 <table class="message-fields">
 <thead>
@@ -5875,7 +5914,7 @@ No
 <td><code>enabled</code></td>
 <td><code><a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#boolvalue">BoolValue</a></code></td>
 <td>
-<p>Controls whether pilot will configure telemetry v1.</p>
+<p>Controls whether pilot will configure telemetry v2.</p>
 
 </td>
 <td>
