@@ -7615,14 +7615,14 @@ spec:
             readOnly: true
           - name: istio-token
             mountPath: /var/run/secrets/tokens
-          {{- end }}
-          {{- if $gateway.sds.enabled }}
-          - name: ingressgatewaysdsudspath
-            mountPath: /var/run/ingress_gateway
           {{- else }}
           - name: istio-certs
             mountPath: /etc/certs
             readOnly: true
+          {{- end }}
+          {{- if $gateway.sds.enabled }}
+          - name: ingressgatewaysdsudspath
+            mountPath: /var/run/ingress_gateway
           {{- end }}
           {{- range $gateway.secretVolumes }}
           - name: {{ .name }}
