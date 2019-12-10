@@ -18,16 +18,11 @@ import (
 	"context"
 	"fmt"
 
-	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
-	appsv1 "k8s.io/api/apps/v1"
-	autoscalingv2beta1 "k8s.io/api/autoscaling/v2beta1"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/api/extensions/v1beta1"
-	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -223,14 +218,7 @@ var ownedResourcePredicates = predicate.Funcs{
 		return false
 	},
 	UpdateFunc: func(e event.UpdateEvent) bool {
-		object, err := meta.Accessor(e.ObjectNew)
-		log.Debugf("got update event for %s.%s", object.GetName(), object.GetNamespace())
-		if err != nil {
-			return false
-		}
-		if object.GetLabels()[OwnerNameKey] != "" {
-			return true
-		}
+		// no action
 		return false
 	},
 }
@@ -260,21 +248,14 @@ func (r *ReconcileIstioControlPlane) getOrCreateReconciler(icp *v1alpha2.IstioCo
 
 // Watch changes for Istio resources managed by the operator
 func watchIstioResources(c controller.Controller) error {
-	for _, t := range []runtime.Object{
-		&corev1.ServiceAccount{TypeMeta: metav1.TypeMeta{Kind: "ServiceAccount", APIVersion: "v1"}},
-		&rbacv1.Role{TypeMeta: metav1.TypeMeta{Kind: "ClusterRole", APIVersion: "v1"}},
-		&rbacv1.RoleBinding{TypeMeta: metav1.TypeMeta{Kind: "ClusterRoleBinding", APIVersion: "v1"}},
-		&rbacv1.ClusterRole{TypeMeta: metav1.TypeMeta{Kind: "ClusterRole", APIVersion: "v1"}},
-		&rbacv1.ClusterRoleBinding{TypeMeta: metav1.TypeMeta{Kind: "ClusterRoleBinding", APIVersion: "v1"}},
-		&corev1.ConfigMap{TypeMeta: metav1.TypeMeta{Kind: "ConfigMap", APIVersion: "v1"}},
-		&corev1.Service{TypeMeta: metav1.TypeMeta{Kind: "Service", APIVersion: "v1"}},
-		&appsv1.Deployment{TypeMeta: metav1.TypeMeta{Kind: "Deployment", APIVersion: "v1"}},
-		&appsv1.DaemonSet{TypeMeta: metav1.TypeMeta{Kind: "DaemonSet", APIVersion: "v1"}},
-		&autoscalingv2beta1.HorizontalPodAutoscaler{TypeMeta: metav1.TypeMeta{Kind: "HorizontalPodAutoscaler", APIVersion: "v2beta1"}},
-		&admissionregistrationv1beta1.MutatingWebhookConfiguration{TypeMeta: metav1.TypeMeta{Kind: "MutatingWebhookConfiguration", APIVersion: "v1beta1"}},
-		&v1beta1.Deployment{TypeMeta: metav1.TypeMeta{Kind: "Deployment", APIVersion: "v1beta1"}},
-	} {
-		err := c.Watch(&source.Kind{Type: t}, &handler.EnqueueRequestsFromMapFunc{
+	for _, t := range append(namespacedResources, nonNamespacedResources...) {
+		u := &unstructured.Unstructured{}
+		u.SetGroupVersionKind(schema.GroupVersionKind{
+			Kind:    t.Kind,
+			Group:   t.Group,
+			Version: t.Version,
+		})
+		err := c.Watch(&source.Kind{Type: u}, &handler.EnqueueRequestsFromMapFunc{
 			ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
 				log.Debugf("watch a change for istio resource: %s.%s", a.Meta.GetName(), a.Meta.GetNamespace())
 				return []reconcile.Request{
@@ -285,7 +266,7 @@ func watchIstioResources(c controller.Controller) error {
 			}),
 		}, ownedResourcePredicates)
 		if err != nil {
-			return err
+			log.Warnf("can not create watch for resources %s.%s.%s due to %q", t.Kind, t.Group, t.Version, err)
 		}
 	}
 	return nil
