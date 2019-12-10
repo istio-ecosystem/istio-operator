@@ -204,11 +204,10 @@ func renderRecursive(manifests name.ManifestMap, installTree componentTree, outp
 
 // ApplyAll applies all given manifests using kubectl client.
 func ApplyAll(manifests name.ManifestMap, version pkgversion.Version, opts *kubectlcmd.Options) (CompositeOutput, error) {
-	logAndPrint("Preparing manifests for these components:")
+	log.Infof("Preparing manifests for these components:")
 	for c := range manifests {
-		logAndPrint("- %s", c)
+		log.Infof("- %s", c)
 	}
-	logAndPrint("")
 	log.Infof("Component dependencies tree: \n%s", installTreeString())
 	if err := InitK8SRestClient(opts.Kubeconfig, opts.Context); err != nil {
 		return nil, err
@@ -311,7 +310,7 @@ func ApplyManifest(componentName name.ComponentName, manifestStr, version string
 		opts.Prune = pointer.BoolPtr(true)
 	}
 
-	logAndPrint("Applying manifest for component %s...", componentName)
+	logAndPrint("- Applying manifest for component %s...", componentName)
 
 	// Apply namespace resources first, then wait.
 	nsObjects := nsKindObjects(objects)
@@ -338,12 +337,15 @@ func ApplyManifest(componentName name.ComponentName, manifestStr, version string
 	// Apply all remaining objects.
 	nonNsCrdObjects := objectsNotInLists(objects, nsObjects, crdObjects)
 	stdout, stderr, err = applyObjects(nonNsCrdObjects, &opts, stdout, stderr)
+	mark := "✔"
+	if err != nil {
+		mark = "✘"
+	}
+	logAndPrint("%s Finished applying manifest for component %s.", mark, componentName)
 	if err != nil {
 		return buildComponentApplyOutput(stdout, stderr, appliedObjects, err), appliedObjects
 	}
 	appliedObjects = append(appliedObjects, nonNsCrdObjects...)
-
-	logAndPrint("Finished applying manifest for component %s.", componentName)
 	return buildComponentApplyOutput(stdout, stderr, appliedObjects, err), appliedObjects
 }
 
