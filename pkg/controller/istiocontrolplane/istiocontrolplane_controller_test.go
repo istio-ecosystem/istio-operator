@@ -20,6 +20,8 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/kr/pretty"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -285,7 +287,7 @@ func checkICPStatus(cl client.Client, key client.ObjectKey, profile string) (boo
 	size := len(installStatus.Status)
 	expectedSize := len(status)
 	if size != expectedSize {
-		return false, fmt.Errorf("status size(%v) is not equal to expected status size (%v)", size, expectedSize)
+		return false, fmt.Errorf("status got: \n%s want: \n%s", pretty.Sprint(installStatus), pretty.Sprint(status))
 	}
 	for k, v := range installStatus.Status {
 		if s, ok := status[k]; ok {
