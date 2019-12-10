@@ -218,11 +218,10 @@ type InstallOptions struct {
 
 // ApplyAll applies all given manifests using kubectl client.
 func ApplyAll(manifests name.ManifestMap, version version.Version, opts *InstallOptions) (CompositeOutput, error) {
-	logAndPrint("Preparing manifests for these components:")
+	log.Infof("Preparing manifests for these components:")
 	for c := range manifests {
-		logAndPrint("- %s", c)
+		log.Infof("- %s", c)
 	}
-	logAndPrint("")
 	log.Infof("Component dependencies tree: \n%s", installTreeString())
 	if err := initK8SRestClient(opts.Kubeconfig, opts.Context); err != nil {
 		return nil, err
@@ -295,6 +294,7 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 			return buildComponentApplyOutput(stdout, stderr, appliedObjects, err), appliedObjects
 		}
 
+		logAndPrint("- Pruning objects for disabled component %s...", componentName)
 		delObjects, err := object.ParseK8sObjectsFromYAMLManifest(stdoutGet)
 		if err != nil {
 			return buildComponentApplyOutput(stdout, stderr, appliedObjects, err), appliedObjects
@@ -304,9 +304,11 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 		stdout += "\n" + stdoutDel
 		stderr += "\n" + stderrDel
 		if err != nil {
+			logAndPrint("✘ Finished pruning objects for component %s.", componentName)
 			return buildComponentApplyOutput(stdout, stderr, appliedObjects, err), appliedObjects
 		}
 		appliedObjects = append(appliedObjects, delObjects...)
+		logAndPrint("✔ Finished pruning objects for component %s.", componentName)
 		return buildComponentApplyOutput(stdout, stderr, appliedObjects, err), appliedObjects
 	}
 
@@ -327,9 +329,7 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 	if componentName != name.IstioBaseComponentName {
 		extraArgs = append(extraArgs, "--prune", "--selector", componentLabel)
 	}
-
-	logAndPrint("Applying manifest for component %s", componentName)
-
+	logAndPrint("- Applying manifest for component %s...", componentName)
 	nsObjects := nsKindObjects(objects)
 	if len(nsObjects) > 0 {
 		mns, err := nsObjects.JSONManifest()
@@ -378,8 +378,12 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 	stdoutNonNsCrd, stderrNonNsCrd, err := kubectl.Apply(opts.DryRun, opts.Verbose, opts.Kubeconfig, opts.Context, namespace, m, extraArgs...)
 	stdout += "\n" + stdoutNonNsCrd
 	stderr += "\n" + stderrNonNsCrd
-	logAndPrint("Finished applying manifest for component %s", componentName)
 	appliedObjects = append(appliedObjects, nonNsCrdObjects...)
+	mark := "✔"
+	if err != nil {
+		mark = "✘"
+	}
+	logAndPrint("%s Finished applying manifest for component %s.", mark, componentName)
 	return buildComponentApplyOutput(stdout, stderr, appliedObjects, err), appliedObjects
 }
 
