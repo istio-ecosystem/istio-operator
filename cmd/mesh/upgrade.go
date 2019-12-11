@@ -84,8 +84,7 @@ func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 			"It will wait for a maximum duration of "+(upgradeWaitSecCheckVerPerLoop*
 			upgradeWaitCheckVerMaxAttempts).String())
 	cmd.PersistentFlags().BoolVar(&args.force, "force", false,
-		"Apply the upgrade without eligibility checks and testing for changes "+
-			"in profile default values")
+		"Apply the upgrade without eligibility checks")
 }
 
 // Upgrade command upgrades Istio control plane in-place with eligibility checks
@@ -116,7 +115,6 @@ func UpgradeCmd() *cobra.Command {
 
 // upgrade is the main function for Upgrade command
 func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
-	l.logAndPrintf("Client - istioctl version: %s\n", opversion.OperatorVersionString)
 	args.inFilename = strings.TrimSpace(args.inFilename)
 
 	// Generate ICPS objects
@@ -133,10 +131,7 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 				"please download istioctl %v and run upgrade again", targetVersion,
 				opversion.OperatorVersionString, targetVersion)
 		}
-		l.logAndPrintf("Warning. The target version %v does not equal to the binary version %v",
-			targetVersion, opversion.OperatorVersionString)
 	}
-	l.logAndPrintf("Upgrade - target version: %s\n", targetVersion)
 
 	// Create a kube client from args.kubeConfigPath and  args.context
 	kubeClient, err := manifest.NewClient(args.kubeConfigPath, args.context)
@@ -163,9 +158,13 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 	l.logAndPrintf("Upgrade version check passed: %v -> %v.\n", currentVersion, targetVersion)
 
 	// Read the overridden ICPS from args.inFilename
-	overrideICPSYaml, err := genOverlayICPS(args.inFilename)
-	if err != nil {
-		return fmt.Errorf("failed to generate override values from file: %v, error: %v", args.inFilename, err)
+	overrideICPSYaml := ""
+	if args.inFilename != "" {
+		b, err := ioutil.ReadFile(args.inFilename)
+		if err != nil {
+			return fmt.Errorf("failed to read override ICPS from file: %v, error: %v", args.inFilename, err)
+		}
+		overrideICPSYaml = string(b)
 	}
 
 	// Generates ICPS for args.inFilename ICP specs yaml. Param force is set to true to
@@ -184,8 +183,8 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 	hparams := &hooks.HookCommonParams{
 		SourceVer:    currentVersion,
 		TargetVer:    targetVersion,
-		SourceValues: targetICPS,
-		TargetValues: targetICPS,
+		SourceICPS: targetICPS,
+		TargetICPS: targetICPS,
 	}
 	errs := hooks.RunPreUpgradeHooks(kubeClient, hparams, rootArgs.dryRun)
 	if len(errs) != 0 && !args.force {
@@ -233,10 +232,10 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 func checkUpgradeICPS(curICPS, tarICPS, ignoreICPS string, l *Logger) {
 	diff := compare.YAMLCmpWithIgnore(curICPS, tarICPS, nil, ignoreICPS)
 	if diff == "" {
-		l.logAndPrintf("Upgrade check: ICPS unchanged. The target values are identical to the current values.\n")
+		l.logAndPrintf("Upgrade check: ICPS unchanged. The target ICPS are identical to the current ICPS.\n")
 	} else {
-		l.logAndPrintf("Upgrade check: Warning!!! The following values will be changed as part of upgrade. "+
-			"If you have not overridden these values, they will change in your cluster. Please double check they are correct:\n%s", diff)
+		l.logAndPrintf("Upgrade check: Warning!!! The following ICPS will be changed as part of upgrade. "+
+			"Please double check they are correct:\n%s", diff)
 	}
 }
 
@@ -355,18 +354,4 @@ func identicalVersions(cv []manifest.ComponentVersion) bool {
 		}
 	}
 	return true
-}
-
-// genOverlayICPS reads an ICPS from filename and returns the YAML of it
-func genOverlayICPS(filename string) (string, error) {
-	if filename == "" {
-		return "", nil
-	}
-
-	overlayICPSYaml, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return "", fmt.Errorf("could not read from file %s: %s", filename, err)
-	}
-
-	return string(overlayICPSYaml), nil
 }
