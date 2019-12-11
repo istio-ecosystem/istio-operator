@@ -304,11 +304,11 @@ func applyManifest(componentName name.ComponentName, manifestStr string, version
 		stdout += "\n" + stdoutDel
 		stderr += "\n" + stderrDel
 		if err != nil {
-			logAndPrint("✘ Finished pruning objects for component %s.", componentName)
+			logAndPrint("✘ Finished pruning objects for disabled component %s.", componentName)
 			return buildComponentApplyOutput(stdout, stderr, appliedObjects, err), appliedObjects
 		}
 		appliedObjects = append(appliedObjects, delObjects...)
-		logAndPrint("✔ Finished pruning objects for component %s.", componentName)
+		logAndPrint("✔ Finished pruning objects for disabled component %s.", componentName)
 		return buildComponentApplyOutput(stdout, stderr, appliedObjects, err), appliedObjects
 	}
 
