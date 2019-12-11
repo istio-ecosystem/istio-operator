@@ -44,8 +44,8 @@ type hookVersionMapping struct {
 
 // HookCommonParams is a set of common params passed to all hooks.
 type HookCommonParams struct {
-	SourceVer    string
-	TargetVer    string
+	SourceVer  string
+	TargetVer  string
 	SourceICPS *v1alpha2.IstioControlPlaneSpec
 	TargetICPS *v1alpha2.IstioControlPlaneSpec
 }

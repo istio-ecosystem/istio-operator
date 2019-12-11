@@ -181,8 +181,8 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 
 	// Run pre-upgrade hooks
 	hparams := &hooks.HookCommonParams{
-		SourceVer:    currentVersion,
-		TargetVer:    targetVersion,
+		SourceVer:  currentVersion,
+		TargetVer:  targetVersion,
 		SourceICPS: targetICPS,
 		TargetICPS: targetICPS,
 	}
