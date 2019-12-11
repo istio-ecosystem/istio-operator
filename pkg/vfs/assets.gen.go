@@ -6470,7 +6470,7 @@ spec:
           - name: ISTIO_META_WORKLOAD_NAME
             value: istio-egressgateway
           - name: ISTIO_META_OWNER
-            value: kubernetes://api/apps/v1/namespaces/{{ .Release.Namespace }}/deployments/istio-egressgateway
+            value: kubernetes://apis/apps/v1/namespaces/{{ .Release.Namespace }}/deployments/istio-egressgateway
           {{- if $.Values.global.meshID }}
           - name: ISTIO_META_MESH_ID
             value: "{{ $.Values.global.meshID }}"
@@ -7566,7 +7566,7 @@ spec:
           - name: ISTIO_META_WORKLOAD_NAME
             value: istio-ingressgateway
           - name: ISTIO_META_OWNER
-            value: kubernetes://api/apps/v1/namespaces/{{ .Release.Namespace }}/deployments/istio-ingressgateway
+            value: kubernetes://apis/apps/v1/namespaces/{{ .Release.Namespace }}/deployments/istio-ingressgateway
           {{- if $.Values.global.meshID }}
           - name: ISTIO_META_MESH_ID
             value: "{{ $.Values.global.meshID }}"
@@ -9146,7 +9146,7 @@ var _chartsIstioControlIstioAutoinjectFilesInjectionTemplateYaml = []byte(`templ
     {{ end }}
     {{- if and .TypeMeta.APIVersion .DeploymentMeta.Name }}
     - name: ISTIO_META_OWNER
-      value: kubernetes://api/{{ .TypeMeta.APIVersion }}/namespaces/{{ valueOrDefault .DeploymentMeta.Namespace `+"`"+`default`+"`"+` }}/{{ toLower .TypeMeta.Kind}}s/{{ .DeploymentMeta.Name }}
+      value: kubernetes://apis/{{ .TypeMeta.APIVersion }}/namespaces/{{ valueOrDefault .DeploymentMeta.Namespace `+"`"+`default`+"`"+` }}/{{ toLower .TypeMeta.Kind}}s/{{ .DeploymentMeta.Name }}
     {{- end}}
     {{- if (isset .ObjectMeta.Annotations `+"`"+`sidecar.istio.io/bootstrapOverride`+"`"+`) }}
     - name: ISTIO_BOOTSTRAP_OVERRIDE
@@ -10454,6 +10454,10 @@ rules:
   - apiGroups: ["apiextensions.k8s.io"]
     resources: ["customresourcedefinitions"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles"]
+    verbs: ["get", "list", "watch"]
+---
 `)
 
 func chartsIstioControlIstioConfigTemplatesClusterroleYamlBytes() ([]byte, error) {
