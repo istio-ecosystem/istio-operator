@@ -22,8 +22,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	"istio.io/operator/pkg/object"
 	"istio.io/operator/pkg/name"
+	"istio.io/operator/pkg/object"
 	"istio.io/operator/pkg/util"
 	"istio.io/pkg/log"
 )
@@ -213,7 +213,7 @@ func (h *HelmReconciler) Delete() error {
 	return err
 }
 
-// allObjectHashes returns a map with object hashes in mm as the keys.
+// allObjectHashes returns a map with object hashes of all the objects contained in cmm as the keys.
 func allObjectHashes(cmm ChartManifestsMap) map[string]bool {
 	ret := make(map[string]bool)
 	for _, mm := range cmm {
