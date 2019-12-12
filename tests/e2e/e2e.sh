@@ -28,9 +28,10 @@ if [[ ! -d "${ISTIO_DIR}" ]]
 then
 	git clone https://github.com/istio/istio.git  "${ISTIO_DIR}"
 	curl -L https://github.com/istio/istio/pull/19535.patch --output "${ISTIO_DIR}"/19535.patch
-	cd "${ISTIO_DIR}"
+	pushd "${ISTIO_DIR}"
 	git apply "${ISTIO_DIR}"/19535.patch
 	rm -rf "${ISTIO_DIR}"/19535.patch
+	popd
 fi
 
 # Write out our personal HUB and TAG to the operator iamge to be consumed
