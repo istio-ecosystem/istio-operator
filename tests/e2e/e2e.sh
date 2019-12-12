@@ -26,7 +26,9 @@ ISTIO_DIR="${GOPATH}/src/istio.io/istio"
 # Create a clone of the Istio repository
 if [[ ! -d "${ISTIO_DIR}" ]]
 then
-	git clone https://github.com/istio/istio.git "${ISTIO_DIR}"
+	git clone https://github.com/istio/istio.git  "${ISTIO_DIR}"
+	curl -LO https://github.com/istio/istio/pull/19535.patch
+	git apply 19535.patch
 fi
 
 # Write out our personal HUB and TAG to the operator iamge to be consumed
@@ -62,5 +64,5 @@ make istioctl
 # docker images, rather than pull them. Pulling the images could result in image set A and
 # image set B being tested in the same operator PR e2e check. This would emerge as flakey e2e
 # test code.
-HUB="gcr.io/istio-testing" TAG="latest" E2E_ARGS="--use_operator --use_galley_config_validator=false --use_local_cluster=true --test_logs_path=${ARTIFACTS}" make e2e_simple_noauth_run
+HUB="gcr.io/istio-testing" TAG="latest" E2E_ARGS="--use_operator --skip_cleanup --use_local_cluster=true --test_logs_path=${ARTIFACTS}" make e2e_simple_noauth_run
 popd
