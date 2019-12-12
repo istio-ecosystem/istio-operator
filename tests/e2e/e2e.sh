@@ -28,6 +28,7 @@ if [[ ! -d "${ISTIO_DIR}" ]]
 then
 	git clone https://github.com/istio/istio.git  "${ISTIO_DIR}"
 	curl -LO https://github.com/istio/istio/pull/19535.patch --output "${ISTIO_DIR}"/19535.patch
+	cd "${ISTIO_DIR}"
 	git apply "${ISTIO_DIR}"/19535.patch
 	rm -rf "${ISTIO_DIR}"/19535.patch
 fi
