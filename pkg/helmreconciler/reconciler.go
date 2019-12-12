@@ -15,6 +15,7 @@
 package helmreconciler
 
 import (
+	"fmt"
 	"sync"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -115,7 +116,11 @@ func (h *HelmReconciler) Reconcile() error {
 	errs = util.AppendErr(errs, h.customizer.Listener().EndPrune())
 
 	errs = util.AppendErr(errs, h.customizer.Listener().EndReconcile(h.instance, status))
-
+	for _, v := range status.Status {
+		if v.Error != "" {
+			errs = util.AppendErr(errs, fmt.Errorf(v.Error+"\n"))
+		}
+	}
 	return errs.ToError()
 }
 
