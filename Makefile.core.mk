@@ -18,7 +18,7 @@ TAG ?= 1.5-dev
 pwd := $(shell pwd)
 
 # make targets
-.PHONY: lint lint-dependencies test_with_coverage mandiff build fmt vfsgen update-charts update-goldens
+.PHONY: lint lint-dependencies test_with_coverage mandiff build fmt vfsgen update-goldens
 
 build: mesh
 
@@ -34,7 +34,7 @@ test_with_coverage:
 	@go test -race -coverprofile=coverage.txt -covermode=atomic ./...
 	@curl -s https://codecov.io/bash | bash -s -- -c -F aFlag -f coverage.txt
 
-mandiff: update-charts
+mandiff:
 	@scripts/run_mandiff.sh
 
 fmt: format-go tidy-go
@@ -45,13 +45,10 @@ gen-check: clean gen check-clean-repo
 
 clean: clean-values clean-types clean-vfs clean-charts
 
-update-charts: installer.sha
-	@scripts/run_update_charts.sh `cat installer.sha`
-
 clean-charts:
 	@rm -fr data/charts
 
-generate-vfs: update-charts
+generate-vfs:
 	@go generate ./...
 
 clean-vfs:

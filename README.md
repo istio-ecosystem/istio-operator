@@ -260,8 +260,8 @@ The compiled in charts and profiles are used by default, but you can specify a f
 apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
-  profile: /usr/home/bob/go/src/github.com/ostromart/istio-installer/data/profiles/default.yaml
-  installPackagePath: /usr/home/bob/go/src/github.com/ostromart/istio-installer/data/charts/
+  profile: /usr/home/bob/go/src/github.com/ostromart/operator/data/profiles/default.yaml
+  installPackagePath: /usr/home/bob/go/src/github.com/ostromart/operator/data/charts/
 ```
 
 You can mix and match these approaches. For example, you can use a compiled-in configuration profile with charts in your

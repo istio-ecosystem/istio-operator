@@ -25,18 +25,7 @@ OUT=${OUT:-/tmp/operator-migrate-out}
 rm -Rf "${OUT}"
 mkdir -p "${OUT}"
 
-CHARTS_DIR=$(mktemp -d)
-
-git clone https://github.com/istio/installer.git "${CHARTS_DIR}"
-
-SHA="$(cat "${ROOT}"/installer.sha)"
-
-pushd .
-cd "${CHARTS_DIR}"
-git checkout "${SHA}"
-# exclude from migrate target
-rm -r ./test ./kustomize
-popd
+CHARTS_DIR="${WD}/data/charts"
 
 cd "${ROOT}"
 export GO111MODULE=on

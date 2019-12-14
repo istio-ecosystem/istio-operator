@@ -21,16 +21,7 @@ WD=$(cd "$WD"; pwd)
 ROOT=$(dirname "$WD")
 OUT=${OUT:-/tmp/istio-mandiff-out}
 
-CHARTS_DIR=$(mktemp -d)
-
-git clone https://github.com/istio/installer.git "${CHARTS_DIR}"
-
-SHA="$(cat "${ROOT}"/installer.sha)"
-
-pushd .
-cd "${CHARTS_DIR}"
-git checkout "${SHA}"
-popd
+CHARTS_DIR=data/charts
 
 ISTIO_SYSTEM_NS=${ISTIO_SYSTEM_NS:-istio-system}
 ISTIO_RELEASE=${ISTIO_RELEASE:-istio}

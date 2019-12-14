@@ -209,7 +209,7 @@ message IstioControlPlaneSpec {
     // default profile is used if this field is unset.
     string profile = 100;
     // Path for the install package. e.g.
-    //     - /tmp/istio-installer/nightly (local file path)
+    //     - istio/install/kubernetes/operator/charts (local file path)
     string install_package_path = 102;
     // Root for docker image paths e.g. docker.io/istio-release.
     // Releases are published to docker hub under 'istio' project.

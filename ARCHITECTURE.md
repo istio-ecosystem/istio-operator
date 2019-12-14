@@ -24,10 +24,8 @@ run a privileged controller in the cluster.
 1. [Migration tools](#migration-tools). The migration tools are intended to
 automate configuration migration from Helm to the operator.
 
-The operator code uses the new Helm charts in the [istio/installer](https://github.com/istio/installer) repo. It is not
+The operator code uses the new Helm charts in the [data/charts](data/charts) folder. It is not
 compatible with the older charts in [istio/istio](https://github.com/istio/istio/tree/master/install/kubernetes/helm).
-See the istio/installer repo for details about the new charts and why they were created. Briefly, the new charts
-are intended to support production ready deployments of Istio that follow best practices like canarying for upgrade.
 
 ## Terminology
 
@@ -37,7 +35,7 @@ Throughout the document, the following terms are used:
 [IstioControlPlaneSpec proto](pkg/apis/istio/v1alpha2/istiocontrolplane_types.proto),
 including feature and component groupings, namespaces and enablement, and per-component K8s settings. 
 - Helm values.yaml API, implicitly defined through the various values.yaml files in the
-[Helm charts](https://github.com/istio/installer) and schematized in the operator through
+[Helm charts](data/charts) and schematized in the operator through
 [values_types.proto](pkg/apis/istio/v1alpha2/values/values_types.proto).
 
 ## IstioControlPlaneSpec API
@@ -46,7 +44,6 @@ The `IstioControlPlaneSpec` API is intended to replace the installation and K8s 
 
 ### Features and components
 
-The operator has a very similar structure to istio/installer: components are grouped into features.
 `IstioControlPlaneSpec` defines functional settings at the feature level. Functional settings are those that performs some
 function in the Istio control plane without necessarily being tied to any one component that runs in a Deployment.
 Component settings are those that necessarily refer to a particular Deployment or Service. For example, the number

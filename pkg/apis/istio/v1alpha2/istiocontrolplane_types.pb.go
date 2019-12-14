@@ -296,7 +296,7 @@ type IstioControlPlaneSpec struct {
 	// default profile is used if this field is unset.
 	Profile string `protobuf:"bytes,100,opt,name=profile,proto3" json:"profile,omitempty"`
 	// Path for the install package. e.g.
-	//     - /tmp/istio-installer/nightly (local file path)
+	//     - istio/install/kubernetes/operator/charts (local file path)
 	InstallPackagePath string `protobuf:"bytes,102,opt,name=install_package_path,json=installPackagePath,proto3" json:"install_package_path,omitempty"`
 	// Root for docker image paths e.g. docker.io/istio-release.
 	// Releases are published to docker hub under 'istio' project.
