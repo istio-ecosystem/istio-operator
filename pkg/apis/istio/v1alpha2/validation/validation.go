@@ -37,7 +37,6 @@ func ValidateConfig(failOnMissingValidation bool, values *v1alpha1.Values, icpls
 
 // validateFeatures check whether the config sematically make sense. For example, feature X and feature Y can't be enabled together.
 func validateFeatures(values *v1alpha1.Values, _ *v1alpha2.IstioControlPlaneSpec) util.Errors {
-	// var e util.Errors
 	// When automatic mutual TLS is enabled, we check control plane security must also be enabled.
 	g := values.GetGlobal()
 	if g == nil {
