@@ -11297,6 +11297,10 @@ webhooks:
         - security.istio.io
         - authentication.istio.io
         - networking.istio.io
+        apiVersions:
+        - "*"
+        resources:
+        - "*"
     failurePolicy: Fail
     sideEffects: None
   - name: mixer.validation.istio.io
