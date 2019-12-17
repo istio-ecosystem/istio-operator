@@ -27,6 +27,11 @@ ISTIO_DIR="${GOPATH}/src/istio.io/istio"
 if [[ ! -d "${ISTIO_DIR}" ]]
 then
 	git clone https://github.com/istio/istio.git "${ISTIO_DIR}"
+	curl -L https://github.com/istio/istio/pull/19627.patch --output "${ISTIO_DIR}"/19627.patch
+	pushd "${ISTIO_DIR}"
+	git apply "${ISTIO_DIR}"/19627.patch
+	rm -rf "${ISTIO_DIR}"/19627.patch
+	popd
 fi
 
 # Write out our personal HUB and TAG to the operator iamge to be consumed
