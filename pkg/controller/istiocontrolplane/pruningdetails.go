@@ -44,12 +44,9 @@ var (
 	namespacedResources = []schema.GroupVersionKind{
 		{Group: "autoscaling", Version: "v2beta1", Kind: "HorizontalPodAutoscaler"},
 		{Group: "policy", Version: "v1beta1", Kind: "PodDisruptionBudget"},
-		{Group: "apps", Version: "v1beta1", Kind: "Deployment"},
-		{Group: "apps", Version: "v1beta1", Kind: "StatefulSet"},
+		{Group: "apps", Version: "v1", Kind: "StatefulSet"},
 		{Group: "apps", Version: "v1", Kind: "Deployment"},
 		{Group: "apps", Version: "v1", Kind: "DaemonSet"},
-		{Group: "extensions", Version: "v1beta1", Kind: "DaemonSet"},
-		{Group: "extensions", Version: "v1beta1", Kind: "Deployment"},
 		{Group: "extensions", Version: "v1beta1", Kind: "Ingress"},
 		{Group: "", Version: "v1", Kind: "Service"},
 		{Group: "", Version: "v1", Kind: "Endpoints"},
