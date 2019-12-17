@@ -20,6 +20,8 @@ import (
 	"path/filepath"
 
 	"github.com/ghodss/yaml"
+	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/rest"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/helm"
@@ -42,7 +44,7 @@ import (
 // ones that are compiled in. If it does, the starting point will be the base and profile YAMLs at that file path.
 // Otherwise it will be the compiled in profile YAMLs.
 // In step 3, the remaining fields in the same user overlay are applied on the resulting profile base.
-func genICPS(inFilename, profile, setOverlayYAML, ver string, force bool, l *Logger) (string, *v1alpha2.IstioControlPlaneSpec, error) {
+func genICPS(inFilename, profile, setOverlayYAML, ver string, force bool, kubeConfig *rest.Config, l *Logger) (string, *v1alpha2.IstioControlPlaneSpec, error) {
 	overlayYAML := ""
 	var overlayICPS *v1alpha2.IstioControlPlaneSpec
 	set := make(map[string]interface{})
@@ -119,6 +121,13 @@ func genICPS(inFilename, profile, setOverlayYAML, ver string, force bool, l *Log
 		}
 	}
 
+	if kubeConfig != nil {
+		baseYAML, err = util.OverlayYAML(baseYAML, getClusterSpecificValues(kubeConfig))
+		if err != nil {
+			return "", nil, err
+		}
+	}
+
 	// Merge base and overlay.
 	mergedYAML, err := util.OverlayYAML(baseYAML, overlayYAML)
 	if err != nil {
@@ -141,8 +150,30 @@ func genICPS(inFilename, profile, setOverlayYAML, ver string, force bool, l *Log
 	return finalYAML, finalICPS, nil
 }
 
-func genProfile(helmValues bool, inFilename, profile, setOverlayYAML, configPath string, force bool, l *Logger) (string, error) {
-	finalYAML, finalICPS, err := genICPS(inFilename, profile, setOverlayYAML, "", force, l)
+func getClusterSpecificValues(config *rest.Config) string {
+	yamlTemplate := `
+values:
+  global:
+    sds:
+      useTrustworthyJwt: %t`
+
+	// Check if we can support Third Party JWT tokens
+	useTrustworthyJwt := false
+	d, _ := discovery.NewDiscoveryClientForConfig(config)
+	_, s, _ := d.ServerGroupsAndResources()
+	for _, res := range s {
+		for _, api := range res.APIResources {
+			if api.Name == "serviceaccounts/token" {
+				useTrustworthyJwt = true
+			}
+		}
+	}
+
+	return fmt.Sprintf(yamlTemplate, useTrustworthyJwt)
+}
+
+func genProfile(helmValues bool, inFilename, profile, setOverlayYAML, configPath string, force bool, kubeConfig *rest.Config, l *Logger) (string, error) {
+	finalYAML, finalICPS, err := genICPS(inFilename, profile, setOverlayYAML, "", force, kubeConfig, l)
 	if err != nil {
 		return "", err
 	}

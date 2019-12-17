@@ -23,7 +23,6 @@ import (
 
 	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
-
 	"istio.io/operator/pkg/compare"
 	"istio.io/operator/pkg/hooks"
 	"istio.io/operator/pkg/manifest"
@@ -116,9 +115,14 @@ func UpgradeCmd() *cobra.Command {
 // upgrade is the main function for Upgrade command
 func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 	args.inFilename = strings.TrimSpace(args.inFilename)
+	// Create a kube client from args.kubeConfigPath and  args.context
+	kubeClient, err := manifest.NewClient(args.kubeConfigPath, args.context)
+	if err != nil {
+		return fmt.Errorf("failed to connect Kubernetes API server, error: %v", err)
+	}
 
 	// Generate ICPS objects
-	targetICPSYaml, targetICPS, err := genICPS(args.inFilename, "", "", "", args.force, l)
+	targetICPSYaml, targetICPS, err := genICPS(args.inFilename, "", "", "", args.force, kubeClient.Config, l)
 	if err != nil {
 		return fmt.Errorf("failed to generate ICPS from file %s, error: %s", args.inFilename, err)
 	}
@@ -131,12 +135,6 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 				"please download istioctl %v and run upgrade again", targetVersion,
 				opversion.OperatorVersionString, targetVersion)
 		}
-	}
-
-	// Create a kube client from args.kubeConfigPath and  args.context
-	kubeClient, err := manifest.NewClient(args.kubeConfigPath, args.context)
-	if err != nil {
-		return fmt.Errorf("failed to connect Kubernetes API server, error: %v", err)
 	}
 
 	// Get Istio control plane namespace
@@ -170,7 +168,7 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 	// Generates ICPS for args.inFilename ICP specs yaml. Param force is set to true to
 	// skip the validation because the code only has the validation proto for the
 	// target version.
-	currentICPSYaml, _, err := genICPS(args.inFilename, "", "", currentVersion, true, l)
+	currentICPSYaml, _, err := genICPS(args.inFilename, "", "", currentVersion, true, kubeClient.Config, l)
 	if err != nil {
 		return fmt.Errorf("failed to generate ICPS from file: %s for the current version: %s, error: %v",
 			args.inFilename, currentVersion, err)
