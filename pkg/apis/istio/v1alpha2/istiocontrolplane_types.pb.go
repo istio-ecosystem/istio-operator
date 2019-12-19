@@ -60,7 +60,7 @@
 //
 //     ```
 //     spec:
-//       traffic_management:
+//       trafficManagement:
 //         components:
 //           namespace: istio-traffic-management
 //       policy:
@@ -86,7 +86,7 @@
 //
 //     ```
 //     spec:
-//       traffic_management:
+//       trafficManagement:
 //         components:
 //           pilot:
 //             k8s:
@@ -108,7 +108,7 @@
 //
 //     ```
 //     spec:
-//       traffic_management:
+//       trafficManagement:
 //         components:
 //           proxy:
 //             values:
@@ -120,7 +120,7 @@
 //
 //     ```
 //     spec:
-//       configuration_management:
+//       configManagement:
 //         components:
 //           galley:
 //             k8s:

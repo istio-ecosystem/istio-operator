@@ -65,7 +65,7 @@ customization at the lowest level and eliminates the need to create ad-hoc templ
 <li><p>Default install with each feature installed to different namespace and security components in separate namespaces</p>
 
 <pre><code>spec:
-  traffic_management:
+  trafficManagement:
     components:
       namespace: istio-traffic-management
   policy:
@@ -90,7 +90,7 @@ customization at the lowest level and eliminates the need to create ad-hoc templ
 <li><p>Default install with specialized k8s settings for pilot</p>
 
 <pre><code>spec:
-  traffic_management:
+  trafficManagement:
     components:
       pilot:
         k8s:
@@ -111,7 +111,7 @@ customization at the lowest level and eliminates the need to create ad-hoc templ
 <li><p>Default install with values.yaml customizations for proxy</p>
 
 <pre><code>spec:
-  traffic_management:
+  trafficManagement:
     components:
       proxy:
         values:
@@ -122,7 +122,7 @@ customization at the lowest level and eliminates the need to create ad-hoc templ
 <li><p>Default install with modification to container flag in galley</p>
 
 <pre><code>spec:
-  configuration_management:
+  configManagement:
     components:
       galley:
         k8s:
