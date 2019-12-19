@@ -88,7 +88,7 @@ import "github.com/gogo/protobuf/protobuf/google/protobuf/wrappers.proto";
 //
 //     ```
 //     spec:
-//       traffic_management:
+//       trafficManagement:
 //         components:
 //           namespace: istio-traffic-management
 //       policy:
@@ -114,7 +114,7 @@ import "github.com/gogo/protobuf/protobuf/google/protobuf/wrappers.proto";
 //
 //     ```
 //     spec:
-//       traffic_management:
+//       trafficManagement:
 //         components:
 //           pilot:
 //             k8s:
@@ -136,7 +136,7 @@ import "github.com/gogo/protobuf/protobuf/google/protobuf/wrappers.proto";
 //
 //     ```
 //     spec:
-//       traffic_management:
+//       trafficManagement:
 //         components:
 //           proxy:
 //             values:
@@ -148,7 +148,7 @@ import "github.com/gogo/protobuf/protobuf/google/protobuf/wrappers.proto";
 //
 //     ```
 //     spec:
-//       configuration_management:
+//       configManagement:
 //         components:
 //           galley:
 //             k8s:
