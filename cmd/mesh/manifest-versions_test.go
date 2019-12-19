@@ -58,15 +58,13 @@ func TestGetVersionCompatibleMap(t *testing.T) {
 	}
 	var curCm, ver133Cm, ver137Cm *version.CompatibilityMapping
 	for i := range vs {
-		if vs[i].OperatorVersion != nil && binversion.OperatorBinaryGoVersion.Equal(vs[i].OperatorVersion) {
-			curCm = &vs[i]
-		} else if vs[i].OperatorVersionRange != nil && vs[i].OperatorVersionRange.Check(binversion.OperatorBinaryGoVersion) {
+		if binversion.OperatorBinaryGoVersion.Equal(vs[i].OperatorVersion) {
 			curCm = &vs[i]
 		}
-		if vs[i].OperatorVersion != nil && goVer133.Equal(vs[i].OperatorVersion) {
+		if goVer133.Equal(vs[i].OperatorVersion) {
 			ver133Cm = &vs[i]
 		}
-		if vs[i].OperatorVersion != nil && goVer137.Equal(vs[i].OperatorVersion) {
+		if goVer137.Equal(vs[i].OperatorVersion) {
 			ver137Cm = &vs[i]
 		}
 	}

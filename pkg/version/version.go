@@ -104,9 +104,6 @@ func (v *CompatibilityMapping) UnmarshalYAML(unmarshal func(interface{}) error) 
 	if v.OperatorVersion, err = goversion.NewVersion(tmp.OperatorVersion); err != nil {
 		return err
 	}
-	if v.OperatorVersionRange, err = goversion.NewConstraint(tmp.OperatorVersion); err != nil {
-		return err
-	}
 
 	if tmp.OperatorVersionRange != "" {
 		if v.OperatorVersionRange, err = goversion.NewConstraint(tmp.OperatorVersionRange); err != nil {
