@@ -138,7 +138,7 @@ func (t *ReverseTranslator) initK8SMapping(valueTree map[string]interface{}) err
 
 // NewReverseTranslator creates a new ReverseTranslator for minorVersion and returns a ptr to it.
 func NewReverseTranslator(minorVersion version.MinorVersion) (*ReverseTranslator, error) {
-	return newReverseTranslator(minorVersion, 1)
+	return newReverseTranslator(minorVersion, maxFallbackNum)
 }
 
 func newReverseTranslator(minorVersion version.MinorVersion, fallbackNum uint) (*ReverseTranslator, error) {
