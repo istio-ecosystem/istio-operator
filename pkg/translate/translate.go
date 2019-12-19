@@ -47,9 +47,11 @@ const (
 	HelmValuesEnabledSubpath = "enabled"
 	// HelmValuesNamespaceSubpath is the subpath from the component root to the namespace parameter.
 	HelmValuesNamespaceSubpath = "namespace"
-
 	// devDbg generates lots of output useful in development.
 	devDbg = false
+	// maxFallbackNum is the max number of previous versions that NewTranslator()
+	// or NewReverseTranslator() will attempt by giving configs for that version.
+	maxFallbackNum = 1
 )
 
 var (
@@ -115,7 +117,7 @@ type Translation struct {
 
 // NewTranslator creates a new Translator for minorVersion and returns a ptr to it.
 func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
-	return newTranslator(minorVersion, 1)
+	return newTranslator(minorVersion, maxFallbackNum)
 }
 
 func newTranslator(minorVersion version.MinorVersion, fallbackNum uint) (*Translator, error) {
