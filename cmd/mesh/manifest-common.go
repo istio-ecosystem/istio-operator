@@ -55,6 +55,12 @@ func genApplyManifests(setOverlay []string, inFilename string, force bool, dryRu
 	if err != nil {
 		return fmt.Errorf("failed to generate manifest: %v", err)
 	}
+
+	if icps.Tag != version.OperatorBinaryGoVersion.String() {
+		l.logAndPrintf("Warning: istioctl version %s and the to-be-installed Istio version %s are different. ",
+			version.OperatorBinaryGoVersion.String(), icps.Tag)
+	}
+
 	opts := &kubectlcmd.Options{
 		DryRun:      dryRun,
 		Verbose:     verbose,
