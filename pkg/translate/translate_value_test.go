@@ -15,6 +15,7 @@
 package translate
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/ghodss/yaml"
@@ -95,11 +96,11 @@ mixer:
 hub: docker.io/istio
 tag: 1.2.3
 defaultNamespace: istio-system
-cni:
-  components:
-    cni:
-      enabled: false
-  enabled: false
+configManagement:
+ components:
+   galley:
+     enabled: false
+ enabled: false
 telemetry:
  components:
    namespace: istio-telemetry
@@ -114,33 +115,6 @@ policy:
      k8s:
        replicaCount: 1
  enabled: true
-configManagement:
- components:
-   galley:
-     enabled: false
- enabled: false
-security:
- components:
-   namespace: istio-system
-   certManager:
-     enabled: false
-   nodeAgent:
-     enabled: false
-   citadel:
-     enabled: false
- enabled: false
-gateways:
- components:
-   ingressGateway:
-     enabled: false
-   egressGateway:
-     enabled: false
- enabled: false
-coreDNS:
- components:
-   coreDNS:
-     enabled: false
- enabled: false
 trafficManagement:
  components:
    pilot:
@@ -179,11 +153,6 @@ trafficManagement:
            maxSurge: 100%
            maxUnavailable: 25%
  enabled: true
-autoInjection:
- components:
-   injector:
-     enabled: false
- enabled: false
 values:
   global:
     controlPlaneSecurityEnabled: false
@@ -239,17 +208,12 @@ gateways:
         memory: 1G
     enabled: true
 sidecarInjectorWebhook:
-  enabled: false
+  enabled: true
 `,
 			want: `
 hub: docker.io/istio
 tag: 1.2.3
 defaultNamespace: istio-system
-cni:
-  components:
-    cni:
-      enabled: false
-  enabled: false
 telemetry:
   components:
     namespace: istio-telemetry
@@ -269,13 +233,10 @@ configManagement:
   enabled: true 
 security:
   components:
-    namespace: istio-system
     certManager:
       enabled: true
     nodeAgent:
       enabled: true
-    citadel:
-      enabled: false
   enabled: true
 coreDNS:
  components:
@@ -290,8 +251,8 @@ trafficManagement:
 autoInjection:
   components:
     injector:
-      enabled: false
-  enabled: false
+      enabled: true
+  enabled: true
 gateways:
   components:
     ingressGateway:
@@ -305,8 +266,6 @@ gateways:
           rollingUpdate:
             maxSurge: 4
             maxUnavailable: 1
-    egressGateway:
-          enabled: false
   enabled: true
 `,
 		},
@@ -339,42 +298,15 @@ telemetry:
    telemetry:
      enabled: false
  enabled: false
-coreDNS:
- components:
-   coreDNS:
-     enabled: false
- enabled: false
 policy:
  components:
    namespace: istio-policy
    policy:
      enabled: true
  enabled: true
-cni:
-  components:
-    cni:
-      enabled: false
-  enabled: false
 configManagement:
  components:
    galley:
-     enabled: false
- enabled: false
-security:
- components:
-   namespace: istio-system
-   certManager:
-     enabled: false
-   nodeAgent:
-     enabled: false
-   citadel:
-     enabled: false
- enabled: false
-gateways:
- components:
-   ingressGateway:
-     enabled: false
-   egressGateway:
      enabled: false
  enabled: false
 trafficManagement:
@@ -382,11 +314,6 @@ trafficManagement:
    pilot:
      enabled: true
  enabled: true
-autoInjection:
- components:
-   injector:
-     enabled: false
- enabled: false
 `,
 		},
 	}
@@ -403,13 +330,14 @@ autoInjection:
 				t.Fatalf("unmarshal(%s): got error %s", tt.desc, err)
 			}
 			scope.Debugf("value struct: \n%s\n", pretty.Sprint(valueStruct))
-			got, err := tr.TranslateFromValueToSpec([]byte(tt.valueYAML))
+			gotYAML, gotSpec, err := tr.TranslateFromValueToSpec([]byte(tt.valueYAML))
 			if gotErr, wantErr := errToString(err), tt.wantErr; gotErr != wantErr {
 				t.Errorf("ValuesToProto(%s)(%v): gotErr:%s, wantErr:%s", tt.desc, tt.valueYAML, gotErr, wantErr)
 			}
 			if tt.wantErr == "" {
+				fmt.Println(gotYAML)
 				ms := jsonpb.Marshaler{}
-				gotString, err := ms.MarshalToString(got)
+				gotString, err := ms.MarshalToString(gotSpec)
 				if err != nil {
 					t.Errorf("error when marshal translated IstioControlPlaneSpec: %s", err)
 				}
@@ -417,6 +345,47 @@ autoInjection:
 				if want := tt.want; !util.IsYAMLEqual(gotString, want) {
 					t.Errorf("ValuesToProto(%s): got:\n%s\n\nwant:\n%s\nDiff:\n%s\n", tt.desc, string(cpYaml), want, util.YAMLDiff(gotString, want))
 				}
+
+			}
+		})
+	}
+}
+
+func TestNewReverseTranslator(t *testing.T) {
+	tests := []struct {
+		name         string
+		minorVersion version.MinorVersion
+		wantVer      string
+		wantErr      bool
+	}{
+		{
+			name:         "version 1.4",
+			minorVersion: version.NewMinorVersion(1, 4),
+			wantVer:      "1.4",
+			wantErr:      false,
+		},
+		{
+			name:         "version 1.5",
+			minorVersion: version.NewMinorVersion(1, 5),
+			wantVer:      "1.4",
+			wantErr:      false,
+		},
+		{
+			name:         "version 1.6",
+			minorVersion: version.NewMinorVersion(1, 6),
+			wantVer:      "",
+			wantErr:      true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NewReverseTranslator(tt.minorVersion)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewReverseTranslator() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != nil && tt.wantVer != got.Version.String() {
+				t.Errorf("NewReverseTranslator() got = %v, want %v", got.Version.String(), tt.wantVer)
 			}
 		})
 	}

@@ -91,11 +91,18 @@ func translateFunc(values []byte, l *Logger) error {
 		return fmt.Errorf("error creating values.yaml translator: %s", err)
 	}
 
-	iop, err := ts.TranslateFromValueToSpec(values)
+	translatedYAML, _, err := ts.TranslateFromValueToSpec(values)
 	if err != nil {
 		return fmt.Errorf("error translating values.yaml: %s", err)
 	}
-	isCP := &iopv1alpha1.IstioOperator{Spec: iop, Kind: "IstioOperatorSpec", ApiVersion: "install.istio.io/v1alpha1"}
+
+	translatedICPS := &iopv1alpha1.IstioOperator{}
+	err = util.UnmarshalWithJSONPB(translatedYAML, translatedICPS)
+	if err != nil {
+		return err
+	}
+
+	isCP := &iopv1alpha1.IstioOperator{Spec: translatedICPS, Kind: "IstioControlPlane", ApiVersion: "install.istio.io/v1alpha2"}
 
 	ms := jsonpb.Marshaler{}
 	gotString, err := ms.MarshalToString(isCP)
@@ -103,7 +110,7 @@ func translateFunc(values []byte, l *Logger) error {
 		return fmt.Errorf("error marshaling translated IstioControlPlane: %s", err)
 	}
 
-	isCPYaml, _ := yaml.JSONToYAML([]byte(gotString))
+	isCPYaml, err := yaml.JSONToYAML([]byte(gotString))
 	if err != nil {
 		return fmt.Errorf("error converting JSON: %s\n%s", gotString, err)
 	}
