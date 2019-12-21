@@ -22,14 +22,13 @@ package component
 import (
 	"fmt"
 
-	"istio.io/operator/pkg/tpath"
-
 	"github.com/ghodss/yaml"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/api/mesh/v1alpha1"
 	"istio.io/operator/pkg/helm"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/patch"
+	"istio.io/operator/pkg/tpath"
 	"istio.io/operator/pkg/translate"
 	"istio.io/pkg/log"
 )
@@ -45,11 +44,9 @@ const (
 
 // Options defines options for a component.
 type Options struct {
-	// FeatureName is the name of the feature this component belongs to.
-	FeatureName name.FeatureName
-	// InstallSpec is the global IstioControlPlaneSpec.
-	InstallSpec *v1alpha2.IstioControlPlaneSpec
-	// Translator is the translator for this component.
+	// installSpec is the global IstioControlPlaneSpec.
+	InstallSpec *v1alpha1.IstioOperatorSpec
+	// translator is the translator for this component.
 	Translator *translate.Translator
 }
 
@@ -762,8 +759,8 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 		log.Infof("Manifest after k8s API settings:\n%s\n", my)
 	}
 	// Add the k8s resource overlays from IstioControlPlaneSpec.
-	pathToK8sOverlay := fmt.Sprintf("%s.Components.%s.K8S.Overlays", c.FeatureName, c.name)
-	var overlays []*v1alpha2.K8SObjectOverlay
+	pathToK8sOverlay := fmt.Sprintf("Components.%s.K8S.Overlays", c.name)
+	var overlays []*v1alpha1.K8SObjectOverlay
 	found, err := tpath.SetFromPath(c.InstallSpec, pathToK8sOverlay, &overlays)
 	if err != nil {
 		return "", err
@@ -777,7 +774,7 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 		return "", err
 	}
 	log.Infof("Applying kubernetes overlay: \n%s\n", kyo)
-	ns, err := name.Namespace(c.FeatureName, c.name, c.InstallSpec)
+	ns, err := name.Namespace(c.name, c.InstallSpec)
 	if err != nil {
 		return "", err
 	}
@@ -793,7 +790,7 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 // createHelmRenderer creates a helm renderer for the component defined by c and returns a ptr to it.
 func createHelmRenderer(c *CommonComponentFields) (helm.TemplateRenderer, error) {
 	icp := c.InstallSpec
-	ns, err := name.Namespace(c.FeatureName, c.name, c.InstallSpec)
+	ns, err := name.Namespace(c.name, c.InstallSpec)
 	if err != nil {
 		return nil, err
 	}

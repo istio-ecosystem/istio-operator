@@ -21,7 +21,7 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/api/mesh/v1alpha1"
 	"istio.io/operator/pkg/helm"
 	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/tpath"
@@ -42,9 +42,9 @@ import (
 // ones that are compiled in. If it does, the starting point will be the base and profile YAMLs at that file path.
 // Otherwise it will be the compiled in profile YAMLs.
 // In step 3, the remaining fields in the same user overlay are applied on the resulting profile base.
-func genICPS(inFilename, profile, setOverlayYAML, ver string, force bool, l *Logger) (string, *v1alpha2.IstioControlPlaneSpec, error) {
+func genICPS(inFilename, profile, setOverlayYAML, ver string, force bool, l *Logger) (string, *v1alpha1.IstioOperatorSpec, error) {
 	overlayYAML := ""
-	var overlayICPS *v1alpha2.IstioControlPlaneSpec
+	var overlayICPS *v1alpha1.IstioOperatorSpec
 	set := make(map[string]interface{})
 	err := yaml.Unmarshal([]byte(setOverlayYAML), &set)
 	if err != nil {
@@ -167,10 +167,10 @@ func genProfile(helmValues bool, inFilename, profile, setOverlayYAML, configPath
 	return finalYAML, err
 }
 
-func unmarshalAndValidateICP(crYAML string, force bool) (*v1alpha2.IstioControlPlaneSpec, string, error) {
+func unmarshalAndValidateICP(crYAML string, force bool) (*v1alpha1.IstioOperatorSpec, string, error) {
 	// TODO: add GVK handling as appropriate.
 	if crYAML == "" {
-		return &v1alpha2.IstioControlPlaneSpec{}, "", nil
+		return &v1alpha1.IstioOperatorSpec{}, "", nil
 	}
 	icps, _, err := manifest.ParseK8SYAMLToIstioControlPlaneSpec(crYAML)
 	if err != nil {
@@ -188,8 +188,8 @@ func unmarshalAndValidateICP(crYAML string, force bool) (*v1alpha2.IstioControlP
 	return icps, icpsYAML, nil
 }
 
-func unmarshalAndValidateICPS(icpsYAML string, force bool, l *Logger) (*v1alpha2.IstioControlPlaneSpec, error) {
-	icps := &v1alpha2.IstioControlPlaneSpec{}
+func unmarshalAndValidateICPS(icpsYAML string, force bool, l *Logger) (*v1alpha1.IstioOperatorSpec, error) {
+	icps := &v1alpha1.IstioOperatorSpec{}
 	if err := util.UnmarshalWithJSONPB(icpsYAML, icps); err != nil {
 		return nil, fmt.Errorf("could not unmarshal the merged YAML: %s\n\nYAML:\n%s", err, icpsYAML)
 	}

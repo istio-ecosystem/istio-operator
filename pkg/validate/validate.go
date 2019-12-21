@@ -19,7 +19,7 @@ import (
 	"net/url"
 	"reflect"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/api/mesh/v1alpha1"
 	"istio.io/operator/pkg/util"
 )
 
@@ -40,7 +40,8 @@ var (
 
 // CheckIstioControlPlaneSpec validates the values in the given Installer spec, using the field map defaultValidations to
 // call the appropriate validation function.
-func CheckIstioControlPlaneSpec(is *v1alpha2.IstioControlPlaneSpec, checkRequired bool) (errs util.Errors) {
+func CheckIstioControlPlaneSpec(is *v1alpha1.IstioOperatorSpec, checkRequired bool) (errs util.Errors) {
+	//return util.NewErrs(fmt.Errorf("CheckIstioControlPlaneSpec must be ported"))
 	errs = CheckValues(is.Values)
 	return util.AppendErrs(errs, validate(defaultValidations, is, nil, checkRequired))
 }

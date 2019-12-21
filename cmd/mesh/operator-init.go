@@ -206,7 +206,7 @@ func getCRAndNamespaceFromFile(filePath string, l *Logger) (customResource strin
 		return "", "", fmt.Errorf("could not read values from file %s: %s", filePath, err)
 	}
 	customResource = string(b)
-	istioNamespace = mergedICPS.DefaultNamespace
+	istioNamespace = mergedICPS.MeshConfig.RootNamespace
 	return
 }
 

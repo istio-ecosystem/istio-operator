@@ -22,8 +22,10 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+	"k8s.io/apimachinery/pkg/util/strategicpatch"
+	"k8s.io/client-go/kubernetes/scheme"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/api/mesh/v1alpha1"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/object"
 	"istio.io/operator/pkg/tpath"
@@ -31,9 +33,6 @@ import (
 	"istio.io/operator/pkg/version"
 	"istio.io/operator/pkg/vfs"
 	"istio.io/pkg/log"
-
-	"k8s.io/apimachinery/pkg/util/strategicpatch"
-	"k8s.io/client-go/kubernetes/scheme"
 )
 
 const (
@@ -64,17 +63,10 @@ type Translator struct {
 	APIMapping map[string]*Translation `yaml:"apiMapping"`
 	// KubernetesMapping defines mappings from an IstioControlPlane API paths to k8s resource paths.
 	KubernetesMapping map[string]*Translation `yaml:"kubernetesMapping"`
-	// ToFeature maps a component to its parent feature.
-	ToFeature map[name.ComponentName]name.FeatureName `yaml:"toFeature"`
-	// FeatureMaps is a set of mappings for each Istio feature.
-	FeatureMaps map[name.FeatureName]*FeatureMap `yaml:"featureMaps"`
 	// GlobalNamespaces maps feature namespaces to Helm global namespace definitions.
 	GlobalNamespaces map[name.ComponentName]string `yaml:"globalNamespaces"`
 	// ComponentMaps is a set of mappings for each Istio component.
 	ComponentMaps map[name.ComponentName]*ComponentMaps `yaml:"componentMaps"`
-
-	// featureToComponents maps feature names to their component names.
-	featureToComponents map[name.FeatureName][]name.ComponentName `yaml:"featureToComponents,omitempty"`
 }
 
 // FeatureMaps is a set of mappings for an Istio feature.
@@ -107,7 +99,7 @@ type Translation struct {
 	translationFunc TranslationFunc `yaml:"TranslationFunc,omitempty"`
 }
 
-// NewTranslator creates a new Translator for minorVersion and returns a ptr to it.
+// NewTranslator creates a new translator for minorVersion and returns a ptr to it.
 func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
 	v := fmt.Sprintf("%s.%d", minorVersion.MajorVersion, minorVersion.Minor)
 	f := "translateConfig/translateConfig-" + v + ".yaml"
@@ -120,15 +112,11 @@ func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not Unmarshal translateConfig file %s: %s", f, err)
 	}
-	t.featureToComponents = make(map[name.FeatureName][]name.ComponentName)
-	for c, f := range t.ToFeature {
-		t.featureToComponents[f] = append(t.featureToComponents[f], c)
-	}
 	return t, nil
 }
 
 // OverlayK8sSettings overlays k8s settings from icp over the manifest objects, based on t's translation mappings.
-func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPlaneSpec, componentName name.ComponentName) (string, error) {
+func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha1.IstioOperatorSpec, componentName name.ComponentName) (string, error) {
 	objects, err := object.ParseK8sObjectsFromYAMLManifest(yml)
 	if err != nil {
 		return "", err
@@ -140,7 +128,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 	// om is a map of kind:name string to Object ptr.
 	om := objects.ToNameKindMap()
 	for inPath, v := range t.KubernetesMapping {
-		inPath, err := renderFeatureComponentPathTemplate(inPath, t.ToFeature[componentName], componentName)
+		inPath, err := renderFeatureComponentPathTemplate(inPath, componentName)
 		if err != nil {
 			return "", err
 		}
@@ -196,7 +184,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha2.IstioControlPl
 }
 
 // ProtoToValues traverses the supplied IstioControlPlaneSpec and returns a values.yaml translation from it.
-func (t *Translator) ProtoToValues(ii *v1alpha2.IstioControlPlaneSpec) (string, error) {
+func (t *Translator) ProtoToValues(ii *v1alpha1.IstioOperatorSpec) (string, error) {
 	root := make(map[string]interface{})
 
 	errs := t.protoToHelmValues(ii, root, nil)
@@ -238,7 +226,7 @@ func (t *Translator) ValuesOverlaysToHelmValues(in map[string]interface{}, cname
 }
 
 // TranslateHelmValues creates a Helm values.yaml config data tree from icp using the given translator.
-func (t *Translator) TranslateHelmValues(icp *v1alpha2.IstioControlPlaneSpec, componentName name.ComponentName) (string, error) {
+func (t *Translator) TranslateHelmValues(icp *v1alpha1.IstioOperatorSpec, componentName name.ComponentName) (string, error) {
 	globalVals, globalUnvalidatedVals, apiVals := make(map[string]interface{}), make(map[string]interface{}), make(map[string]interface{})
 
 	// First, translate the IstioControlPlane API to helm Values.
@@ -282,11 +270,6 @@ func (t *Translator) TranslateHelmValues(icp *v1alpha2.IstioControlPlaneSpec, co
 		return "", err
 	}
 	return string(mergedYAML), err
-}
-
-// Components returns the Components under the featureName feature.
-func (t *Translator) Components(featureName name.FeatureName) []name.ComponentName {
-	return t.featureToComponents[featureName]
 }
 
 // protoToHelmValues takes an interface which must be a struct ptr and recursively iterates through all its fields.
@@ -341,7 +324,7 @@ func (t *Translator) protoToHelmValues(node interface{}, root map[string]interfa
 
 // setEnablementAndNamespaces translates the enablement and namespace value of each component in the baseYAML values
 // tree, based on feature/component inheritance relationship.
-func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp *v1alpha2.IstioControlPlaneSpec) error {
+func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp *v1alpha1.IstioOperatorSpec) error {
 	var keys []string
 	for k := range t.ComponentMaps {
 		keys = append(keys, string(k))
@@ -365,7 +348,7 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp
 			return err
 		}
 
-		ns, err := name.Namespace(t.ToFeature[cn], cn, icp)
+		ns, err := name.Namespace(cn, icp)
 		if err != nil {
 			return err
 		}
@@ -375,7 +358,7 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp
 	}
 
 	for cn, gns := range t.GlobalNamespaces {
-		ns, err := name.Namespace(t.ToFeature[cn], cn, icp)
+		ns, err := name.Namespace(cn, icp)
 		if err != nil {
 			return err
 		}
@@ -387,19 +370,13 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp
 	return nil
 }
 
-// IsFeatureEnabled reports whether the feature with name ft is enabled, according to the translations in t,
-// and the contents of icp.
-func (t *Translator) IsFeatureEnabled(ft name.FeatureName, icp *v1alpha2.IstioControlPlaneSpec) (bool, error) {
-	return name.IsFeatureEnabledInSpec(ft, icp)
-}
-
 // IsComponentEnabled reports whether the component with name cn is enabled, according to the translations in t,
 // and the contents of ocp.
-func (t *Translator) IsComponentEnabled(cn name.ComponentName, icp *v1alpha2.IstioControlPlaneSpec) (bool, error) {
+func (t *Translator) IsComponentEnabled(cn name.ComponentName, icp *v1alpha1.IstioOperatorSpec) (bool, error) {
 	if t.ComponentMaps[cn] == nil {
 		return false, nil
 	}
-	return name.IsComponentEnabledInSpec(t.ToFeature[cn], cn, icp)
+	return name.IsComponentEnabledInSpec(cn, icp)
 }
 
 // AllComponentsNames returns a slice of all components used in t.
@@ -459,15 +436,13 @@ func getValuesPathMapping(mappings map[string]*Translation, path util.Path) (str
 	return out, m
 }
 
-// renderFeatureComponentPathTemplate renders a template of the form <path>{{.FeatureName}}<path>{{.ComponentName}}<path> with
+// renderFeatureComponentPathTemplate renders a template of the form <path>{{.ComponentName}}<path> with
 // the supplied parameters.
-func renderFeatureComponentPathTemplate(tmpl string, featureName name.FeatureName, componentName name.ComponentName) (string, error) {
+func renderFeatureComponentPathTemplate(tmpl string, componentName name.ComponentName) (string, error) {
 	type Temp struct {
-		FeatureName   name.FeatureName
 		ComponentName name.ComponentName
 	}
 	ts := Temp{
-		FeatureName:   featureName,
 		ComponentName: componentName,
 	}
 	return util.RenderTemplate(tmpl, ts)

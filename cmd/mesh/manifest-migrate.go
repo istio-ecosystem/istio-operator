@@ -23,7 +23,7 @@ import (
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/spf13/cobra"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	iopv1alpha1 "istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/translate"
 	"istio.io/operator/pkg/util"
@@ -91,11 +91,11 @@ func translateFunc(values []byte, l *Logger) error {
 		return fmt.Errorf("error creating values.yaml translator: %s", err)
 	}
 
-	isCPSpec, err := ts.TranslateFromValueToSpec(values)
+	iop, err := ts.TranslateFromValueToSpec(values)
 	if err != nil {
 		return fmt.Errorf("error translating values.yaml: %s", err)
 	}
-	isCP := &v1alpha2.IstioControlPlane{Spec: isCPSpec, Kind: "IstioControlPlane", ApiVersion: "install.istio.io/v1alpha2"}
+	isCP := &iopv1alpha1.IstioOperator{Spec: iop, Kind: "IstioOperatorSpec", ApiVersion: "install.istio.io/v1alpha1"}
 
 	ms := jsonpb.Marshaler{}
 	gotString, err := ms.MarshalToString(isCP)

@@ -45,7 +45,7 @@ import (
 	kubectlutil "k8s.io/kubectl/pkg/util/deployment"
 	"k8s.io/utils/pointer"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/api/mesh/v1alpha1"
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/object"
@@ -139,7 +139,7 @@ func init() {
 
 // ParseK8SYAMLToIstioControlPlaneSpec parses a IstioControlPlane CustomResource YAML string and unmarshals in into
 // an IstioControlPlaneSpec object. It returns the object and an API group/version with it.
-func ParseK8SYAMLToIstioControlPlaneSpec(yml string) (*v1alpha2.IstioControlPlaneSpec, *schema.GroupVersionKind, error) {
+func ParseK8SYAMLToIstioControlPlaneSpec(yml string) (*v1alpha1.IstioOperatorSpec, *schema.GroupVersionKind, error) {
 	o, err := object.ParseYAMLToK8sObject([]byte(yml))
 	if err != nil {
 		return nil, nil, err
@@ -152,7 +152,7 @@ func ParseK8SYAMLToIstioControlPlaneSpec(yml string) (*v1alpha2.IstioControlPlan
 	if err != nil {
 		return nil, nil, err
 	}
-	icp := &v1alpha2.IstioControlPlaneSpec{}
+	icp := &v1alpha1.IstioOperatorSpec{}
 	if err := util.UnmarshalWithJSONPB(string(y), icp); err != nil {
 		return nil, nil, err
 	}

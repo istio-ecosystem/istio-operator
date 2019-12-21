@@ -19,7 +19,7 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/api/mesh/v1alpha1"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/tpath"
 	"istio.io/operator/pkg/util"
@@ -49,19 +49,19 @@ var (
 		version.NewMinorVersion(1, 4): {
 			APIMapping: map[string]*Translation{},
 			KubernetesPatternMapping: map[string]string{
-				"{{.ValueComponentName}}.env":                   "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Env",
-				"{{.ValueComponentName}}.autoscaleEnabled":      "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.HpaSpec",
-				"{{.ValueComponentName}}.imagePullPolicy":       "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ImagePullPolicy",
-				"{{.ValueComponentName}}.nodeSelector":          "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.NodeSelector",
-				"{{.ValueComponentName}}.tolerations":           "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Tolerations",
-				"{{.ValueComponentName}}.podDisruptionBudget":   "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PodDisruptionBudget",
-				"{{.ValueComponentName}}.podAnnotations":        "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PodAnnotations",
-				"{{.ValueComponentName}}.priorityClassName":     "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PriorityClassName",
-				"{{.ValueComponentName}}.readinessProbe":        "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ReadinessProbe",
-				"{{.ValueComponentName}}.replicaCount":          "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ReplicaCount",
-				"{{.ValueComponentName}}.resources":             "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Resources",
-				"{{.ValueComponentName}}.rollingMaxSurge":       "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Strategy",
-				"{{.ValueComponentName}}.rollingMaxUnavailable": "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Strategy",
+				"{{.ValueComponentName}}.env":                   "Components.{{.ComponentName}}.K8s.Env",
+				"{{.ValueComponentName}}.autoscaleEnabled":      "Components.{{.ComponentName}}.K8s.HpaSpec",
+				"{{.ValueComponentName}}.imagePullPolicy":       "Components.{{.ComponentName}}.K8s.ImagePullPolicy",
+				"{{.ValueComponentName}}.nodeSelector":          "Components.{{.ComponentName}}.K8s.NodeSelector",
+				"{{.ValueComponentName}}.tolerations":           "Components.{{.ComponentName}}.K8s.Tolerations",
+				"{{.ValueComponentName}}.podDisruptionBudget":   "Components.{{.ComponentName}}.K8s.PodDisruptionBudget",
+				"{{.ValueComponentName}}.podAnnotations":        "Components.{{.ComponentName}}.K8s.PodAnnotations",
+				"{{.ValueComponentName}}.priorityClassName":     "Components.{{.ComponentName}}.K8s.PriorityClassName",
+				"{{.ValueComponentName}}.readinessProbe":        "Components.{{.ComponentName}}.K8s.ReadinessProbe",
+				"{{.ValueComponentName}}.replicaCount":          "Components.{{.ComponentName}}.K8s.ReplicaCount",
+				"{{.ValueComponentName}}.resources":             "Components.{{.ComponentName}}.K8s.Resources",
+				"{{.ValueComponentName}}.rollingMaxSurge":       "Components.{{.ComponentName}}.K8s.Strategy",
+				"{{.ValueComponentName}}.rollingMaxUnavailable": "Components.{{.ComponentName}}.K8s.Strategy",
 			},
 			KubernetesMapping:     map[string]*Translation{},
 			ValuesToComponentName: map[string]name.ComponentName{},
@@ -73,9 +73,9 @@ var (
 			},
 		},
 	}
-	// Component enablement mapping. Ex "{{.ValueComponent}}.enabled": {"{{.FeatureName}}.Components.{{.ComponentName}}.enabled}", nil},
+	// Component enablement mapping. Ex "{{.ValueComponent}}.enabled": {"Components.{{.ComponentName}}.enabled}", nil},
 	// Feature enablement mapping. Ex: "{{.ValueComponent}}.enabled": {"{{.FeatureName}}.enabled}", nil},
-	componentEnablementPattern = "{{.FeatureName}}.Components.{{.ComponentName}}.Enabled"
+	componentEnablementPattern = "Components.{{.ComponentName}}.Enabled"
 	// specialComponentPath lists cases of component path of values.yaml we need to have special treatment.
 	specialComponentPath = map[string]bool{
 		"mixer":                         true,
@@ -84,6 +84,15 @@ var (
 		"gateways":                      true,
 		"gateways.istio-ingressgateway": true,
 		"gateways.istio-egressgateway":  true,
+	}
+
+	skipTranslate = map[name.ComponentName]bool{
+		name.IstioBaseComponentName:          true,
+		name.IstioOperatorComponentName:      true,
+		name.IstioOperatorCustomResourceName: true,
+		name.CoreDNSComponentName:            true,
+		name.CNIComponentName:                true,
+		name.KialiComponentName:              true,
 	}
 )
 
@@ -98,8 +107,7 @@ func (t *ReverseTranslator) initAPIAndComponentMapping(vs version.MinorVersion) 
 	}
 
 	for cn, cm := range ts.ComponentMaps {
-		f := ts.ToFeature[cn]
-		if f != name.IstioBaseFeatureName && f != name.ThirdPartyFeatureName {
+		if !skipTranslate[cn] {
 			t.ValuesToComponentName[cm.ToHelmValuesTreeRoot] = cn
 		}
 	}
@@ -110,7 +118,6 @@ func (t *ReverseTranslator) initAPIAndComponentMapping(vs version.MinorVersion) 
 func (t *ReverseTranslator) initK8SMapping(valueTree map[string]interface{}) error {
 	outputMapping := make(map[string]*Translation)
 	for valKey, componentName := range t.ValuesToComponentName {
-		featureName := name.ComponentNameToFeatureName[componentName]
 		cnEnabled, err := name.IsComponentEnabledFromValue(valKey, valueTree)
 		if err != nil {
 			return err
@@ -124,7 +131,7 @@ func (t *ReverseTranslator) initK8SMapping(valueTree map[string]interface{}) err
 			if err != nil {
 				return err
 			}
-			newVal, err := renderFeatureComponentPathTemplate(outPathTmpl, featureName, componentName)
+			newVal, err := renderFeatureComponentPathTemplate(outPathTmpl, componentName)
 			if err != nil {
 				return err
 			}
@@ -151,7 +158,7 @@ func NewReverseTranslator(minorVersion version.MinorVersion) (*ReverseTranslator
 }
 
 // TranslateFromValueToSpec translates from values.yaml value to IstioControlPlaneSpec.
-func (t *ReverseTranslator) TranslateFromValueToSpec(values []byte) (controlPlaneSpec *v1alpha2.IstioControlPlaneSpec, err error) {
+func (t *ReverseTranslator) TranslateFromValueToSpec(values []byte) (controlPlaneSpec *v1alpha1.IstioOperatorSpec, err error) {
 
 	var yamlTree = make(map[string]interface{})
 	err = yaml.Unmarshal(values, &yamlTree)
@@ -169,7 +176,7 @@ func (t *ReverseTranslator) TranslateFromValueToSpec(values []byte) (controlPlan
 		return nil, err
 	}
 
-	var cpSpec = &v1alpha2.IstioControlPlaneSpec{}
+	var cpSpec = &v1alpha1.IstioOperatorSpec{}
 	err = util.UnmarshalWithJSONPB(string(outputVal), cpSpec)
 
 	if err != nil {
@@ -218,9 +225,8 @@ func (t *ReverseTranslator) setEnablementAndNamespacesFromValue(valueSpec map[st
 		if err != nil {
 			return err
 		}
-		featureName := name.ComponentNameToFeatureName[cni]
 		tmpl := componentEnablementPattern
-		ceVal, err := renderFeatureComponentPathTemplate(tmpl, featureName, cni)
+		ceVal, err := renderFeatureComponentPathTemplate(tmpl, cni)
 		if err != nil {
 			return err
 		}
@@ -228,19 +234,6 @@ func (t *ReverseTranslator) setEnablementAndNamespacesFromValue(valueSpec map[st
 		// set component enablement
 		if err := tpath.WriteNode(root, outCP, enabled); err != nil {
 			return err
-		}
-		// set feature enablement
-		feVal := featureName + ".Enabled"
-		outFP := util.ToYAMLPath(string(feVal))
-		curEnabled, found, _ := tpath.GetFromTreePath(root, outFP)
-		if !found {
-			if err := tpath.WriteNode(root, outFP, enabled); err != nil {
-				return err
-			}
-		} else if curEnabled == false && enabled {
-			if err := tpath.WriteNode(root, outFP, enabled); err != nil {
-				return err
-			}
 		}
 	}
 

@@ -6,8 +6,8 @@ metadata:
 spec:
   group: install.istio.io
   names:
-    kind: IstioControlPlane
-    listKind: IstioControlPlaneList
+    kind: IstioOperator
+    listKind: IstioOperatorList
     plural: istiocontrolplanes
     singular: istiocontrolplane
     shortNames:

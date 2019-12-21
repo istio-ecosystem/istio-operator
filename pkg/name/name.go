@@ -17,34 +17,15 @@ package name
 import (
 	"fmt"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/api/mesh/v1alpha1"
 	"istio.io/operator/pkg/tpath"
 	"istio.io/operator/pkg/util"
 )
-
-// FeatureName is a feature name string, typed to constrain allowed values.
-type FeatureName string
 
 const (
 	// OperatorAPINamespace is the API namespace for operator config.
 	// TODO: move this to a base definitions file when one is created.
 	OperatorAPINamespace = "operator.istio.io"
-)
-
-const (
-	// IstioFeature names, must be the same as feature names defined in the IstioControlPlane proto, since these are
-	// used to reference structure paths.
-	IstioBaseFeatureName         FeatureName = "Base"
-	TrafficManagementFeatureName FeatureName = "TrafficManagement"
-	PolicyFeatureName            FeatureName = "Policy"
-	TelemetryFeatureName         FeatureName = "Telemetry"
-	SecurityFeatureName          FeatureName = "Security"
-	ConfigManagementFeatureName  FeatureName = "ConfigManagement"
-	AutoInjectionFeatureName     FeatureName = "AutoInjection"
-	GatewayFeatureName           FeatureName = "Gateways"
-	CNIFeatureName               FeatureName = "Cni"
-	CoreDNSFeatureName           FeatureName = "CoreDNS"
-	ThirdPartyFeatureName        FeatureName = "ThirdParty"
 )
 
 // ComponentName is a component name string, typed to constrain allowed values.
@@ -81,99 +62,48 @@ const (
 )
 
 var (
-	ComponentNameToFeatureName = map[ComponentName]FeatureName{
-		IstioBaseComponentName:       IstioBaseFeatureName,
-		PilotComponentName:           TrafficManagementFeatureName,
-		GalleyComponentName:          ConfigManagementFeatureName,
-		SidecarInjectorComponentName: AutoInjectionFeatureName,
-		PolicyComponentName:          PolicyFeatureName,
-		TelemetryComponentName:       TelemetryFeatureName,
-		CitadelComponentName:         SecurityFeatureName,
-		CertManagerComponentName:     SecurityFeatureName,
-		NodeAgentComponentName:       SecurityFeatureName,
-		IngressComponentName:         GatewayFeatureName,
-		EgressComponentName:          GatewayFeatureName,
-		CNIComponentName:             CNIFeatureName,
-		CoreDNSComponentName:         CoreDNSFeatureName,
-
-		// External
-		PrometheusComponentName:         ThirdPartyFeatureName,
-		PrometheusOperatorComponentName: ThirdPartyFeatureName,
-		GrafanaComponentName:            ThirdPartyFeatureName,
-		KialiComponentName:              ThirdPartyFeatureName,
-		TracingComponentName:            ThirdPartyFeatureName,
+	AllComponentNames = []ComponentName{
+		IstioBaseComponentName,
+		PilotComponentName,
+		GalleyComponentName,
+		SidecarInjectorComponentName,
+		PolicyComponentName,
+		TelemetryComponentName,
+		CitadelComponentName,
+		CertManagerComponentName,
+		NodeAgentComponentName,
+		IngressComponentName,
+		EgressComponentName,
+		CNIComponentName,
+		CoreDNSComponentName,
+		PrometheusComponentName,
+		PrometheusOperatorComponentName,
+		GrafanaComponentName,
+		KialiComponentName,
+		TracingComponentName,
 	}
 )
 
 // ManifestMap is a map of ComponentName to its manifest string.
 type ManifestMap map[ComponentName]string
 
-// IsFeatureEnabledInSpec reports whether the given feature is enabled in the given spec.
-// This follows the logic description in IstioControlPlane proto.
-// IsFeatureEnabledInSpec assumes that controlPlaneSpec has been validated.
-func IsFeatureEnabledInSpec(featureName FeatureName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) (bool, error) {
-	featureNodeI, found, err := tpath.GetFromStructPath(controlPlaneSpec, string(featureName)+".Enabled")
-	if err != nil {
-		return false, fmt.Errorf("error in IsFeatureEnabledInSpec GetFromStructPath featureEnabled for feature=%s: %s", featureName, err)
-	}
-	if !found || featureNodeI == nil {
-		return false, nil
-	}
-	featureNode, ok := featureNodeI.(*v1alpha2.BoolValueForPB)
-	if !ok {
-		return false, fmt.Errorf("feature %s enabled has bad type %T, expect *v1alpha2.BoolValueForPB", featureName, featureNodeI)
-	}
-	if featureNode == nil || !featureNode.Value {
-		return false, nil
-	}
-	return featureNode.Value, nil
-}
-
-// IsComponentEnabledInSpec reports whether the given feature and component are enabled in the given spec. The logic is, in
-// order of evaluation:
-// 1. if the feature is not defined, the component is disabled, else
-// 2. if the feature is disabled, the component is disabled, else
-// 3. if the component is not defined, it is reported disabled, else
-// 4. if the component disabled, it is reported disabled, else
-// 5. the component is enabled.
-// This follows the logic description in IstioControlPlane proto.
+// IsComponentEnabledInSpec reports whether the given component is enabled in the given spec.
 // IsComponentEnabledInSpec assumes that controlPlaneSpec has been validated.
-// TODO: remove extra validations when comfort level is high enough.
-func IsComponentEnabledInSpec(featureName FeatureName, componentName ComponentName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) (bool, error) {
-	//check in Values part as well for third Party components
-	if featureName == ThirdPartyFeatureName {
-		return IsComponentEnabledFromValue(string(componentName), controlPlaneSpec.Values)
-	}
-	featureNodeI, found, err := tpath.GetFromStructPath(controlPlaneSpec, string(featureName)+".Enabled")
+func IsComponentEnabledInSpec(componentName ComponentName, controlPlaneSpec *v1alpha1.IstioOperatorSpec) (bool, error) {
+	componentNodeI, found, err := tpath.GetFromStructPath(controlPlaneSpec, "Components."+string(componentName)+".Enabled")
 	if err != nil {
-		return false, fmt.Errorf("error in IsComponentEnabledInSpec GetFromStructPath featureEnabled for feature=%s, component=%s: %s",
-			featureName, componentName, err)
-	}
-	if !found || featureNodeI == nil {
-		return false, nil
-	}
-	featureNode, ok := featureNodeI.(*v1alpha2.BoolValueForPB)
-	if !ok {
-		return false, fmt.Errorf("feature %s enabled has bad type %T, expect *v1alpha2.BoolValueForPB", featureName, featureNodeI)
-	}
-	if featureNode == nil || !featureNode.Value {
-		return false, nil
-	}
-
-	componentNodeI, found, err := tpath.GetFromStructPath(controlPlaneSpec, string(featureName)+".Components."+string(componentName)+".Enabled")
-	if err != nil {
-		return false, fmt.Errorf("error in IsComponentEnabledInSpec GetFromStructPath componentEnabled for feature=%s, component=%s: %s",
-			featureName, componentName, err)
+		return false, fmt.Errorf("error in IsComponentEnabledInSpec GetFromStructPath componentEnabled for component=%s: %s",
+			componentName, err)
 	}
 	if !found || componentNodeI == nil {
-		return featureNode.Value, nil
+		return false, nil
 	}
-	componentNode, ok := componentNodeI.(*v1alpha2.BoolValueForPB)
+	componentNode, ok := componentNodeI.(*v1alpha1.BoolValueForPB)
 	if !ok {
 		return false, fmt.Errorf("component %s enabled has bad type %T, expect *v1alpha2.BoolValueForPB", componentName, componentNodeI)
 	}
 	if componentNode == nil {
-		return featureNode.Value, nil
+		return false, nil
 	}
 	return componentNode.Value, nil
 }
@@ -224,13 +154,13 @@ func NamespaceFromValue(valuePath string, valueSpec map[string]interface{}) (str
 // 4. Otherwise return the component namespace.
 // Namespace assumes that controlPlaneSpec has been validated.
 // TODO: remove extra validations when comfort level is high enough.
-func Namespace(featureName FeatureName, componentName ComponentName, controlPlaneSpec *v1alpha2.IstioControlPlaneSpec) (string, error) {
-	defaultNamespaceI, found, err := tpath.GetFromStructPath(controlPlaneSpec, "DefaultNamespace")
+func Namespace(componentName ComponentName, controlPlaneSpec *v1alpha1.IstioOperatorSpec) (string, error) {
+	defaultNamespaceI, found, err := tpath.GetFromStructPath(controlPlaneSpec, "MeshConfig.RootNamespace")
 	if !found {
-		return "", fmt.Errorf("can't find any setting for defaultNamespace for feature=%s, component=%s", featureName, componentName)
+		return "", fmt.Errorf("can't find any setting for defaultNamespace for component=%s", componentName)
 	}
 	if err != nil {
-		return "", fmt.Errorf("error in Namepsace for feature=%s, component=%s: %s", featureName, componentName, err)
+		return "", fmt.Errorf("error in Namepsace for component=%s: %s", componentName, err)
 
 	}
 	defaultNamespace, ok := defaultNamespaceI.(string)
@@ -241,37 +171,22 @@ func Namespace(featureName FeatureName, componentName ComponentName, controlPlan
 		return "", fmt.Errorf("defaultNamespace must be set")
 	}
 
-	featureNamespace := defaultNamespace
-	featureNodeI, found, err := tpath.GetFromStructPath(controlPlaneSpec, string(featureName)+".Components.Namespace")
+	componentNodeI, found, err := tpath.GetFromStructPath(controlPlaneSpec, "Components."+string(componentName)+".Namespace")
 	if err != nil {
-		return "", fmt.Errorf("error in Namepsace GetFromStructPath featureNamespace for feature=%s, component=%s: %s", featureName, componentName, err)
-	}
-	if found && featureNodeI != nil {
-		featureNamespace, ok = featureNodeI.(string)
-		if !ok {
-			return "", fmt.Errorf("feature %s namespace has bad type %T, expect string", featureName, featureNodeI)
-		}
-		if featureNamespace == "" {
-			featureNamespace = defaultNamespace
-		}
-	}
-
-	componentNodeI, found, err := tpath.GetFromStructPath(controlPlaneSpec, string(featureName)+".Components."+string(componentName)+".Namespace")
-	if err != nil {
-		return "", fmt.Errorf("error in Namepsace GetFromStructPath componentNamespace for feature=%s, component=%s: %s", featureName, componentName, err)
+		return "", fmt.Errorf("error in Namepsace GetFromStructPath componentNamespace for component=%s: %s", componentName, err)
 	}
 	if !found {
-		return featureNamespace, nil
+		return defaultNamespace, nil
 	}
 	if componentNodeI == nil {
-		return featureNamespace, nil
+		return defaultNamespace, nil
 	}
 	componentNamespace, ok := componentNodeI.(string)
 	if !ok {
 		return "", fmt.Errorf("component %s enabled has bad type %T, expect string", componentName, componentNodeI)
 	}
 	if componentNamespace == "" {
-		return featureNamespace, nil
+		return defaultNamespace, nil
 	}
 	return componentNamespace, nil
 }

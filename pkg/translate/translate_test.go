@@ -19,7 +19,7 @@ import (
 
 	"github.com/kr/pretty"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/api/mesh/v1alpha1"
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/version"
 )
@@ -34,7 +34,8 @@ func TestProtoToValuesV13(t *testing.T) {
 		{
 			desc: "default success",
 			yamlStr: `
-defaultNamespace: istio-system
+meshConfig:
+  rootNamespace: istio-system
 `,
 			want: `certmanager:
   enabled: false
@@ -101,7 +102,8 @@ tracing:
 			yamlStr: `
 hub: docker.io/istio
 tag: 1.2.3
-defaultNamespace: istio-system
+meshConfig:
+  rootNamespace: istio-system
 `,
 			want: `certmanager:
   enabled: false
@@ -173,7 +175,7 @@ tracing:
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			ispec := &v1alpha2.IstioControlPlaneSpec{}
+			ispec := &v1alpha1.IstioOperatorSpec{}
 			err := util.UnmarshalWithJSONPB(tt.yamlStr, ispec)
 			if err != nil {
 				t.Fatalf("unmarshalWithJSONPB(%s): got error %s", tt.desc, err)

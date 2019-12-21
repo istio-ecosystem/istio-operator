@@ -23,7 +23,7 @@ import (
 
 const (
 	// OperatorVersionString is the version string of this operator binary.
-	OperatorVersionString = "1.4.3"
+	OperatorVersionString = "1.5.0"
 )
 
 var (

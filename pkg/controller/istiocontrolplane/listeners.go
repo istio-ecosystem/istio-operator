@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"time"
 
+	"istio.io/api/mesh/v1alpha1"
+
 	"k8s.io/apimachinery/pkg/types"
 
 	corev1 "k8s.io/api/core/v1"
@@ -31,7 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	iop "istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/helmreconciler"
 	"istio.io/pkg/log"
 )
@@ -54,13 +56,13 @@ type IstioRenderingListener struct {
 // instance based on the results of the Reconcile operation.
 type IstioStatusUpdater struct {
 	*helmreconciler.DefaultRenderingListener
-	instance   *v1alpha2.IstioControlPlane
+	instance   *iop.IstioOperator
 	reconciler *helmreconciler.HelmReconciler
 }
 
 // NewIstioRenderingListener returns a new IstioRenderingListener, which is a composite that includes IstioStatusUpdater
 // and IstioChartCustomizerListener.
-func NewIstioRenderingListener(instance *v1alpha2.IstioControlPlane) *IstioRenderingListener {
+func NewIstioRenderingListener(instance *iop.IstioOperator) *IstioRenderingListener {
 	return &IstioRenderingListener{
 		&helmreconciler.CompositeRenderingListener{
 			Listeners: []helmreconciler.RenderingListener{
@@ -72,7 +74,7 @@ func NewIstioRenderingListener(instance *v1alpha2.IstioControlPlane) *IstioRende
 }
 
 // NewIstioStatusUpdater returns a new IstioStatusUpdater instance for the specified IstioControlPlane
-func NewIstioStatusUpdater(instance *v1alpha2.IstioControlPlane) helmreconciler.RenderingListener {
+func NewIstioStatusUpdater(instance *iop.IstioOperator) helmreconciler.RenderingListener {
 	return &IstioStatusUpdater{
 		DefaultRenderingListener: &helmreconciler.DefaultRenderingListener{},
 		instance:                 instance,
@@ -80,8 +82,8 @@ func NewIstioStatusUpdater(instance *v1alpha2.IstioControlPlane) helmreconciler.
 }
 
 // EndReconcile updates the status field on the IstioControlPlane instance based on the resulting err parameter.
-func (u *IstioStatusUpdater) EndReconcile(_ runtime.Object, status *v1alpha2.InstallStatus) error {
-	icp := &v1alpha2.IstioControlPlane{}
+func (u *IstioStatusUpdater) EndReconcile(_ runtime.Object, status map[string]*v1alpha1.IstioOperatorSpec_VersionStatus) error {
+	icp := &iop.IstioOperator{}
 	namespacedName := types.NamespacedName{
 		Name:      u.instance.Name,
 		Namespace: u.instance.Namespace,
@@ -89,7 +91,7 @@ func (u *IstioStatusUpdater) EndReconcile(_ runtime.Object, status *v1alpha2.Ins
 	if err := u.reconciler.GetClient().Get(context.TODO(), namespacedName, icp); err != nil {
 		return fmt.Errorf("failed to get IstioControlPlane before updating status due to %v", err)
 	}
-	icp.Status = status
+	icp.Spec.ComponentStatus = status
 	return u.reconciler.GetClient().Status().Update(context.TODO(), icp)
 }
 

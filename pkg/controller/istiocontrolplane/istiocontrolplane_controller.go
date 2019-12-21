@@ -35,7 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	iop "istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/helmreconciler"
 	"istio.io/pkg/log"
 )
@@ -51,7 +51,7 @@ const (
 * business logic.  Delete these comments after modifying this file.*
  */
 
-// Add creates a new IstioControlPlane Controller and adds it to the Manager. The Manager will set fields on the Controller
+// Add creates a new IstioOperator Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
@@ -65,15 +65,15 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	log.Info("Adding controller for IstioControlPlane")
+	log.Info("Adding controller for IstioOperator")
 	// Create a new controller
 	c, err := controller.New("istiocontrolplane-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
 
-	// Watch for changes to primary resource IstioControlPlane
-	err = c.Watch(&source.Kind{Type: &v1alpha2.IstioControlPlane{}}, &handler.EnqueueRequestForObject{})
+	// Watch for changes to primary resource IstioOperator
+	err = c.Watch(&source.Kind{Type: &iop.IstioOperator{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 var _ reconcile.Reconciler = &ReconcileIstioControlPlane{}
 
-// ReconcileIstioControlPlane reconciles a IstioControlPlane object
+// ReconcileIstioControlPlane reconciles a IstioOperator object
 type ReconcileIstioControlPlane struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
@@ -97,13 +97,13 @@ type ReconcileIstioControlPlane struct {
 	factory *helmreconciler.Factory
 }
 
-// Reconcile reads that state of the cluster for a IstioControlPlane object and makes changes based on the state read
-// and what is in the IstioControlPlane.Spec
+// Reconcile reads that state of the cluster for a IstioOperator object and makes changes based on the state read
+// and what is in the IstioOperator.Spec
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	log.Info("Reconciling IstioControlPlane")
+	log.Info("Reconciling IstioOperator")
 
 	ns := request.Namespace
 	if ns == "" {
@@ -116,7 +116,7 @@ func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (recon
 		Namespace: ns,
 	}
 	// declare read-only icp instance to create the reconciler
-	icp := &v1alpha2.IstioControlPlane{}
+	icp := &iop.IstioOperator{}
 	if err := r.client.Get(context.TODO(), reqNamespacedName, icp); err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -125,7 +125,7 @@ func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (recon
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
-		log.Errorf("error getting IstioControlPlane icp: %s", err)
+		log.Errorf("error getting IstioOperator icp: %s", err)
 		return reconcile.Result{}, err
 	}
 
@@ -133,10 +133,10 @@ func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (recon
 	finalizers := sets.NewString(icp.GetFinalizers()...)
 	if deleted {
 		if !finalizers.Has(finalizer) {
-			log.Info("IstioControlPlane deleted")
+			log.Info("IstioOperator deleted")
 			return reconcile.Result{}, nil
 		}
-		log.Info("Deleting IstioControlPlane")
+		log.Info("Deleting IstioOperator")
 
 		reconciler, err := r.factory.New(icp, r.client)
 		if err == nil {
@@ -169,12 +169,12 @@ func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (recon
 		icp.SetFinalizers(finalizers.List())
 		err := r.client.Update(context.TODO(), icp)
 		if err != nil {
-			log.Errorf("Failed to update IstioControlPlane with finalizer, %v", err)
+			log.Errorf("Failed to update IstioOperator with finalizer, %v", err)
 			return reconcile.Result{}, err
 		}
 	}
 
-	log.Info("Updating IstioControlPlane")
+	log.Info("Updating IstioOperator")
 	reconciler, err := r.getOrCreateReconciler(icp)
 	if err == nil {
 		err = reconciler.Reconcile()
@@ -193,7 +193,7 @@ var (
 	reconcilers = map[string]*helmreconciler.HelmReconciler{}
 )
 
-func reconcilersMapKey(icp *v1alpha2.IstioControlPlane) string {
+func reconcilersMapKey(icp *iop.IstioOperator) string {
 	return fmt.Sprintf("%s/%s", icp.Namespace, icp.Name)
 }
 
@@ -223,7 +223,7 @@ var ownedResourcePredicates = predicate.Funcs{
 	},
 }
 
-func (r *ReconcileIstioControlPlane) getOrCreateReconciler(icp *v1alpha2.IstioControlPlane) (*helmreconciler.HelmReconciler, error) {
+func (r *ReconcileIstioControlPlane) getOrCreateReconciler(icp *iop.IstioOperator) (*helmreconciler.HelmReconciler, error) {
 	key := reconcilersMapKey(icp)
 	var err error
 	var reconciler *helmreconciler.HelmReconciler
@@ -231,7 +231,7 @@ func (r *ReconcileIstioControlPlane) getOrCreateReconciler(icp *v1alpha2.IstioCo
 		reconciler.SetNeedUpdateAndPrune(false)
 		oldInstance := reconciler.GetInstance()
 		reconciler.SetInstance(icp)
-		if reconciler.GetInstance().GetGeneration() != oldInstance.GetGeneration() {
+		if reconciler.GetInstance() != oldInstance {
 			//regenerate the reconciler
 			if reconciler, err = r.factory.New(icp, r.client); err == nil {
 				reconcilers[key] = reconciler

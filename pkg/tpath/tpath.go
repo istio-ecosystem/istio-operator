@@ -184,7 +184,7 @@ func WritePathContext(nc *PathContext, value interface{}) error {
 	scope.Debugf("WritePathContext PathContext=%s, value=%v", nc, value)
 
 	switch {
-	case value == nil:
+	case util.IsValueNil(value):
 		scope.Debug("delete")
 		switch {
 		case nc.Parent != nil && isSliceOrPtrInterface(nc.Parent.Node):

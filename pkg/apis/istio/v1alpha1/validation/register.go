@@ -17,11 +17,13 @@
 // Package v1alpha2 contains API Schema definitions for the istio v1alpha2 API group
 // +k8s:deepcopy-gen=package,register
 // +groupName=install.istio.io
-package v1alpha2
+package validation
 
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
+
+	"istio.io/operator/pkg/apis/istio/v1alpha1"
 )
 
 var (
@@ -34,5 +36,5 @@ var (
 
 // Register the IstioControlPlane and IstioControlPlaneList API kind
 func init() {
-	SchemeBuilder.Register(&IstioControlPlane{}, &IstioControlPlaneList{})
+	SchemeBuilder.Register(&v1alpha1.IstioOperator{}, &v1alpha1.IstioOperatorList{})
 }

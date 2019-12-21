@@ -2,7 +2,7 @@
 title: v1alpha1
 layout: protoc-gen-docs
 generator: protoc-gen-docs
-number_of_entries: 85
+number_of_entries: 86
 ---
 <h2 id="AddonIngressConfig">AddonIngressConfig</h2>
 <section>
@@ -2380,6 +2380,53 @@ No
 <td><code>suffix</code></td>
 <td><code>string</code></td>
 <td>
+</td>
+<td>
+No
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<h2 id="IstioOperator">IstioOperator</h2>
+<section>
+<p>IstioOperator is a CustomResourceDefinition (CRD) for an operator.</p>
+
+<table class="message-fields">
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr id="IstioOperator-kind">
+<td><code>kind</code></td>
+<td><code>string</code></td>
+<td>
+</td>
+<td>
+No
+</td>
+</tr>
+<tr id="IstioOperator-apiVersion">
+<td><code>apiVersion</code></td>
+<td><code>string</code></td>
+<td>
+</td>
+<td>
+No
+</td>
+</tr>
+<tr id="IstioOperator-placeholder">
+<td><code>placeholder</code></td>
+<td><code>string</code></td>
+<td>
+<p>GOFIELD:v11.ObjectMeta <code>json:&quot;metadata,omitempty&quot; protobuf:&quot;bytes,7,opt,name=metadata&quot;</code>
+GOFIELD:v11.TypeMeta <code>json:&quot;,inline&quot;</code></p>
+
 </td>
 <td>
 No

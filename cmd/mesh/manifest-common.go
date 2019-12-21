@@ -21,13 +21,12 @@ import (
 	"strings"
 	"time"
 
-	"istio.io/operator/pkg/kubectlcmd"
-
 	"github.com/ghodss/yaml"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
+	"istio.io/api/mesh/v1alpha1"
 	"istio.io/operator/pkg/component/controlplane"
 	"istio.io/operator/pkg/helm"
+	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/manifest"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/tpath"
@@ -69,7 +68,7 @@ func genApplyManifests(setOverlay []string, inFilename string, force bool, dryRu
 	gotError := false
 	skippedComponentMap := map[name.ComponentName]bool{}
 	for cn := range manifests {
-		enabledInSpec, err := name.IsComponentEnabledInSpec(name.ComponentNameToFeatureName[cn], cn, icps)
+		enabledInSpec, err := name.IsComponentEnabledInSpec(cn, icps)
 		if err != nil {
 			l.logAndPrintf("failed to check if %s is enabled in IstioControlPlaneSpec: %v", cn, err)
 		}
@@ -106,7 +105,7 @@ func genApplyManifests(setOverlay []string, inFilename string, force bool, dryRu
 }
 
 // GenManifests generate manifest from input file and setOverLay
-func GenManifests(inFilename string, setOverlayYAML string, force bool, l *Logger) (name.ManifestMap, *v1alpha2.IstioControlPlaneSpec, error) {
+func GenManifests(inFilename string, setOverlayYAML string, force bool, l *Logger) (name.ManifestMap, *v1alpha1.IstioOperatorSpec, error) {
 	mergedYAML, err := genProfile(false, inFilename, "", setOverlayYAML, "", force, l)
 	if err != nil {
 		return nil, nil, err
@@ -148,7 +147,7 @@ func ignoreError(stderr string) bool {
 }
 
 // fetchInstallPackageFromURL downloads installation packages from specified URL.
-func fetchInstallPackageFromURL(mergedICPS *v1alpha2.IstioControlPlaneSpec) error {
+func fetchInstallPackageFromURL(mergedICPS *v1alpha1.IstioOperatorSpec) error {
 	if util.IsHTTPURL(mergedICPS.InstallPackagePath) {
 		pkgPath, err := fetchInstallPackage(mergedICPS.InstallPackagePath)
 		if err != nil {
@@ -200,7 +199,7 @@ func MakeTreeFromSetList(setOverlay []string, force bool, l *Logger) (string, er
 		if err != nil {
 			return "", err
 		}
-		icps := &v1alpha2.IstioControlPlaneSpec{}
+		icps := &v1alpha1.IstioOperatorSpec{}
 		if err := util.UnmarshalWithJSONPB(string(testTree), icps); err != nil {
 			return "", fmt.Errorf("bad path=value: %s", kv)
 		}

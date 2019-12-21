@@ -17,8 +17,8 @@ package controlplane
 import (
 	"fmt"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
-	"istio.io/operator/pkg/component/feature"
+	"istio.io/api/mesh/v1alpha1"
+	"istio.io/operator/pkg/component/component"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/translate"
 	"istio.io/operator/pkg/util"
@@ -26,31 +26,32 @@ import (
 
 // IstioControlPlane is an installation of an Istio control plane.
 type IstioControlPlane struct {
-	features []feature.IstioFeature
-	started  bool
+	// installSpec is the installation spec for the control plane.
+	installSpec *v1alpha1.IstioOperatorSpec
+	// translator is the translator for this feature.
+	translator *translate.Translator
+	// components is a slice of components that are part of the feature.
+	components []component.IstioComponent
+	started    bool
 }
 
 // NewIstioControlPlane creates a new IstioControlPlane and returns a pointer to it.
-func NewIstioControlPlane(installSpec *v1alpha2.IstioControlPlaneSpec, translator *translate.Translator) *IstioControlPlane {
-	opts := &feature.Options{
+func NewIstioControlPlane(installSpec *v1alpha1.IstioOperatorSpec, translator *translate.Translator) *IstioControlPlane {
+	out := &IstioControlPlane{}
+	opts := &component.Options{
 		InstallSpec: installSpec,
 		Translator:  translator,
 	}
-	features := make([]feature.IstioFeature, 0, len(translator.FeatureMaps))
-	for ft := range translator.FeatureMaps {
-		features = append(features, feature.NewFeature(ft, opts))
+	for _, c := range name.AllComponentNames {
+		out.components = append(out.components, component.NewComponent(c, opts))
 	}
-	//add third Party feature as well
-	features = append(features, feature.NewFeature(name.ThirdPartyFeatureName, opts))
-	return &IstioControlPlane{
-		features: features,
-	}
+	return out
 }
 
 // Run starts the Istio control plane.
 func (i *IstioControlPlane) Run() error {
-	for _, f := range i.features {
-		if err := f.Run(); err != nil {
+	for _, c := range i.components {
+		if err := c.Run(); err != nil {
 			return err
 		}
 	}
@@ -65,24 +66,13 @@ func (i *IstioControlPlane) RenderManifest() (manifests name.ManifestMap, errsOu
 	}
 
 	manifests = make(name.ManifestMap)
-	for _, f := range i.features {
-		ms, errs := f.RenderManifest()
-		manifests = mergeManifestMaps(manifests, ms)
-		errsOut = util.AppendErrs(errsOut, errs)
+	for _, c := range i.components {
+		ms, err := c.RenderManifest()
+		errsOut = util.AppendErr(errsOut, err)
+		manifests[c.Name()] = ms
 	}
 	if len(errsOut) > 0 {
 		return nil, errsOut
 	}
 	return
-}
-
-func mergeManifestMaps(a, b name.ManifestMap) name.ManifestMap {
-	out := make(name.ManifestMap)
-	for k, v := range a {
-		out[k] = v
-	}
-	for k, v := range b {
-		out[k] = v
-	}
-	return out
 }
