@@ -570,7 +570,7 @@ spec:
       enabled: true
       replicaCount: 1
       hub: docker.io/prom
-      tag: v2.12.0
+      tag: v2.15.0
       retention: 6h
       scrapeInterval: 15s
       contextPath: /prometheus
