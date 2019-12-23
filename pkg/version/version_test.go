@@ -192,37 +192,37 @@ func errToString(err error) string {
 func TestIsVersionString(t *testing.T) {
 	tests := []struct {
 		name string
-		ver string
+		ver  string
 		want bool
 	}{
 		{
 			name: "empty",
-			ver: "",
+			ver:  "",
 			want: true,
 		},
 		{
 			name: "unknown",
-			ver: "unknown",
+			ver:  "unknown",
 			want: false,
 		},
 		{
 			name: "release branch dev",
-			ver: "1.4-dev",
+			ver:  "1.4-dev",
 			want: true,
 		},
 		{
 			name: "release",
-			ver: "1.4.5",
+			ver:  "1.4.5",
 			want: true,
 		},
 		{
 			name: "incorrect",
-			ver: "1.4.xxx",
+			ver:  "1.4.xxx",
 			want: false,
 		},
 		{
 			name: "dev sha",
-			ver: "a3703b76cf4745f3d56bf653ed751509be116351-dirty",
+			ver:  "a3703b76cf4745f3d56bf653ed751509be116351-dirty",
 			want: false,
 		},
 	}
