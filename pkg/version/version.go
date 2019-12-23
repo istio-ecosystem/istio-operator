@@ -18,8 +18,6 @@ import (
 	"fmt"
 	"strings"
 
-	"gopkg.in/yaml.v2"
-
 	goversion "github.com/hashicorp/go-version"
 )
 
@@ -128,8 +126,8 @@ func (v *CompatibilityMapping) UnmarshalYAML(unmarshal func(interface{}) error) 
 
 // IsVersionString checks whether the given string is a version string
 func IsVersionString(path string) bool {
-	vs := Version{}
-	return yaml.Unmarshal([]byte(path), &vs) == nil
+	_, err := goversion.NewSemver(path)
+	return err == nil
 }
 
 // MajorVersion represents a major version.
