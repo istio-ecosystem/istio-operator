@@ -1650,11 +1650,12 @@ type GlobalConfig struct {
 	// Specifies the Istio control plane’s pilot Pod IP address or remote cluster DNS resolvable hostname.
 	RemotePilotAddress string `protobuf:"bytes,48,opt,name=remotePilotAddress,proto3" json:"remotePilotAddress,omitempty"`
 	// Specifies the Istio control plane’s telemetry Pod IP address or remote cluster DNS resolvable hostname
-	RemoteTelemetryAddress string        `protobuf:"bytes,49,opt,name=remoteTelemetryAddress,proto3" json:"remoteTelemetryAddress,omitempty"`
-	Istiod                 *IstiodConfig `protobuf:"bytes,54,opt,name=istiod,proto3" json:"istiod,omitempty"`
-	XXX_NoUnkeyedLiteral   struct{}      `json:"-"`
-	XXX_unrecognized       []byte        `json:"-"`
-	XXX_sizecache          int32         `json:"-"`
+	RemoteTelemetryAddress string `protobuf:"bytes,49,opt,name=remoteTelemetryAddress,proto3" json:"remoteTelemetryAddress,omitempty"`
+	// Specifies the configution of istiod
+	Istiod               *IstiodConfig `protobuf:"bytes,54,opt,name=istiod,proto3" json:"istiod,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
 }
 
 func (m *GlobalConfig) Reset()         { *m = GlobalConfig{} }
