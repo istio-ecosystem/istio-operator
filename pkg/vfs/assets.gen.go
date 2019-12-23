@@ -39157,7 +39157,7 @@ spec:
       replicaCount: 1
       image:
         repository: grafana/grafana
-        tag: 6.4.3
+        tag: 6.5.2
       persist: false
       storageClassName: ""
       accessMode: ReadWriteMany
