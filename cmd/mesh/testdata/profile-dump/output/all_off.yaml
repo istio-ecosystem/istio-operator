@@ -327,6 +327,8 @@ values:
     enableTracing: true
     imagePullPolicy: IfNotPresent
     imagePullSecrets: []
+    istiod:
+      enabled: true
     k8sIngress:
       enableHttps: false
       enabled: false
