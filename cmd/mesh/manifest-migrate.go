@@ -20,10 +20,8 @@ import (
 	"path/filepath"
 
 	"github.com/ghodss/yaml"
-	"github.com/gogo/protobuf/jsonpb"
 	"github.com/spf13/cobra"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/translate"
 	"istio.io/operator/pkg/util"
@@ -96,26 +94,12 @@ func translateFunc(values []byte, l *Logger) error {
 		return fmt.Errorf("error translating values.yaml: %s", err)
 	}
 
-	translatedICPS := &v1alpha2.IstioControlPlaneSpec{}
-	err = util.UnmarshalWithJSONPB(translatedYAML, translatedICPS)
+	isCPYaml, err := icpsToIcp(translatedYAML)
 	if err != nil {
 		return err
 	}
 
-	isCP := &v1alpha2.IstioControlPlane{Spec: translatedICPS, Kind: "IstioControlPlane", ApiVersion: "install.istio.io/v1alpha2"}
-
-	ms := jsonpb.Marshaler{}
-	gotString, err := ms.MarshalToString(isCP)
-	if err != nil {
-		return fmt.Errorf("error marshaling translated IstioControlPlane: %s", err)
-	}
-
-	isCPYaml, err := yaml.JSONToYAML([]byte(gotString))
-	if err != nil {
-		return fmt.Errorf("error converting JSON: %s\n%s", gotString, err)
-	}
-
-	l.print(string(isCPYaml) + "\n")
+	l.print(isCPYaml + "\n")
 	return nil
 }
 

@@ -66,12 +66,17 @@ func profileDump(args []string, rootArgs *rootArgs, pdArgs *profileDumpArgs, l *
 	if len(args) == 1 {
 		profile = args[0]
 	}
-	y, err := genProfile(pdArgs.helmValues, pdArgs.inFilename, profile, "", pdArgs.configPath, true, l)
+	icpsy, err := genProfile(pdArgs.helmValues, pdArgs.inFilename, profile, "", pdArgs.configPath, true, l)
 	if err != nil {
 		return err
 	}
 
-	l.print(y + "\n")
+	icpy, err := icpsToIcp(icpsy)
+	if err != nil {
+		return err
+	}
+
+	l.print(icpy + "\n")
 
 	return nil
 }

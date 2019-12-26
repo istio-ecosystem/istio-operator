@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 
 	"github.com/ghodss/yaml"
+	"github.com/gogo/protobuf/jsonpb"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/helm"
@@ -165,6 +166,26 @@ func genProfile(helmValues bool, inFilename, profile, setOverlayYAML, configPath
 	}
 
 	return finalYAML, err
+}
+
+func icpsToIcp(icpsy string) (string, error) {
+	var err error
+	icps := &v1alpha2.IstioControlPlaneSpec{}
+	err = util.UnmarshalWithJSONPB(icpsy, icps)
+	if err != nil {
+		return "", err
+	}
+	icp := &v1alpha2.IstioControlPlane{Spec: icps, Kind: "IstioControlPlane", ApiVersion: "install.istio.io/v1alpha2"}
+	ms := jsonpb.Marshaler{}
+	icpj, err := ms.MarshalToString(icp)
+	if err != nil {
+		return "", fmt.Errorf("error marshaling translated IstioControlPlane: %s", err)
+	}
+	icpy, err := yaml.JSONToYAML([]byte(icpj))
+	if err != nil {
+		return "", fmt.Errorf("error converting JSON: %s\n%s", icpj, err)
+	}
+	return string(icpy), nil
 }
 
 func unmarshalAndValidateICP(crYAML string, force bool) (*v1alpha2.IstioControlPlaneSpec, string, error) {
