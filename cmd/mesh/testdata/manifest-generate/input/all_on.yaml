@@ -17,12 +17,20 @@ spec:
     citadel:
       enabled: true
     nodeAgent:
-      enabled: true
+      enabled: false
     galley:
       enabled: true
     cni:
       enabled: false
     coreDNS:
       enabled: false
-  extraComponents:
+    ingressGateways:
+      - namespace: istio-system
+        name: ingress-gateway
+    egressGateways:
+      - namespace: istio-system
+        name: egress-gateway
+
+  addonComponents:
     prometheus:
+      enabled: false

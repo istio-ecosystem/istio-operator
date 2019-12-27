@@ -58,7 +58,7 @@ componentMaps:
     ContainerName:        "galley"
     HelmSubdir:           "istio-control/istio-config"
     ToHelmValuesTreeRoot: "galley"
-  Injector:
+  SidecarInjector:
     ResourceType:         "Deployment"
     ResourceName:         "istio-sidecar-injector"
     ContainerName:        "sidecar-injector-webhook"

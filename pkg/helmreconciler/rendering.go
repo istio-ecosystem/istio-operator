@@ -60,7 +60,10 @@ func (h *HelmReconciler) renderCharts(in RenderingInput) (ChartManifestsMap, err
 		return nil, err
 	}
 
-	cp := controlplane.NewIstioControlPlane(mergedICPS, t)
+	cp, err := controlplane.NewIstioControlPlane(mergedICPS, t)
+	if err != nil {
+		return nil, err
+	}
 	if err := cp.Run(); err != nil {
 		return nil, fmt.Errorf("failed to create Istio control plane with spec: \n%v\nerror: %s", mergedICPS, err)
 	}

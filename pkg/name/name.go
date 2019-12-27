@@ -16,6 +16,7 @@ package name
 
 import (
 	"fmt"
+	"strings"
 
 	"istio.io/api/operator/v1alpha1"
 	"istio.io/operator/pkg/tpath"
@@ -37,24 +38,18 @@ const (
 	IstioBaseComponentName       ComponentName = "Base"
 	PilotComponentName           ComponentName = "Pilot"
 	GalleyComponentName          ComponentName = "Galley"
-	SidecarInjectorComponentName ComponentName = "Injector"
+	SidecarInjectorComponentName ComponentName = "SidecarInjector"
 	PolicyComponentName          ComponentName = "Policy"
 	TelemetryComponentName       ComponentName = "Telemetry"
 	CitadelComponentName         ComponentName = "Citadel"
 	CertManagerComponentName     ComponentName = "CertManager"
 	NodeAgentComponentName       ComponentName = "NodeAgent"
-	IngressComponentName         ComponentName = "IngressGateway"
-	EgressComponentName          ComponentName = "EgressGateway"
 	CNIComponentName             ComponentName = "Cni"
 	CoreDNSComponentName         ComponentName = "CoreDNS"
 
-	// The following are third party components, not a part of the IstioControlPlaneAPI but still installed in some
-	// profiles through the Helm API.
-	PrometheusComponentName         ComponentName = "Prometheus"
-	PrometheusOperatorComponentName ComponentName = "PrometheusOperator"
-	GrafanaComponentName            ComponentName = "Grafana"
-	KialiComponentName              ComponentName = "Kiali"
-	TracingComponentName            ComponentName = "Tracing"
+	// Gateway components
+	IngressComponentName ComponentName = "IngressGateway"
+	EgressComponentName  ComponentName = "EgressGateway"
 
 	// Operator components
 	IstioOperatorComponentName      ComponentName = "IstioOperator"
@@ -62,7 +57,7 @@ const (
 )
 
 var (
-	AllComponentNames = []ComponentName{
+	AllCoreComponentNames = []ComponentName{
 		IstioBaseComponentName,
 		PilotComponentName,
 		GalleyComponentName,
@@ -72,8 +67,6 @@ var (
 		CitadelComponentName,
 		CertManagerComponentName,
 		NodeAgentComponentName,
-		IngressComponentName,
-		EgressComponentName,
 		CNIComponentName,
 		CoreDNSComponentName,
 	}
@@ -81,7 +74,7 @@ var (
 )
 
 func init() {
-	for _, n := range AllComponentNames {
+	for _, n := range AllCoreComponentNames {
 		allComponentNamesMap[n] = true
 	}
 }
@@ -196,4 +189,10 @@ func Namespace(componentName ComponentName, controlPlaneSpec *v1alpha1.IstioOper
 		return defaultNamespace, nil
 	}
 	return componentNamespace, nil
+}
+
+// TitleCase returns a capitalized version of n.
+func TitleCase(n ComponentName) ComponentName {
+	s := string(n)
+	return ComponentName(strings.ToUpper(s[0:1]) + s[1:])
 }

@@ -124,7 +124,10 @@ func GenManifests(inFilename string, setOverlayYAML string, force bool, l *Logge
 		return nil, nil, err
 	}
 
-	cp := controlplane.NewIstioControlPlane(mergedICPS, t)
+	cp, err := controlplane.NewIstioControlPlane(mergedICPS, t)
+	if err != nil {
+		return nil, nil, err
+	}
 	if err := cp.Run(); err != nil {
 		return nil, nil, fmt.Errorf("failed to create Istio control plane with spec: \n%v\nerror: %s", mergedICPS, err)
 	}

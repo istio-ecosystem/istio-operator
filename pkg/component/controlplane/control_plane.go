@@ -36,19 +36,41 @@ type IstioControlPlane struct {
 }
 
 // NewIstioControlPlane creates a new IstioControlPlane and returns a pointer to it.
-func NewIstioControlPlane(installSpec *v1alpha1.IstioOperatorSpec, translator *translate.Translator) *IstioControlPlane {
+func NewIstioControlPlane(installSpec *v1alpha1.IstioOperatorSpec, translator *translate.Translator) (*IstioControlPlane, error) {
 	out := &IstioControlPlane{}
 	opts := &component.Options{
 		InstallSpec: installSpec,
 		Translator:  translator,
 	}
-	for _, c := range name.AllComponentNames {
-		out.components = append(out.components, component.NewComponent(c, opts))
+	for _, c := range name.AllCoreComponentNames {
+		o := *opts
+		ns, err := name.Namespace(c, installSpec)
+		if err != nil {
+			return nil, err
+		}
+		o.Namespace = ns
+		out.components = append(out.components, component.NewComponent(c, &o))
+	}
+	for _, g := range installSpec.Components.IngressGateways {
+		o := *opts
+		o.Namespace = g.Namespace
+		out.components = append(out.components, component.NewIngressComponent(g.Name, &o))
+	}
+	for _, g := range installSpec.Components.EgressGateways {
+		o := *opts
+		o.Namespace = g.Namespace
+		out.components = append(out.components, component.NewEgressComponent(g.Name, &o))
 	}
 	for c := range installSpec.AddonComponents {
-		out.components = append(out.components, component.NewAddonComponent(c, opts))
+		rn := ""
+		// For well-known addon components like Prometheus, the resource names are included
+		// in the translations.
+		if cm := translator.ComponentMap(c); cm != nil {
+			rn = cm.ResourceName
+		}
+		out.components = append(out.components, component.NewAddonComponent(c, rn, opts))
 	}
-	return out
+	return out, nil
 }
 
 // Run starts the Istio control plane.
@@ -72,7 +94,7 @@ func (i *IstioControlPlane) RenderManifest() (manifests name.ManifestMap, errsOu
 	for _, c := range i.components {
 		ms, err := c.RenderManifest()
 		errsOut = util.AppendErr(errsOut, err)
-		manifests[c.Name()] = ms
+		manifests[c.ComponentName()] = ms
 	}
 	if len(errsOut) > 0 {
 		return nil, errsOut

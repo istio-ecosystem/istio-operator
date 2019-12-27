@@ -273,6 +273,14 @@ func (t *Translator) TranslateHelmValues(icp *v1alpha1.IstioOperatorSpec, compon
 	return string(mergedYAML), err
 }
 
+// ComponentMap returns a ComponentMaps struct ptr for the given component name if one exists.
+// If the name of the component is lower case, the function will use the capitalized version
+// of the name.
+func (t *Translator) ComponentMap(cns string) *ComponentMaps {
+	cn := name.TitleCase(name.ComponentName(cns))
+	return t.ComponentMaps[cn]
+}
+
 // protoToHelmValues takes an interface which must be a struct ptr and recursively iterates through all its fields.
 // For each leaf, if looks for a mapping from the struct data path to the corresponding YAML path and if one is
 // found, it calls the associated mapping function if one is defined to populate the values YAML path.

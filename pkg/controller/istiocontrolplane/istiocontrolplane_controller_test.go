@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/kr/pretty"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -37,11 +38,17 @@ import (
 
 var (
 	minimalStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
+		"Base": {
+			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
+		},
 		"Pilot": {
 			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
 		},
 	}
 	defaultStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
+		"Base": {
+			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
+		},
 		"Pilot": {
 			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
 		},
@@ -55,10 +62,19 @@ var (
 			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
 		},
 		"Galley": {
+			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
+		},
+		"IngressGateway": {
+			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
+		},
+		"EgressGateway": {
 			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
 		},
 	}
 	demoStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
+		"Base": {
+			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
+		},
 		"Pilot": {
 			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
 		},
@@ -74,8 +90,17 @@ var (
 		"Galley": {
 			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
 		},
+		"IngressGateway": {
+			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
+		},
+		"EgressGateway": {
+			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
+		},
 	}
 	sdsStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
+		"Base": {
+			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
+		},
 		"Pilot": {
 			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
 		},
@@ -92,6 +117,9 @@ var (
 			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
 		},
 		"NodeAgent": {
+			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
+		},
+		"IngressGateway": {
 			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
 		},
 	}
@@ -179,7 +207,7 @@ func testSwitchProfile(t *testing.T, c testCase) {
 	// check ICP status
 	succeed, err := checkICPStatus(cl, req.NamespacedName, c.initialProfile)
 	if !succeed || err != nil {
-		t.Fatalf("failed to get expected IstioOperator status: (%v)", err)
+		t.Fatalf("failed to get initial expected IstioOperator status: (%v)", err)
 	}
 
 	//update IstioOperator : switch profile from minimal to default and reconcile
@@ -197,7 +225,7 @@ func testSwitchProfile(t *testing.T, c testCase) {
 	// check ICP status
 	succeed, err = checkICPStatus(cl, req.NamespacedName, c.targetProfile)
 	if !succeed || err != nil {
-		t.Fatalf("failed to get expected IstioOperator status: (%v)", err)
+		t.Fatalf("failed to get expected target IstioOperator status: (%v)", err)
 	}
 }
 
@@ -241,7 +269,7 @@ func checkICPStatus(cl client.Client, key client.ObjectKey, profile string) (boo
 	size := len(spec.ComponentStatus)
 	expectedSize := len(status)
 	if size != expectedSize {
-		return false, fmt.Errorf("status size(%v) is not equal to expected status size (%v)", size, expectedSize)
+		return false, fmt.Errorf("status got: %s, want: %s", pretty.Sprint(spec.ComponentStatus), pretty.Sprint(status))
 	}
 	for k, v := range spec.ComponentStatus {
 		if s, ok := status[k]; ok {
