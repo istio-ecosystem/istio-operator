@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"os"
 
-	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/util"
 
 	"github.com/spf13/cobra"
