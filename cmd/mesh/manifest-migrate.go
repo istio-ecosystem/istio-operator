@@ -91,15 +91,9 @@ func translateFunc(values []byte, l *Logger) error {
 		return fmt.Errorf("error creating values.yaml translator: %s", err)
 	}
 
-	translatedYAML, _, err := ts.TranslateFromValueToSpec(values)
+	translatedICPS, err := ts.TranslateFromValueToSpec(values)
 	if err != nil {
 		return fmt.Errorf("error translating values.yaml: %s", err)
-	}
-
-	translatedICPS := &iopv1alpha1.IstioOperator{}
-	err = util.UnmarshalWithJSONPB(translatedYAML, translatedICPS)
-	if err != nil {
-		return err
 	}
 
 	isCP := &iopv1alpha1.IstioOperator{Spec: translatedICPS, Kind: "IstioControlPlane", ApiVersion: "install.istio.io/v1alpha2"}

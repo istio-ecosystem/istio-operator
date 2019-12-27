@@ -19,10 +19,6 @@ import (
 	"fmt"
 	"time"
 
-	"istio.io/api/mesh/v1alpha1"
-
-	"k8s.io/apimachinery/pkg/types"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -30,9 +26,11 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"istio.io/api/operator/v1alpha1"
 	iop "istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/helmreconciler"
 	"istio.io/pkg/log"

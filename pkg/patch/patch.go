@@ -91,7 +91,7 @@ import (
 	"github.com/kr/pretty"
 	"gopkg.in/yaml.v2"
 
-	"istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 	"istio.io/operator/pkg/object"
 	"istio.io/operator/pkg/tpath"
 	"istio.io/operator/pkg/util"

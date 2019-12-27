@@ -25,7 +25,7 @@ import (
 	kubectl "k8s.io/kubectl/pkg/util"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 	valuesv1alpha1 "istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/component/controlplane"
 	"istio.io/operator/pkg/helm"

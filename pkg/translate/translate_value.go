@@ -19,7 +19,7 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/tpath"
 	"istio.io/operator/pkg/util"
@@ -154,11 +154,12 @@ func NewReverseTranslator(minorVersion version.MinorVersion) (*ReverseTranslator
 	if err != nil {
 		return nil, fmt.Errorf("error initialize API mapping: %s", err)
 	}
+	t.Version = minorVersion
 	return t, nil
 }
 
 // TranslateFromValueToSpec translates from values.yaml value to IstioControlPlaneSpec.
-func (t *ReverseTranslator) TranslateFromValueToSpec(values []byte) (controlPlaneSpec *v1alpha2.IstioControlPlaneSpec, err error) {
+func (t *ReverseTranslator) TranslateFromValueToSpec(values []byte) (controlPlaneSpec *v1alpha1.IstioOperatorSpec, err error) {
 
 	var yamlTree = make(map[string]interface{})
 	err = yaml.Unmarshal(values, &yamlTree)

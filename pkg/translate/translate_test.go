@@ -19,7 +19,7 @@ import (
 
 	"github.com/kr/pretty"
 
-	"istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/version"
 )
@@ -223,16 +223,21 @@ func TestNewTranslator(t *testing.T) {
 		{
 			name:         "version 1.5",
 			minorVersion: version.NewMinorVersion(1, 5),
-			wantVer:      "1.4",
+			wantVer:      "1.5",
 			wantErr:      false,
 		},
 		{
 			name:         "version 1.6",
 			minorVersion: version.NewMinorVersion(1, 6),
-			wantVer:      "",
+			wantVer:      "1.5",
 			wantErr:      true,
 		},
-	}
+		{
+			name:         "version 1.99",
+			minorVersion: version.NewMinorVersion(1, 99),
+			wantVer:      "",
+			wantErr:      true,
+		}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := NewTranslator(tt.minorVersion)

@@ -22,10 +22,8 @@ import (
 	"testing"
 
 	"istio.io/operator/pkg/compare"
-
-	"istio.io/pkg/version"
-
 	"istio.io/operator/pkg/util"
+	"istio.io/pkg/version"
 )
 
 type testGroup []struct {
@@ -46,6 +44,10 @@ func TestManifestGenerateFlags(t *testing.T) {
 		},
 		{
 			desc:       "all_on",
+			diffIgnore: "ConfigMap:*:istio",
+		},
+		{
+			desc:       "prometheus",
 			diffIgnore: "ConfigMap:*:istio",
 		},
 		{

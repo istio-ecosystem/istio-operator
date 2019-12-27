@@ -8,6 +8,8 @@ spec:
 
   # Traffic management feature
   components:
+    base:
+      enabled: true
     pilot:
       enabled: true
       k8s:

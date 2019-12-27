@@ -8,10 +8,9 @@ import (
 	math "math"
 
 	proto "github.com/golang/protobuf/proto"
-
 	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

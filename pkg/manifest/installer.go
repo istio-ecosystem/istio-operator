@@ -22,10 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
-
-	// For kubeclient GCP auth
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"time" // For kubeclient GCP auth
 
 	"github.com/ghodss/yaml"
 	appsv1 "k8s.io/api/apps/v1"
@@ -40,12 +37,13 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	kubectlutil "k8s.io/kubectl/pkg/util/deployment"
 	"k8s.io/utils/pointer"
 
-	"istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/object"

@@ -21,7 +21,7 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 	iop "istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/util"

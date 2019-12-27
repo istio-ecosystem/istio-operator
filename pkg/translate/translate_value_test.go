@@ -15,7 +15,6 @@
 package translate
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/ghodss/yaml"
@@ -330,12 +329,11 @@ trafficManagement:
 				t.Fatalf("unmarshal(%s): got error %s", tt.desc, err)
 			}
 			scope.Debugf("value struct: \n%s\n", pretty.Sprint(valueStruct))
-			gotYAML, gotSpec, err := tr.TranslateFromValueToSpec([]byte(tt.valueYAML))
+			gotSpec, err := tr.TranslateFromValueToSpec([]byte(tt.valueYAML))
 			if gotErr, wantErr := errToString(err), tt.wantErr; gotErr != wantErr {
 				t.Errorf("ValuesToProto(%s)(%v): gotErr:%s, wantErr:%s", tt.desc, tt.valueYAML, gotErr, wantErr)
 			}
 			if tt.wantErr == "" {
-				fmt.Println(gotYAML)
 				ms := jsonpb.Marshaler{}
 				gotString, err := ms.MarshalToString(gotSpec)
 				if err != nil {
@@ -364,15 +362,16 @@ func TestNewReverseTranslator(t *testing.T) {
 			wantVer:      "1.4",
 			wantErr:      false,
 		},
+		// TODO: implement
 		{
 			name:         "version 1.5",
 			minorVersion: version.NewMinorVersion(1, 5),
-			wantVer:      "1.4",
-			wantErr:      false,
+			wantVer:      "",
+			wantErr:      true,
 		},
 		{
-			name:         "version 1.6",
-			minorVersion: version.NewMinorVersion(1, 6),
+			name:         "version 1.99",
+			minorVersion: version.NewMinorVersion(1, 99),
 			wantVer:      "",
 			wantErr:      true,
 		},

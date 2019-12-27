@@ -17,7 +17,7 @@ package controlplane
 import (
 	"fmt"
 
-	"istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 	"istio.io/operator/pkg/component/component"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/translate"
@@ -44,6 +44,9 @@ func NewIstioControlPlane(installSpec *v1alpha1.IstioOperatorSpec, translator *t
 	}
 	for _, c := range name.AllComponentNames {
 		out.components = append(out.components, component.NewComponent(c, opts))
+	}
+	for c := range installSpec.AddonComponents {
+		out.components = append(out.components, component.NewAddonComponent(c, opts))
 	}
 	return out
 }

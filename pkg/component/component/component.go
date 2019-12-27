@@ -21,10 +21,11 @@ package component
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/ghodss/yaml"
 
-	"istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 	"istio.io/operator/pkg/helm"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/patch"
@@ -477,6 +478,39 @@ func (c *EgressComponent) Name() name.ComponentName {
 	return c.CommonComponentFields.name
 }
 
+// AddonComponent is an external component.
+type AddonComponent struct {
+	*CommonComponentFields
+}
+
+// NewAddonComponent creates a new IngressComponent and returns a pointer to it.
+func NewAddonComponent(addonName string, opts *Options) *AddonComponent {
+	return &AddonComponent{
+		&CommonComponentFields{
+			Options: opts,
+			name:    name.ComponentName(addonName),
+		},
+	}
+}
+
+// Run implements the IstioComponent interface.
+func (c *AddonComponent) Run() error {
+	return runComponent(c.CommonComponentFields)
+}
+
+// RenderManifest implements the IstioComponent interface.
+func (c *AddonComponent) RenderManifest() (string, error) {
+	if !c.started {
+		return "", fmt.Errorf("component %s not started in RenderManifest", c.Name())
+	}
+	return renderManifest(c.CommonComponentFields)
+}
+
+// Name implements the IstioComponent interface.
+func (c *AddonComponent) Name() name.ComponentName {
+	return c.CommonComponentFields.name
+}
+
 // PrometheusComponent is the egress gateway component.
 type PrometheusComponent struct {
 	*CommonComponentFields
@@ -724,12 +758,14 @@ func runComponent(c *CommonComponentFields) error {
 
 // renderManifest renders the manifest for the component defined by c and returns the resulting string.
 func renderManifest(c *CommonComponentFields) (string, error) {
-	e, err := c.Translator.IsComponentEnabled(c.name, c.InstallSpec)
-	if err != nil {
-		return "", err
-	}
-	if !e {
-		return disabledYAMLStr(c.name), nil
+	if name.IsCoreComponent(c.name) {
+		e, err := c.Translator.IsComponentEnabled(c.name, c.InstallSpec)
+		if err != nil {
+			return "", err
+		}
+		if !e {
+			return disabledYAMLStr(c.name), nil
+		}
 	}
 
 	mergedYAML, err := c.Translator.TranslateHelmValues(c.InstallSpec, c.name)
@@ -794,11 +830,20 @@ func createHelmRenderer(c *CommonComponentFields) (helm.TemplateRenderer, error)
 	if err != nil {
 		return nil, err
 	}
-	return helm.NewHelmRenderer(icp.InstallPackagePath, c.Translator.ComponentMaps[c.name].HelmSubdir,
-		string(c.name), ns)
+	helmSubdir := string(c.name)
+	tc := titleCase(c.name)
+	if cm := c.Translator.ComponentMaps[tc]; cm != nil {
+		helmSubdir = cm.HelmSubdir
+	}
+	return helm.NewHelmRenderer(icp.InstallPackagePath, helmSubdir, string(c.name), ns)
 }
 
 // disabledYAMLStr returns the YAML comment string that the given component is disabled.
 func disabledYAMLStr(componentName name.ComponentName) string {
 	return yamlCommentStr + string(componentName) + componentDisabledStr + "\n"
+}
+
+func titleCase(n name.ComponentName) name.ComponentName {
+	s := string(n)
+	return name.ComponentName(strings.ToUpper(s[0:1]) + s[1:])
 }

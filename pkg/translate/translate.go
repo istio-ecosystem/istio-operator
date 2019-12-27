@@ -25,7 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
 	"k8s.io/client-go/kubernetes/scheme"
 
-	"istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/object"
 	"istio.io/operator/pkg/tpath"
@@ -112,6 +112,7 @@ func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not Unmarshal translateConfig file %s: %s", f, err)
 	}
+	t.Version = minorVersion
 	return t, nil
 }
 

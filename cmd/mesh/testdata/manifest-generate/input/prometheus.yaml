@@ -3,26 +3,27 @@ kind: IstioControlPlane
 spec:
   components:
     base:
-      enabled: true
+      enabled: false
     pilot:
-      enabled: true
+      enabled: false
     policy:
-      enabled: true
+      enabled: false
     telemetry:
-      enabled: true
+      enabled: false
     proxy:
-      enabled: true
+      enabled: false
     sidecarInjector:
-      enabled: true
+      enabled: false
     citadel:
-      enabled: true
+      enabled: false
     nodeAgent:
-      enabled: true
+      enabled: false
     galley:
-      enabled: true
+      enabled: false
     cni:
       enabled: false
     coreDNS:
       enabled: false
-  extraComponents:
+  addonComponents:
     prometheus:
+      enabled: false

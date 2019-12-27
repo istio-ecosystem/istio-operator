@@ -17,7 +17,7 @@ package name
 import (
 	"fmt"
 
-	"istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 	"istio.io/operator/pkg/tpath"
 	"istio.io/operator/pkg/util"
 )
@@ -76,16 +76,23 @@ var (
 		EgressComponentName,
 		CNIComponentName,
 		CoreDNSComponentName,
-		PrometheusComponentName,
-		PrometheusOperatorComponentName,
-		GrafanaComponentName,
-		KialiComponentName,
-		TracingComponentName,
 	}
+	allComponentNamesMap = make(map[ComponentName]bool)
 )
+
+func init() {
+	for _, n := range AllComponentNames {
+		allComponentNamesMap[n] = true
+	}
+}
 
 // ManifestMap is a map of ComponentName to its manifest string.
 type ManifestMap map[ComponentName]string
+
+// IsCoreComponent reports whether cn is a core component.
+func IsCoreComponent(cn ComponentName) bool {
+	return allComponentNamesMap[cn]
+}
 
 // IsComponentEnabledInSpec reports whether the given component is enabled in the given spec.
 // IsComponentEnabledInSpec assumes that controlPlaneSpec has been validated.

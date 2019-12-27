@@ -8,6 +8,8 @@ replace github.com/golang/glog => github.com/istio/glog v0.0.0-20190424172949-d7
 
 replace github.com/spf13/viper => github.com/istio/viper v1.3.3-0.20190515210538-2789fed3109c
 
+replace istio.io/api => ../api
+
 require (
 	github.com/Masterminds/semver v1.4.2 // indirect
 	github.com/Masterminds/sprig v2.14.1+incompatible // indirect

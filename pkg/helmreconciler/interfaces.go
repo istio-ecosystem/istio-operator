@@ -22,7 +22,7 @@ import (
 	"k8s.io/helm/pkg/manifest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 	"istio.io/operator/pkg/name"
 )
 

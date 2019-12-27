@@ -20,8 +20,6 @@ import (
 	"strconv"
 	"testing"
 
-	"istio.io/operator/pkg/apis/istio/v1alpha1/validation"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -30,8 +28,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"istio.io/api/mesh/v1alpha1"
+	mesh "istio.io/api/mesh/v1alpha1"
+	"istio.io/api/operator/v1alpha1"
 	iop "istio.io/operator/pkg/apis/istio/v1alpha1"
+	"istio.io/operator/pkg/apis/istio/v1alpha1/validation"
 	"istio.io/operator/pkg/helmreconciler"
 )
 
@@ -151,7 +151,7 @@ func testSwitchProfile(t *testing.T, c testCase) {
 		},
 		Spec: &v1alpha1.IstioOperatorSpec{
 			Profile: c.initialProfile,
-			MeshConfig: &v1alpha1.MeshConfig{
+			MeshConfig: &mesh.MeshConfig{
 				RootNamespace: "istio-system",
 			},
 		},
