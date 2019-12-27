@@ -17,6 +17,7 @@ package util
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"strings"
 
 	jsonpatch "github.com/evanphx/json-patch"
@@ -148,6 +149,9 @@ func OverlayYAML(base, overlay string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("yamlToJSON error in overlay: %s\n%s", err, oj)
 	}
+	if base == "" {
+		bj = []byte("{}")
+	}
 	if overlay == "" {
 		oj = []byte("{}")
 	}
@@ -162,6 +166,21 @@ func OverlayYAML(base, overlay string) (string, error) {
 	}
 
 	return string(my), nil
+}
+
+func ReadLayeredYAMLs(filenames []string) (string, error) {
+	var ly string
+	for _, fn := range filenames {
+		b, err := ioutil.ReadFile(strings.TrimSpace(fn))
+		if err != nil {
+			return "", err
+		}
+		ly, err = OverlayYAML(ly, string(b))
+		if err != nil {
+			return "", err
+		}
+	}
+	return ly, nil
 }
 
 func YAMLDiff(a, b string) string {

@@ -16,7 +16,6 @@ package mesh
 
 import (
 	"fmt"
-	"io/ioutil"
 	"path/filepath"
 
 	"github.com/ghodss/yaml"
@@ -42,7 +41,7 @@ import (
 // ones that are compiled in. If it does, the starting point will be the base and profile YAMLs at that file path.
 // Otherwise it will be the compiled in profile YAMLs.
 // In step 3, the remaining fields in the same user overlay are applied on the resulting profile base.
-func genICPS(inFilename, profile, setOverlayYAML, ver string, force bool, l *Logger) (string, *v1alpha2.IstioControlPlaneSpec, error) {
+func genICPS(inFilename []string, profile, setOverlayYAML, ver string, force bool, l *Logger) (string, *v1alpha2.IstioControlPlaneSpec, error) {
 	overlayYAML := ""
 	var overlayICPS *v1alpha2.IstioControlPlaneSpec
 	set := make(map[string]interface{})
@@ -50,8 +49,8 @@ func genICPS(inFilename, profile, setOverlayYAML, ver string, force bool, l *Log
 	if err != nil {
 		return "", nil, fmt.Errorf("could not Unmarshal overlay Set%s: %s", setOverlayYAML, err)
 	}
-	if inFilename != "" {
-		b, err := ioutil.ReadFile(inFilename)
+	if inFilename != nil {
+		b, err := util.ReadLayeredYAMLs(inFilename)
 		if err != nil {
 			return "", nil, fmt.Errorf("could not read values from file %s: %s", inFilename, err)
 		}
@@ -141,7 +140,7 @@ func genICPS(inFilename, profile, setOverlayYAML, ver string, force bool, l *Log
 	return finalYAML, finalICPS, nil
 }
 
-func genProfile(helmValues bool, inFilename, profile, setOverlayYAML, configPath string, force bool, l *Logger) (string, error) {
+func genProfile(helmValues bool, inFilename []string, profile, setOverlayYAML, configPath string, force bool, l *Logger) (string, error) {
 	finalYAML, finalICPS, err := genICPS(inFilename, profile, setOverlayYAML, "", force, l)
 	if err != nil {
 		return "", err

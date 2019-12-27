@@ -16,13 +16,13 @@ package mesh
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
-	"strings"
 	"time"
 
 	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
+
+	"istio.io/operator/pkg/util"
 
 	"istio.io/operator/pkg/compare"
 	"istio.io/operator/pkg/hooks"
@@ -51,7 +51,7 @@ const (
 
 type upgradeArgs struct {
 	// inFilename is the path to the input IstioControlPlane CR.
-	inFilename string
+	inFilename []string
 	// versionsURI is a URI pointing to a YAML formatted versions mapping.
 	versionsURI string
 	// kubeConfigPath is the path to kube config file.
@@ -68,8 +68,8 @@ type upgradeArgs struct {
 
 // addUpgradeFlags adds upgrade related flags into cobra command
 func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
-	cmd.PersistentFlags().StringVarP(&args.inFilename, "filename",
-		"f", "", "Path to file containing IstioControlPlane CustomResource")
+	cmd.PersistentFlags().StringSliceVarP(&args.inFilename, "filename",
+		"f", nil, "Path to file containing IstioControlPlane CustomResource")
 	cmd.PersistentFlags().StringVarP(&args.versionsURI, "versionsURI", "u",
 		versionsMapURL, "URI for operator versions to Istio versions map")
 	cmd.PersistentFlags().StringVarP(&args.kubeConfigPath, "kubeconfig",
@@ -115,8 +115,6 @@ func UpgradeCmd() *cobra.Command {
 
 // upgrade is the main function for Upgrade command
 func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
-	args.inFilename = strings.TrimSpace(args.inFilename)
-
 	// Generate ICPS objects
 	targetICPSYaml, targetICPS, err := genICPS(args.inFilename, "", "", "", args.force, l)
 	if err != nil {
@@ -159,12 +157,11 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 
 	// Read the overridden ICPS from args.inFilename
 	overrideICPSYaml := ""
-	if args.inFilename != "" {
-		b, err := ioutil.ReadFile(args.inFilename)
+	if args.inFilename != nil {
+		overrideICPSYaml, err = util.ReadLayeredYAMLs(args.inFilename)
 		if err != nil {
 			return fmt.Errorf("failed to read override ICPS from file: %v, error: %v", args.inFilename, err)
 		}
-		overrideICPSYaml = string(b)
 	}
 
 	// Generates ICPS for args.inFilename ICP specs yaml. Param force is set to true to
