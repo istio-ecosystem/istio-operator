@@ -54,7 +54,7 @@ func genICPS(inFilename []string, profile, setOverlayYAML, ver string, force boo
 		if err != nil {
 			return "", nil, fmt.Errorf("could not read values from file %s: %s", inFilename, err)
 		}
-		overlayICPS, overlayYAML, err = unmarshalAndValidateICP(string(b), force)
+		overlayICPS, overlayYAML, err = unmarshalAndValidateICP(b, force)
 		if err != nil {
 			return "", nil, err
 		}
