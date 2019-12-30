@@ -34,94 +34,49 @@ import (
 	iop "istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/apis/istio/v1alpha1/validation"
 	"istio.io/operator/pkg/helmreconciler"
+	"istio.io/operator/pkg/name"
 )
 
 var (
+	healthyVersionStatus = &v1alpha1.IstioOperatorSpec_VersionStatus{
+		Status:       v1alpha1.IstioOperatorSpec_HEALTHY,
+		StatusString: "HEALTHY",
+	}
 	minimalStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
-		"Base": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Pilot": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
+		string(name.IstioBaseComponentName): healthyVersionStatus,
+		string(name.PilotComponentName):     healthyVersionStatus,
 	}
 	defaultStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
-		"Base": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Pilot": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Policy": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Telemetry": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Citadel": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Galley": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"IngressGateway": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"EgressGateway": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
+		string(name.IstioBaseComponentName):       healthyVersionStatus,
+		string(name.PilotComponentName):           healthyVersionStatus,
+		string(name.SidecarInjectorComponentName): healthyVersionStatus,
+		string(name.PolicyComponentName):          healthyVersionStatus,
+		string(name.TelemetryComponentName):       healthyVersionStatus,
+		string(name.CitadelComponentName):         healthyVersionStatus,
+		string(name.GalleyComponentName):          healthyVersionStatus,
+		string(name.IngressComponentName):         healthyVersionStatus,
 	}
 	demoStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
-		"Base": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Pilot": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Policy": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Telemetry": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Citadel": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Galley": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"IngressGateway": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"EgressGateway": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
+		string(name.IstioBaseComponentName):       healthyVersionStatus,
+		string(name.PilotComponentName):           healthyVersionStatus,
+		string(name.SidecarInjectorComponentName): healthyVersionStatus,
+		string(name.PolicyComponentName):          healthyVersionStatus,
+		string(name.TelemetryComponentName):       healthyVersionStatus,
+		string(name.CitadelComponentName):         healthyVersionStatus,
+		string(name.GalleyComponentName):          healthyVersionStatus,
+		string(name.IngressComponentName):         healthyVersionStatus,
+		string(name.EgressComponentName):          healthyVersionStatus,
 	}
 	sdsStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
-		"Base": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Pilot": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Policy": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Telemetry": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Citadel": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"Galley": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"NodeAgent": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
-		"IngressGateway": {
-			Status: v1alpha1.IstioOperatorSpec_HEALTHY,
-		},
+		string(name.IstioBaseComponentName):       healthyVersionStatus,
+		string(name.PilotComponentName):           healthyVersionStatus,
+		string(name.SidecarInjectorComponentName): healthyVersionStatus,
+		string(name.PolicyComponentName):          healthyVersionStatus,
+		string(name.TelemetryComponentName):       healthyVersionStatus,
+		string(name.CitadelComponentName):         healthyVersionStatus,
+		string(name.GalleyComponentName):          healthyVersionStatus,
+		string(name.NodeAgentComponentName):       healthyVersionStatus,
+		string(name.IngressComponentName):         healthyVersionStatus,
 	}
 )
 
