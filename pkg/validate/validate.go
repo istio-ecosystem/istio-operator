@@ -26,22 +26,17 @@ import (
 var (
 	// defaultValidations maps a data path to a validation function.
 	defaultValidations = map[string]ValidatorFunc{
-		"Hub":               validateHub,
-		"Tag":               validateTag,
-		"BaseSpecPath":      validateInstallPackagePath,
-		"CustomPackagePath": validateInstallPackagePath,
-		"DefaultNamespace":  validateDefaultNamespace,
+		"Hub":                validateHub,
+		"Tag":                validateTag,
+		"InstallPackagePath": validateInstallPackagePath,
 	}
 	// requiredValues lists all the values that must be non-empty.
-	requiredValues = map[string]bool{
-		"DefaultNamespace": true,
-	}
+	requiredValues = map[string]bool{}
 )
 
 // CheckIstioControlPlaneSpec validates the values in the given Installer spec, using the field map defaultValidations to
 // call the appropriate validation function.
 func CheckIstioControlPlaneSpec(is *v1alpha1.IstioOperatorSpec, checkRequired bool) (errs util.Errors) {
-	//return util.NewErrs(fmt.Errorf("CheckIstioControlPlaneSpec must be ported"))
 	errs = CheckValues(is.Values)
 	return util.AppendErrs(errs, validate(defaultValidations, is, nil, checkRequired))
 }

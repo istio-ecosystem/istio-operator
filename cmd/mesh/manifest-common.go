@@ -183,10 +183,6 @@ func MakeTreeFromSetList(setOverlay []string, force bool, l *Logger) (string, er
 		return "", nil
 	}
 	tree := make(map[string]interface{})
-	// Populate a default namespace for convenience, otherwise most --set commands will error out.
-	if err := tpath.WriteNode(tree, util.PathFromString("defaultNamespace"), "istio-system"); err != nil {
-		return "", err
-	}
 	for _, kv := range setOverlay {
 		kvv := strings.Split(kv, "=")
 		if len(kvv) != 2 {

@@ -62,7 +62,7 @@ func TestManifestGenerateFlags(t *testing.T) {
 		},
 		{
 			desc:  "flag_override_values",
-			flags: "-s defaultNamespace=control-plane",
+			flags: "-s meshConfig.rootNamespace=control-plane",
 		},
 		{
 			desc:      "flag_output",

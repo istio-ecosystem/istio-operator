@@ -23,7 +23,8 @@ spec:
       enabled: false
     coreDNS:
       enabled: false
-
+    ingressGateways:
+    egressGateways:
 
   values:
     global:
