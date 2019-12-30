@@ -117,7 +117,7 @@ func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
 }
 
 // OverlayK8sSettings overlays k8s settings from icp over the manifest objects, based on t's translation mappings.
-func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha1.IstioOperatorSpec, componentName name.ComponentName) (string, error) {
+func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha1.IstioOperatorSpec, componentName name.ComponentName, index int) (string, error) {
 	objects, err := object.ParseK8sObjectsFromYAMLManifest(yml)
 	if err != nil {
 		return "", err
@@ -133,6 +133,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha1.IstioOperatorS
 		if err != nil {
 			return "", err
 		}
+		inPath = strings.Replace(inPath, "gressGateways.", "gressGateways."+fmt.Sprint(index)+".", 1)
 		log.Debugf("Checking for path %s in IstioControlPlaneSpec", inPath)
 		m, found, err := tpath.GetFromStructPath(icp, inPath)
 		if err != nil {
@@ -336,7 +337,9 @@ func (t *Translator) protoToHelmValues(node interface{}, root map[string]interfa
 func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp *v1alpha1.IstioOperatorSpec) error {
 	var keys []string
 	for k := range t.ComponentMaps {
-		keys = append(keys, string(k))
+		if k != name.IngressComponentName && k != name.EgressComponentName {
+			keys = append(keys, string(k))
+		}
 	}
 	sort.Strings(keys)
 	l := len(keys)

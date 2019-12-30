@@ -1,26 +1,4 @@
 apiVersion: install.istio.io/v1alpha2
-kind: IstioControlPlane
+kind: IstioOperator
 spec:
-  components:
-    base:
-      enabled: false
-    pilot:
-      enabled: false
-    policy:
-      enabled: false
-    telemetry:
-      enabled: false
-    proxy:
-      enabled: false
-    sidecarInjector:
-      enabled: false
-    citadel:
-      enabled: false
-    nodeAgent:
-      enabled: false
-    galley:
-      enabled: false
-    cni:
-      enabled: false
-    coreDNS:
-      enabled: false
+  profile: empty

@@ -1,0 +1,12 @@
+apiVersion: install.istio.io/v1alpha2
+kind: IstioOperator
+spec:
+  profile: empty
+  components:
+    ingressGateways:
+      - namespace: istio-ingress
+        k8s:
+          resources:
+            requests:
+              cpu: 111m
+              memory: 222Mi

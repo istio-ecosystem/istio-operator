@@ -75,8 +75,10 @@ type CommonComponentFields struct {
 	// resourceName is the name of all resources for this component.
 	resourceName string
 	namespace    string
-	started      bool
-	renderer     helm.TemplateRenderer
+	// index is the index of the component (only used for components with multiple instances like gateways).
+	index    int
+	started  bool
+	renderer helm.TemplateRenderer
 }
 
 // NewComponent creates a new IstioComponent with the given componentName and options.
@@ -601,13 +603,14 @@ type IngressComponent struct {
 }
 
 // NewIngressComponent creates a new IngressComponent and returns a pointer to it.
-func NewIngressComponent(resourceName string, opts *Options) *IngressComponent {
+func NewIngressComponent(resourceName string, index int, opts *Options) *IngressComponent {
 	cn := name.IngressComponentName
 	return &IngressComponent{
 		CommonComponentFields: &CommonComponentFields{
 			Options:       opts,
 			componentName: cn,
 			resourceName:  resourceName,
+			index:         index,
 		},
 	}
 }
@@ -648,13 +651,14 @@ type EgressComponent struct {
 }
 
 // NewEgressComponent creates a new IngressComponent and returns a pointer to it.
-func NewEgressComponent(resourceName string, opts *Options) *EgressComponent {
+func NewEgressComponent(resourceName string, index int, opts *Options) *EgressComponent {
 	cn := name.EgressComponentName
 	return &EgressComponent{
 		resourceName: resourceName,
 		CommonComponentFields: &CommonComponentFields{
 			Options:       opts,
 			componentName: cn,
+			index:         index,
 		},
 	}
 }
@@ -774,7 +778,7 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 		log.Infof("Initial manifest with merged values:\n%s\n", my)
 	}
 	// Add the k8s resources from IstioControlPlaneSpec.
-	my, err = c.Translator.OverlayK8sSettings(my, c.InstallSpec, c.componentName)
+	my, err = c.Translator.OverlayK8sSettings(my, c.InstallSpec, c.componentName, c.index)
 	if err != nil {
 		log.Errorf("Error in OverlayK8sSettings: %s", err)
 		return "", err
@@ -784,7 +788,11 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 		log.Infof("Manifest after k8s API settings:\n%s\n", my)
 	}
 	// Add the k8s resource overlays from IstioControlPlaneSpec.
-	pathToK8sOverlay := fmt.Sprintf("Components.%s.K8S.Overlays", c.componentName)
+	pathToK8sOverlay := fmt.Sprintf("Components.%s.", c.componentName)
+	if c.componentName == name.IngressComponentName || c.componentName == name.EgressComponentName {
+		pathToK8sOverlay += fmt.Sprintf("%d.", c.index)
+	}
+	pathToK8sOverlay += fmt.Sprintf("K8S.Overlays")
 	var overlays []*v1alpha1.K8SObjectOverlay
 	found, err := tpath.SetFromPath(c.InstallSpec, pathToK8sOverlay, &overlays)
 	if err != nil {

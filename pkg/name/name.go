@@ -48,8 +48,8 @@ const (
 	CoreDNSComponentName         ComponentName = "CoreDNS"
 
 	// Gateway components
-	IngressComponentName ComponentName = "IngressGateway"
-	EgressComponentName  ComponentName = "EgressGateway"
+	IngressComponentName ComponentName = "IngressGateways"
+	EgressComponentName  ComponentName = "EgressGateways"
 
 	// Operator components
 	IstioOperatorComponentName      ComponentName = "IstioOperator"
@@ -90,6 +90,13 @@ func IsCoreComponent(cn ComponentName) bool {
 // IsComponentEnabledInSpec reports whether the given component is enabled in the given spec.
 // IsComponentEnabledInSpec assumes that controlPlaneSpec has been validated.
 func IsComponentEnabledInSpec(componentName ComponentName, controlPlaneSpec *v1alpha1.IstioOperatorSpec) (bool, error) {
+	if componentName == IngressComponentName {
+		return len(controlPlaneSpec.Components.IngressGateways) != 0, nil
+	}
+	if componentName == EgressComponentName {
+		return len(controlPlaneSpec.Components.EgressGateways) != 0, nil
+	}
+
 	componentNodeI, found, err := tpath.GetFromStructPath(controlPlaneSpec, "Components."+string(componentName)+".Enabled")
 	if err != nil {
 		return false, fmt.Errorf("error in IsComponentEnabledInSpec GetFromStructPath componentEnabled for component=%s: %s",

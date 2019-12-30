@@ -51,15 +51,15 @@ func NewIstioControlPlane(installSpec *v1alpha1.IstioOperatorSpec, translator *t
 		o.Namespace = ns
 		out.components = append(out.components, component.NewComponent(c, &o))
 	}
-	for _, g := range installSpec.Components.IngressGateways {
+	for idx, g := range installSpec.Components.IngressGateways {
 		o := *opts
 		o.Namespace = g.Namespace
-		out.components = append(out.components, component.NewIngressComponent(g.Name, &o))
+		out.components = append(out.components, component.NewIngressComponent(g.Name, idx, &o))
 	}
-	for _, g := range installSpec.Components.EgressGateways {
+	for idx, g := range installSpec.Components.EgressGateways {
 		o := *opts
 		o.Namespace = g.Namespace
-		out.components = append(out.components, component.NewEgressComponent(g.Name, &o))
+		out.components = append(out.components, component.NewEgressComponent(g.Name, idx, &o))
 	}
 	for c := range installSpec.AddonComponents {
 		rn := ""

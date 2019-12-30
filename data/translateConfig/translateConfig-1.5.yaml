@@ -94,13 +94,13 @@ componentMaps:
     ContainerName:        "certmanager"
     HelmSubdir:           "security/certmanager"
     ToHelmValuesTreeRoot: "certmanager"
-  IngressGateway:
+  IngressGateways:
     ResourceType:         "Deployment"
     ResourceName:         "istio-ingressgateway"
     ContainerName:        "istio-proxy"
     HelmSubdir:           "gateways/istio-ingress"
     ToHelmValuesTreeRoot: "gateways.istio-ingressgateway"
-  EgressGateway:
+  EgressGateways:
     ResourceType:         "Deployment"
     ResourceName:         "istio-egressgateway"
     ContainerName:        "istio-proxy"

@@ -1,7 +1,13 @@
 apiVersion: install.istio.io/v1alpha2
 kind: IstioControlPlane
 spec:
+  hub: gcr.io/istio-testing
+  tag: latest
+  meshConfig:
+    rootNamespace: istio-system
   components:
+    base:
+      enabled: false
     pilot:
       enabled: false
     policy:
@@ -22,6 +28,8 @@ spec:
       enabled: false
     coreDNS:
       enabled: false
+    ingressGateways:
+    egressGateways:
 
   values:
     global:
