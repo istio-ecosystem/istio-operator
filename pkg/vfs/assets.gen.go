@@ -242,6 +242,7 @@
 // ../../data/translateConfig/translateConfig-1.4.yaml
 // ../../data/translateConfig/translateConfig-1.5.yaml
 // ../../data/versions.yaml
+// ../../data/versions.yaml.orig
 // DO NOT EDIT!
 
 package vfs
@@ -43704,6 +43705,8 @@ spec:
   # Global values passed through to helm global.yaml.
   values:
     global:
+      istiod:
+        enabled: true
       logging:
         level: "default:info"
       logAsJson: false
@@ -44030,7 +44033,7 @@ spec:
       enabled: true
       replicaCount: 1
       hub: docker.io/prom
-      tag: v2.12.0
+      tag: v2.15.0
       retention: 6h
       scrapeInterval: 15s
       contextPath: /prometheus
@@ -44052,7 +44055,7 @@ spec:
       replicaCount: 1
       image:
         repository: grafana/grafana
-        tag: 6.4.3
+        tag: 6.5.2
       persist: false
       storageClassName: ""
       accessMode: ReadWriteMany
@@ -45246,6 +45249,69 @@ func versionsYaml() (*asset, error) {
 	return a, nil
 }
 
+var _versionsYamlOrig = []byte(`- operatorVersion: 1.3.0
+  supportedIstioVersions: 1.3.0
+  recommendedIstioVersions: 1.3.0
+- operatorVersion: 1.3.1
+  supportedIstioVersions: ">=1.3.0,<=1.3.1"
+  recommendedIstioVersions: 1.3.1
+- operatorVersion: 1.3.2
+  supportedIstioVersions: ">=1.3.0,<=1.3.2"
+  recommendedIstioVersions: 1.3.2
+- operatorVersion: 1.3.3
+  supportedIstioVersions: ">=1.3.0,<=1.3.3"
+  recommendedIstioVersions: 1.3.3
+- operatorVersion: 1.3.4
+  supportedIstioVersions: ">=1.3.0,<=1.3.4"
+  recommendedIstioVersions: 1.3.4
+- operatorVersion: 1.3.5
+  supportedIstioVersions: ">=1.3.0,<=1.3.5"
+  recommendedIstioVersions: 1.3.5
+- operatorVersion: 1.3.6
+  supportedIstioVersions: ">=1.3.0,<=1.3.6"
+  recommendedIstioVersions: 1.3.6
+- operatorVersion: 1.3.7
+  operatorVersionRange: ">=1.3.7,<1.4.0"
+  supportedIstioVersions: ">=1.3.0,<1.4.0"
+  recommendedIstioVersions: 1.3.7
+- operatorVersion: 1.4.0
+  supportedIstioVersions: ">=1.3.3, <1.6"
+  recommendedIstioVersions: 1.4.0
+- operatorVersion: 1.4.1
+  supportedIstioVersions: ">=1.3.3, <1.6"
+  recommendedIstioVersions: 1.4.1
+- operatorVersion: 1.4.2
+  supportedIstioVersions: ">=1.3.3, <1.6"
+  recommendedIstioVersions: 1.4.2
+- operatorVersion: 1.4.3
+  operatorVersionRange: ">=1.4.3,<1.5.0"
+  supportedIstioVersions: ">=1.3.3, <1.6"
+  recommendedIstioVersions: 1.4.3
+- operatorVersion: 1.5.0
+  operatorVersionRange: ">=1.5.0,<1.6.0"
+<<<<<<< HEAD
+  supportedIstioVersions: ">=1.5.0, <1.6"
+=======
+  supportedIstioVersions: ">=1.4.3, <1.6"
+>>>>>>> de1fa9d44017bb6dbacdc8c53dcc6082ce7c8b16
+  recommendedIstioVersions: 1.5.0
+`)
+
+func versionsYamlOrigBytes() ([]byte, error) {
+	return _versionsYamlOrig, nil
+}
+
+func versionsYamlOrig() (*asset, error) {
+	bytes, err := versionsYamlOrigBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "versions.yaml.orig", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -45540,6 +45606,7 @@ var _bindata = map[string]func() (*asset, error){
 	"translateConfig/translateConfig-1.4.yaml": translateconfigTranslateconfig14Yaml,
 	"translateConfig/translateConfig-1.5.yaml": translateconfigTranslateconfig15Yaml,
 	"versions.yaml": versionsYaml,
+	"versions.yaml.orig": versionsYamlOrig,
 }
 
 // AssetDir returns the file names below a certain
@@ -45934,6 +46001,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 		"translateConfig-1.5.yaml": &bintree{translateconfigTranslateconfig15Yaml, map[string]*bintree{}},
 	}},
 	"versions.yaml": &bintree{versionsYaml, map[string]*bintree{}},
+	"versions.yaml.orig": &bintree{versionsYamlOrig, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory
