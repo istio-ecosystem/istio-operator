@@ -54,8 +54,8 @@ func FromString(val string) IntOrStringForPB {
 // IstioControlPlaneList contains a list of IstioControlPlane
 type IstioControlPlaneList struct {
 	v1.TypeMeta `json:",inline"`
-	v1.ListMeta `json:"metadata,omitempty"`
-	Items       []IstioControlPlane `json:"items"`
+	v1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata,proto3"`
+	Items       []IstioControlPlane `json:"items" protobuf:"bytes,2,rep,name=items,proto3"`
 }
 
 // define new type from protobuf.BoolValue to marshal/unmarshal jsonpb
