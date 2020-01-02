@@ -39526,7 +39526,6 @@ spec:
   values:
     global:
       disablePolicyChecks: false
-      controlPlaneSecurityEnabled: false
       proxy:
         accessLogFile: /dev/stdout
         resources:
