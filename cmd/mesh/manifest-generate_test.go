@@ -169,7 +169,7 @@ func TestMultiICPSFiles(t *testing.T) {
 		}
 
 		if got != want {
-			t.Errorf("stable_manifest: Manifest generation is not producing stable text output.")
+			t.Errorf("`manifest generate` got = %v, want %v", got, want)
 		}
 	})
 }
