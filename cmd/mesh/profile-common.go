@@ -32,7 +32,7 @@ import (
 )
 
 // getICPS creates an IstioControlPlaneSpec from the following sources, overlaid sequentially:
-// 1. Compiled in base, or optionally base from path pointed to in ICP stored at inFilename.
+// 1. Compiled in base, or optionally base from paths pointing to one or multiple ICP files.
 // 2. Profile overlay, if non-default overlay is selected. This also comes either from compiled in or path specified in ICP contained in inFilename.
 // 3. User overlay stored in inFilename.
 // 4. setOverlayYAML, which comes from --set flag passed to manifest command.

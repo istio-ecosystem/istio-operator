@@ -21,7 +21,7 @@ import (
 )
 
 type profileDumpArgs struct {
-	// inFilename is the path to the input IstioControlPlane CR.
+	// inFilename is an array of paths to the input IstioControlPlane CR files.
 	inFilename []string
 	// If set, display the translated Helm values rather than IstioControlPlaneSpec.
 	helmValues bool

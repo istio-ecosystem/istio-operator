@@ -26,7 +26,7 @@ import (
 )
 
 type manifestGenerateArgs struct {
-	// inFilename is the path to the input IstioControlPlane CR.
+	// inFilename is an array of paths to the input IstioControlPlane CR files.
 	inFilename []string
 	// outFilename is the path to the generated output directory.
 	outFilename string

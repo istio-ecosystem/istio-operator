@@ -200,9 +200,9 @@ func runTestGroup(t *testing.T, tests testGroup) {
 		t.Run(tt.desc, func(t *testing.T) {
 			inPath := filepath.Join(testDataDir, "input", tt.desc+".yaml")
 			outPath := filepath.Join(testDataDir, "output", tt.desc+".yaml")
-			filenames := []string{inPath}
-			if tt.noInput {
-				filenames = nil
+			var filenames []string
+			if !tt.noInput {
+				filenames = []string{inPath}
 			}
 			got, err := runManifestGenerate(filenames, tt.flags)
 			if err != nil {
@@ -250,7 +250,7 @@ func runTestGroup(t *testing.T, tests testGroup) {
 	}
 }
 
-// runManifestGenerate runs the manifest generate command. If path is set, passes the given path as a -f flag,
+// runManifestGenerate runs the manifest generate command. If filenames is set, passes the given filenames as -f flag,
 // flags is passed to the command verbatim. If you set both flags and path, make sure to not use -f in flags.
 func runManifestGenerate(filenames []string, flags string) (string, error) {
 	args := "manifest generate"

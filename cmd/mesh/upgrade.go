@@ -50,7 +50,7 @@ const (
 )
 
 type upgradeArgs struct {
-	// inFilename is the path to the input IstioControlPlane CR.
+	// inFilename is an array of paths to the input IstioControlPlane CR files.
 	inFilename []string
 	// versionsURI is a URI pointing to a YAML formatted versions mapping.
 	versionsURI string

@@ -25,7 +25,7 @@ import (
 )
 
 type manifestApplyArgs struct {
-	// inFilename is the path to the input IstioControlPlane CR.
+	// inFilename is an array of paths to the input IstioControlPlane CR files.
 	inFilename []string
 	// kubeConfigPath is the path to kube config file.
 	kubeConfigPath string
