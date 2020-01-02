@@ -137,7 +137,7 @@ func TestManifestGenerateOrdered(t *testing.T) {
 	// Since this is testing the special case of stable YAML output order, it
 	// does not use the established test group pattern
 	t.Run("stable_manifest", func(t *testing.T) {
-		inPath := filepath.Join(testDataDir, "input", "all_on.yaml")
+		inPath := filepath.Join(testDataDir, "input/all_on.yaml")
 		got1, err := runManifestGenerate([]string{inPath}, "")
 		if err != nil {
 			t.Fatal(err)
@@ -155,13 +155,13 @@ func TestManifestGenerateOrdered(t *testing.T) {
 
 func TestMultiICPSFiles(t *testing.T) {
 	t.Run("multi-ICPS files", func(t *testing.T) {
-		inPathBase := filepath.Join(testDataDir, "input", "all_off.yaml")
-		inPathOverride := filepath.Join(testDataDir, "input", "telemetry_override_only.yaml")
+		inPathBase := filepath.Join(testDataDir, "input/all_off.yaml")
+		inPathOverride := filepath.Join(testDataDir, "input/telemetry_override_only.yaml")
 		got, err := runManifestGenerate([]string{inPathBase, inPathOverride}, "")
 		if err != nil {
 			t.Fatal(err)
 		}
-		outPath := filepath.Join(testDataDir, "output", "telemetry_override_values.yaml")
+		outPath := filepath.Join(testDataDir, "output/telemetry_override_values.yaml")
 
 		want, err := readFile(outPath)
 		if err != nil {
