@@ -245,7 +245,17 @@ func (t *Translator) TranslateHelmValues(icp *v1alpha1.IstioOperatorSpec, compon
 		log.Infof("Values translated from IstioControlPlane API:\n%s", apiValsStr)
 	}
 
-	// Add global overlay from IstioControlPlaneSpec.Values.
+	// Add overlay for all ingress and egress gateways.
+	gatewayVals, err := gatewaysOverlay(icp)
+	if err != nil {
+		return "", err
+	}
+	apiVals, err = util.OverlayTrees(apiVals, gatewayVals)
+	if err != nil {
+		return "", err
+	}
+
+	// Add global overlay from IstioOperatorSpec.Values/UnvalidatedValues.
 	_, err = tpath.SetFromPath(icp, "Values", &globalVals)
 	if err != nil {
 		return "", err
@@ -272,6 +282,45 @@ func (t *Translator) TranslateHelmValues(icp *v1alpha1.IstioOperatorSpec, compon
 		return "", err
 	}
 	return string(mergedYAML), err
+}
+
+// gatewaysOverlay returns a merged values.yaml overlay for all gateways defined in icp.
+func gatewaysOverlay(icp *v1alpha1.IstioOperatorSpec) (map[string]interface{}, error) {
+	out := make(map[string]interface{})
+	// Add tree entries for each gateway.
+	for idx, g := range icp.Components.IngressGateways {
+		gatewayOutVals, err := gatewayOverlay(icp, "IngressGateways", idx, g)
+		if err != nil {
+			return nil, err
+		}
+		out, err = util.OverlayTrees(out, gatewayOutVals)
+		if err != nil {
+			return nil, err
+		}
+	}
+	for idx, g := range icp.Components.EgressGateways {
+		gatewayOutVals, err := gatewayOverlay(icp, "EgressGateways", idx, g)
+		if err != nil {
+			return nil, err
+		}
+		out, err = util.OverlayTrees(out, gatewayOutVals)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
+}
+
+func gatewayOverlay(icp *v1alpha1.IstioOperatorSpec, gwPathElementName string, idx int, gw *v1alpha1.GatewaySpec) (map[string]interface{}, error) {
+	gatewayInVals, gatewayOutVals := make(map[string]interface{}), make(map[string]interface{})
+	if _, err := tpath.SetFromPath(icp, fmt.Sprintf("Components.%s.%d.Values", gwPathElementName, idx), &gatewayInVals); err != nil {
+		return nil, err
+	}
+	// Translate to output values tree, which has tree structure gateways.<gateway name>.
+	if err := tpath.WriteNode(gatewayOutVals, util.PathFromString(fmt.Sprintf("gateways.%s", gw.Name)), gatewayInVals); err != nil {
+		return nil, err
+	}
+	return gatewayOutVals, nil
 }
 
 // ComponentMap returns a ComponentMaps struct ptr for the given component name if one exists.

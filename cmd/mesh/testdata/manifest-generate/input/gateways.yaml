@@ -4,12 +4,14 @@ spec:
   profile: empty
   components:
     ingressGateways:
-      - namespace: istio-ingress-1
+      - namespace: istio-ingress-1-ns
+        name: istio-ingress-1
+        values:
+          type: NodePort
         k8s:
           resources:
             requests:
               cpu: 111m
               memory: 222Mi
-      - namespace: istio-ingress-2
-        values:
-          type: NodePort
+      - namespace: istio-ingress-2-ns
+        name: istio-ingress-2
