@@ -24,6 +24,8 @@ import (
 	"sync"
 	"time" // For kubeclient GCP auth
 
+	"istio.io/operator/pkg/helm"
+
 	"github.com/ghodss/yaml"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -106,6 +108,9 @@ var (
 			name.CertManagerComponentName,
 			name.SidecarInjectorComponentName,
 			name.CNIComponentName,
+			name.IngressComponentName,
+			name.EgressComponentName,
+			name.AddonComponentName,
 		},
 	}
 
@@ -161,11 +166,8 @@ func RenderToDir(manifests name.ManifestMap, outputDir string, dryRun bool) erro
 func renderRecursive(manifests name.ManifestMap, installTree componentTree, outputDir string, dryRun bool) error {
 	for k, v := range installTree {
 		componentName := string(k)
-		ym := manifests[k]
-		if ym == "" {
-			logAndPrint("Manifest for %s not found, skip.", componentName)
-			continue
-		}
+		// In cases (like gateways) where multiple instances can exist, concatenate the manifests and apply as one.
+		ym := strings.Join(manifests[k], helm.YAMLSeparator)
 		logAndPrint("Rendering: %s", componentName)
 		dirName := filepath.Join(outputDir, componentName)
 		if !dryRun {
@@ -221,7 +223,7 @@ func applyRecursive(manifests name.ManifestMap, version pkgversion.Version, opts
 				<-s
 				log.Infof("Prerequisite for %s has completed, proceeding with install.", c)
 			}
-			applyOut, appliedObjects := ApplyManifest(c, m, version.String(), *opts)
+			applyOut, appliedObjects := ApplyManifest(c, strings.Join(m, helm.YAMLSeparator), version.String(), *opts)
 			mu.Lock()
 			out[c] = applyOut
 			allAppliedObjects = append(allAppliedObjects, appliedObjects...)

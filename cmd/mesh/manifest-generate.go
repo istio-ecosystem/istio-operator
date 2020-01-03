@@ -18,6 +18,9 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
+
+	"istio.io/operator/pkg/helm"
 
 	"github.com/spf13/cobra"
 
@@ -99,7 +102,7 @@ func orderedManifests(mm name.ManifestMap) []string {
 	}
 	sort.Strings(keys)
 	for _, k := range keys {
-		out = append(out, mm[name.ComponentName(k)])
+		out = append(out, strings.Join(mm[name.ComponentName(k)], helm.YAMLSeparator))
 	}
 	return out
 }

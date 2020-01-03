@@ -17,6 +17,7 @@ package helmreconciler
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -265,7 +266,7 @@ func toChartManifestsMap(m name.ManifestMap) ChartManifestsMap {
 	for k, v := range m {
 		out[string(k)] = []manifest.Manifest{{
 			Name:    string(k),
-			Content: v,
+			Content: strings.Join(v, helm.YAMLSeparator),
 		}}
 	}
 	return out

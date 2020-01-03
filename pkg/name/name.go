@@ -51,6 +51,9 @@ const (
 	IngressComponentName ComponentName = "IngressGateways"
 	EgressComponentName  ComponentName = "EgressGateways"
 
+	// Addon components
+	AddonComponentName ComponentName = "Addon"
+
 	// Operator components
 	IstioOperatorComponentName      ComponentName = "IstioOperator"
 	IstioOperatorCustomResourceName ComponentName = "IstioOperatorCustomResource"
@@ -80,11 +83,16 @@ func init() {
 }
 
 // ManifestMap is a map of ComponentName to its manifest string.
-type ManifestMap map[ComponentName]string
+type ManifestMap map[ComponentName][]string
 
 // IsCoreComponent reports whether cn is a core component.
-func IsCoreComponent(cn ComponentName) bool {
+func (cn ComponentName) IsCoreComponent() bool {
 	return allComponentNamesMap[cn]
+}
+
+// IsCoreComponent reports whether cn is a core component.
+func (cn ComponentName) IsGateway() bool {
+	return cn == IngressComponentName || cn == EgressComponentName
 }
 
 // IsComponentEnabledInSpec reports whether the given component is enabled in the given spec.

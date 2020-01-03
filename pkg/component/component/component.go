@@ -701,7 +701,7 @@ func NewAddonComponent(componentName, resourceName string, opts *Options) *Addon
 	return &AddonComponent{
 		&CommonComponentFields{
 			Options:       opts,
-			componentName: name.ComponentName(componentName),
+			componentName: name.AddonComponentName,
 			resourceName:  resourceName,
 		},
 	}
@@ -751,7 +751,7 @@ func runComponent(c *CommonComponentFields) error {
 
 // renderManifest renders the manifest for the component defined by c and returns the resulting string.
 func renderManifest(c *CommonComponentFields) (string, error) {
-	if name.IsCoreComponent(c.componentName) {
+	if c.componentName.IsCoreComponent() {
 		e, err := c.Translator.IsComponentEnabled(c.componentName, c.InstallSpec)
 		if err != nil {
 			return "", err
