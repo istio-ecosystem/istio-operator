@@ -90,9 +90,14 @@ func (cn ComponentName) IsCoreComponent() bool {
 	return allComponentNamesMap[cn]
 }
 
-// IsCoreComponent reports whether cn is a core component.
+// IsGateway reports whether cn is a gateway component.
 func (cn ComponentName) IsGateway() bool {
 	return cn == IngressComponentName || cn == EgressComponentName
+}
+
+// IsAddon reports whether cn is an addon component.
+func (cn ComponentName) IsAddon() bool {
+	return cn == AddonComponentName
 }
 
 // IsComponentEnabledInSpec reports whether the given component is enabled in the given spec.

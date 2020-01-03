@@ -72,6 +72,8 @@ type IstioComponent interface {
 type CommonComponentFields struct {
 	*Options
 	componentName name.ComponentName
+	// addonName is the name of the addon component.
+	addonName string
 	// resourceName is the name of all resources for this component.
 	resourceName string
 	namespace    string
@@ -697,12 +699,13 @@ type AddonComponent struct {
 }
 
 // NewAddonComponent creates a new IngressComponent and returns a pointer to it.
-func NewAddonComponent(componentName, resourceName string, opts *Options) *AddonComponent {
+func NewAddonComponent(addonName, resourceName string, opts *Options) *AddonComponent {
 	return &AddonComponent{
 		&CommonComponentFields{
 			Options:       opts,
 			componentName: name.AddonComponentName,
 			resourceName:  resourceName,
+			addonName:     addonName,
 		},
 	}
 }
@@ -821,6 +824,10 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 func createHelmRenderer(c *CommonComponentFields) (helm.TemplateRenderer, error) {
 	icp := c.InstallSpec
 	cns := string(c.componentName)
+	if c.componentName.IsAddon() {
+		// For addons, distinguish the chart path using the addon name.
+		cns = c.addonName
+	}
 	helmSubdir := addonsChartDirName + "/" + cns
 	if cm := c.Translator.ComponentMap(cns); cm != nil {
 		helmSubdir = cm.HelmSubdir
