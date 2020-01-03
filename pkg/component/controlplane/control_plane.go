@@ -51,26 +51,44 @@ func NewIstioControlPlane(installSpec *v1alpha1.IstioOperatorSpec, translator *t
 		o.Namespace = ns
 		out.components = append(out.components, component.NewComponent(c, &o))
 	}
-	for idx, g := range installSpec.Components.IngressGateways {
+	for idx, c := range installSpec.Components.IngressGateways {
+		if c.Enabled == nil || !c.Enabled.Value {
+			continue
+		}
 		o := *opts
-		o.Namespace = g.Namespace
-		out.components = append(out.components, component.NewIngressComponent(g.Name, idx, &o))
+		o.Namespace = defaultIfEmpty(c.Namespace, installSpec.MeshConfig.RootNamespace)
+		out.components = append(out.components, component.NewIngressComponent(c.Name, idx, &o))
 	}
-	for idx, g := range installSpec.Components.EgressGateways {
+	for idx, c := range installSpec.Components.EgressGateways {
+		if c.Enabled == nil || !c.Enabled.Value {
+			continue
+		}
 		o := *opts
-		o.Namespace = g.Namespace
-		out.components = append(out.components, component.NewEgressComponent(g.Name, idx, &o))
+		o.Namespace = defaultIfEmpty(c.Namespace, installSpec.MeshConfig.RootNamespace)
+		out.components = append(out.components, component.NewEgressComponent(c.Name, idx, &o))
 	}
-	for c := range installSpec.AddonComponents {
+	for cn, c := range installSpec.AddonComponents {
+		if c.Enabled == nil || !c.Enabled.Value {
+			continue
+		}
 		rn := ""
 		// For well-known addon components like Prometheus, the resource names are included
 		// in the translations.
-		if cm := translator.ComponentMap(c); cm != nil {
+		if cm := translator.ComponentMap(cn); cm != nil {
 			rn = cm.ResourceName
 		}
-		out.components = append(out.components, component.NewAddonComponent(c, rn, opts))
+		o := *opts
+		o.Namespace = defaultIfEmpty(c.Namespace, installSpec.MeshConfig.RootNamespace)
+		out.components = append(out.components, component.NewAddonComponent(cn, rn, &o))
 	}
 	return out, nil
+}
+
+func defaultIfEmpty(val, dflt string) string {
+	if val == "" {
+		return dflt
+	}
+	return val
 }
 
 // Run starts the Istio control plane.

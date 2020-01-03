@@ -26,11 +26,13 @@ spec:
       enabled: false
     ingressGateways:
       - namespace: istio-system
-        name: ingress-gateway
+        name: istio-ingressgateway
+        enabled: true
     egressGateways:
       - namespace: istio-system
-        name: egress-gateway
+        name: istio-egressgateway
+        enabled: true
 
   addonComponents:
     prometheus:
-      enabled: false
+      enabled: true

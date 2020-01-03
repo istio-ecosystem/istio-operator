@@ -1,31 +1,9 @@
-# Base component is disabled.
-
-# CertManager component is disabled.
-
-# Citadel component is disabled.
-
-# Cni component is disabled.
-
-# CoreDNS component is disabled.
-
-# Galley component is disabled.
-
-# NodeAgent component is disabled.
-
-# Pilot component is disabled.
-
-# Policy component is disabled.
-
-# SidecarInjector component is disabled.
-
-# Telemetry component is disabled.
-
-# Resources for prometheus component
+# Resources for Addon component
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: prometheus-
+  name: prometheus-istio-system
   labels:
     app: prometheus
     release: istio
@@ -50,18 +28,18 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: prometheus-
+  name: prometheus-istio-system
   labels:
     app: prometheus
     release: istio
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: prometheus-
+  name: prometheus-istio-system
 subjects:
 - kind: ServiceAccount
   name: prometheus
-  namespace:
+  namespace: istio-system
 ---
 
 
@@ -69,7 +47,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus
-  namespace: 
+  namespace: istio-system
   labels:
     app: prometheus
     release: istio
@@ -86,7 +64,7 @@ data:
       - role: endpoints
         namespaces:
           names:
-          - 
+          - istio-system
       relabel_configs:
       - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
         action: keep
@@ -183,7 +161,7 @@ data:
       - role: endpoints
         namespaces:
           names:
-          - 
+          - istio-system
 
       relabel_configs:
       - source_labels: [__meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
@@ -360,7 +338,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
-  namespace: 
+  namespace: istio-system
   labels:
     app: prometheus
     release: istio
@@ -453,7 +431,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prometheus
-  namespace: 
+  namespace: istio-system
   annotations:
     prometheus.io/scrape: 'true'
   labels:
@@ -473,9 +451,31 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: prometheus
-  namespace: 
+  namespace: istio-system
   labels:
     app: prometheus
     release: istio
 ---
+
+# Base component is disabled.
+
+# CertManager component is disabled.
+
+# Citadel component is disabled.
+
+# Cni component is disabled.
+
+# CoreDNS component is disabled.
+
+# Galley component is disabled.
+
+# NodeAgent component is disabled.
+
+# Pilot component is disabled.
+
+# Policy component is disabled.
+
+# SidecarInjector component is disabled.
+
+# Telemetry component is disabled.
 
