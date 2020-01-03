@@ -22,8 +22,6 @@ import (
 	goversion "github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
 
-	"istio.io/operator/pkg/util"
-
 	"istio.io/operator/pkg/compare"
 	"istio.io/operator/pkg/hooks"
 	"istio.io/operator/pkg/manifest"
@@ -158,7 +156,7 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 	// Read the overridden ICPS from args.inFilename
 	overrideICPSYaml := ""
 	if args.inFilename != nil {
-		overrideICPSYaml, err = util.ReadLayeredYAMLs(args.inFilename)
+		overrideICPSYaml, err = ReadLayeredYAMLs(args.inFilename)
 		if err != nil {
 			return fmt.Errorf("failed to read override ICPS from file: %v, error: %v", args.inFilename, err)
 		}

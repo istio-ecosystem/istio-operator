@@ -50,7 +50,7 @@ func genICPS(inFilename []string, profile, setOverlayYAML, ver string, force boo
 		return "", nil, fmt.Errorf("could not Unmarshal overlay Set%s: %s", setOverlayYAML, err)
 	}
 	if inFilename != nil {
-		b, err := util.ReadLayeredYAMLs(inFilename)
+		b, err := ReadLayeredYAMLs(inFilename)
 		if err != nil {
 			return "", nil, fmt.Errorf("could not read values from file %s: %s", inFilename, err)
 		}
