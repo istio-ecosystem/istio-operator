@@ -1,4 +1,0 @@
-spec:
-  profile: sds
-  policy:
-    enabled: false

@@ -43,17 +43,17 @@ func TestReadLayeredYAMLs(t *testing.T) {
 	}{
 		{
 			name:     "single",
-			overlays: []string{"all_off"},
+			overlays: []string{"first"},
 			wantErr:  false,
 		},
 		{
 			name:     "double",
-			overlays: []string{"all_off", "all_on"},
+			overlays: []string{"first", "second"},
 			wantErr:  false,
 		},
 		{
 			name:     "triple",
-			overlays: []string{"all_off", "all_on", "sds_policy_off"},
+			overlays: []string{"first", "second", "third"},
 			wantErr:  false,
 		},
 	}

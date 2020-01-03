@@ -1,19 +1,7 @@
-apiVersion: install.istio.io/v1alpha2
-kind: IstioControlPlane
+kind: kkk
 spec:
-  defaultNamespace: istio-system
-  profile: default
-  trafficManagement:
+  ka: va
+  kb:
     enabled: true
-  policy:
-    enabled: true
-  telemetry:
-    enabled: true
-  security:
-    enabled: true
-  configManagement:
-    enabled: true
-  autoInjection:
-    enabled: true
-  gateways:
-    enabled: true
+  kc:
+    kca: "vca"
