@@ -55,6 +55,10 @@ func TestManifestGenerateFlags(t *testing.T) {
 			diffIgnore: "ConfigMap:*:istio",
 		},
 		{
+			desc:       "gateways_override_default",
+			diffIgnore: "ConfigMap:*:istio",
+		},
+		{
 			desc:       "flag_set_values",
 			diffIgnore: "ConfigMap:*:istio",
 			flags:      "-s values.global.proxy.image=myproxy",
