@@ -55,6 +55,7 @@ var (
 		string(name.CitadelComponentName):         healthyVersionStatus,
 		string(name.GalleyComponentName):          healthyVersionStatus,
 		string(name.IngressComponentName):         healthyVersionStatus,
+		string(name.AddonComponentName):           healthyVersionStatus,
 	}
 	demoStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
 		string(name.IstioBaseComponentName):       healthyVersionStatus,
@@ -66,6 +67,7 @@ var (
 		string(name.GalleyComponentName):          healthyVersionStatus,
 		string(name.IngressComponentName):         healthyVersionStatus,
 		string(name.EgressComponentName):          healthyVersionStatus,
+		string(name.AddonComponentName):           healthyVersionStatus,
 	}
 	sdsStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
 		string(name.IstioBaseComponentName):       healthyVersionStatus,
@@ -77,6 +79,7 @@ var (
 		string(name.GalleyComponentName):          healthyVersionStatus,
 		string(name.NodeAgentComponentName):       healthyVersionStatus,
 		string(name.IngressComponentName):         healthyVersionStatus,
+		string(name.AddonComponentName):           healthyVersionStatus,
 	}
 )
 
