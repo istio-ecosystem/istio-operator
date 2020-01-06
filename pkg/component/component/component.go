@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /*
-Package component defines an in-memory representation of IstioControlPlane.<Feature>.<Component>. It provides functions
+Package component defines an in-memory representation of IstioOperator.<Feature>.<Component>. It provides functions
 for manipulating the component and rendering a manifest from it.
 See ../README.md for an architecture overview.
 */
@@ -46,7 +46,7 @@ const (
 
 // Options defines options for a component.
 type Options struct {
-	// installSpec is the global IstioControlPlaneSpec.
+	// installSpec is the global IstioOperatorSpec.
 	InstallSpec *v1alpha1.IstioOperatorSpec
 	// translator is the translator for this component.
 	Translator *translate.Translator
@@ -733,7 +733,7 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 	if devDbg {
 		log.Infof("Initial manifest with merged values:\n%s\n", my)
 	}
-	// Add the k8s resources from IstioControlPlaneSpec.
+	// Add the k8s resources from IstioOperatorSpec.
 	my, err = c.Translator.OverlayK8sSettings(my, c.InstallSpec, c.componentName, c.index)
 	if err != nil {
 		log.Errorf("Error in OverlayK8sSettings: %s", err)
@@ -743,7 +743,7 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 	if devDbg {
 		log.Infof("Manifest after k8s API settings:\n%s\n", my)
 	}
-	// Add the k8s resource overlays from IstioControlPlaneSpec.
+	// Add the k8s resource overlays from IstioOperatorSpec.
 	pathToK8sOverlay := fmt.Sprintf("Components.%s.", c.componentName)
 	if c.componentName == name.IngressComponentName || c.componentName == name.EgressComponentName {
 		pathToK8sOverlay += fmt.Sprintf("%d.", c.index)

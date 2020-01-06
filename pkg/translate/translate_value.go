@@ -33,7 +33,7 @@ type ReverseTranslator struct {
 	// APIMapping is Values.yaml path to API path mapping using longest prefix match. If the path is a non-leaf node,
 	// the output path is the matching portion of the path, plus any remaining output path.
 	APIMapping map[string]*Translation
-	// KubernetesPatternMapping defines mapping patterns from k8s resource paths to IstioControlPlane API paths.
+	// KubernetesPatternMapping defines mapping patterns from k8s resource paths to IstioOperator API paths.
 	KubernetesPatternMapping map[string]string
 	// KubernetesMapping defines actual k8s mappings generated from KubernetesPatternMapping before each translation.
 	KubernetesMapping map[string]*Translation
@@ -156,7 +156,7 @@ func NewReverseTranslator(minorVersion version.MinorVersion) (*ReverseTranslator
 	return t, nil
 }
 
-// TranslateFromValueToSpec translates from values.yaml value to IstioControlPlaneSpec.
+// TranslateFromValueToSpec translates from values.yaml value to IstioOperatorSpec.
 func (t *ReverseTranslator) TranslateFromValueToSpec(values []byte) (controlPlaneSpec *v1alpha1.IstioOperatorSpec, err error) {
 
 	var yamlTree = make(map[string]interface{})

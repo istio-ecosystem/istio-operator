@@ -44,7 +44,7 @@ type operatorInitArgs struct {
 	operatorNamespace string
 	// istioNamespace is the namespace Istio is installed into.
 	istioNamespace string
-	// inFilename is the path to the input IstioControlPlane CR.
+	// inFilename is the path to the input IstioOperator CR.
 	inFilename string
 
 	// kubeConfigPath is the path to kube config file.

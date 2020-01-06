@@ -134,16 +134,16 @@ func init() {
 
 }
 
-// ParseK8SYAMLToIstioControlPlaneSpec parses a IstioControlPlane CustomResource YAML string and unmarshals in into
-// an IstioControlPlaneSpec object. It returns the object and an API group/version with it.
-func ParseK8SYAMLToIstioControlPlaneSpec(yml string) (*v1alpha1.IstioOperatorSpec, *schema.GroupVersionKind, error) {
+// ParseK8SYAMLToIstioOperatorSpec parses a IstioOperator CustomResource YAML string and unmarshals in into
+// an IstioOperatorSpec object. It returns the object and an API group/version with it.
+func ParseK8SYAMLToIstioOperatorSpec(yml string) (*v1alpha1.IstioOperatorSpec, *schema.GroupVersionKind, error) {
 	o, err := object.ParseYAMLToK8sObject([]byte(yml))
 	if err != nil {
 		return nil, nil, err
 	}
 	spec, ok := o.UnstructuredObject().Object["spec"]
 	if !ok {
-		return nil, nil, fmt.Errorf("spec is missing from IstioControlPlane YAML")
+		return nil, nil, fmt.Errorf("spec is missing from IstioOperator YAML")
 	}
 	y, err := yaml.Marshal(spec)
 	if err != nil {

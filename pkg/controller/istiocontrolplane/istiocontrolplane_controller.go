@@ -60,7 +60,7 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	factory := &helmreconciler.Factory{CustomizerFactory: &IstioRenderingCustomizerFactory{}}
-	return &ReconcileIstioControlPlane{client: mgr.GetClient(), scheme: mgr.GetScheme(), factory: factory}
+	return &ReconcileIstioOperator{client: mgr.GetClient(), scheme: mgr.GetScheme(), factory: factory}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -86,10 +86,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileIstioControlPlane{}
+var _ reconcile.Reconciler = &ReconcileIstioOperator{}
 
-// ReconcileIstioControlPlane reconciles a IstioOperator object
-type ReconcileIstioControlPlane struct {
+// ReconcileIstioOperator reconciles a IstioOperator object
+type ReconcileIstioOperator struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
 	client  client.Client
@@ -102,7 +102,7 @@ type ReconcileIstioControlPlane struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileIstioControlPlane) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileIstioOperator) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	log.Info("Reconciling IstioOperator")
 
 	ns := request.Namespace
@@ -223,7 +223,7 @@ var ownedResourcePredicates = predicate.Funcs{
 	},
 }
 
-func (r *ReconcileIstioControlPlane) getOrCreateReconciler(icp *iop.IstioOperator) (*helmreconciler.HelmReconciler, error) {
+func (r *ReconcileIstioOperator) getOrCreateReconciler(icp *iop.IstioOperator) (*helmreconciler.HelmReconciler, error) {
 	key := reconcilersMapKey(icp)
 	var err error
 	var reconciler *helmreconciler.HelmReconciler

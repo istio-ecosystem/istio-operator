@@ -337,7 +337,7 @@ trafficManagement:
 				ms := jsonpb.Marshaler{}
 				gotString, err := ms.MarshalToString(gotSpec)
 				if err != nil {
-					t.Errorf("error when marshal translated IstioControlPlaneSpec: %s", err)
+					t.Errorf("error when marshal translated IstioOperatorSpec: %s", err)
 				}
 				cpYaml, _ := yaml.JSONToYAML([]byte(gotString))
 				if want := tt.want; !util.IsYAMLEqual(gotString, want) {

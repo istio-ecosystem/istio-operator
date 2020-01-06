@@ -32,7 +32,7 @@ import (
 	"istio.io/pkg/version"
 )
 
-// getICPS creates an IstioControlPlaneSpec from the following sources, overlaid sequentially:
+// getICPS creates an IstioOperatorSpec from the following sources, overlaid sequentially:
 // 1. Compiled in base, or optionally base from path pointed to in ICP stored at inFilename.
 // 2. Profile overlay, if non-default overlay is selected. This also comes either from compiled in or path specified in ICP contained in inFilename.
 // 3. User overlay stored in inFilename.
@@ -77,7 +77,7 @@ func genICPS(inFilename, profile, setOverlayYAML, ver string, force bool, l *Log
 		}
 	}
 
-	// This contains the IstioControlPlane CR.
+	// This contains the IstioOperator CR.
 	baseCRYAML, err := helm.ReadProfileYAML(profile)
 	if err != nil {
 		return "", nil, fmt.Errorf("could not read the profile values for %s: %s", profile, err)
@@ -172,11 +172,11 @@ func unmarshalAndValidateICP(crYAML string, force bool) (*v1alpha1.IstioOperator
 	if crYAML == "" {
 		return &v1alpha1.IstioOperatorSpec{}, "", nil
 	}
-	icps, _, err := manifest.ParseK8SYAMLToIstioControlPlaneSpec(crYAML)
+	icps, _, err := manifest.ParseK8SYAMLToIstioOperatorSpec(crYAML)
 	if err != nil {
 		return nil, "", fmt.Errorf("could not unmarshal the overlay file: %s\n\nOriginal YAML:\n%s", err, crYAML)
 	}
-	if errs := validate.CheckIstioControlPlaneSpec(icps, false); len(errs) != 0 {
+	if errs := validate.CheckIstioOperatorSpec(icps, false); len(errs) != 0 {
 		if !force {
 			return nil, "", fmt.Errorf("input file failed validation with the following errors: %s\n\nOriginal YAML:\n%s", errs, crYAML)
 		}
@@ -193,7 +193,7 @@ func unmarshalAndValidateICPS(icpsYAML string, force bool, l *Logger) (*v1alpha1
 	if err := util.UnmarshalWithJSONPB(icpsYAML, icps); err != nil {
 		return nil, fmt.Errorf("could not unmarshal the merged YAML: %s\n\nYAML:\n%s", err, icpsYAML)
 	}
-	if errs := validate.CheckIstioControlPlaneSpec(icps, true); len(errs) != 0 {
+	if errs := validate.CheckIstioOperatorSpec(icps, true); len(errs) != 0 {
 		if !force {
 			l.logAndError("Run the command with the --force flag if you want to ignore the validation error and proceed.")
 			return nil, fmt.Errorf(errs.Error())

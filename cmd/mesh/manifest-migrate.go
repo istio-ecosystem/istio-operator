@@ -41,14 +41,14 @@ type manifestMigrateArgs struct {
 
 func addManifestMigrateFlags(cmd *cobra.Command, args *manifestMigrateArgs) {
 	cmd.PersistentFlags().StringVarP(&args.namespace, "namespace", "n", defaultNamespace,
-		" Default namespace for output IstioControlPlane CustomResource")
+		" Default namespace for output IstioOperator CustomResource")
 }
 
 func manifestMigrateCmd(rootArgs *rootArgs, mmArgs *manifestMigrateArgs) *cobra.Command {
 	return &cobra.Command{
 		Use:   "migrate [<filepath>]",
-		Short: "Migrates a file containing Helm values to IstioControlPlane format",
-		Long:  "The migrate subcommand migrates a configuration from Helm values format to IstioControlPlane format.",
+		Short: "Migrates a file containing Helm values to IstioOperator format",
+		Long:  "The migrate subcommand migrates a configuration from Helm values format to IstioOperator format.",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 1 {
 				return fmt.Errorf("migrate accepts optional single filepath")
@@ -96,12 +96,12 @@ func translateFunc(values []byte, l *Logger) error {
 		return fmt.Errorf("error translating values.yaml: %s", err)
 	}
 
-	isCP := &iopv1alpha1.IstioOperator{Spec: translatedICPS, Kind: "IstioControlPlane", ApiVersion: "install.istio.io/v1alpha2"}
+	isCP := &iopv1alpha1.IstioOperator{Spec: translatedICPS, Kind: "IstioOperator", ApiVersion: "install.istio.io/v1alpha2"}
 
 	ms := jsonpb.Marshaler{}
 	gotString, err := ms.MarshalToString(isCP)
 	if err != nil {
-		return fmt.Errorf("error marshaling translated IstioControlPlane: %s", err)
+		return fmt.Errorf("error marshaling translated IstioOperator: %s", err)
 	}
 
 	isCPYaml, err := yaml.JSONToYAML([]byte(gotString))

@@ -61,7 +61,7 @@ type Translator struct {
 	// match. If the path is a non-leaf node, the output path is the matching portion of the path, plus any remaining
 	// output path.
 	APIMapping map[string]*Translation `yaml:"apiMapping"`
-	// KubernetesMapping defines mappings from an IstioControlPlane API paths to k8s resource paths.
+	// KubernetesMapping defines mappings from an IstioOperator API paths to k8s resource paths.
 	KubernetesMapping map[string]*Translation `yaml:"kubernetesMapping"`
 	// GlobalNamespaces maps feature namespaces to Helm global namespace definitions.
 	GlobalNamespaces map[name.ComponentName]string `yaml:"globalNamespaces"`
@@ -134,13 +134,13 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha1.IstioOperatorS
 			return "", err
 		}
 		inPath = strings.Replace(inPath, "gressGateways.", "gressGateways."+fmt.Sprint(index)+".", 1)
-		log.Debugf("Checking for path %s in IstioControlPlaneSpec", inPath)
+		log.Debugf("Checking for path %s in IstioOperatorSpec", inPath)
 		m, found, err := tpath.GetFromStructPath(icp, inPath)
 		if err != nil {
 			return "", err
 		}
 		if !found {
-			log.Debugf("path %s not found in IstioControlPlaneSpec, skip mapping.", inPath)
+			log.Debugf("path %s not found in IstioOperatorSpec, skip mapping.", inPath)
 			continue
 		}
 		if mstr, ok := m.(string); ok && mstr == "" {
@@ -157,7 +157,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha1.IstioOperatorS
 		if err != nil {
 			return "", err
 		}
-		log.Debugf("path has value in IstioControlPlaneSpec, mapping to output path %s", outPath)
+		log.Debugf("path has value in IstioOperatorSpec, mapping to output path %s", outPath)
 		path := util.PathFromString(outPath)
 		pe := path[0]
 		// Output path must start with [kind:name], which is used to map to the object to overlay.
@@ -185,7 +185,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha1.IstioOperatorS
 	return objects.YAMLManifest()
 }
 
-// ProtoToValues traverses the supplied IstioControlPlaneSpec and returns a values.yaml translation from it.
+// ProtoToValues traverses the supplied IstioOperatorSpec and returns a values.yaml translation from it.
 func (t *Translator) ProtoToValues(ii *v1alpha1.IstioOperatorSpec) (string, error) {
 	root := make(map[string]interface{})
 
@@ -231,7 +231,7 @@ func (t *Translator) ValuesOverlaysToHelmValues(in map[string]interface{}, cname
 func (t *Translator) TranslateHelmValues(icp *v1alpha1.IstioOperatorSpec, componentName name.ComponentName) (string, error) {
 	globalVals, globalUnvalidatedVals, apiVals := make(map[string]interface{}), make(map[string]interface{}), make(map[string]interface{})
 
-	// First, translate the IstioControlPlane API to helm Values.
+	// First, translate the IstioOperator API to helm Values.
 	apiValsStr, err := t.ProtoToValues(icp)
 	if err != nil {
 		return "", err
@@ -242,7 +242,7 @@ func (t *Translator) TranslateHelmValues(icp *v1alpha1.IstioOperatorSpec, compon
 	}
 
 	if devDbg {
-		log.Infof("Values translated from IstioControlPlane API:\n%s", apiValsStr)
+		log.Infof("Values translated from IstioOperator API:\n%s", apiValsStr)
 	}
 
 	// Add global overlay from IstioOperatorSpec.Values/UnvalidatedValues.
@@ -255,8 +255,8 @@ func (t *Translator) TranslateHelmValues(icp *v1alpha1.IstioOperatorSpec, compon
 		return "", err
 	}
 	if devDbg {
-		log.Infof("Values from IstioControlPlaneSpec.Values:\n%s", util.ToYAML(globalVals))
-		log.Infof("Values from IstioControlPlaneSpec.UnvalidatedValues:\n%s", util.ToYAML(globalUnvalidatedVals))
+		log.Infof("Values from IstioOperatorSpec.Values:\n%s", util.ToYAML(globalVals))
+		log.Infof("Values from IstioOperatorSpec.UnvalidatedValues:\n%s", util.ToYAML(globalUnvalidatedVals))
 	}
 	mergedVals, err := util.OverlayTrees(apiVals, globalVals)
 	if err != nil {

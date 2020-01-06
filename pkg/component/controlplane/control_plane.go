@@ -24,16 +24,16 @@ import (
 	"istio.io/operator/pkg/util"
 )
 
-// IstioControlPlane is an installation of an Istio control plane.
-type IstioControlPlane struct {
+// IstioOperator is an installation of an Istio control plane.
+type IstioOperator struct {
 	// components is a slice of components that are part of the feature.
 	components []component.IstioComponent
 	started    bool
 }
 
-// NewIstioControlPlane creates a new IstioControlPlane and returns a pointer to it.
-func NewIstioControlPlane(installSpec *v1alpha1.IstioOperatorSpec, translator *translate.Translator) (*IstioControlPlane, error) {
-	out := &IstioControlPlane{}
+// NewIstioOperator creates a new IstioOperator and returns a pointer to it.
+func NewIstioOperator(installSpec *v1alpha1.IstioOperatorSpec, translator *translate.Translator) (*IstioOperator, error) {
+	out := &IstioOperator{}
 	opts := &component.Options{
 		InstallSpec: installSpec,
 		Translator:  translator,
@@ -88,7 +88,7 @@ func defaultIfEmpty(val, dflt string) string {
 }
 
 // Run starts the Istio control plane.
-func (i *IstioControlPlane) Run() error {
+func (i *IstioOperator) Run() error {
 	for _, c := range i.components {
 		if err := c.Run(); err != nil {
 			return err
@@ -99,7 +99,7 @@ func (i *IstioControlPlane) Run() error {
 }
 
 // RenderManifest returns a manifest rendered against
-func (i *IstioControlPlane) RenderManifest() (manifests name.ManifestMap, errsOut util.Errors) {
+func (i *IstioOperator) RenderManifest() (manifests name.ManifestMap, errsOut util.Errors) {
 	if !i.started {
 		return nil, util.NewErrs(fmt.Errorf("istioControlPlane must be Run before calling RenderManifest"))
 	}

@@ -34,7 +34,7 @@ var (
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
 )
 
-// Register the IstioControlPlane and IstioControlPlaneList API kind
+// Register the IstioOperator and IstioOperatorList API kind
 func init() {
 	SchemeBuilder.Register(&v1alpha1.IstioOperator{}, &v1alpha1.IstioOperatorList{})
 }

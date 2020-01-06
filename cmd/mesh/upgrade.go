@@ -50,7 +50,7 @@ const (
 )
 
 type upgradeArgs struct {
-	// inFilename is the path to the input IstioControlPlane CR.
+	// inFilename is the path to the input IstioOperator CR.
 	inFilename string
 	// versionsURI is a URI pointing to a YAML formatted versions mapping.
 	versionsURI string
@@ -69,7 +69,7 @@ type upgradeArgs struct {
 // addUpgradeFlags adds upgrade related flags into cobra command
 func addUpgradeFlags(cmd *cobra.Command, args *upgradeArgs) {
 	cmd.PersistentFlags().StringVarP(&args.inFilename, "filename",
-		"f", "", "Path to file containing IstioControlPlane CustomResource")
+		"f", "", "Path to file containing IstioOperator CustomResource")
 	cmd.PersistentFlags().StringVarP(&args.versionsURI, "versionsURI", "u",
 		versionsMapURL, "URI for operator versions to Istio versions map")
 	cmd.PersistentFlags().StringVarP(&args.kubeConfigPath, "kubeconfig",

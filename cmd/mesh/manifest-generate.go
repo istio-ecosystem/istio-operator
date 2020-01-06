@@ -29,11 +29,11 @@ import (
 )
 
 type manifestGenerateArgs struct {
-	// inFilename is the path to the input IstioControlPlane CR.
+	// inFilename is the path to the input IstioOperator CR.
 	inFilename string
 	// outFilename is the path to the generated output directory.
 	outFilename string
-	// set is a string with element format "path=value" where path is an IstioControlPlane path and the value is a
+	// set is a string with element format "path=value" where path is an IstioOperator path and the value is a
 	// value to set the node at that path to.
 	set []string
 	// force proceeds even if there are validation errors

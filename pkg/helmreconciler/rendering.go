@@ -47,7 +47,7 @@ func (h *HelmReconciler) renderCharts(in RenderingInput) (ChartManifestsMap, err
 		return nil, fmt.Errorf("unexpected type %T in renderCharts", in.GetInputConfig())
 	}
 	icpSpec := icp.Spec
-	if err := validate.CheckIstioControlPlaneSpec(icpSpec, false); err != nil {
+	if err := validate.CheckIstioOperatorSpec(icpSpec, false); err != nil {
 		return nil, err
 	}
 
@@ -61,7 +61,7 @@ func (h *HelmReconciler) renderCharts(in RenderingInput) (ChartManifestsMap, err
 		return nil, err
 	}
 
-	cp, err := controlplane.NewIstioControlPlane(mergedICPS, t)
+	cp, err := controlplane.NewIstioOperator(mergedICPS, t)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (h *HelmReconciler) renderCharts(in RenderingInput) (ChartManifestsMap, err
 func mergeICPSWithProfile(icp *v1alpha1.IstioOperatorSpec) (*v1alpha1.IstioOperatorSpec, error) {
 	profile := icp.Profile
 
-	// This contains the IstioControlPlane CR.
+	// This contains the IstioOperator CR.
 	baseCRYAML, err := helm.ReadProfileYAML(profile)
 	if err != nil {
 		return nil, fmt.Errorf("could not read the profile values for %s: %s", profile, err)
@@ -137,18 +137,18 @@ func mergeICPSWithProfile(icp *v1alpha1.IstioOperatorSpec) (*v1alpha1.IstioOpera
 	return unmarshalAndValidateICPSpec(mergedYAML)
 }
 
-// unmarshalAndValidateICP unmarshals the IstioControlPlane in the crYAML string and validates it.
-// If successful, it returns both a struct and string YAML representations of the IstioControlPlaneSpec embedded in icp.
+// unmarshalAndValidateICP unmarshals the IstioOperator in the crYAML string and validates it.
+// If successful, it returns both a struct and string YAML representations of the IstioOperatorSpec embedded in icp.
 func unmarshalAndValidateICP(crYAML string) (*v1alpha1.IstioOperatorSpec, string, error) {
 	// TODO: add GroupVersionKind handling as appropriate.
 	if crYAML == "" {
 		return &v1alpha1.IstioOperatorSpec{}, "", nil
 	}
-	icps, _, err := istiomanifest.ParseK8SYAMLToIstioControlPlaneSpec(crYAML)
+	icps, _, err := istiomanifest.ParseK8SYAMLToIstioOperatorSpec(crYAML)
 	if err != nil {
 		return nil, "", fmt.Errorf("could not parse the overlay file: %s\n\nOriginal YAML:\n%s", err, crYAML)
 	}
-	if errs := validate.CheckIstioControlPlaneSpec(icps, false); len(errs) != 0 {
+	if errs := validate.CheckIstioOperatorSpec(icps, false); len(errs) != 0 {
 		return nil, "", fmt.Errorf("input file failed validation with the following errors: %s\n\nOriginal YAML:\n%s", errs, crYAML)
 	}
 	icpsYAML, err := util.MarshalWithJSONPB(icps)
@@ -158,14 +158,14 @@ func unmarshalAndValidateICP(crYAML string) (*v1alpha1.IstioOperatorSpec, string
 	return icps, icpsYAML, nil
 }
 
-// unmarshalAndValidateICPSpec unmarshals the IstioControlPlaneSpec in the icpsYAML string and validates it.
+// unmarshalAndValidateICPSpec unmarshals the IstioOperatorSpec in the icpsYAML string and validates it.
 // If successful, it returns a struct representation of icpsYAML.
 func unmarshalAndValidateICPSpec(icpsYAML string) (*v1alpha1.IstioOperatorSpec, error) {
 	icps := &v1alpha1.IstioOperatorSpec{}
 	if err := util.UnmarshalWithJSONPB(icpsYAML, icps); err != nil {
 		return nil, fmt.Errorf("could not unmarshal the merged YAML: %s\n\nYAML:\n%s", err, icpsYAML)
 	}
-	if errs := validate.CheckIstioControlPlaneSpec(icps, true); len(errs) != 0 {
+	if errs := validate.CheckIstioOperatorSpec(icps, true); len(errs) != 0 {
 		return nil, fmt.Errorf(errs.Error())
 	}
 	return icps, nil

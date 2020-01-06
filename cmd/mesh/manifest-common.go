@@ -71,7 +71,7 @@ func genApplyManifests(setOverlay []string, inFilename string, force bool, dryRu
 	for cn := range manifests {
 		enabledInSpec, err := name.IsComponentEnabledInSpec(cn, icps)
 		if err != nil {
-			l.logAndPrintf("failed to check if %s is enabled in IstioControlPlaneSpec: %v", cn, err)
+			l.logAndPrintf("failed to check if %s is enabled in IstioOperatorSpec: %v", cn, err)
 		}
 		// Skip the output of a component when it is disabled
 		// and not pruned (indicated by applied manifest out[cn].Manifest).
@@ -125,7 +125,7 @@ func GenManifests(inFilename string, setOverlayYAML string, force bool, l *Logge
 		return nil, nil, err
 	}
 
-	cp, err := controlplane.NewIstioControlPlane(mergedICPS, t)
+	cp, err := controlplane.NewIstioOperator(mergedICPS, t)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -203,7 +203,7 @@ func MakeTreeFromSetList(setOverlay []string, force bool, l *Logger) (string, er
 		if err := util.UnmarshalWithJSONPB(string(testTree), icps); err != nil {
 			return "", fmt.Errorf("bad path=value: %s", kv)
 		}
-		if errs := validate.CheckIstioControlPlaneSpec(icps, true); len(errs) != 0 {
+		if errs := validate.CheckIstioOperatorSpec(icps, true); len(errs) != 0 {
 			if !force {
 				l.logAndError("Run the command with the --force flag if you want to ignore the validation error and proceed.")
 				return "", fmt.Errorf("bad path=value (%s): %s", kv, errs)

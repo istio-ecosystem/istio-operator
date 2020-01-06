@@ -139,7 +139,7 @@ values:
 			if err != nil {
 				t.Fatalf("unmarshalWithJSONPB(%s): got error %s", tt.desc, err)
 			}
-			errs := CheckIstioControlPlaneSpec(ispec, false)
+			errs := CheckIstioOperatorSpec(ispec, false)
 			if gotErrs, wantErrs := errs, tt.wantErrs; !util.EqualErrors(gotErrs, wantErrs) {
 				t.Errorf("ProtoToValues(%s)(%v): gotErrs:%s, wantErrs:%s", tt.desc, tt.yamlStr, gotErrs, wantErrs)
 			}

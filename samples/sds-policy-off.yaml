@@ -1,5 +1,5 @@
 apiVersion: install.istio.io/v1alpha2
-kind: IstioControlPlane
+kind: IstioOperator
 spec:
   profile: sds
   policy:

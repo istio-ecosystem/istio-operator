@@ -34,9 +34,9 @@ var (
 	requiredValues = map[string]bool{}
 )
 
-// CheckIstioControlPlaneSpec validates the values in the given Installer spec, using the field map defaultValidations to
+// CheckIstioOperatorSpec validates the values in the given Installer spec, using the field map defaultValidations to
 // call the appropriate validation function.
-func CheckIstioControlPlaneSpec(is *v1alpha1.IstioOperatorSpec, checkRequired bool) (errs util.Errors) {
+func CheckIstioOperatorSpec(is *v1alpha1.IstioOperatorSpec, checkRequired bool) (errs util.Errors) {
 	errs = CheckValues(is.Values)
 	return util.AppendErrs(errs, validate(defaultValidations, is, nil, checkRequired))
 }

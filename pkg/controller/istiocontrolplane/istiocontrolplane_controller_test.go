@@ -150,7 +150,7 @@ func testSwitchProfile(t *testing.T, c testCase) {
 	s.AddKnownTypes(validation.SchemeGroupVersion, icp)
 	cl := fake.NewFakeClientWithScheme(s, objs...)
 	factory := &helmreconciler.Factory{CustomizerFactory: &IstioRenderingCustomizerFactory{}}
-	r := &ReconcileIstioControlPlane{client: cl, scheme: s, factory: factory}
+	r := &ReconcileIstioOperator{client: cl, scheme: s, factory: factory}
 
 	req := reconcile.Request{
 		NamespacedName: types.NamespacedName{
@@ -169,7 +169,7 @@ func testSwitchProfile(t *testing.T, c testCase) {
 	}
 
 	//update IstioOperator : switch profile from minimal to default and reconcile
-	err = switchIstioControlPlaneProfile(cl, req.NamespacedName, c.targetProfile)
+	err = switchIstioOperatorProfile(cl, req.NamespacedName, c.targetProfile)
 	if err != nil {
 		t.Fatalf("failed to update IstioOperator: (%v)", err)
 	}
@@ -191,7 +191,7 @@ func statusExpected(s1, s2 *v1alpha1.IstioOperatorSpec_VersionStatus) bool {
 	return s1.Status.String() == s2.Status.String()
 }
 
-func switchIstioControlPlaneProfile(cl client.Client, key client.ObjectKey, profile string) error {
+func switchIstioOperatorProfile(cl client.Client, key client.ObjectKey, profile string) error {
 	instance := &iop.IstioOperator{}
 	err := cl.Get(context.TODO(), key, instance)
 	if err != nil {
