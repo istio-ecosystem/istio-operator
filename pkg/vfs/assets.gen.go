@@ -235,14 +235,18 @@
 // ../../data/operator/templates/service.yaml
 // ../../data/operator/templates/service_account.yaml
 // ../../data/profiles/default.yaml
+// ../../data/profiles/default.yaml.orig
 // ../../data/profiles/demo.yaml
 // ../../data/profiles/empty.yaml
 // ../../data/profiles/minimal.yaml
 // ../../data/profiles/remote.yaml
 // ../../data/profiles/sds.yaml
+// ../../data/translateConfig/reverseTranslateConfig-1.4.yaml
+// ../../data/translateConfig/reverseTranslateConfig-1.5.yaml
 // ../../data/translateConfig/translateConfig-1.3.yaml
 // ../../data/translateConfig/translateConfig-1.4.yaml
 // ../../data/translateConfig/translateConfig-1.5.yaml
+// ../../data/translateConfig/translateConfig-1.5.yaml.orig
 // ../../data/versions.yaml
 // ../../data/versions.yaml.orig
 // DO NOT EDIT!
@@ -44835,6 +44839,734 @@ func profilesDefaultYaml() (*asset, error) {
 	return a, nil
 }
 
+var _profilesDefaultYamlOrig = []byte(`apiVersion: operator.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  hub: gcr.io/istio-testing
+  tag: latest
+  meshConfig:
+    rootNamespace: istio-system
+
+  # Traffic management feature
+  components:
+    base:
+      enabled: true
+    pilot:
+      enabled: true
+      k8s:
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+        hpaSpec:
+          maxReplicas: 5
+          minReplicas: 1
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: istio-pilot
+          metrics:
+            - type: Resource
+              resource:
+                name: cpu
+                targetAverageUtilization: 80
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 30
+          timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2048Mi
+        strategy:
+          rollingUpdate:
+            maxSurge: "100%"
+            maxUnavailable: "25%"
+
+  # Policy feature
+    policy:
+      enabled: true
+      k8s:
+        hpaSpec:
+          maxReplicas: 5
+          minReplicas: 1
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: istio-policy
+          metrics:
+            - type: Resource
+              resource:
+                name: cpu
+                targetAverageUtilization: 80
+        env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+        strategy:
+          rollingUpdate:
+            maxSurge: "100%"
+            maxUnavailable: "25%"
+
+   # Telemetry feature
+    telemetry:
+      enabled: true
+      k8s:
+        env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          - name: GOMAXPROCS
+            value: "6"
+        hpaSpec:
+          maxReplicas: 5
+          minReplicas: 1
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: istio-telemetry
+          metrics:
+            - type: Resource
+              resource:
+                name: cpu
+                targetAverageUtilization: 80
+        replicaCount: 1
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1G
+          limits:
+            cpu: 4800m
+            memory: 4G
+        strategy:
+          rollingUpdate:
+            maxSurge: "100%"
+            maxUnavailable: "25%"
+
+  # Security feature
+    citadel:
+      enabled: true
+      k8s:
+        strategy:
+          rollingUpdate:
+            maxSurge: "100%"
+            maxUnavailable: "25%"
+
+    nodeAgent:
+      enabled: false
+
+  # Config management feature
+    galley:
+      enabled: true
+      k8s:
+        replicaCount: 1
+        resources:
+          requests:
+            cpu: 100m
+        strategy:
+          rollingUpdate:
+            maxSurge: "100%"
+            maxUnavailable: "25%"
+
+  # Auto injection feature
+    sidecarInjector:
+      enabled: true
+      k8s:
+        replicaCount: 1
+        strategy:
+          rollingUpdate:
+            maxSurge: "100%"
+            maxUnavailable: "25%"
+
+  # Istio Gateway feature
+    ingressGateways:
+    - name: istio-ingressgateway
+      enabled: true
+      k8s:
+        hpaSpec:
+          maxReplicas: 5
+          minReplicas: 1
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: istio-ingressgateway
+          metrics:
+            - type: Resource
+              resource:
+                name: cpu
+                targetAverageUtilization: 80
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+        strategy:
+          rollingUpdate:
+            maxSurge: "100%"
+            maxUnavailable: "25%"
+
+<<<<<<< HEAD
+    egressGateways:
+
+    # Istio CNI feature
+    cni:
+      enabled: false
+=======
+      egressGateway:
+        enabled: false
+        k8s:
+          hpaSpec:
+            maxReplicas: 5
+            minReplicas: 1
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: istio-egressgateway
+            metrics:
+              - type: Resource
+                resource:
+                  name: cpu
+                  targetAverageUtilization: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 2000m
+              memory: 1024Mi
+          strategy:
+            rollingUpdate:
+              maxSurge: "100%"
+              maxUnavailable: "25%"
+  # Istio CNI feature
+  cni:
+    enabled: false
+    components:
+      cni:
+        namespace: kube-system
+>>>>>>> e9546bf24b8bf55bdf50ac10925851a8e4a01cb0
+
+  # Global values passed through to helm global.yaml.
+  values:
+    global:
+      istiod:
+        enabled: true
+      logging:
+        level: "default:info"
+      logAsJson: false
+      k8sIngress:
+        enabled: false
+        gatewayName: ingressgateway
+        enableHttps: false
+      proxy:
+        image: proxyv2
+        clusterDomain: "cluster.local"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+        concurrency: 2
+        accessLogFile: ""
+        accessLogFormat: ""
+        accessLogEncoding: TEXT
+        envoyAccessLogService:
+          enabled: false
+          host: # example: accesslog-service.istio-system
+          port: # example: 15000
+        logLevel: warning
+        componentLogLevel: "misc:error"
+        dnsRefreshRate: 300s
+        protocolDetectionTimeout: 100ms
+        privileged: false
+        enableCoreDump: false
+        statusPort: 15020
+        readinessInitialDelaySeconds: 1
+        readinessPeriodSeconds: 2
+        readinessFailureThreshold: 30
+        includeIPRanges: "*"
+        excludeIPRanges: ""
+        excludeOutboundPorts: ""
+        kubevirtInterfaces: ""
+        includeInboundPorts: "*"
+        excludeInboundPorts: ""
+        autoInject: enabled
+        envoyStatsd:
+          enabled: false
+          host: # example: statsd-svc.istio-system
+          port: # example: 9125
+        envoyMetricsService:
+          enabled: false
+          host: # example: metrics-service.istio-system
+          port: # example: 15000
+          tlsSettings:
+            mode: DISABLE # DISABLE, SIMPLE, MUTUAL, ISTIO_MUTUAL
+            clientCertificate: # example: /etc/istio/ms/cert-chain.pem
+            privateKey:        # example: /etc/istio/ms/key.pem
+            caCertificates:    # example: /etc/istio/ms/root-cert.pem
+            sni:               # example: ms.somedomain
+            subjectAltNames: []
+          tcpKeepalive:
+            probes: 3
+            time: 10s
+            interval: 10s
+        tracer: "zipkin"
+      proxy_init:
+        image: proxyv2
+        resources:
+          limits:
+            cpu: 100m
+            memory: 50Mi
+          requests:
+            cpu: 10m
+            memory: 10Mi
+      imagePullPolicy: IfNotPresent
+      certificates: []
+      operatorManageWebhooks: false
+      controlPlaneSecurityEnabled: true
+      disablePolicyChecks: true
+      policyCheckFailOpen: false
+      enableTracing: true
+      tracer:
+        lightstep:
+          address: ""                # example: lightstep-satellite:443
+          accessToken: ""            # example: abcdefg1234567
+          secure: true               # example: true|false
+          cacertPath: ""             # example: /etc/lightstep/cacert.pem
+        zipkin:
+          address: ""
+        datadog:
+          address: "$(HOST_IP):8126"
+      mtls:
+        enabled: false
+        auto: true
+      imagePullSecrets: []
+      arch:
+        amd64: 2
+        s390x: 2
+        ppc64le: 2
+      oneNamespace: false
+      defaultNodeSelector: {}
+      configValidation: true
+      meshExpansion:
+        enabled: false
+        useILB: false
+      multiCluster:
+        enabled: false
+        clusterName: ""
+      omitSidecarInjectorConfigMap: false
+      network: ""
+      defaultResources:
+        requests:
+          cpu: 10m
+      defaultPodDisruptionBudget:
+        enabled: true
+      priorityClassName: ""
+      useMCP: true
+      trustDomain: "cluster.local"
+      outboundTrafficPolicy:
+        mode: ALLOW_ANY
+      sds:
+        enabled: false
+        udsPath: ""
+        token:
+          aud: istio-ca
+      meshNetworks: {}
+      localityLbSetting:
+        enabled: true
+      enableHelmTest: false
+    pilot:
+      autoscaleEnabled: true
+      autoscaleMin: 1
+      autoscaleMax: 5
+      replicaCount: 1
+      image: pilot
+      traceSampling: 1.0
+      configNamespace: istio-config
+      appNamespaces: []
+      env: {}
+      cpu:
+        targetAverageUtilization: 80
+      nodeSelector: {}
+      tolerations: []
+      podAntiAffinityLabelSelector: []
+      podAntiAffinityTermLabelSelector: []
+      keepaliveMaxServerConnectionAge: 30m
+      enableProtocolSniffingForOutbound: true
+      enableProtocolSniffingForInbound: false
+      deploymentLabels:
+      meshNetworks:
+        networks: {}
+      configMap: true
+      ingress:
+        ingressService: istio-ingressgateway
+        ingressControllerMode: "OFF"
+        ingressClass: istio
+      policy:
+        enabled: false
+      useMCP: true
+
+    telemetry:
+      enabled: true
+      v2:
+        enabled: false
+
+    mixer:
+      adapters:
+        stdio:
+          enabled: false
+          outputAsJson: false
+        prometheus:
+          enabled: true
+          metricsExpiryDuration: 10m
+        kubernetesenv:
+          enabled: true
+        stackdriver:
+          enabled: false
+          auth:
+            appCredentials: false
+            apiKey: ""
+            serviceAccountPath: ""
+          tracer:
+            enabled: false
+            sampleProbability: 1
+        useAdapterCRDs: false
+
+      telemetry:
+        image: mixer
+        replicaCount: 1
+        autoscaleEnabled: true
+        sessionAffinityEnabled: false
+        loadshedding:
+          mode: enforce
+          latencyThreshold: 100ms
+        reportBatchMaxEntries: 100
+        reportBatchMaxTime: 1s
+        useMCP: true
+        env:
+          GOMAXPROCS: "6"
+        nodeSelector: {}
+        tolerations: []
+        podAntiAffinityLabelSelector: []
+        podAntiAffinityTermLabelSelector: []
+
+      policy:
+        autoscaleEnabled: true
+        image: mixer
+        sessionAffinityEnabled: false
+        adapters:
+          kubernetesenv:
+            enabled: true
+          useAdapterCRDs: false
+
+    galley:
+      image: galley
+      enableAnalysis: false
+
+    security:
+      image: citadel
+      selfSigned: true # indicate if self-signed CA is used.
+      enableNamespacesByDefault: true
+      dnsCerts:
+        istio-pilot-service-account.istio-control: istio-pilot.istio-control
+
+    nodeagent:
+      image: node-agent-k8s
+
+    gateways:
+      istio-egressgateway:
+        autoscaleEnabled: true
+        zvpn:
+          suffix: global
+          enabled: true
+        type: ClusterIP
+        env:
+          ISTIO_META_ROUTER_MODE: "sni-dnat"
+        ports:
+          - port: 80
+            name: http2
+          - port: 443
+            name: https
+          - port: 15443
+            targetPort: 15443
+            name: tls
+        secretVolumes:
+          - name: egressgateway-certs
+            secretName: istio-egressgateway-certs
+            mountPath: /etc/istio/egressgateway-certs
+          - name: egressgateway-ca-certs
+            secretName: istio-egressgateway-ca-certs
+            mountPath: /etc/istio/egressgateway-ca-certs
+
+      istio-ingressgateway:
+        autoscaleEnabled: true
+        applicationPorts: ""
+        debug: info
+        domain: ""
+        type: LoadBalancer
+        zvpn:
+          enabled: true
+          suffix: global
+        sds:
+          enabled: false
+          image: node-agent-k8s
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 2000m
+              memory: 1024Mi
+        env:
+          ISTIO_META_ROUTER_MODE: "sni-dnat"
+        ports:
+          - port: 15020
+            targetPort: 15020
+            name: status-port
+          - port: 80
+            targetPort: 80
+            name: http2
+          - port: 443
+            name: https
+          - port: 15029
+            targetPort: 15029
+            name: kiali
+          - port: 15030
+            targetPort: 15030
+            name: prometheus
+          - port: 15031
+            targetPort: 15031
+            name: grafana
+          - port: 15032
+            targetPort: 15032
+            name: tracing
+          - port: 15443
+            targetPort: 15443
+            name: tls
+        meshExpansionPorts:
+          - port: 15011
+            targetPort: 15011
+            name: tcp-pilot-grpc-tls
+          - port: 8060
+            targetPort: 8060
+            name: tcp-citadel-grpc-tls
+          - port: 853
+            targetPort: 853
+            name: tcp-dns-tls
+        secretVolumes:
+          - name: ingressgateway-certs
+            secretName: istio-ingressgateway-certs
+            mountPath: /etc/istio/ingressgateway-certs
+          - name: ingressgateway-ca-certs
+            secretName: istio-ingressgateway-ca-certs
+            mountPath: /etc/istio/ingressgateway-ca-certs
+
+    sidecarInjectorWebhook:
+      image: sidecar_injector
+      enableNamespacesByDefault: false
+      rewriteAppHTTPProbe: false
+      selfSigned: false
+      injectLabel: istio-injection
+      objectSelector:
+        enabled: false
+        autoInject: true
+
+    prometheus:
+      enabled: true
+      replicaCount: 1
+      hub: docker.io/prom
+      tag: v2.15.1
+      retention: 6h
+      scrapeInterval: 15s
+      contextPath: /prometheus
+      ingress:
+        enabled: false
+        hosts:
+          - prometheus.local
+        annotations:
+        tls:
+      nodeSelector: {}
+      tolerations: []
+      podAntiAffinityLabelSelector: []
+      podAntiAffinityTermLabelSelector: []
+
+    grafana:
+      enabled: false
+      replicaCount: 1
+      image:
+        repository: grafana/grafana
+        tag: 6.5.2
+      persist: false
+      storageClassName: ""
+      accessMode: ReadWriteMany
+      security:
+        enabled: false
+        secretName: grafana
+        usernameKey: username
+        passphraseKey: passphrase
+      contextPath: /grafana
+      service:
+        annotations: {}
+        name: http
+        type: ClusterIP
+        externalPort: 3000
+        loadBalancerIP:
+        loadBalancerSourceRanges:
+      ingress:
+        enabled: false
+        hosts:
+          - grafana.local
+        annotations:
+        tls:
+      datasources:
+        datasources.yaml:
+          apiVersion: 1
+          datasources:
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+            - name: 'istio'
+              orgId: 1
+              folder: 'istio'
+              type: file
+              disableDeletion: false
+              options:
+                path: /var/lib/grafana/dashboards/istio
+      nodeSelector: {}
+      tolerations: []
+      podAntiAffinityLabelSelector: []
+      podAntiAffinityTermLabelSelector: []
+      env: {}
+      envSecrets: {}
+
+    tracing:
+      enabled: false
+      provider: jaeger
+      nodeSelector: {}
+      podAntiAffinityLabelSelector: []
+      podAntiAffinityTermLabelSelector: []
+      jaeger:
+        hub: docker.io/jaegertracing
+        tag: "1.14"
+        memory:
+          max_traces: 50000
+        spanStorageType: badger
+        persist: false
+        storageClassName: ""
+        accessMode: ReadWriteMany
+      zipkin:
+        hub: docker.io/openzipkin
+        tag: 2.14.2
+        probeStartupDelay: 200
+        queryPort: 9411
+        resources:
+          limits:
+            cpu: 300m
+            memory: 900Mi
+          requests:
+            cpu: 150m
+            memory: 900Mi
+        javaOptsHeap: 700
+        maxSpans: 500000
+        node:
+          cpus: 2
+      opencensus:
+        hub: docker.io/omnition
+        tag: 0.1.9
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 200m
+            memory: 400Mi
+        exporters:
+          stackdriver:
+            enable_tracing: true
+      service:
+        annotations: {}
+        name: http-query
+        type: ClusterIP
+        externalPort: 9411
+      ingress:
+        enabled: false
+        hosts:
+        annotations:
+        tls:
+    istiocoredns:
+      enabled: false
+      coreDNSImage: coredns/coredns
+      coreDNSTag: 1.6.2
+      coreDNSPluginImage: istio/coredns-plugin:0.2-istio-1.1
+
+    kiali:
+      enabled: false
+      replicaCount: 1
+      hub: quay.io/kiali
+      tag: v1.9
+      contextPath: /kiali
+      nodeSelector: {}
+      podAntiAffinityLabelSelector: []
+      podAntiAffinityTermLabelSelector: []
+      ingress:
+        enabled: false
+        hosts:
+          - kiali.local
+        annotations:
+        tls:
+      dashboard:
+        secretName: kiali
+        usernameKey: username
+        passphraseKey: passphrase
+        viewOnlyMode: false
+        grafanaURL:
+        jaegerURL:
+      prometheusNamespace:
+      createDemoSecret: false
+      security:
+        enabled: false
+        cert_file: /kiali-cert/cert-chain.pem
+        private_key_file: /kiali-cert/key.pem
+
+    # TODO: derive from operator API
+    version: ""
+    clusterResources: true
+`)
+
+func profilesDefaultYamlOrigBytes() ([]byte, error) {
+	return _profilesDefaultYamlOrig, nil
+}
+
+func profilesDefaultYamlOrig() (*asset, error) {
+	bytes, err := profilesDefaultYamlOrigBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "profiles/default.yaml.orig", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _profilesDemoYaml = []byte(`apiVersion: operator.istio.io/v1alpha1
 kind: IstioOperator
 spec:
@@ -44898,7 +45630,6 @@ spec:
   values:
     global:
       disablePolicyChecks: false
-      controlPlaneSecurityEnabled: false
       proxy:
         accessLogFile: /dev/stdout
         resources:
@@ -45177,6 +45908,66 @@ func profilesSdsYaml() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "profiles/sds.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _translateconfigReversetranslateconfig14Yaml = []byte(`kubernetesPatternMapping:
+  "{{.ValueComponentName}}.env":                   "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Env"
+  "{{.ValueComponentName}}.autoscaleEnabled":      "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.HpaSpec"
+  "{{.ValueComponentName}}.imagePullPolicy":       "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ImagePullPolicy"
+  "{{.ValueComponentName}}.nodeSelector":          "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.NodeSelector"
+  "{{.ValueComponentName}}.tolerations":           "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Tolerations"
+  "{{.ValueComponentName}}.podDisruptionBudget":   "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PodDisruptionBudget"
+  "{{.ValueComponentName}}.podAnnotations":        "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PodAnnotations"
+  "{{.ValueComponentName}}.priorityClassName":     "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PriorityClassName"
+  "{{.ValueComponentName}}.readinessProbe":        "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ReadinessProbe"
+  "{{.ValueComponentName}}.replicaCount":          "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ReplicaCount"
+  "{{.ValueComponentName}}.resources":             "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Resources"
+  "{{.ValueComponentName}}.rollingMaxSurge":       "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Strategy"
+  "{{.ValueComponentName}}.rollingMaxUnavailable": "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Strategy"`)
+
+func translateconfigReversetranslateconfig14YamlBytes() ([]byte, error) {
+	return _translateconfigReversetranslateconfig14Yaml, nil
+}
+
+func translateconfigReversetranslateconfig14Yaml() (*asset, error) {
+	bytes, err := translateconfigReversetranslateconfig14YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "translateConfig/reverseTranslateConfig-1.4.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _translateconfigReversetranslateconfig15Yaml = []byte(`kubernetesPatternMapping:
+  "{{.ValueComponentName}}.env":                   "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Env"
+  "{{.ValueComponentName}}.autoscaleEnabled":      "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.HpaSpec"
+  "{{.ValueComponentName}}.imagePullPolicy":       "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ImagePullPolicy"
+  "{{.ValueComponentName}}.nodeSelector":          "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.NodeSelector"
+  "{{.ValueComponentName}}.tolerations":           "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Tolerations"
+  "{{.ValueComponentName}}.podDisruptionBudget":   "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PodDisruptionBudget"
+  "{{.ValueComponentName}}.podAnnotations":        "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PodAnnotations"
+  "{{.ValueComponentName}}.priorityClassName":     "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.PriorityClassName"
+  "{{.ValueComponentName}}.readinessProbe":        "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ReadinessProbe"
+  "{{.ValueComponentName}}.replicaCount":          "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.ReplicaCount"
+  "{{.ValueComponentName}}.resources":             "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Resources"
+  "{{.ValueComponentName}}.rollingMaxSurge":       "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Strategy"
+  "{{.ValueComponentName}}.rollingMaxUnavailable": "{{.FeatureName}}.Components.{{.ComponentName}}.K8s.Strategy"`)
+
+func translateconfigReversetranslateconfig15YamlBytes() ([]byte, error) {
+	return _translateconfigReversetranslateconfig15Yaml, nil
+}
+
+func translateconfigReversetranslateconfig15Yaml() (*asset, error) {
+	bytes, err := translateconfigReversetranslateconfig15YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "translateConfig/reverseTranslateConfig-1.5.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -45812,6 +46603,286 @@ func translateconfigTranslateconfig15Yaml() (*asset, error) {
 	return a, nil
 }
 
+var _translateconfigTranslateconfig15YamlOrig = []byte(`apiMapping:
+  Hub:
+    outPath: "global.hub"
+  Tag:
+    outPath: "global.tag"
+  K8SDefaults:
+    outPath: "global.resources"
+  DefaultNamespace:
+    outPath: "global.istioNamespace"
+<<<<<<< HEAD
+kubernetesMapping:
+  "Components.{{.ComponentName}}.K8S.Affinity":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.affinity"
+  "Components.{{.ComponentName}}.K8S.Env":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.containers.[name:{{.ContainerName}}].env"
+  "Components.{{.ComponentName}}.K8S.HpaSpec":
+    outPath: "[HorizontalPodAutoscaler:{{.ResourceName}}].spec"
+  "Components.{{.ComponentName}}.K8S.ImagePullPolicy":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.containers.[name:{{.ContainerName}}].imagePullPolicy"
+  "Components.{{.ComponentName}}.K8S.NodeSelector":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.nodeSelector"
+  "Components.{{.ComponentName}}.K8S.PodDisruptionBudget":
+    outPath: "[PodDisruptionBudget:{{.ResourceName}}].spec"
+  "Components.{{.ComponentName}}.K8S.PodAnnotations":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.metadata.annotations"
+  "Components.{{.ComponentName}}.K8S.PriorityClassName":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.priorityClassName."
+  "Components.{{.ComponentName}}.K8S.ReadinessProbe":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.containers.[name:{{.ContainerName}}].readinessProbe"
+  "Components.{{.ComponentName}}.K8S.ReplicaCount":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.replicas"
+  "Components.{{.ComponentName}}.K8S.Resources":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.containers.[name:{{.ContainerName}}].resources"
+  "Components.{{.ComponentName}}.K8S.Strategy":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.strategy"
+  "Components.{{.ComponentName}}.K8S.Tolerations":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.tolerations"
+=======
+  ConfigManagement.Components.Namespace:
+    outPath: "global.configNamespace"
+  Policy.Components.Namespace:
+    outPath: "global.policyNamespace"
+  Telemetry.Components.Namespace:
+    outPath: "global.telemetryNamespace"
+  Security.Components.Namespace:
+    outPath: "global.securityNamespace"
+kubernetesMapping:
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.Affinity":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.affinity"
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.Env":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.containers.[name:{{.ContainerName}}].env"
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.HpaSpec":
+    outPath: "[HorizontalPodAutoscaler:{{.ResourceName}}].spec"
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.ImagePullPolicy":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.containers.[name:{{.ContainerName}}].imagePullPolicy"
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.NodeSelector":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.nodeSelector"
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.PodDisruptionBudget":
+    outPath: "[PodDisruptionBudget:{{.ResourceName}}].spec"
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.PodAnnotations":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.metadata.annotations"
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.PriorityClassName":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.priorityClassName."
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.ReadinessProbe":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.containers.[name:{{.ContainerName}}].readinessProbe"
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.ReplicaCount":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.replicas"
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.Resources":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.containers.[name:{{.ContainerName}}].resources"
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.Strategy":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.strategy"
+  "{{.FeatureName}}.Components.{{.ComponentName}}.K8S.Tolerations":
+    outPath: "[{{.ResourceType}}:{{.ResourceName}}].spec.template.spec.tolerations"
+toFeature:
+  Base:               Base
+  Pilot:              TrafficManagement
+  Galley:             ConfigManagement
+  Injector:           AutoInjection
+  Policy:             Policy
+  Telemetry:          Telemetry
+  Citadel:            Security
+  CertManager:        Security
+  NodeAgent:          Security
+  IngressGateway:     Gateways
+  EgressGateway:      Gateways
+  Cni:                Cni
+  CoreDNS:            CoreDNS
+  Grafana:            ThirdParty
+  Prometheus:         ThirdParty
+  Tracing:            ThirdParty
+  PrometheusOperator: ThirdParty
+  Kiali:              ThirdParty
+>>>>>>> e9546bf24b8bf55bdf50ac10925851a8e4a01cb0
+globalNamespaces:
+  Pilot:      "istioNamespace"
+  Galley:     "configNamespace"
+  Telemetry:  "telemetryNamespace"
+  Policy:     "policyNamespace"
+  Prometheus: "prometheusNamespace"
+  Citadel:    "securityNamespace"
+<<<<<<< HEAD
+=======
+featureMaps:
+  Base:
+    Components:
+      - Base
+  TrafficManagement:
+    Components:
+      - Pilot
+  Policy:
+    Components:
+      - Policy
+  Telemetry:
+    Components:
+      - Telemetry
+  Security:
+    Components:
+      - Citadel
+      - CertManager
+      - NodeAgent
+  ConfigManagement:
+    Components:
+      - Galley
+  AutoInjection:
+    Components:
+      - Injector
+  Gateways:
+    Components:
+      - IngressGateway
+      - EgressGateway
+  Cni:
+    Components:
+      - Cni
+  CoreDNS:
+    Components:
+      - CoreDNS
+  ThirdParty:
+    Components:
+      - Grafana
+      - Prometheus
+      - Tracing
+      - PrometheusOperator
+      - Kiali
+>>>>>>> e9546bf24b8bf55bdf50ac10925851a8e4a01cb0
+
+componentMaps:
+  Base:
+    ToHelmValuesTreeRoot: "global"
+    HelmSubdir:           "base"
+  Pilot:
+    ResourceType:         "Deployment"
+    ResourceName:         "istio-pilot"
+    ContainerName:        "discovery"
+    HelmSubdir:           "istio-control/istio-discovery"
+    ToHelmValuesTreeRoot: "pilot"
+  Galley:
+    ResourceType:         "Deployment"
+    ResourceName:         "istio-galley"
+    ContainerName:        "galley"
+    HelmSubdir:           "istio-control/istio-config"
+    ToHelmValuesTreeRoot: "galley"
+<<<<<<< HEAD
+  SidecarInjector:
+=======
+  Injector:
+>>>>>>> e9546bf24b8bf55bdf50ac10925851a8e4a01cb0
+    ResourceType:         "Deployment"
+    ResourceName:         "istio-sidecar-injector"
+    ContainerName:        "sidecar-injector-webhook"
+    HelmSubdir:           "istio-control/istio-autoinject"
+    ToHelmValuesTreeRoot: "sidecarInjectorWebhook"
+  Policy:
+    ResourceType:         "Deployment"
+    ResourceName:         "istio-policy"
+    ContainerName:        "mixer"
+    HelmSubdir:           "istio-policy"
+    ToHelmValuesTreeRoot: "mixer.policy"
+  Telemetry:
+    ResourceType:        "Deployment"
+    ResourceName:         "istio-telemetry"
+    ContainerName:        "mixer"
+    HelmSubdir:           "istio-telemetry/mixer-telemetry"
+    ToHelmValuesTreeRoot: "mixer.telemetry"
+  Citadel:
+    ResourceType:        "Deployment"
+    ResourceName:         "istio-citadel"
+    ContainerName:        "citadel"
+    HelmSubdir:           "security/citadel"
+    ToHelmValuesTreeRoot: "security"
+  NodeAgent:
+    ResourceType:         "DaemonSet"
+    ResourceName:         "istio-nodeagent"
+    ContainerName:        "nodeagent"
+    HelmSubdir:           "security/nodeagent"
+    ToHelmValuesTreeRoot: "nodeagent"
+  CertManager:
+    ResourceType:        "Deployment"
+    ResourceName:         "certmanager"
+    ContainerName:        "certmanager"
+    HelmSubdir:           "security/certmanager"
+    ToHelmValuesTreeRoot: "certmanager"
+<<<<<<< HEAD
+  IngressGateways:
+=======
+  IngressGateway:
+>>>>>>> e9546bf24b8bf55bdf50ac10925851a8e4a01cb0
+    ResourceType:         "Deployment"
+    ResourceName:         "istio-ingressgateway"
+    ContainerName:        "istio-proxy"
+    HelmSubdir:           "gateways/istio-ingress"
+    ToHelmValuesTreeRoot: "gateways.istio-ingressgateway"
+<<<<<<< HEAD
+  EgressGateways:
+=======
+  EgressGateway:
+>>>>>>> e9546bf24b8bf55bdf50ac10925851a8e4a01cb0
+    ResourceType:         "Deployment"
+    ResourceName:         "istio-egressgateway"
+    ContainerName:        "istio-proxy"
+    HelmSubdir:           "gateways/istio-egress"
+    ToHelmValuesTreeRoot: "gateways.istio-egressgateway"
+  Cni:
+    ResourceType:         "DaemonSet"
+    ResourceName:         "istio-cni-node"
+    ContainerName:        "install-cni"
+    HelmSubdir:           "istio-cni"
+    ToHelmValuesTreeRoot: "cni"
+  CoreDNS:
+    ResourceType:         "Deployment"
+    ResourceName:         "istiocoredns"
+    ContainerName:        "coredns"
+    HelmSubdir:           "istiocoredns"
+    ToHelmValuesTreeRoot: "istiocoredns"
+  Tracing:
+    ResourceType:         "Deployment"
+    ResourceName:         "istio-tracing"
+    ContainerName:        "jaeger"
+    HelmSubdir:           "istio-telemetry/tracing"
+    ToHelmValuesTreeRoot: "tracing.jaeger"
+  PrometheusOperator:
+    ResourceType:         "Deployment"
+    ResourceName:         "prometheus"
+    ContainerName:        "prometheus"
+    HelmSubdir:           "istio-telemetry/prometheus-operator"
+    ToHelmValuesTreeRoot: "prometheus"
+  Kiali:
+    ResourceType:         "Deployment"
+    ResourceName:         "kiali"
+    ContainerName:        "kiali"
+    HelmSubdir:           "istio-telemetry/kiali"
+    ToHelmValuesTreeRoot: "kiali"
+  Grafana:
+    ResourceType:        "Deployment"
+    ResourceName:         "grafana"
+    ContainerName:        "grafana"
+    HelmSubdir:           "istio-telemetry/grafana"
+    ToHelmValuesTreeRoot: "grafana"
+  Prometheus:
+    ResourceType:         "Deployment"
+    ResourceName:         "prometheus"
+    ContainerName:        "prometheus"
+    HelmSubdir:           "istio-telemetry/prometheus"
+    ToHelmValuesTreeRoot: "prometheus"
+`)
+
+func translateconfigTranslateconfig15YamlOrigBytes() ([]byte, error) {
+	return _translateconfigTranslateconfig15YamlOrig, nil
+}
+
+func translateconfigTranslateconfig15YamlOrig() (*asset, error) {
+	bytes, err := translateconfigTranslateconfig15YamlOrigBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "translateConfig/translateConfig-1.5.yaml.orig", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _versionsYaml = []byte(`- operatorVersion: 1.3.0
   supportedIstioVersions: 1.3.0
   recommendedIstioVersions: 1.3.0
@@ -46221,14 +47292,18 @@ var _bindata = map[string]func() (*asset, error){
 	"operator/templates/service.yaml": operatorTemplatesServiceYaml,
 	"operator/templates/service_account.yaml": operatorTemplatesService_accountYaml,
 	"profiles/default.yaml": profilesDefaultYaml,
+	"profiles/default.yaml.orig": profilesDefaultYamlOrig,
 	"profiles/demo.yaml": profilesDemoYaml,
 	"profiles/empty.yaml": profilesEmptyYaml,
 	"profiles/minimal.yaml": profilesMinimalYaml,
 	"profiles/remote.yaml": profilesRemoteYaml,
 	"profiles/sds.yaml": profilesSdsYaml,
+	"translateConfig/reverseTranslateConfig-1.4.yaml": translateconfigReversetranslateconfig14Yaml,
+	"translateConfig/reverseTranslateConfig-1.5.yaml": translateconfigReversetranslateconfig15Yaml,
 	"translateConfig/translateConfig-1.3.yaml": translateconfigTranslateconfig13Yaml,
 	"translateConfig/translateConfig-1.4.yaml": translateconfigTranslateconfig14Yaml,
 	"translateConfig/translateConfig-1.5.yaml": translateconfigTranslateconfig15Yaml,
+	"translateConfig/translateConfig-1.5.yaml.orig": translateconfigTranslateconfig15YamlOrig,
 	"versions.yaml": versionsYaml,
 	"versions.yaml.orig": versionsYamlOrig,
 }
@@ -46617,6 +47692,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	}},
 	"profiles": &bintree{nil, map[string]*bintree{
 		"default.yaml": &bintree{profilesDefaultYaml, map[string]*bintree{}},
+		"default.yaml.orig": &bintree{profilesDefaultYamlOrig, map[string]*bintree{}},
 		"demo.yaml": &bintree{profilesDemoYaml, map[string]*bintree{}},
 		"empty.yaml": &bintree{profilesEmptyYaml, map[string]*bintree{}},
 		"minimal.yaml": &bintree{profilesMinimalYaml, map[string]*bintree{}},
@@ -46624,9 +47700,12 @@ var _bintree = &bintree{nil, map[string]*bintree{
 		"sds.yaml": &bintree{profilesSdsYaml, map[string]*bintree{}},
 	}},
 	"translateConfig": &bintree{nil, map[string]*bintree{
+		"reverseTranslateConfig-1.4.yaml": &bintree{translateconfigReversetranslateconfig14Yaml, map[string]*bintree{}},
+		"reverseTranslateConfig-1.5.yaml": &bintree{translateconfigReversetranslateconfig15Yaml, map[string]*bintree{}},
 		"translateConfig-1.3.yaml": &bintree{translateconfigTranslateconfig13Yaml, map[string]*bintree{}},
 		"translateConfig-1.4.yaml": &bintree{translateconfigTranslateconfig14Yaml, map[string]*bintree{}},
 		"translateConfig-1.5.yaml": &bintree{translateconfigTranslateconfig15Yaml, map[string]*bintree{}},
+		"translateConfig-1.5.yaml.orig": &bintree{translateconfigTranslateconfig15YamlOrig, map[string]*bintree{}},
 	}},
 	"versions.yaml": &bintree{versionsYaml, map[string]*bintree{}},
 	"versions.yaml.orig": &bintree{versionsYamlOrig, map[string]*bintree{}},
