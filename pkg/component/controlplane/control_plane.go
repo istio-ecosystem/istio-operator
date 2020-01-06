@@ -26,10 +26,6 @@ import (
 
 // IstioControlPlane is an installation of an Istio control plane.
 type IstioControlPlane struct {
-	// installSpec is the installation spec for the control plane.
-	installSpec *v1alpha1.IstioOperatorSpec
-	// translator is the translator for this feature.
-	translator *translate.Translator
 	// components is a slice of components that are part of the feature.
 	components []component.IstioComponent
 	started    bool

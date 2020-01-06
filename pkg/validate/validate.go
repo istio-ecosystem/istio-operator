@@ -134,10 +134,6 @@ func validateTag(path util.Path, val interface{}) util.Errors {
 	return validateWithRegex(path, val, TagRegexp)
 }
 
-func validateDefaultNamespace(path util.Path, val interface{}) util.Errors {
-	return validateWithRegex(path, val, ObjectNameRegexp)
-}
-
 func validateInstallPackagePath(path util.Path, val interface{}) util.Errors {
 	valStr, ok := val.(string)
 	if !ok {

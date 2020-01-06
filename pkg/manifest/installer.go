@@ -24,8 +24,6 @@ import (
 	"sync"
 	"time" // For kubeclient GCP auth
 
-	"istio.io/operator/pkg/helm"
-
 	"github.com/ghodss/yaml"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -39,6 +37,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+
+	// For GCP auth functionality.
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -46,6 +46,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	"istio.io/api/operator/v1alpha1"
+	"istio.io/operator/pkg/helm"
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/name"
 	"istio.io/operator/pkg/object"

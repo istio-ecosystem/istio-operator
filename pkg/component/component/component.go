@@ -76,7 +76,6 @@ type CommonComponentFields struct {
 	addonName string
 	// resourceName is the name of all resources for this component.
 	resourceName string
-	namespace    string
 	// index is the index of the component (only used for components with multiple instances like gateways).
 	index    int
 	started  bool
