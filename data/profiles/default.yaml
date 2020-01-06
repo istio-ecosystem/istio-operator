@@ -186,6 +186,10 @@ spec:
     cni:
       enabled: false
 
+  addonComponents:
+    prometheus:
+      enabled: true
+
   # Global values passed through to helm global.yaml.
   values:
     global:
@@ -517,7 +521,7 @@ spec:
       enabled: true
       replicaCount: 1
       hub: docker.io/prom
-      tag: v2.15.0
+      tag: v2.15.1
       retention: 6h
       scrapeInterval: 15s
       contextPath: /prometheus
