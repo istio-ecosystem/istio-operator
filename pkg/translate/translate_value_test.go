@@ -362,14 +362,7 @@ func TestNewReverseTranslator(t *testing.T) {
 			wantVer:      "1.4",
 			wantErr:      false,
 		},
-		// TODO: implement
-		{
-			name:         "version 1.5",
-			minorVersion: version.NewMinorVersion(1, 5),
-			//TODO Once we add translate configs for 1.5, update wantVer to "1.5"
-			wantVer: "1.4",
-			wantErr: false,
-		},
+		// TODO: implement 1.5 and fallback logic.
 		{
 			name:         "version 1.99",
 			minorVersion: version.NewMinorVersion(1, 99),
