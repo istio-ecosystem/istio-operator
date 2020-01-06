@@ -45,7 +45,6 @@ const (
 	CertManagerComponentName     ComponentName = "CertManager"
 	NodeAgentComponentName       ComponentName = "NodeAgent"
 	CNIComponentName             ComponentName = "Cni"
-	CoreDNSComponentName         ComponentName = "CoreDNS"
 
 	// Gateway components
 	IngressComponentName ComponentName = "IngressGateways"
@@ -71,7 +70,6 @@ var (
 		CertManagerComponentName,
 		NodeAgentComponentName,
 		CNIComponentName,
-		CoreDNSComponentName,
 	}
 	allComponentNamesMap = make(map[ComponentName]bool)
 )

@@ -22,8 +22,6 @@ spec:
       enabled: true
     cni:
       enabled: false
-    coreDNS:
-      enabled: false
     ingressGateways:
       - namespace: istio-system
         name: istio-ingressgateway
@@ -35,4 +33,6 @@ spec:
 
   addonComponents:
     prometheus:
+      enabled: true
+    coreDNS:
       enabled: true

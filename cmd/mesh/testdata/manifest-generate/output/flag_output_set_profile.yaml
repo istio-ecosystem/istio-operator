@@ -5415,8 +5415,6 @@ metadata:
 
 # Cni component is disabled.
 
-# CoreDNS component is disabled.
-
 # Galley component is disabled.
 
 # NodeAgent component is disabled.

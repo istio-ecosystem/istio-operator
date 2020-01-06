@@ -10,8 +10,6 @@ components:
           maxUnavailable: 25%
   cni:
     enabled: false
-  coreDNS:
-    enabled: false
   galley:
     enabled: false
     k8s:
@@ -24,7 +22,8 @@ components:
           maxSurge: 100%
           maxUnavailable: 25%
   ingressGateways:
-  - k8s:
+  - enabled: true
+    k8s:
       hpaSpec:
         maxReplicas: 5
         metrics:

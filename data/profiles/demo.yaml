@@ -4,6 +4,7 @@ spec:
   components:
     egressGateways:
     - name: istio-egressgateway
+      enabled: true
       k8s:
         resources:
           requests:
@@ -12,6 +13,7 @@ spec:
 
     ingressGateways:
     - name: istio-ingressgateway
+      enabled: true
       k8s:
         resources:
           requests:

@@ -90,7 +90,6 @@ var (
 		name.IstioBaseComponentName:          true,
 		name.IstioOperatorComponentName:      true,
 		name.IstioOperatorCustomResourceName: true,
-		name.CoreDNSComponentName:            true,
 		name.CNIComponentName:                true,
 	}
 )

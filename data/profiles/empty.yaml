@@ -26,8 +26,6 @@ spec:
       enabled: false
     cni:
       enabled: false
-    coreDNS:
-      enabled: false
     ingressGateways:
     egressGateways:
 

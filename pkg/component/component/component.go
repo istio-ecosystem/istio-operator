@@ -107,8 +107,6 @@ func NewComponent(cn name.ComponentName, opts *Options) IstioComponent {
 		component = NewNodeAgentComponent(opts)
 	case name.CNIComponentName:
 		component = NewCNIComponent(opts)
-	case name.CoreDNSComponentName:
-		component = NewCoreDNSComponent(opts)
 	default:
 		panic("Unknown component componentName: " + string(cn))
 	}
@@ -552,50 +550,6 @@ func (c *CNIComponent) ResourceName() string {
 
 // Namespace implements the IstioComponent interface.
 func (c *CNIComponent) Namespace() string {
-	return c.CommonComponentFields.Namespace
-}
-
-// CoreDNSComponent is the egress gateway component.
-type CoreDNSComponent struct {
-	*CommonComponentFields
-}
-
-// NewCoreDNSComponent creates a new IngressComponent and returns a pointer to it.
-func NewCoreDNSComponent(opts *Options) *CoreDNSComponent {
-	cn := name.CoreDNSComponentName
-	return &CoreDNSComponent{
-		&CommonComponentFields{
-			Options:       opts,
-			componentName: cn,
-		},
-	}
-}
-
-// Run implements the IstioComponent interface.
-func (c *CoreDNSComponent) Run() error {
-	return runComponent(c.CommonComponentFields)
-}
-
-// RenderManifest implements the IstioComponent interface.
-func (c *CoreDNSComponent) RenderManifest() (string, error) {
-	if !c.started {
-		return "", fmt.Errorf("component %s not started in RenderManifest", c.ComponentName())
-	}
-	return renderManifest(c.CommonComponentFields)
-}
-
-// ComponentName implements the IstioComponent interface.
-func (c *CoreDNSComponent) ComponentName() name.ComponentName {
-	return c.CommonComponentFields.componentName
-}
-
-// ResourceName implements the IstioComponent interface.
-func (c *CoreDNSComponent) ResourceName() string {
-	return c.CommonComponentFields.resourceName
-}
-
-// Namespace implements the IstioComponent interface.
-func (c *CoreDNSComponent) Namespace() string {
 	return c.CommonComponentFields.Namespace
 }
 

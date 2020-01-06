@@ -22,7 +22,8 @@ components:
           maxSurge: 100%
           maxUnavailable: 25%
   ingressGateways:
-  - k8s:
+  - enabled: true
+    k8s:
       hpaSpec:
         maxReplicas: 5
         metrics:

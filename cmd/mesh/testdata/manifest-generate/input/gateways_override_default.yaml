@@ -23,8 +23,6 @@ spec:
       enabled: false
     cni:
       enabled: false
-    coreDNS:
-      enabled: false
     ingressGateways:
       - namespace: istio-system
         name: istio-ingressgateway

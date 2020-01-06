@@ -154,6 +154,7 @@ spec:
   # Istio Gateway feature
     ingressGateways:
     - name: istio-ingressgateway
+      enabled: true
       k8s:
         hpaSpec:
           maxReplicas: 5

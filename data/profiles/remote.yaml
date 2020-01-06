@@ -20,8 +20,6 @@ spec:
       enabled: false
     cni:
       enabled: false
-    coreDNS:
-      enabled: false
 
   values:
     pilot:

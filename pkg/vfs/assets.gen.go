@@ -43551,14 +43551,15 @@ func examplesGooglecaValuesIstioGoogleCaYaml() (*asset, error) {
 }
 
 var _examplesMulticlusterValuesIstioMulticlusterGatewaysYaml = []byte(`apiVersion: install.istio.io/v1alpha2
-kind: IstioControlPlane
+kind: IstioOperator
 spec:
-  coreDNS:
-    enabled: true
+  addonComponents:
+    coreDNS:
+      enabled: true
 
-  gateways:
-    components:
-      egressGateway:
+  components:
+    egressGateways:
+      - name: istio-egressgateway
         enabled: true
 
   values:
@@ -44295,6 +44296,7 @@ spec:
   # Istio Gateway feature
     ingressGateways:
     - name: istio-ingressgateway
+      enabled: true
       k8s:
         hpaSpec:
           maxReplicas: 5
@@ -44839,6 +44841,7 @@ spec:
   components:
     egressGateways:
     - name: istio-egressgateway
+      enabled: true
       k8s:
         resources:
           requests:
@@ -44847,6 +44850,7 @@ spec:
 
     ingressGateways:
     - name: istio-ingressgateway
+      enabled: true
       k8s:
         resources:
           requests:
@@ -44983,8 +44987,6 @@ spec:
       enabled: false
     cni:
       enabled: false
-    coreDNS:
-      enabled: false
     ingressGateways:
     egressGateways:
 
@@ -45046,8 +45048,6 @@ spec:
       enabled: false
     cni:
       enabled: false
-    coreDNS:
-      enabled: false
     ingressGateways:
     egressGateways:
 
@@ -45107,8 +45107,6 @@ spec:
     galley:
       enabled: false
     cni:
-      enabled: false
-    coreDNS:
       enabled: false
 
   values:
