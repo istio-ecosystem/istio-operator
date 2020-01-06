@@ -119,9 +119,13 @@ spec:
         - --controlPlaneAuthPolicy
         - NONE
         - --discoveryAddress
-        - istio-pilot.istio-system:15010
+        - istio-pilot.istio-system.svc:15012
         - --trust-domain=cluster.local
         env:
+        - name: ISTIO_META_USER_SDS
+          value: "true"
+        - name: CA_ADDR
+          value: istio-pilot.istio-system.svc:15012
         - name: NODE_NAME
           valueFrom:
             fieldRef:
@@ -211,6 +215,9 @@ spec:
             cpu: 111m
             memory: 222Mi
         volumeMounts:
+        - mountPath: /var/run/secrets/tokens
+          name: istio-token
+          readOnly: true
         - mountPath: /etc/certs
           name: istio-certs
           readOnly: true
@@ -222,6 +229,13 @@ spec:
           readOnly: true
       serviceAccountName: istio-ingressgateway-service-account
       volumes:
+      - name: istio-token
+        projected:
+          sources:
+          - serviceAccountToken:
+              audience: istio-ca
+              expirationSeconds: 43200
+              path: istio-token
       - name: istio-certs
         secret:
           optional: true
@@ -275,6 +289,37 @@ spec:
       app: istio-ingressgateway
       release: istio
       istio: ingressgateway
+---
+
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: istio-ingressgateway-sds
+  namespace: istio-ingress-1-ns
+  labels:
+    release: istio
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list"]
+---
+
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: istio-ingressgateway-sds
+  namespace: istio-ingress-1-ns
+  labels:
+    release: istio
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: istio-ingressgateway-sds
+subjects:
+- kind: ServiceAccount
+  name: istio-ingressgateway-service-account
 ---
 
 
@@ -451,7 +496,7 @@ spec:
           - --controlPlaneAuthPolicy
           - NONE
           - --discoveryAddress
-          - istio-pilot.istio-system:15010
+          - istio-pilot.istio-system.svc:15012
           - --trust-domain=cluster.local
           readinessProbe:
             failureThreshold: 30
@@ -472,6 +517,10 @@ spec:
               memory: 128Mi
             
           env:
+          - name: "ISTIO_META_USER_SDS"
+            value: "true"
+          - name: CA_ADDR
+            value: istio-pilot.istio-system.svc:15012
           - name: NODE_NAME
             valueFrom:
               fieldRef:
@@ -527,7 +576,10 @@ spec:
           - name: SDS_ENABLED
             value: "false"
           volumeMounts:
-          
+          - name: istio-token
+            mountPath: /var/run/secrets/tokens
+            readOnly: true
+
           - name: istio-certs
             mountPath: /etc/certs
             readOnly: true
@@ -538,6 +590,13 @@ spec:
             mountPath: "/etc/istio/ingressgateway-ca-certs"
             readOnly: true
       volumes:
+      - name: istio-token
+        projected:
+          sources:
+          - serviceAccountToken:
+              path: istio-token
+              expirationSeconds: 43200
+              audience: istio-ca
       - name: istio-certs
         secret:
           secretName: istio.istio-ingressgateway-service-account
@@ -623,6 +682,37 @@ spec:
       app: istio-ingressgateway
       release: istio
       istio: ingressgateway
+---
+
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: istio-ingressgateway-sds
+  namespace: istio-ingress-2-ns
+  labels:
+    release: istio
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list"]
+---
+
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: istio-ingressgateway-sds
+  namespace: istio-ingress-2-ns
+  labels:
+    release: istio
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: istio-ingressgateway-sds
+subjects:
+- kind: ServiceAccount
+  name: istio-ingressgateway-service-account
 ---
 
 

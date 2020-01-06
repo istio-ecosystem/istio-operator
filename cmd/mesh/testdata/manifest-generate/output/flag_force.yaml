@@ -79,7 +79,7 @@ rules:
     - "certificatesigningrequests"
     - "certificatesigningrequests/approval"
     - "certificatesigningrequests/status"
-  verbs: ["update", "create", "get", "delete"]
+  verbs: ["update", "create", "get", "delete", "watch"]
 - apiGroups: ["discovery.k8s.io"]
   resources: ["endpointslices"]
   verbs: ["get", "list", "watch"]
@@ -91,7 +91,8 @@ kind: ClusterRole
 metadata:
   name: istiod-istio-system
   labels:
-    release: istiod
+    app: pilot
+    release: istio
 rules:
   # Injector management - future plan is to be managed by operator.
   # Only needed if injection/validation are enabled
@@ -158,7 +159,7 @@ rules:
       - "certificatesigningrequests"
       - "certificatesigningrequests/approval"
       - "certificatesigningrequests/status"
-    verbs: ["update", "create", "get", "delete"]
+    verbs: ["update", "create", "get", "delete", "watch"]
   # Used by Istiod to verify the JWT tokens
   - apiGroups: ["authentication.k8s.io"]
     resources: ["tokenreviews"]
@@ -465,6 +466,8 @@ data:
     reportBatchMaxTime: 1s
     disableMixerHttpReports: false
 
+    # Set the following variable to true to disable policy checks by the Mixer.
+    # Note that metrics will still be reported to the Mixer.
     disablePolicyChecks: true
 
     # Automatic protocol detection uses a set of heuristics to
@@ -495,24 +498,8 @@ data:
     #  or "td3/ns/foo/sa/a-service-account" will be treated the same in the Istio mesh.
     trustDomainAliases:
 
-    # Set expected values when SDS is disabled
-    # Unix Domain Socket through which envoy communicates with NodeAgent SDS to get
-    # key/cert for mTLS. Use secret-mount files instead of SDS if set to empty.
-    sdsUdsPath: ""
-
-    # This flag is used by secret discovery service(SDS).
-    # If set to true(prerequisite: https://kubernetes.io/docs/concepts/storage/volumes/#projected), Istio will inject volumes mount
-    # for k8s service account JWT, so that K8s API server mounts k8s service account JWT to envoy container, which
-    # will be used to generate key/cert eventually. This isn't supported for non-k8s case.
-    enableSdsTokenMount: false
-
-    # This flag is used by secret discovery service(SDS).
-    # If set to true, envoy will fetch normal k8s service account JWT from '/var/run/secrets/kubernetes.io/serviceaccount/token'
-    # (https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod)
-    # and pass to sds server, which will be used to request key/cert eventually.
-    # this flag is ignored if enableSdsTokenMount is set.
-    # This isn't supported for non-k8s case.
-    sdsUseK8sSaJwt: false
+    # Used by pilot-agent
+    sdsUdsPath: "unix:/etc/istio/proxy/SDS"
 
     # If true, automatically configure client side mTLS settings to match the corresponding service's
     # server side mTLS authentication policy, when destination rule for that service does not specify
@@ -561,12 +548,10 @@ data:
         zipkin:
           # Address of the Zipkin collector
           address: zipkin.istio-system:9411
-      #
-      # Mutual TLS authentication between sidecars and istio control plane.
+      # If port is 15012, will use SDS.
+      # controlPlaneAuthPolicy is for mounted secrets, will wait for the files.
       controlPlaneAuthPolicy: NONE
-      #
-      # Address where istio Pilot service is running
-      discoveryAddress: istio-pilot.istio-system:15010
+      discoveryAddress: istio-pilot.istio-system.svc:15012
 ---
 
 
@@ -664,7 +649,7 @@ spec:
         - name: PILOT_ENABLE_PROTOCOL_SNIFFING_FOR_INBOUND
           value: "false"
         - name: WEBHOOK
-          value: istiod
+          value: istio-sidecar-injector
         - name: ISTIOD_ADDR
           value: istio-pilot.istio-system.svc:15012
         - name: PILOT_EXTERNAL_GALLEY
@@ -707,6 +692,8 @@ spec:
         - mountPath: /var/lib/istio/local
           name: istiod
           readOnly: true
+      securityContext:
+        fsGroup: 1337
       serviceAccountName: istio-pilot-service-account
       volumes:
       - emptyDir:
@@ -824,14 +811,18 @@ data:
         resources: {}
       {{- end }}
         securityContext:
-          runAsUser: 0
-          runAsNonRoot: false
+          allowPrivilegeEscalation: {{ .Values.global.proxy.privileged }}
           capabilities:
             add:
             - NET_ADMIN
-          {{- if .Values.global.proxy.privileged }}
-          privileged: true
-          {{- end }}
+            - NET_RAW
+            drop:
+            - ALL
+          privileged: {{ .Values.global.proxy.privileged }}
+          readOnlyRootFilesystem: false
+          runAsGroup: 0
+          runAsNonRoot: false
+          runAsUser: 0
         restartPolicy: Always
       {{- end }}
       {{  end -}}
@@ -850,9 +841,17 @@ data:
         imagePullPolicy: "{{ valueOrDefault .Values.global.imagePullPolicy `Always` }}"
         resources: {}
         securityContext:
-          runAsUser: 0
-          runAsNonRoot: false
+          allowPrivilegeEscalation: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+            drop:
+            - ALL
           privileged: true
+          readOnlyRootFilesystem: false
+          runAsGroup: 0
+          runAsNonRoot: false
+          runAsUser: 0
       {{ end }}
       {{- end }}
       containers:
@@ -911,12 +910,12 @@ data:
         - "{{ .ProxyConfig.StatsdUdpAddress }}"
       {{- end }}
       {{- if .Values.global.proxy.envoyMetricsService.enabled }}
-        - --envoyMetricsServiceAddress
-        - "{{ .ProxyConfig.GetEnvoyMetricsService.GetAddress }}"
+        - --envoyMetricsService
+        - '{{ protoToJSON .ProxyConfig.EnvoyMetricsService }}'
       {{- end }}
       {{- if .Values.global.proxy.envoyAccessLogService.enabled }}
-        - --envoyAccessLogServiceAddress
-        - "{{ .ProxyConfig.GetEnvoyAccessLogService.GetAddress }}"
+        - --envoyAccessLogService
+        - '{{ protoToJSON .ProxyConfig.EnvoyAccessLogService }}'
       {{- end }}
         - --proxyAdminPort
         - "{{ .ProxyConfig.ProxyAdminPort }}"
@@ -924,7 +923,10 @@ data:
         - --concurrency
         - "{{ .ProxyConfig.Concurrency }}"
         {{ end -}}
-        {{- if .Values.global.controlPlaneSecurityEnabled }}
+        {{- if .Values.global.istiod.enabled }}
+        - --controlPlaneAuthPolicy
+        - NONE
+        {{- else if .Values.global.controlPlaneSecurityEnabled }}
         - --controlPlaneAuthPolicy
         - MUTUAL_TLS
         {{- else }}
@@ -947,10 +949,14 @@ data:
       {{- if (isset .ObjectMeta.Annotations `sidecar.istio.io/bootstrapOverride`) }}
         - --templateFile=/etc/istio/custom-bootstrap/envoy_bootstrap.json
       {{- end }}
+      {{- if .Values.global.proxy.lifecycle }}
+        lifecycle:
+          {{ toYaml .Values.global.proxy.lifecycle | indent 4 }}
+        {{- end }}
         env:
         # Temp, pending PR to make it default or based on the istiodAddr env
         - name: CA_ADDR
-          value: istiod.istio-system.svc:15012
+          value: istio-pilot.istio-system.svc:15012
         - name: POD_NAME
           valueFrom:
             fieldRef:
@@ -982,9 +988,13 @@ data:
         - name: ISTIO_META_POD_PORTS
           value: |-
             [
+            {{- $first := true }}
             {{- range $index1, $c := .Spec.Containers }}
               {{- range $index2, $p := $c.Ports }}
-                {{if or (ne $index1 0) (ne $index2 0)}},{{end}}{{ structToJSON $p }}
+                {{- if (structToJSON $p) }}
+                {{if not $first}},{{end}}{{ structToJSON $p }}
+                {{- $first = false }}
+                {{- end }}
               {{- end}}
             {{- end}}
             ]
@@ -1022,7 +1032,7 @@ data:
         {{ end }}
         {{- if and .TypeMeta.APIVersion .DeploymentMeta.Name }}
         - name: ISTIO_META_OWNER
-          value: kubernetes://api/{{ .TypeMeta.APIVersion }}/namespaces/{{ valueOrDefault .DeploymentMeta.Namespace `default` }}/{{ toLower .TypeMeta.Kind}}s/{{ .DeploymentMeta.Name }}
+          value: kubernetes://apis/{{ .TypeMeta.APIVersion }}/namespaces/{{ valueOrDefault .DeploymentMeta.Namespace `default` }}/{{ toLower .TypeMeta.Kind}}s/{{ .DeploymentMeta.Name }}
         {{- end}}
         {{- if (isset .ObjectMeta.Annotations `sidecar.istio.io/bootstrapOverride`) }}
         - name: ISTIO_BOOTSTRAP_OVERRIDE
@@ -1052,20 +1062,25 @@ data:
           failureThreshold: {{ annotation .ObjectMeta `readiness.status.sidecar.istio.io/failureThreshold` .Values.global.proxy.readinessFailureThreshold }}
         {{ end -}}
         securityContext:
-          {{- if .Values.global.proxy.privileged }}
-          privileged: true
-          {{- end }}
-          {{- if ne .Values.global.proxy.enableCoreDump true }}
-          readOnlyRootFilesystem: true
-          {{- end }}
-          {{ if eq (annotation .ObjectMeta `sidecar.istio.io/interceptionMode` .ProxyConfig.InterceptionMode) `TPROXY` -}}
+          allowPrivilegeEscalation: {{ .Values.global.proxy.privileged }}
           capabilities:
+            {{ if eq (annotation .ObjectMeta `sidecar.istio.io/interceptionMode` .ProxyConfig.InterceptionMode) `TPROXY` -}}
             add:
             - NET_ADMIN
-          {{ else -}}
+            {{- end }}
+            drop:
+            - ALL
+          privileged: {{ .Values.global.proxy.privileged }}
+          readOnlyRootFilesystem: {{ not .Values.global.proxy.enableCoreDump }}
+          runAsGroup: 1337
+          fsGroup: 1337
+          {{ if eq (annotation .ObjectMeta `sidecar.istio.io/interceptionMode` .ProxyConfig.InterceptionMode) `TPROXY` -}}
+          runAsNonRoot: false
+          runAsUser: 0
+          {{- else -}}
+          runAsNonRoot: true
           runAsUser: 1337
           {{- end }}
-          runAsGroup: 1337
         resources:
           {{ if or (isset .ObjectMeta.Annotations `sidecar.istio.io/proxyCPU`) (isset .ObjectMeta.Annotations `sidecar.istio.io/proxyMemory`) -}}
           requests:
@@ -1189,6 +1204,9 @@ spec:
     name: http-legacy-discovery # direct
   - port: 15014
     name: http-monitoring
+  - port: 443
+    name: https-inject
+    targetPort: 15017
   selector:
     istio: pilot
 ---
