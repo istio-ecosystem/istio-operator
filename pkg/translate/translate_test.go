@@ -35,6 +35,10 @@ func TestProtoToValuesV13(t *testing.T) {
 			desc: "default success",
 			yamlStr: `
 defaultNamespace: istio-system
+cni:
+  components:
+    cni:
+      namespace: kube-system
 `,
 			want: `certmanager:
   enabled: false
@@ -102,6 +106,10 @@ tracing:
 hub: docker.io/istio
 tag: 1.2.3
 defaultNamespace: istio-system
+cni:
+  components:
+    cni:
+      namespace: kube-system
 `,
 			want: `certmanager:
   enabled: false
