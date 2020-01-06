@@ -39475,6 +39475,15 @@ spec:
             cpu: 10m
             memory: 100Mi
 
+  addonComponents:
+    kiali:
+      enabled: true
+    grafana:
+      enabled: true
+    tracing:
+      enabled: true
+
+
   values:
     global:
       disablePolicyChecks: false
@@ -39610,7 +39619,6 @@ spec:
   components:
     pilot:
       enabled: true
-
     policy:
       enabled: false
     telemetry:
@@ -39628,7 +39636,13 @@ spec:
     cni:
       enabled: false
     ingressGateways:
+    - name: istio-ingressgateway
+      enabled: false
     egressGateways:
+
+  addonComponents:
+    prometheus:
+      enabled: false
 
   values:
     global:

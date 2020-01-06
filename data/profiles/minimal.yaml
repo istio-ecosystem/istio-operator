@@ -4,7 +4,6 @@ spec:
   components:
     pilot:
       enabled: true
-
     policy:
       enabled: false
     telemetry:
@@ -22,7 +21,13 @@ spec:
     cni:
       enabled: false
     ingressGateways:
+    - name: istio-ingressgateway
+      enabled: false
     egressGateways:
+
+  addonComponents:
+    prometheus:
+      enabled: false
 
   values:
     global:
