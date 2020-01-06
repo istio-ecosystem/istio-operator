@@ -1,3 +1,6 @@
+addonComponents:
+  prometheus:
+    enabled: true
 components:
   base:
     enabled: true
@@ -565,7 +568,7 @@ values:
     scrapeInterval: 15s
     security:
       enabled: true
-    tag: v2.15.0
+    tag: v2.15.1
     tolerations: []
   security:
     dnsCerts:

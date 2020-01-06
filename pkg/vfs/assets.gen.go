@@ -39578,6 +39578,10 @@ spec:
     ingressGateways:
     egressGateways:
 
+  addonComponents:
+    prometheus:
+      enabled: false
+
   values:
     global:
       useMCP: false

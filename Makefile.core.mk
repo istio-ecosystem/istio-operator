@@ -85,7 +85,7 @@ docker.save: docker
 docker.all: docker docker.push
 
 update-goldens:
-	@REFRESH_GOLDEN=true go test -v ./cmd/mesh/...
+	@UPDATE_GOLDENS=true go test -v ./cmd/mesh/...
 
 e2e:
 	@HUB=$(HUB) TAG=$(TAG) bash -c tests/e2e/e2e.sh
