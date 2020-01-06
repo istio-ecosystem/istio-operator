@@ -40,7 +40,7 @@ defaultNamespace: istio-system
   enabled: false
   namespace: istio-system
 cni:
-  namespace: istio-system
+  namespace: kube-system
 galley:
   enabled: false
   namespace: istio-system
@@ -107,7 +107,7 @@ defaultNamespace: istio-system
   enabled: false
   namespace: istio-system
 cni:
-  namespace: istio-system
+  namespace: kube-system
 galley:
   enabled: false
   namespace: istio-system
