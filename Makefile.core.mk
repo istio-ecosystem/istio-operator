@@ -43,7 +43,7 @@ gen: generate-v1alpha1 generate-vfs tidy-go mirror-licenses
 
 gen-check: clean gen check-clean-repo
 
-clean: clean-values clean-types clean-vfs clean-charts
+clean: clean-values clean-vfs clean-charts
 
 update-charts: installer.sha
 	@scripts/run_update_charts.sh `cat installer.sha`
