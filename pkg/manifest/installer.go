@@ -149,12 +149,12 @@ func ParseK8SYAMLToIstioOperatorSpec(yml string) (*v1alpha1.IstioOperatorSpec, *
 	if err != nil {
 		return nil, nil, err
 	}
-	icp := &v1alpha1.IstioOperatorSpec{}
-	if err := util.UnmarshalWithJSONPB(string(y), icp); err != nil {
+	iop := &v1alpha1.IstioOperatorSpec{}
+	if err := util.UnmarshalWithJSONPB(string(y), iop); err != nil {
 		return nil, nil, err
 	}
 	gvk := o.GroupVersionKind()
-	return icp, &gvk, nil
+	return iop, &gvk, nil
 }
 
 // RenderToDir writes manifests to a local filesystem directory tree.

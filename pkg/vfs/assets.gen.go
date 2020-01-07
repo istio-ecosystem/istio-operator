@@ -38436,7 +38436,7 @@ func chartsSecurityNodeagentValuesYaml() (*asset, error) {
 	return a, nil
 }
 
-var _examplesGooglecaValuesIstioGoogleCaYaml = []byte(`apiVersion: install.istio.io/v1alpha2
+var _examplesGooglecaValuesIstioGoogleCaYaml = []byte(`apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 spec:
   security:
@@ -38478,7 +38478,7 @@ func examplesGooglecaValuesIstioGoogleCaYaml() (*asset, error) {
 	return a, nil
 }
 
-var _examplesMulticlusterValuesIstioMulticlusterGatewaysYaml = []byte(`apiVersion: install.istio.io/v1alpha2
+var _examplesMulticlusterValuesIstioMulticlusterGatewaysYaml = []byte(`apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 spec:
   addonComponents:
@@ -38529,7 +38529,7 @@ func examplesMulticlusterValuesIstioMulticlusterGatewaysYaml() (*asset, error) {
 	return a, nil
 }
 
-var _examplesMulticlusterValuesIstioMulticlusterPrimaryYaml = []byte(`apiVersion: install.istio.io/v1alpha2
+var _examplesMulticlusterValuesIstioMulticlusterPrimaryYaml = []byte(`apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 spec:
   values:
@@ -38580,7 +38580,7 @@ func examplesMulticlusterValuesIstioMulticlusterPrimaryYaml() (*asset, error) {
 	return a, nil
 }
 
-var _examplesUserGatewayIngressGatewayOnlyYaml = []byte(`apiVersion: install.istio.io/v1alpha2
+var _examplesUserGatewayIngressGatewayOnlyYaml = []byte(`apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 spec:
   profile: empty
@@ -38607,7 +38607,7 @@ func examplesUserGatewayIngressGatewayOnlyYaml() (*asset, error) {
 	return a, nil
 }
 
-var _examplesVmValuesIstioMeshexpansionGatewaysYaml = []byte(`apiVersion: install.istio.io/v1alpha2
+var _examplesVmValuesIstioMeshexpansionGatewaysYaml = []byte(`apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 spec:
   values:
@@ -38646,7 +38646,7 @@ func examplesVmValuesIstioMeshexpansionGatewaysYaml() (*asset, error) {
 	return a, nil
 }
 
-var _examplesVmValuesIstioMeshexpansionYaml = []byte(`apiVersion: install.istio.io/v1alpha2
+var _examplesVmValuesIstioMeshexpansionYaml = []byte(`apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 spec:
   values:
@@ -38869,16 +38869,16 @@ func operatorTemplatesClusterrole_bindingYaml() (*asset, error) {
 var _operatorTemplatesCrdYaml = []byte(`apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: istiocontrolplanes.install.istio.io
+  name: istiooperators.install.istio.io
 spec:
   group: install.istio.io
   names:
     kind: IstioOperator
     listKind: IstioOperatorList
-    plural: istiocontrolplanes
-    singular: istiocontrolplane
+    plural: istiooperators
+    singular: istiooperator
     shortNames:
-    - icp
+    - iop
   scope: Namespaced
   subresources:
     status: {}

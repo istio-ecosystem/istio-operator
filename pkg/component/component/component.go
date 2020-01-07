@@ -775,7 +775,7 @@ func renderManifest(c *CommonComponentFields) (string, error) {
 // createHelmRenderer creates a helm renderer for the component defined by c and returns a ptr to it.
 // If a helm subdir is not found in ComponentMap translations, it is assumed to be "addon/<component name>.
 func createHelmRenderer(c *CommonComponentFields) (helm.TemplateRenderer, error) {
-	icp := c.InstallSpec
+	iop := c.InstallSpec
 	cns := string(c.componentName)
 	if c.componentName.IsAddon() {
 		// For addons, distinguish the chart path using the addon name.
@@ -785,7 +785,7 @@ func createHelmRenderer(c *CommonComponentFields) (helm.TemplateRenderer, error)
 	if cm := c.Translator.ComponentMap(cns); cm != nil {
 		helmSubdir = cm.HelmSubdir
 	}
-	return helm.NewHelmRenderer(icp.InstallPackagePath, helmSubdir, cns, c.Namespace)
+	return helm.NewHelmRenderer(iop.InstallPackagePath, helmSubdir, cns, c.Namespace)
 }
 
 // disabledYAMLStr returns the YAML comment string that the given component is disabled.

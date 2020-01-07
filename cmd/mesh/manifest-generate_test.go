@@ -15,6 +15,7 @@
 package mesh
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -144,6 +145,7 @@ func TestManifestGenerateTelemetry(t *testing.T) {
 }
 
 func TestManifestGenerateOrdered(t *testing.T) {
+	testDataDir = filepath.Join(repoRootDir, "cmd/mesh/testdata/manifest-generate")
 	// Since this is testing the special case of stable YAML output order, it
 	// does not use the established test group pattern
 	t.Run("stable_manifest", func(t *testing.T) {
@@ -158,6 +160,7 @@ func TestManifestGenerateOrdered(t *testing.T) {
 		}
 
 		if got1 != got2 {
+			fmt.Printf("%s", util.YAMLDiff(got1, got2))
 			t.Errorf("stable_manifest: Manifest generation is not producing stable text output.")
 		}
 	})

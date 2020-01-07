@@ -116,8 +116,8 @@ func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
 	return t, nil
 }
 
-// OverlayK8sSettings overlays k8s settings from icp over the manifest objects, based on t's translation mappings.
-func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha1.IstioOperatorSpec, componentName name.ComponentName, index int) (string, error) {
+// OverlayK8sSettings overlays k8s settings from iop over the manifest objects, based on t's translation mappings.
+func (t *Translator) OverlayK8sSettings(yml string, iop *v1alpha1.IstioOperatorSpec, componentName name.ComponentName, index int) (string, error) {
 	objects, err := object.ParseK8sObjectsFromYAMLManifest(yml)
 	if err != nil {
 		return "", err
@@ -135,7 +135,7 @@ func (t *Translator) OverlayK8sSettings(yml string, icp *v1alpha1.IstioOperatorS
 		}
 		inPath = strings.Replace(inPath, "gressGateways.", "gressGateways."+fmt.Sprint(index)+".", 1)
 		log.Debugf("Checking for path %s in IstioOperatorSpec", inPath)
-		m, found, err := tpath.GetFromStructPath(icp, inPath)
+		m, found, err := tpath.GetFromStructPath(iop, inPath)
 		if err != nil {
 			return "", err
 		}
@@ -227,12 +227,12 @@ func (t *Translator) ValuesOverlaysToHelmValues(in map[string]interface{}, cname
 	return out
 }
 
-// TranslateHelmValues creates a Helm values.yaml config data tree from icp using the given translator.
-func (t *Translator) TranslateHelmValues(icp *v1alpha1.IstioOperatorSpec, componentName name.ComponentName) (string, error) {
+// TranslateHelmValues creates a Helm values.yaml config data tree from iop using the given translator.
+func (t *Translator) TranslateHelmValues(iop *v1alpha1.IstioOperatorSpec, componentName name.ComponentName) (string, error) {
 	globalVals, globalUnvalidatedVals, apiVals := make(map[string]interface{}), make(map[string]interface{}), make(map[string]interface{})
 
 	// First, translate the IstioOperator API to helm Values.
-	apiValsStr, err := t.ProtoToValues(icp)
+	apiValsStr, err := t.ProtoToValues(iop)
 	if err != nil {
 		return "", err
 	}
@@ -246,11 +246,11 @@ func (t *Translator) TranslateHelmValues(icp *v1alpha1.IstioOperatorSpec, compon
 	}
 
 	// Add global overlay from IstioOperatorSpec.Values/UnvalidatedValues.
-	_, err = tpath.SetFromPath(icp, "Values", &globalVals)
+	_, err = tpath.SetFromPath(iop, "Values", &globalVals)
 	if err != nil {
 		return "", err
 	}
-	_, err = tpath.SetFromPath(icp, "UnvalidatedValues", &globalUnvalidatedVals)
+	_, err = tpath.SetFromPath(iop, "UnvalidatedValues", &globalUnvalidatedVals)
 	if err != nil {
 		return "", err
 	}
@@ -334,7 +334,7 @@ func (t *Translator) protoToHelmValues(node interface{}, root map[string]interfa
 
 // setEnablementAndNamespaces translates the enablement and namespace value of each component in the baseYAML values
 // tree, based on feature/component inheritance relationship.
-func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp *v1alpha1.IstioOperatorSpec) error {
+func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, iop *v1alpha1.IstioOperatorSpec) error {
 	var keys []string
 	for k := range t.ComponentMaps {
 		if k != name.IngressComponentName && k != name.EgressComponentName {
@@ -346,7 +346,7 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp
 	for i := l - 1; i >= 0; i-- {
 		cn := name.ComponentName(keys[i])
 		c := t.ComponentMaps[cn]
-		e, err := t.IsComponentEnabled(cn, icp)
+		e, err := t.IsComponentEnabled(cn, iop)
 		if err != nil {
 			return err
 		}
@@ -360,7 +360,7 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp
 			return err
 		}
 
-		ns, err := name.Namespace(cn, icp)
+		ns, err := name.Namespace(cn, iop)
 		if err != nil {
 			return err
 		}
@@ -370,7 +370,7 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp
 	}
 
 	for cn, gns := range t.GlobalNamespaces {
-		ns, err := name.Namespace(cn, icp)
+		ns, err := name.Namespace(cn, iop)
 		if err != nil {
 			return err
 		}
@@ -384,11 +384,11 @@ func (t *Translator) setEnablementAndNamespaces(root map[string]interface{}, icp
 
 // IsComponentEnabled reports whether the component with name cn is enabled, according to the translations in t,
 // and the contents of ocp.
-func (t *Translator) IsComponentEnabled(cn name.ComponentName, icp *v1alpha1.IstioOperatorSpec) (bool, error) {
+func (t *Translator) IsComponentEnabled(cn name.ComponentName, iop *v1alpha1.IstioOperatorSpec) (bool, error) {
 	if t.ComponentMaps[cn] == nil {
 		return false, nil
 	}
-	return name.IsComponentEnabledInSpec(cn, icp)
+	return name.IsComponentEnabledInSpec(cn, iop)
 }
 
 // AllComponentsNames returns a slice of all components used in t.

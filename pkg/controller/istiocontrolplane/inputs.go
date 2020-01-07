@@ -72,6 +72,9 @@ func (i *IstioRenderingInput) GetInputConfig() interface{} {
 }
 
 func (i *IstioRenderingInput) GetTargetNamespace() string {
+	if i.instance.Spec.MeshConfig == nil {
+		return ""
+	}
 	return i.instance.Spec.MeshConfig.RootNamespace
 }
 

@@ -28,10 +28,10 @@ const (
 )
 
 // ValidateConfig  calls validation func for every defined element in Values
-func ValidateConfig(failOnMissingValidation bool, values *valuesv1alpha1.Values, icpls *v1alpha1.IstioOperatorSpec) util.Errors {
+func ValidateConfig(failOnMissingValidation bool, values *valuesv1alpha1.Values, iopls *v1alpha1.IstioOperatorSpec) util.Errors {
 	var validationErrors util.Errors
-	validationErrors = util.AppendErrs(validationErrors, validateSubTypes(reflect.ValueOf(values).Elem(), failOnMissingValidation, values, icpls))
-	validationErrors = util.AppendErrs(validationErrors, validateFeatures(values, icpls))
+	validationErrors = util.AppendErrs(validationErrors, validateSubTypes(reflect.ValueOf(values).Elem(), failOnMissingValidation, values, iopls))
+	validationErrors = util.AppendErrs(validationErrors, validateFeatures(values, iopls))
 	return validationErrors
 }
 
@@ -52,7 +52,7 @@ func validateFeatures(values *valuesv1alpha1.Values, _ *v1alpha1.IstioOperatorSp
 	return nil
 }
 
-func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *valuesv1alpha1.Values, icpls *v1alpha1.IstioOperatorSpec) util.Errors {
+func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *valuesv1alpha1.Values, iopls *v1alpha1.IstioOperatorSpec) util.Errors {
 	// Dealing with receiver pointer and receiver value
 	ptr := e
 	k := e.Kind()
@@ -71,7 +71,7 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *val
 			validationErrors = append(validationErrors, fmt.Errorf("type %s is missing Validation method", e.Type().String()))
 		}
 	} else {
-		r := method.Call([]reflect.Value{reflect.ValueOf(failOnMissingValidation), reflect.ValueOf(values), reflect.ValueOf(icpls)})[0].Interface().(util.Errors)
+		r := method.Call([]reflect.Value{reflect.ValueOf(failOnMissingValidation), reflect.ValueOf(values), reflect.ValueOf(iopls)})[0].Interface().(util.Errors)
 		if len(r) != 0 {
 			validationErrors = append(validationErrors, r...)
 		}
@@ -83,11 +83,11 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *val
 	for i := 0; i < e.NumField(); i++ {
 		// Corner case of a slice of something, if something is defined type, then process it recursiveley.
 		if e.Field(i).Kind() == reflect.Slice {
-			validationErrors = append(validationErrors, processSlice(e.Field(i), failOnMissingValidation, values, icpls)...)
+			validationErrors = append(validationErrors, processSlice(e.Field(i), failOnMissingValidation, values, iopls)...)
 			continue
 		}
 		if e.Field(i).Kind() == reflect.Map {
-			validationErrors = append(validationErrors, processMap(e.Field(i), failOnMissingValidation, values, icpls)...)
+			validationErrors = append(validationErrors, processMap(e.Field(i), failOnMissingValidation, values, iopls)...)
 			continue
 		}
 		// Validation is not required if it is not a defined type
@@ -98,26 +98,26 @@ func validateSubTypes(e reflect.Value, failOnMissingValidation bool, values *val
 		if util.IsNilOrInvalidValue(val) {
 			continue
 		}
-		validationErrors = append(validationErrors, validateSubTypes(e.Field(i), failOnMissingValidation, values, icpls)...)
+		validationErrors = append(validationErrors, validateSubTypes(e.Field(i), failOnMissingValidation, values, iopls)...)
 	}
 
 	return validationErrors
 }
 
-func processSlice(e reflect.Value, failOnMissingValidation bool, values *valuesv1alpha1.Values, icpls *v1alpha1.IstioOperatorSpec) util.Errors {
+func processSlice(e reflect.Value, failOnMissingValidation bool, values *valuesv1alpha1.Values, iopls *v1alpha1.IstioOperatorSpec) util.Errors {
 	var validationErrors util.Errors
 	for i := 0; i < e.Len(); i++ {
-		validationErrors = append(validationErrors, validateSubTypes(e.Index(i), failOnMissingValidation, values, icpls)...)
+		validationErrors = append(validationErrors, validateSubTypes(e.Index(i), failOnMissingValidation, values, iopls)...)
 	}
 
 	return validationErrors
 }
 
-func processMap(e reflect.Value, failOnMissingValidation bool, values *valuesv1alpha1.Values, icpls *v1alpha1.IstioOperatorSpec) util.Errors {
+func processMap(e reflect.Value, failOnMissingValidation bool, values *valuesv1alpha1.Values, iopls *v1alpha1.IstioOperatorSpec) util.Errors {
 	var validationErrors util.Errors
 	for _, k := range e.MapKeys() {
 		v := e.MapIndex(k)
-		validationErrors = append(validationErrors, validateSubTypes(v, failOnMissingValidation, values, icpls)...)
+		validationErrors = append(validationErrors, validateSubTypes(v, failOnMissingValidation, values, iopls)...)
 	}
 
 	return validationErrors

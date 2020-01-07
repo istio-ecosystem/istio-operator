@@ -42,16 +42,16 @@ import (
 )
 
 func (h *HelmReconciler) renderCharts(in RenderingInput) (ChartManifestsMap, error) {
-	icp, ok := in.GetInputConfig().(*valuesv1alpha1.IstioOperator)
+	iop, ok := in.GetInputConfig().(*valuesv1alpha1.IstioOperator)
 	if !ok {
 		return nil, fmt.Errorf("unexpected type %T in renderCharts", in.GetInputConfig())
 	}
-	icpSpec := icp.Spec
-	if err := validate.CheckIstioOperatorSpec(icpSpec, false); err != nil {
+	iopSpec := iop.Spec
+	if err := validate.CheckIstioOperatorSpec(iopSpec, false); err != nil {
 		return nil, err
 	}
 
-	mergedICPS, err := mergeICPSWithProfile(icpSpec)
+	mergedICPS, err := MergeICPSWithProfile(iopSpec)
 	if err != nil {
 		return nil, err
 	}
@@ -77,10 +77,10 @@ func (h *HelmReconciler) renderCharts(in RenderingInput) (ChartManifestsMap, err
 	return toChartManifestsMap(manifests), err
 }
 
-// mergeICPSWithProfile overlays the values in icp on top of the defaults for the profile given by icp.profile and
+// MergeICPSWithProfile overlays the values in iop on top of the defaults for the profile given by iop.profile and
 // returns the merged result.
-func mergeICPSWithProfile(icp *v1alpha1.IstioOperatorSpec) (*v1alpha1.IstioOperatorSpec, error) {
-	profile := icp.Profile
+func MergeICPSWithProfile(iop *v1alpha1.IstioOperatorSpec) (*v1alpha1.IstioOperatorSpec, error) {
+	profile := iop.Profile
 
 	// This contains the IstioOperator CR.
 	baseCRYAML, err := helm.ReadProfileYAML(profile)
@@ -124,7 +124,7 @@ func mergeICPSWithProfile(icp *v1alpha1.IstioOperatorSpec) (*v1alpha1.IstioOpera
 		}
 	}
 
-	overlayYAML, err := util.MarshalWithJSONPB(icp)
+	overlayYAML, err := util.MarshalWithJSONPB(iop)
 	if err != nil {
 		return nil, err
 	}
@@ -138,37 +138,37 @@ func mergeICPSWithProfile(icp *v1alpha1.IstioOperatorSpec) (*v1alpha1.IstioOpera
 }
 
 // unmarshalAndValidateICP unmarshals the IstioOperator in the crYAML string and validates it.
-// If successful, it returns both a struct and string YAML representations of the IstioOperatorSpec embedded in icp.
+// If successful, it returns both a struct and string YAML representations of the IstioOperatorSpec embedded in iop.
 func unmarshalAndValidateICP(crYAML string) (*v1alpha1.IstioOperatorSpec, string, error) {
 	// TODO: add GroupVersionKind handling as appropriate.
 	if crYAML == "" {
 		return &v1alpha1.IstioOperatorSpec{}, "", nil
 	}
-	icps, _, err := istiomanifest.ParseK8SYAMLToIstioOperatorSpec(crYAML)
+	iops, _, err := istiomanifest.ParseK8SYAMLToIstioOperatorSpec(crYAML)
 	if err != nil {
 		return nil, "", fmt.Errorf("could not parse the overlay file: %s\n\nOriginal YAML:\n%s", err, crYAML)
 	}
-	if errs := validate.CheckIstioOperatorSpec(icps, false); len(errs) != 0 {
+	if errs := validate.CheckIstioOperatorSpec(iops, false); len(errs) != 0 {
 		return nil, "", fmt.Errorf("input file failed validation with the following errors: %s\n\nOriginal YAML:\n%s", errs, crYAML)
 	}
-	icpsYAML, err := util.MarshalWithJSONPB(icps)
+	iopsYAML, err := util.MarshalWithJSONPB(iops)
 	if err != nil {
 		return nil, "", fmt.Errorf("could not marshal: %s", err)
 	}
-	return icps, icpsYAML, nil
+	return iops, iopsYAML, nil
 }
 
-// unmarshalAndValidateICPSpec unmarshals the IstioOperatorSpec in the icpsYAML string and validates it.
-// If successful, it returns a struct representation of icpsYAML.
-func unmarshalAndValidateICPSpec(icpsYAML string) (*v1alpha1.IstioOperatorSpec, error) {
-	icps := &v1alpha1.IstioOperatorSpec{}
-	if err := util.UnmarshalWithJSONPB(icpsYAML, icps); err != nil {
-		return nil, fmt.Errorf("could not unmarshal the merged YAML: %s\n\nYAML:\n%s", err, icpsYAML)
+// unmarshalAndValidateICPSpec unmarshals the IstioOperatorSpec in the iopsYAML string and validates it.
+// If successful, it returns a struct representation of iopsYAML.
+func unmarshalAndValidateICPSpec(iopsYAML string) (*v1alpha1.IstioOperatorSpec, error) {
+	iops := &v1alpha1.IstioOperatorSpec{}
+	if err := util.UnmarshalWithJSONPB(iopsYAML, iops); err != nil {
+		return nil, fmt.Errorf("could not unmarshal the merged YAML: %s\n\nYAML:\n%s", err, iopsYAML)
 	}
-	if errs := validate.CheckIstioOperatorSpec(icps, true); len(errs) != 0 {
+	if errs := validate.CheckIstioOperatorSpec(iops, true); len(errs) != 0 {
 		return nil, fmt.Errorf(errs.Error())
 	}
-	return icps, nil
+	return iops, nil
 }
 
 // ProcessManifest apply the manifest to create or update resources, returns the number of objects processed

@@ -115,9 +115,9 @@ func (r *ReconcileIstioOperator) Reconcile(request reconcile.Request) (reconcile
 		Name:      request.Name,
 		Namespace: ns,
 	}
-	// declare read-only icp instance to create the reconciler
-	icp := &iop.IstioOperator{}
-	if err := r.client.Get(context.TODO(), reqNamespacedName, icp); err != nil {
+	// declare read-only iop instance to create the reconciler
+	iop := &iop.IstioOperator{}
+	if err := r.client.Get(context.TODO(), reqNamespacedName, iop); err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
@@ -125,12 +125,12 @@ func (r *ReconcileIstioOperator) Reconcile(request reconcile.Request) (reconcile
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
-		log.Errorf("error getting IstioOperator icp: %s", err)
+		log.Errorf("error getting IstioOperator iop: %s", err)
 		return reconcile.Result{}, err
 	}
 
-	deleted := icp.GetDeletionTimestamp() != nil
-	finalizers := sets.NewString(icp.GetFinalizers()...)
+	deleted := iop.GetDeletionTimestamp() != nil
+	finalizers := sets.NewString(iop.GetFinalizers()...)
 	if deleted {
 		if !finalizers.Has(finalizer) {
 			log.Info("IstioOperator deleted")
@@ -138,7 +138,7 @@ func (r *ReconcileIstioOperator) Reconcile(request reconcile.Request) (reconcile
 		}
 		log.Info("Deleting IstioOperator")
 
-		reconciler, err := r.factory.New(icp, r.client)
+		reconciler, err := r.factory.New(iop, r.client)
 		if err == nil {
 			err = reconciler.Delete()
 		} else {
@@ -146,17 +146,17 @@ func (r *ReconcileIstioOperator) Reconcile(request reconcile.Request) (reconcile
 		}
 		// TODO: for now, nuke the resources, regardless of errors
 		finalizers.Delete(finalizer)
-		icp.SetFinalizers(finalizers.List())
-		finalizerError := r.client.Update(context.TODO(), icp)
+		iop.SetFinalizers(finalizers.List())
+		finalizerError := r.client.Update(context.TODO(), iop)
 		for retryCount := 0; errors.IsConflict(finalizerError) && retryCount < finalizerMaxRetries; retryCount++ {
 			// workaround for https://github.com/kubernetes/kubernetes/issues/73098 for k8s < 1.14
 			// TODO: make this error message more meaningful.
 			log.Info("conflict during finalizer removal, retrying")
-			_ = r.client.Get(context.TODO(), request.NamespacedName, icp)
-			finalizers = sets.NewString(icp.GetFinalizers()...)
+			_ = r.client.Get(context.TODO(), request.NamespacedName, iop)
+			finalizers = sets.NewString(iop.GetFinalizers()...)
 			finalizers.Delete(finalizer)
-			icp.SetFinalizers(finalizers.List())
-			finalizerError = r.client.Update(context.TODO(), icp)
+			iop.SetFinalizers(finalizers.List())
+			finalizerError = r.client.Update(context.TODO(), iop)
 		}
 		if finalizerError != nil {
 			log.Errorf("error removing finalizer: %s", finalizerError)
@@ -166,8 +166,8 @@ func (r *ReconcileIstioOperator) Reconcile(request reconcile.Request) (reconcile
 	} else if !finalizers.Has(finalizer) {
 		log.Infof("Adding finalizer %v to %v", finalizer, request)
 		finalizers.Insert(finalizer)
-		icp.SetFinalizers(finalizers.List())
-		err := r.client.Update(context.TODO(), icp)
+		iop.SetFinalizers(finalizers.List())
+		err := r.client.Update(context.TODO(), iop)
 		if err != nil {
 			log.Errorf("Failed to update IstioOperator with finalizer, %v", err)
 			return reconcile.Result{}, err
@@ -175,7 +175,13 @@ func (r *ReconcileIstioOperator) Reconcile(request reconcile.Request) (reconcile
 	}
 
 	log.Info("Updating IstioOperator")
-	reconciler, err := r.getOrCreateReconciler(icp)
+	var err error
+	iopMerged := *iop
+	iopMerged.Spec, err = helmreconciler.MergeICPSWithProfile(iop.Spec)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	reconciler, err := r.getOrCreateReconciler(&iopMerged)
 	if err == nil {
 		err = reconciler.Reconcile()
 		if err != nil {
@@ -193,8 +199,8 @@ var (
 	reconcilers = map[string]*helmreconciler.HelmReconciler{}
 )
 
-func reconcilersMapKey(icp *iop.IstioOperator) string {
-	return fmt.Sprintf("%s/%s", icp.Namespace, icp.Name)
+func reconcilersMapKey(iop *iop.IstioOperator) string {
+	return fmt.Sprintf("%s/%s", iop.Namespace, iop.Name)
 }
 
 var ownedResourcePredicates = predicate.Funcs{
@@ -223,24 +229,24 @@ var ownedResourcePredicates = predicate.Funcs{
 	},
 }
 
-func (r *ReconcileIstioOperator) getOrCreateReconciler(icp *iop.IstioOperator) (*helmreconciler.HelmReconciler, error) {
-	key := reconcilersMapKey(icp)
+func (r *ReconcileIstioOperator) getOrCreateReconciler(iop *iop.IstioOperator) (*helmreconciler.HelmReconciler, error) {
+	key := reconcilersMapKey(iop)
 	var err error
 	var reconciler *helmreconciler.HelmReconciler
 	if reconciler, ok := reconcilers[key]; ok {
 		reconciler.SetNeedUpdateAndPrune(false)
 		oldInstance := reconciler.GetInstance()
-		reconciler.SetInstance(icp)
+		reconciler.SetInstance(iop)
 		if reconciler.GetInstance() != oldInstance {
 			//regenerate the reconciler
-			if reconciler, err = r.factory.New(icp, r.client); err == nil {
+			if reconciler, err = r.factory.New(iop, r.client); err == nil {
 				reconcilers[key] = reconciler
 			}
 		}
 		return reconciler, err
 	}
 	//not found - generate the reconciler
-	if reconciler, err = r.factory.New(icp, r.client); err == nil {
+	if reconciler, err = r.factory.New(iop, r.client); err == nil {
 		reconcilers[key] = reconciler
 	}
 	return reconciler, err

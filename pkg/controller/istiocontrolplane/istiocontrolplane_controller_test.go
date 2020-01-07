@@ -128,9 +128,9 @@ func testSwitchProfile(t *testing.T, c testCase) {
 	t.Helper()
 	name := "example-istiocontrolplane"
 	namespace := "istio-system"
-	icp := &iop.IstioOperator{
+	iop := &iop.IstioOperator{
 		Kind:       "IstioOperator",
-		ApiVersion: "install.istio.io/v1alpha2",
+		ApiVersion: "install.istio.io/v1alpha1",
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -143,11 +143,11 @@ func testSwitchProfile(t *testing.T, c testCase) {
 		},
 	}
 	objs := []runtime.Object{
-		icp,
+		iop,
 	}
 
 	s := scheme.Scheme
-	s.AddKnownTypes(validation.SchemeGroupVersion, icp)
+	s.AddKnownTypes(validation.SchemeGroupVersion, iop)
 	cl := fake.NewFakeClientWithScheme(s, objs...)
 	factory := &helmreconciler.Factory{CustomizerFactory: &IstioRenderingCustomizerFactory{}}
 	r := &ReconcileIstioOperator{client: cl, scheme: s, factory: factory}
