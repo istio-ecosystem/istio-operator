@@ -15,10 +15,10 @@ base:
       enabled: true
   enabled: true
 cni:
-  enabled: false
   components:
     cni:
       namespace: kube-system
+  enabled: false
 configManagement:
   components:
     galley:
