@@ -127,16 +127,16 @@ roleRef:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: istiocontrolplanes.install.istio.io
+  name: istiooperators.install.istio.io
 spec:
   group: install.istio.io
   names:
     kind: IstioOperator
     listKind: IstioOperatorList
-    plural: istiocontrolplanes
-    singular: istiocontrolplane
+    plural: istiooperators
+    singular: istiooperator
     shortNames:
-    - icp
+    - iop
   scope: Namespaced
   subresources:
     status: {}

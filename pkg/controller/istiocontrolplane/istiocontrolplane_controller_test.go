@@ -89,8 +89,8 @@ type testCase struct {
 	targetProfile  string
 }
 
-// TestICPController_SwitchProfile
-func TestICPController_SwitchProfile(t *testing.T) {
+// TestIOPController_SwitchProfile
+func TestIOPController_SwitchProfile(t *testing.T) {
 	cases := []testCase{
 		{
 			description:    "switch profile from minimal to default",
@@ -162,8 +162,8 @@ func testSwitchProfile(t *testing.T, c testCase) {
 	if err != nil {
 		t.Fatalf("reconcile: (%v)", err)
 	}
-	// check ICP status
-	succeed, err := checkICPStatus(cl, req.NamespacedName, c.initialProfile)
+	// check IOP status
+	succeed, err := checkIOPStatus(cl, req.NamespacedName, c.initialProfile)
 	if !succeed || err != nil {
 		t.Fatalf("failed to get initial expected IstioOperator status: (%v)", err)
 	}
@@ -180,8 +180,8 @@ func testSwitchProfile(t *testing.T, c testCase) {
 	if res.Requeue {
 		t.Error("reconcile requeue which is not expected")
 	}
-	// check ICP status
-	succeed, err = checkICPStatus(cl, req.NamespacedName, c.targetProfile)
+	// check IOP status
+	succeed, err = checkIOPStatus(cl, req.NamespacedName, c.targetProfile)
 	if !succeed || err != nil {
 		t.Fatalf("failed to get expected target IstioOperator status: (%v)", err)
 	}
@@ -206,7 +206,7 @@ func switchIstioOperatorProfile(cl client.Client, key client.ObjectKey, profile 
 	}
 	return nil
 }
-func checkICPStatus(cl client.Client, key client.ObjectKey, profile string) (bool, error) {
+func checkIOPStatus(cl client.Client, key client.ObjectKey, profile string) (bool, error) {
 	instance := &iop.IstioOperator{}
 	err := cl.Get(context.TODO(), key, instance)
 	if err != nil {

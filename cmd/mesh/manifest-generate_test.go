@@ -177,12 +177,12 @@ func TestLDFlags(t *testing.T) {
 	version.DockerInfo.Hub = "testHub"
 	version.DockerInfo.Tag = "testTag"
 	l := NewLogger(true, os.Stdout, os.Stderr)
-	_, icps, err := genICPS("", "default", "", "", true, l)
+	_, iops, err := genIOPS("", "default", "", "", true, l)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if icps.Hub != version.DockerInfo.Hub || icps.Tag != version.DockerInfo.Tag {
-		t.Fatalf("DockerInfoHub, DockerInfoTag got: %s,%s, want: %s, %s", icps.Hub, icps.Tag, version.DockerInfo.Hub, version.DockerInfo.Tag)
+	if iops.Hub != version.DockerInfo.Hub || iops.Tag != version.DockerInfo.Tag {
+		t.Fatalf("DockerInfoHub, DockerInfoTag got: %s,%s, want: %s, %s", iops.Hub, iops.Tag, version.DockerInfo.Hub, version.DockerInfo.Tag)
 	}
 }
 

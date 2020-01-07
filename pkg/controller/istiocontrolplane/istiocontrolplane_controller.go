@@ -177,7 +177,7 @@ func (r *ReconcileIstioOperator) Reconcile(request reconcile.Request) (reconcile
 	log.Info("Updating IstioOperator")
 	var err error
 	iopMerged := *iop
-	iopMerged.Spec, err = helmreconciler.MergeICPSWithProfile(iop.Spec)
+	iopMerged.Spec, err = helmreconciler.MergeIOPSWithProfile(iop.Spec)
 	if err != nil {
 		return reconcile.Result{}, err
 	}

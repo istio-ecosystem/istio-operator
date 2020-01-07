@@ -51,7 +51,7 @@ func (h *HelmReconciler) renderCharts(in RenderingInput) (ChartManifestsMap, err
 		return nil, err
 	}
 
-	mergedICPS, err := MergeICPSWithProfile(iopSpec)
+	mergedIOPS, err := MergeIOPSWithProfile(iopSpec)
 	if err != nil {
 		return nil, err
 	}
@@ -61,12 +61,12 @@ func (h *HelmReconciler) renderCharts(in RenderingInput) (ChartManifestsMap, err
 		return nil, err
 	}
 
-	cp, err := controlplane.NewIstioOperator(mergedICPS, t)
+	cp, err := controlplane.NewIstioOperator(mergedIOPS, t)
 	if err != nil {
 		return nil, err
 	}
 	if err := cp.Run(); err != nil {
-		return nil, fmt.Errorf("failed to create Istio control plane with spec: \n%v\nerror: %s", mergedICPS, err)
+		return nil, fmt.Errorf("failed to create Istio control plane with spec: \n%v\nerror: %s", mergedIOPS, err)
 	}
 
 	manifests, errs := cp.RenderManifest()
@@ -77,9 +77,9 @@ func (h *HelmReconciler) renderCharts(in RenderingInput) (ChartManifestsMap, err
 	return toChartManifestsMap(manifests), err
 }
 
-// MergeICPSWithProfile overlays the values in iop on top of the defaults for the profile given by iop.profile and
+// MergeIOPSWithProfile overlays the values in iop on top of the defaults for the profile given by iop.profile and
 // returns the merged result.
-func MergeICPSWithProfile(iop *v1alpha1.IstioOperatorSpec) (*v1alpha1.IstioOperatorSpec, error) {
+func MergeIOPSWithProfile(iop *v1alpha1.IstioOperatorSpec) (*v1alpha1.IstioOperatorSpec, error) {
 	profile := iop.Profile
 
 	// This contains the IstioOperator CR.
@@ -104,7 +104,7 @@ func MergeICPSWithProfile(iop *v1alpha1.IstioOperatorSpec) (*v1alpha1.IstioOpera
 		}
 	}
 
-	_, baseYAML, err := unmarshalAndValidateICP(baseCRYAML)
+	_, baseYAML, err := unmarshalAndValidateIOP(baseCRYAML)
 	if err != nil {
 		return nil, err
 	}
@@ -134,12 +134,12 @@ func MergeICPSWithProfile(iop *v1alpha1.IstioOperatorSpec) (*v1alpha1.IstioOpera
 	if err != nil {
 		return nil, fmt.Errorf("could not overlay user config over base: %s", err)
 	}
-	return unmarshalAndValidateICPSpec(mergedYAML)
+	return unmarshalAndValidateIOPSpec(mergedYAML)
 }
 
-// unmarshalAndValidateICP unmarshals the IstioOperator in the crYAML string and validates it.
+// unmarshalAndValidateIOP unmarshals the IstioOperator in the crYAML string and validates it.
 // If successful, it returns both a struct and string YAML representations of the IstioOperatorSpec embedded in iop.
-func unmarshalAndValidateICP(crYAML string) (*v1alpha1.IstioOperatorSpec, string, error) {
+func unmarshalAndValidateIOP(crYAML string) (*v1alpha1.IstioOperatorSpec, string, error) {
 	// TODO: add GroupVersionKind handling as appropriate.
 	if crYAML == "" {
 		return &v1alpha1.IstioOperatorSpec{}, "", nil
@@ -158,9 +158,9 @@ func unmarshalAndValidateICP(crYAML string) (*v1alpha1.IstioOperatorSpec, string
 	return iops, iopsYAML, nil
 }
 
-// unmarshalAndValidateICPSpec unmarshals the IstioOperatorSpec in the iopsYAML string and validates it.
+// unmarshalAndValidateIOPSpec unmarshals the IstioOperatorSpec in the iopsYAML string and validates it.
 // If successful, it returns a struct representation of iopsYAML.
-func unmarshalAndValidateICPSpec(iopsYAML string) (*v1alpha1.IstioOperatorSpec, error) {
+func unmarshalAndValidateIOPSpec(iopsYAML string) (*v1alpha1.IstioOperatorSpec, error) {
 	iops := &v1alpha1.IstioOperatorSpec{}
 	if err := util.UnmarshalWithJSONPB(iopsYAML, iops); err != nil {
 		return nil, fmt.Errorf("could not unmarshal the merged YAML: %s\n\nYAML:\n%s", err, iopsYAML)
