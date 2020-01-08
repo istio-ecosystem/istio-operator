@@ -34,6 +34,7 @@ require (
 	github.com/kylelemons/godebug v1.1.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/nwaples/rardecode v1.0.0 // indirect
+	github.com/onsi/gomega v1.5.0
 	github.com/openshift/api v3.9.1-0.20191008181517-e4fd21196097+incompatible // indirect
 	github.com/openshift/cluster-network-operator v0.0.0-20191009144453-fdceef8e1a7b
 	github.com/pierrec/lz4 v2.2.5+incompatible // indirect
