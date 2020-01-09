@@ -90,7 +90,7 @@ func (u *IstioStatusUpdater) EndReconcile(_ runtime.Object, status map[string]*v
 		return fmt.Errorf("failed to get IstioOperator before updating status due to %v", err)
 	}
 	iop.Spec.ComponentStatus = status
-	return u.reconciler.GetClient().Status().Update(context.TODO(), iop)
+	return u.reconciler.GetClient().Update(context.TODO(), iop)
 }
 
 // RegisterReconciler registers the HelmReconciler with this object
