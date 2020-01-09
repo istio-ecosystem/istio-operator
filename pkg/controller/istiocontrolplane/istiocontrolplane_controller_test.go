@@ -32,7 +32,6 @@ import (
 	mesh "istio.io/api/mesh/v1alpha1"
 	"istio.io/api/operator/v1alpha1"
 	iop "istio.io/operator/pkg/apis/istio/v1alpha1"
-	"istio.io/operator/pkg/apis/istio/v1alpha1/validation"
 	"istio.io/operator/pkg/helmreconciler"
 	"istio.io/operator/pkg/name"
 )
@@ -128,7 +127,7 @@ func testSwitchProfile(t *testing.T, c testCase) {
 	t.Helper()
 	name := "example-istiocontrolplane"
 	namespace := "istio-system"
-	iop := &iop.IstioOperator{
+	iopinstance := &iop.IstioOperator{
 		Kind:       "IstioOperator",
 		ApiVersion: "install.istio.io/v1alpha1",
 		ObjectMeta: metav1.ObjectMeta{
@@ -143,11 +142,11 @@ func testSwitchProfile(t *testing.T, c testCase) {
 		},
 	}
 	objs := []runtime.Object{
-		iop,
+		iopinstance,
 	}
 
 	s := scheme.Scheme
-	s.AddKnownTypes(validation.SchemeGroupVersion, iop)
+	s.AddKnownTypes(iop.SchemeGroupVersion, iopinstance)
 	cl := fake.NewFakeClientWithScheme(s, objs...)
 	factory := &helmreconciler.Factory{CustomizerFactory: &IstioRenderingCustomizerFactory{}}
 	r := &ReconcileIstioOperator{client: cl, scheme: s, factory: factory}
