@@ -146,16 +146,6 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 				"you can use --force flag to skip the version check if you know the tag is correct", targetTag)
 		}
 	}
-
-	if targetVersion != opversion.OperatorVersionString {
-		if !args.force {
-			return fmt.Errorf("the target version %v is not supported by istioctl %v, "+
-				"please download istioctl %v and run upgrade again", targetVersion,
-				opversion.OperatorVersionString, targetVersion)
-		}
-		l.logAndPrintf("Warning. The target version %v does not equal to the binary version %v",
-			targetVersion, opversion.OperatorVersionString)
-	}
 	l.logAndPrintf("Upgrade - target version: %s\n", targetVersion)
 
 	// Create a kube client from args.kubeConfigPath and  args.context
@@ -188,9 +178,6 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *logger) (err error) {
 			currentVersion, targetVersion, err)
 	}
 
-	// Read the overridden values from args.inFilename
-	// TODO: Is this correct? Seems to be checking only the overlays under global. Other parts in ICPS can be
-	// overlaid too.
 	overrideValues, _, err := genOverlayICPS(args.inFilename, args.force)
 	if err != nil {
 		return fmt.Errorf("failed to generate override values from file: %v, error: %v", args.inFilename, err)
