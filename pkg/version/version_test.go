@@ -188,3 +188,174 @@ func errToString(err error) string {
 	}
 	return err.Error()
 }
+
+func TestIsVersionString(t *testing.T) {
+	tests := []struct {
+		name string
+		ver  string
+		want bool
+	}{
+		{
+			name: "empty",
+			ver:  "",
+			want: false,
+		},
+		{
+			name: "unknown",
+			ver:  "unknown",
+			want: false,
+		},
+		{
+			name: "release branch dev",
+			ver:  "1.4-dev",
+			want: true,
+		},
+		{
+			name: "release",
+			ver:  "1.4.5",
+			want: true,
+		},
+		{
+			name: "incorrect",
+			ver:  "1.4.xxx",
+			want: false,
+		},
+		{
+			name: "dev sha",
+			ver:  "a3703b76cf4745f3d56bf653ed751509be116351",
+			want: false,
+		},
+		{
+			name: "dev sha digit prefix",
+			ver:  "60023b76cf4745f3d56bf653ed751509be116351",
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsVersionString(tt.ver); got != tt.want {
+				t.Errorf("IsVersionString() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTagToVersionString(t *testing.T) {
+	//type args struct {
+	//	path string
+	//}
+	tests := []struct {
+		name string
+		//args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "1.4.3",
+			want:    "1.4.3",
+			wantErr: false,
+		},
+		{
+			name:    "1.4.3-distroless",
+			want:    "1.4.3",
+			wantErr: false,
+		},
+		{
+			name:    "1.5.0-alpha.0",
+			want:    "1.5.0",
+			wantErr: false,
+		},
+		{
+			name:    "1.5.0-alpha.0-distroless",
+			want:    "1.5.0",
+			wantErr: false,
+		},
+		{
+			name:    "1.2.10",
+			want:    "1.2.10",
+			wantErr: false,
+		},
+		{
+			name:    "1.4.0-beta.5",
+			want:    "1.4.0",
+			wantErr: false,
+		},
+		{
+			name:    "1.3.0-rc.3",
+			want:    "1.3.0",
+			wantErr: false,
+		},
+		{
+			name:    "1.3.0-rc.3-distroless",
+			want:    "1.3.0",
+			wantErr: false,
+		},
+		{
+			name:    "1.5-dev",
+			want:    "1.5.0",
+			wantErr: false,
+		},
+		{
+			name:    "1.5-dev-distroless",
+			want:    "1.5.0",
+			wantErr: false,
+		},
+		{
+			name:    "1.5-alpha.f850909d7ac95501bbb2ae91f57df218bcf7c630",
+			want:    "1.5.0",
+			wantErr: false,
+		},
+		{
+			name:    "1.5-alpha.f850909d7ac95501bbb2ae91f57df218bcf7c630-distroless",
+			want:    "1.5.0",
+			wantErr: false,
+		},
+		{
+			name:    "release-1.3-20200108-10-15",
+			want:    "1.3.0",
+			wantErr: false,
+		},
+		{
+			name:    "release-1.3-latest-daily",
+			want:    "1.3.0",
+			wantErr: false,
+		},
+		{
+			name:    "release-1.3-20200108-10-15-distroless",
+			want:    "1.3.0",
+			wantErr: false,
+		},
+		{
+			name:    "release-1.3-latest-daily-distroless",
+			want:    "1.3.0",
+			wantErr: false,
+		},
+		{
+			name:    "latest",
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name:    "latest-distroless",
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name:    "999450fd4add69e26ba04d001b811863cba8175b",
+			want:    "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := TagToVersionString(tt.name)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("TagToVersionString() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("TagToVersionString() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

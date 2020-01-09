@@ -21,6 +21,8 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/rest"
 
+	"istio.io/operator/pkg/version"
+
 	"istio.io/operator/pkg/util"
 )
 
@@ -107,7 +109,11 @@ func (client *Client) GetIstioVersions(namespace string) ([]ComponentVersion, er
 				errs = util.AppendErr(errs, err)
 			}
 		}
-		server.Version = pv
+		server.Version, err = version.TagToVersionString(pv)
+		if err != nil {
+			tagErr := fmt.Errorf("unable to convert tag %s into version in pod: %v", pv, pod.Spec.Containers)
+			errs = util.AppendErr(errs, tagErr)
+		}
 		res = append(res, server)
 	}
 	return res, errs.ToError()
