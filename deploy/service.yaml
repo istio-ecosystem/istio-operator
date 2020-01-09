@@ -5,9 +5,12 @@ metadata:
   namespace: istio-operator
   labels:
     name: istio-operator
-  name: istio-operator-metrics
+  name: istio-operator
 spec:
   ports:
+  - port: 443
+    name: webhook
+    targetPort: 8443
   - name: http-metrics
     port: 8383
     targetPort: 8383

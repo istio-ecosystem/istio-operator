@@ -17,7 +17,11 @@ spec:
       serviceAccountName: istio-operator
       containers:
         - name: istio-operator
-          image: gcr.io/istio-testing/operator:1.5-dev
+          image: richardwxn/operator:test
+          ports:
+            - containerPort: 443
+              name: webhook-server
+              protocol: TCP
           command:
           - istio-operator
           - server
@@ -42,4 +46,13 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "istio-operator"
+          volumeMounts:
+            - mountPath: /tmp/k8s-webhook-server/serving-certs
+              name: cert
+              readOnly: true
+      volumes:
+        - name: cert
+          secret:
+            defaultMode: 420
+            secretName: webhook-server-cert
 ...

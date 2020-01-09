@@ -8,4 +8,6 @@ resources:
 - service_account.yaml
 - operator.yaml
 - service.yaml
+- cert.yaml
+- webhook.yaml
 ...

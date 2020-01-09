@@ -41,6 +41,11 @@ func CheckIstioOperatorSpec(is *v1alpha1.IstioOperatorSpec, checkRequired bool) 
 	return util.AppendErrs(errs, validate(defaultValidations, is, nil, checkRequired))
 }
 
+// CheckIstioControlPlaneSpecExcludeValues validates the IstioControlPlane spec schema only, excluding the values.yaml pass through part.
+func CheckIstioControlPlaneSpecExcludeValues(is *v1alpha2.IstioControlPlaneSpec, checkRequired bool) (errs util.Errors) {
+	return util.AppendErrs(errs, validate(defaultValidations, is, nil, checkRequired))
+}
+
 func validate(validations map[string]ValidatorFunc, structPtr interface{}, path util.Path, checkRequired bool) (errs util.Errors) {
 	scope.Debugf("validate with path %s, %v (%T)", path, structPtr, structPtr)
 	if structPtr == nil {

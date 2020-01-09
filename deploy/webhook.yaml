@@ -1,0 +1,26 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: validating-webhook-configuration
+  annotations:
+    certmanager.k8s.io/inject-ca-from: istio-operator/webhook-server-cert
+webhooks:
+  - clientConfig:
+      caBundle: Cg==
+      service:
+        name: istio-operator
+        namespace: istio-operator
+        path: /validate-install-istio-io-v1alpha2-istiocontrolplane
+    failurePolicy: Fail
+    name: vistiocontrolplane.kb.io
+    rules:
+      - apiGroups:
+          - install.istio.io
+        apiVersions:
+          - v1alpha2
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - istiocontrolplanes

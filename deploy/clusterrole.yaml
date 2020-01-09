@@ -111,4 +111,17 @@ rules:
   - serviceaccounts
   verbs:
   - '*'
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - '*'
+- apiGroups:
+  - certmanager.k8s.io
+  resources:
+  - certificate
+  - issuer
+  verbs:
+  - '*'
 ...

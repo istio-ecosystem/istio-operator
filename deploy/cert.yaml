@@ -1,0 +1,26 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  labels:
+    app: istio-operator
+  name: webhook-server-cert
+  namespace: istio-operator
+spec:
+  commonName: istio-operator.istio-operator.svc
+  dnsNames:
+    - istio-operator.istio-operator.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: webhook-selfsigned-issuer
+  secretName: webhook-server-cert
+---
+
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Issuer
+metadata:
+  labels:
+    app: istio-operator
+  name: webhook-selfsigned-issuer
+  namespace: istio-operator
+spec:
+  selfSigned: {}

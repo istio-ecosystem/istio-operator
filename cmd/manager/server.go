@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"os"
 
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-
 	drm "github.com/openshift/cluster-network-operator/pkg/util/k8s"
 	"github.com/spf13/cobra"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
@@ -30,6 +30,7 @@ import (
 	"istio.io/operator/pkg/apis"
 	"istio.io/operator/pkg/controller"
 	"istio.io/operator/pkg/controller/istiocontrolplane"
+	iscpwebhook "istio.io/operator/pkg/webhook/istiocontrolplane"
 	"istio.io/pkg/ctrlz"
 	"istio.io/pkg/log"
 )
@@ -127,6 +128,14 @@ func run() {
 	if err := controller.AddToManager(mgr); err != nil {
 		log.Fatalf("Could not add all controllers to operator manager: %v", err)
 	}
+
+	// setup webhooks
+	log.Info("setting up webhook server")
+	crv := mgr.GetWebhookServer()
+	crv.CertDir = "/tmp/k8s-webhook-server/serving-certs"
+	crv.Port = 8443
+	crv.Register("/validate-install-istio-io-v1alpha2-istiocontrolplane",
+		&webhook.Admission{Handler: &iscpwebhook.IscpValidator{}})
 
 	log.Info("Starting the Cmd.")
 
