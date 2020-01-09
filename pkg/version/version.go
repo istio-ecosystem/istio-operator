@@ -29,11 +29,6 @@ const (
 	releasePrefix = "release-"
 )
 
-const (
-	// releasePrefix is the prefix we used in http://gcr.io/istio-release for releases
-	releasePrefix = "release-"
-)
-
 // CompatibilityMapping is a mapping from an Istio operator version and the corresponding recommended and
 // supported versions of Istio.
 type CompatibilityMapping struct {
