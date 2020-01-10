@@ -103,8 +103,8 @@ func run() {
 
 	// Create a new Cmd to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{
-		Namespace:          watchNS,
-		MetricsBindAddress: fmt.Sprintf("%s:%d", metricsHost, metricsPort),
+		Namespace:               watchNS,
+		MetricsBindAddress:      fmt.Sprintf("%s:%d", metricsHost, metricsPort),
 		LeaderElection:          leaderElectionEnabled,
 		LeaderElectionNamespace: leaderElectionNS,
 		LeaderElectionID:        "istio-operator-lock",
