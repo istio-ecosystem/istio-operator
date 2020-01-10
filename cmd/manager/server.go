@@ -21,7 +21,6 @@ import (
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	drm "github.com/openshift/cluster-network-operator/pkg/util/k8s"
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -106,8 +105,6 @@ func run() {
 	mgr, err := manager.New(cfg, manager.Options{
 		Namespace:          watchNS,
 		MetricsBindAddress: fmt.Sprintf("%s:%d", metricsHost, metricsPort),
-		// Workaround for https://github.com/kubernetes-sigs/controller-runtime/issues/321
-		MapperProvider:          drm.NewDynamicRESTMapper,
 		LeaderElection:          leaderElectionEnabled,
 		LeaderElectionNamespace: leaderElectionNS,
 		LeaderElectionID:        "istio-operator-lock",
