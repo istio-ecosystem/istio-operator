@@ -23,7 +23,7 @@ import (
 
 const (
 	// OperatorCodeBaseVersion is the version string from the code base.
-	OperatorCodeBaseVersion = "1.4.3"
+	OperatorCodeBaseVersion = "1.4.4"
 )
 
 var (
