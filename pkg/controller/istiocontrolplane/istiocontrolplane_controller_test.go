@@ -37,15 +37,15 @@ import (
 )
 
 var (
-	healthyVersionStatus = &v1alpha1.IstioOperatorSpec_VersionStatus{
-		Status:       v1alpha1.IstioOperatorSpec_HEALTHY,
+	healthyVersionStatus = &v1alpha1.InstallStatus_VersionStatus{
+		Status:       v1alpha1.InstallStatus_HEALTHY,
 		StatusString: "HEALTHY",
 	}
-	minimalStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
+	minimalStatus = map[string]*v1alpha1.InstallStatus_VersionStatus{
 		string(name.IstioBaseComponentName): healthyVersionStatus,
 		string(name.PilotComponentName):     healthyVersionStatus,
 	}
-	defaultStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
+	defaultStatus = map[string]*v1alpha1.InstallStatus_VersionStatus{
 		string(name.IstioBaseComponentName):       healthyVersionStatus,
 		string(name.PilotComponentName):           healthyVersionStatus,
 		string(name.SidecarInjectorComponentName): healthyVersionStatus,
@@ -56,7 +56,7 @@ var (
 		string(name.IngressComponentName):         healthyVersionStatus,
 		string(name.AddonComponentName):           healthyVersionStatus,
 	}
-	demoStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
+	demoStatus = map[string]*v1alpha1.InstallStatus_VersionStatus{
 		string(name.IstioBaseComponentName):       healthyVersionStatus,
 		string(name.PilotComponentName):           healthyVersionStatus,
 		string(name.SidecarInjectorComponentName): healthyVersionStatus,
@@ -68,7 +68,7 @@ var (
 		string(name.EgressComponentName):          healthyVersionStatus,
 		string(name.AddonComponentName):           healthyVersionStatus,
 	}
-	sdsStatus = map[string]*v1alpha1.IstioOperatorSpec_VersionStatus{
+	sdsStatus = map[string]*v1alpha1.InstallStatus_VersionStatus{
 		string(name.IstioBaseComponentName):       healthyVersionStatus,
 		string(name.PilotComponentName):           healthyVersionStatus,
 		string(name.SidecarInjectorComponentName): healthyVersionStatus,
@@ -186,7 +186,7 @@ func testSwitchProfile(t *testing.T, c testCase) {
 	}
 }
 
-func statusExpected(s1, s2 *v1alpha1.IstioOperatorSpec_VersionStatus) bool {
+func statusExpected(s1, s2 *v1alpha1.InstallStatus_VersionStatus) bool {
 	return s1.Status.String() == s2.Status.String()
 }
 
@@ -211,25 +211,25 @@ func checkIOPStatus(cl client.Client, key client.ObjectKey, profile string) (boo
 	if err != nil {
 		return false, err
 	}
-	var status map[string]*v1alpha1.IstioOperatorSpec_VersionStatus
+	var expectedComponentStatus map[string]*v1alpha1.InstallStatus_VersionStatus
 	switch profile {
 	case "minimal":
-		status = minimalStatus
+		expectedComponentStatus = minimalStatus
 	case "default":
-		status = defaultStatus
+		expectedComponentStatus = defaultStatus
 	case "sds":
-		status = sdsStatus
+		expectedComponentStatus = sdsStatus
 	case "demo":
-		status = demoStatus
+		expectedComponentStatus = demoStatus
 	}
-	spec := instance.Spec
-	size := len(spec.ComponentStatus)
-	expectedSize := len(status)
+	status := instance.Status
+	size := len(status.ComponentStatus)
+	expectedSize := len(expectedComponentStatus)
 	if size != expectedSize {
-		return false, fmt.Errorf("status got: %s, want: %s", pretty.Sprint(spec.ComponentStatus), pretty.Sprint(status))
+		return false, fmt.Errorf("status got: %s, want: %s", pretty.Sprint(status.ComponentStatus), pretty.Sprint(expectedComponentStatus))
 	}
-	for k, v := range spec.ComponentStatus {
-		if s, ok := status[k]; ok {
+	for k, v := range status.ComponentStatus {
+		if s, ok := expectedComponentStatus[k]; ok {
 			if !statusExpected(s, v) {
 				return false, fmt.Errorf("failed to get Expected IstioOperator status: (%s)", k)
 			}
