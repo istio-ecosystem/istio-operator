@@ -30,7 +30,7 @@ import (
 // function prunes all resources.
 func (h *HelmReconciler) Prune(all bool) error {
 	allErrors := []error{}
-	namespacedResourceMap, nonNamespacedResourceMap := h.customizer.PruningDetails().GetResourceTypes()
+	namespacedResourceMap, nonNamespacedResourceMap, _ := h.customizer.PruningDetails().GetResourceTypes()
 	targetNamespace := h.customizer.Input().GetTargetNamespace()
 	err := h.PruneResources(namespacedResourceMap, all, targetNamespace)
 	if err != nil {

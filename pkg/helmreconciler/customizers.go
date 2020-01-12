@@ -78,6 +78,7 @@ type SimplePruningDetails struct {
 	// used by the pruning process to clean cluster wide resources, the pruning process will only try to delete
 	// resource of 'true' to accelerate the pruning loop
 	NonNamespacedResourceMap map[schema.GroupVersionKind]bool
+	PruningDetailsMU         *sync.Mutex
 }
 
 var _ PruningDetails = &SimplePruningDetails{}
@@ -99,8 +100,8 @@ func (m *SimplePruningDetails) GetOwnerAnnotations() map[string]string {
 }
 
 // GetResourceTypes returns this.NamespacedResourceMap and this.NonNamespacedResourceMap
-func (m *SimplePruningDetails) GetResourceTypes() (namespacedMap map[schema.GroupVersionKind]bool, nonNamespacedMap map[schema.GroupVersionKind]bool) {
-	return m.NamespacedResourceMap, m.NonNamespacedResourceMap
+func (m *SimplePruningDetails) GetResourceTypes() (map[schema.GroupVersionKind]bool, map[schema.GroupVersionKind]bool, *sync.Mutex) {
+	return m.NamespacedResourceMap, m.NonNamespacedResourceMap, m.PruningDetailsMU
 }
 
 // DefaultChartCustomizerFactory is a factory for creating DefaultChartCustomizer objects

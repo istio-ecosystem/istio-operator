@@ -16,6 +16,7 @@ package istiocontrolplane
 
 import (
 	"strconv"
+	"sync"
 
 	"istio.io/operator/pkg/apis/istio/v1alpha1"
 
@@ -150,5 +151,6 @@ func NewIstioPruningDetails(instance *v1alpha1.IstioOperator) helmreconciler.Pru
 		},
 		NamespacedResourceMap:    namespacedResourceMap,
 		NonNamespacedResourceMap: nonNamespacedResourceMap,
+		PruningDetailsMU:         &sync.Mutex{},
 	}
 }

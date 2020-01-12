@@ -220,13 +220,14 @@ func (h *HelmReconciler) ProcessObject(chartName string, obj *unstructured.Unstr
 	gvk := mutatedObj.GetObjectKind().GroupVersionKind()
 	receiver.SetGroupVersionKind(gvk)
 	objectKey, _ := client.ObjectKeyFromObject(mutatedObj)
-	namespacedResourceMap, nonNamespacedResourceMap := h.customizer.PruningDetails().GetResourceTypes()
-	if val, ok := namespacedResourceMap[gvk]; !val && ok {
+	namespacedResourceMap, nonNamespacedResourceMap, pruningDetailsMU := h.customizer.PruningDetails().GetResourceTypes()
+	pruningDetailsMU.Lock()
+	if _, ok := namespacedResourceMap[gvk]; ok {
 		namespacedResourceMap[gvk] = true
-	}
-	if val, ok := nonNamespacedResourceMap[gvk]; !val && ok {
+	} else if _, ok := nonNamespacedResourceMap[gvk]; ok {
 		nonNamespacedResourceMap[gvk] = true
 	}
+	pruningDetailsMU.Unlock()
 
 	var patch Patch
 
