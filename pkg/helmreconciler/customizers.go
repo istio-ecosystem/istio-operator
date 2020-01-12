@@ -69,8 +69,14 @@ type SimplePruningDetails struct {
 	// OwnerAnnotations to be added to all rendered resources.
 	OwnerAnnotations map[string]string
 	// NamespacedResourceMap rendered by these charts
+        // It is the namespaced scoped resource map of Group/Kind/Version as key and bool as value
+        // used by the pruning process to clean cluster wide resources, the pruning process will only try to delete
+        // resource of 'true' to accelerate the pruning loop
 	NamespacedResourceMap map[schema.GroupVersionKind]bool
 	// NonNamespacedResourceMap rendered by these charts
+	// It is the cluster wide resource map of Group/Kind/Version as key and bool as value
+        // used by the pruning process to clean cluster wide resources, the pruning process will only try to delete
+	// resource of 'true' to accelerate the pruning loop
 	NonNamespacedResourceMap map[schema.GroupVersionKind]bool
 }
 

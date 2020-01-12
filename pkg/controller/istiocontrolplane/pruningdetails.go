@@ -69,6 +69,9 @@ var (
 		{Group: "apiextensions.k8s.io", Version: "v1beta1", Kind: "CustomResourceDefinition"},
 	}
 
+	// namespacedResourceMap is the namespaced scoped resource map of Group/Kind/Version as key and bool as value
+	// initial value of each Group/Kind/Version is 'false', which will be updated to 'true' if the operator creates the
+	// corresponding resource, then the prune process will only try to delete resource of 'true' to accelerate the pruning loop
 	// ordered by which types should be deleted, first to last
 	namespacedResourceMap = map[schema.GroupVersionKind]bool{
 		{Group: "autoscaling", Version: "v2beta1", Kind: "HorizontalPodAutoscaler"}:     false,
@@ -117,6 +120,9 @@ var (
 		{Group: "security.istio.io", Version: "v1beta1", Kind: "RequestAuthentication"}: false,
 	}
 
+	// nonNamespacedResourceMap is the cluster wide resource map of Group/Kind/Version as key and bool as value
+        // initial value of each Group/Kind/Version is 'false', which will be updated to 'true' if the operator creates the
+        // corresponding resource, then the prune process will only try to delete resource of 'true' to accelerate the pruning loop
 	// ordered by which types should be deleted, first to last
 	nonNamespacedResourceMap = map[schema.GroupVersionKind]bool{
 		{Group: "admissionregistration.k8s.io", Version: "v1beta1", Kind: "MutatingWebhookConfiguration"}:   false,
