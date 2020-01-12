@@ -64,7 +64,7 @@ type PruningDetails interface {
 	GetOwnerAnnotations() map[string]string
 	// GetResourceTypes returns the types of resources managed by the operator.  These types are used when selecting
 	// resources to be pruned.
-	GetResourceTypes() (namespaced []schema.GroupVersionKind, nonNamespaced []schema.GroupVersionKind)
+	GetResourceTypes() (namespacedMap map[schema.GroupVersionKind]bool, nonNamespacedMap map[schema.GroupVersionKind]bool)
 }
 
 // ChartManifestsMap is a typedef representing a map of chart-name: []manifest, i.e. the manifests

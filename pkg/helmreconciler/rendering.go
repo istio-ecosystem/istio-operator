@@ -217,8 +217,16 @@ func (h *HelmReconciler) ProcessObject(chartName string, obj *unstructured.Unstr
 	}
 
 	receiver := &unstructured.Unstructured{}
-	receiver.SetGroupVersionKind(mutatedObj.GetObjectKind().GroupVersionKind())
+	gvk := mutatedObj.GetObjectKind().GroupVersionKind()
+	receiver.SetGroupVersionKind(gvk)
 	objectKey, _ := client.ObjectKeyFromObject(mutatedObj)
+	namespacedResourceMap, nonNamespacedResourceMap := h.customizer.PruningDetails().GetResourceTypes()
+	if val, ok := namespacedResourceMap[gvk]; !val && ok {
+		namespacedResourceMap[gvk] = true
+	}
+	if val, ok := nonNamespacedResourceMap[gvk]; !val && ok {
+		nonNamespacedResourceMap[gvk] = true
+	}
 
 	var patch Patch
 
