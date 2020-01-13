@@ -23,6 +23,7 @@ import (
 	"k8s.io/helm/pkg/manifest"
 
 	"istio.io/api/operator/v1alpha1"
+	iop "istio.io/operator/pkg/apis/istio/v1alpha1"
 	"istio.io/operator/pkg/util"
 	"istio.io/pkg/log"
 )
@@ -438,7 +439,7 @@ func NewOwnerReferenceDecorator(instance runtime.Object) (RenderingListener, err
 	}
 	return &ownerReferenceDecorator{
 		DefaultRenderingListener: &DefaultRenderingListener{},
-		ownerReference:           metav1.NewControllerRef(instanceAccessor, v1alpha1.IstioOperatorGVK),
+		ownerReference:           metav1.NewControllerRef(instanceAccessor, iop.IstioOperatorGVK),
 		namespace:                instanceAccessor.GetNamespace(),
 	}, nil
 }
