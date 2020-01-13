@@ -22,7 +22,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"istio.io/operator/pkg/helmreconciler"
-	"istio.io/operator/pkg/util"
 )
 
 const (
@@ -136,8 +135,8 @@ func NewIstioPruningDetails(instance *v1alpha1.IstioOperator) helmreconciler.Pru
 	return &helmreconciler.SimplePruningDetails{
 		OwnerLabels: map[string]string{
 			OwnerNameKey:  name,
-			OwnerGroupKey: util.IstioOperatorGVK.Group,
-			OwnerKindKey:  util.IstioOperatorGVK.Kind,
+			OwnerGroupKey: v1alpha1.IstioOperatorGVK.Group,
+			OwnerKindKey:  v1alpha1.IstioOperatorGVK.Kind,
 		},
 		OwnerAnnotations: map[string]string{
 			OwnerGenerationKey: generation,

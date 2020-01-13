@@ -30,6 +30,13 @@ var (
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
+
+	// IstioOperatorGVK is GVK for IstioOperator
+	IstioOperatorGVK = schema.GroupVersionKind{
+		Version: "v1alpha1",
+		Group:   "install.istio.io",
+		Kind:    "IstioOperator",
+	}
 )
 
 // Register the IstioOperator and IstioOperatorList API kind
