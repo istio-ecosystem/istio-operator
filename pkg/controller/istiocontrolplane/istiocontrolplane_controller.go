@@ -42,8 +42,8 @@ import (
 
 const (
 	finalizer = "istio-finalizer.install.istio.io"
-	// finalizerMaxRetries defines the maximum number of attempts to add finalizers.
-	finalizerMaxRetries = 10
+	// finalizerMaxRetries defines the maximum number of attempts to remove finalizers.
+	finalizerMaxRetries = 1
 )
 
 /**
