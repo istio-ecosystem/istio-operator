@@ -847,6 +847,14 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: status.hostIP
+        - name: SERVICE_ACCOUNT
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
+        - name: ISTIO_META_WORKLOAD_NAME
+          value: istio-ingressgateway
+        - name: ISTIO_META_OWNER
+          value: kubernetes://api/apps/v1/namespaces/istio-system/deployments/istio-ingressgateway
         - name: ISTIO_META_POD_NAME
           valueFrom:
             fieldRef:
@@ -1153,7 +1161,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config-volume: a7720cffba65fa6c445efc64d7249b94da43266c65337573364f8c436f60f91c
+        checksum/config-volume: 41d3d641e3c68263c35dbd7f64bc5da98b345e6fe63c0be0c5ba3bc768fe144c
         sidecar.istio.io/inject: "false"
       labels:
         app: sidecarInjectorWebhook
