@@ -10829,14 +10829,15 @@ spec:
 {{- end }}
           volumeMounts:
   {{- if .Values.global.configValidation }}
-          - name: istio-certs
-            mountPath: /etc/certs
-            readOnly: true
-  {{- end }}
-  {{- if .Values.global.certificates }}
+    {{- if .Values.global.certificates }}
           - name: dnscerts
             mountPath: /etc/dnscerts
             readOnly: true
+    {{- else }}
+          - name: istio-certs
+            mountPath: /etc/certs
+            readOnly: true
+    {{- end }}
   {{- end }}
           - name: config
             mountPath: /etc/config
@@ -10926,7 +10927,7 @@ spec:
             readOnly: true
           - name: istio-token
             mountPath: /var/run/secrets/tokens
-          {{ else }}
+          {{- else }}
           - name: istio-certs
             mountPath: /etc/certs
             readOnly: true
@@ -10934,11 +10935,7 @@ spec:
 {{- end }}
 
       volumes:
-  {{- if or .Values.global.controlPlaneSecurityEnabled .Values.global.configValidation }}
-      - name: istio-certs
-        secret:
-          secretName: istio.istio-galley-service-account
-      {{- if .Values.global.sds.enabled }}
+  {{- if and .Values.global.controlPlaneSecurityEnabled .Values.global.sds.enabled }}
       - hostPath:
           path: /var/run/sds
         name: sds-uds-path
@@ -10949,12 +10946,16 @@ spec:
               audience: {{ .Values.global.sds.token.aud }}
               expirationSeconds: 43200
               path: istio-token
-      {{- end }}
   {{- end }}
-  {{- if .Values.global.certificates }}
+  {{- if and .Values.global.configValidation .Values.global.certificates }}
       - name: dnscerts
         secret:
           secretName: dns.istio-galley-service-account
+  {{- end }}
+  {{- if or (and .Values.global.controlPlaneSecurityEnabled (not .Values.global.sds.enabled)) (and .Values.global.configValidation (not .Values.global.certificates)) }}
+      - name: istio-certs
+        secret:
+          secretName: istio.istio-galley-service-account
   {{- end }}
   {{- if .Values.global.controlPlaneSecurityEnabled }}
       - name: envoy-config
