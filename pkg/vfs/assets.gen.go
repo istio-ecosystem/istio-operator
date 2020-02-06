@@ -8531,7 +8531,23 @@ rules:
   - nodes
   verbs:
   - get
-`)
+---
+{{- if .Values.cni.repair.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: istio-cni-repair-role
+  labels:
+    app: istio-cni
+    release: {{ .Release.Name }}
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch", "delete", "patch", "update" ]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "watch", "delete", "patch", "update", "create" ]
+{{- end }}`)
 
 func chartsIstioCniTemplatesClusterroleYamlBytes() ([]byte, error) {
 	return _chartsIstioCniTemplatesClusterroleYaml, nil
@@ -8579,7 +8595,24 @@ subjects:
   name: istio-cni
   namespace: {{ .Release.Namespace }}
 {{- end }}
-`)
+---
+{{- if .Values.cni.repair.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-cni-repair-rolebinding
+  namespace: {{ .Release.Namespace}}
+  labels:
+    k8s-app: istio-cni-repair
+subjects:
+- kind: ServiceAccount
+  name: istio-cni
+  namespace: {{ .Release.Namespace}}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-cni-repair-role
+{{- end }}`)
 
 func chartsIstioCniTemplatesClusterrolebindingYamlBytes() ([]byte, error) {
 	return _chartsIstioCniTemplatesClusterrolebindingYaml, nil
@@ -8714,6 +8747,41 @@ spec:
               name: cni-bin-dir
             - mountPath: /host/etc/cni/net.d
               name: cni-net-dir
+{{- if .Values.cni.repair.enabled }}
+        - name: repair-cni
+{{- if contains "/" .Values.cni.image }}
+          image: "{{ .Values.cni.image }}"
+{{- else }}
+          image: "{{ .Values.cni.hub | default .Values.global.hub }}/{{ .Values.cni.image | default "install-cni" }}:{{ .Values.cni.tag | default .Values.global.tag }}"
+{{- end }}
+{{- if or .Values.cni.pullPolicy .Values.global.imagePullPolicy }}
+          imagePullPolicy: {{ .Values.cni.pullPolicy | default .Values.global.imagePullPolicy }}
+{{- end }}
+
+          command: ["/opt/cni/bin/istio-cni-repair"]
+          env:
+          - name: "REPAIR_NODE-NAME"
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: "REPAIR_LABEL-PODS"
+            value: "{{.Values.cni.repair.labelPods}}"
+          - name: "REPAIR_CREATE-EVENTS"
+            value: "{{.Values.cni.repair.createEvents}}"
+          # Set to true to enable pod deletion
+          - name: "REPAIR_DELETE-PODS"
+            value: "{{.Values.cni.repair.deletePods}}"
+          - name: "REPAIR_RUN-AS-DAEMON"
+            value: "true"
+          - name: "REPAIR_SIDECAR-ANNOTATION"
+            value: "sidecar.istio.io/status"
+          - name: "REPAIR_INIT-CONTAINER-NAME"
+            value: "istio-init"
+          - name: "REPAIR_BROKEN-POD-LABEL-KEY"
+            value: "{{.Values.cni.repair.brokenPodLabelKey}}"
+          - name: "REPAIR_BROKEN-POD-LABEL-VALUE"
+            value: "{{.Values.cni.repair.brokenPodLabelValue}}"
+{{- end }}
       volumes:
         # Used to install CNI.
         - name: cni-bin-dir
@@ -8800,7 +8868,18 @@ var _chartsIstioCniValuesYaml = []byte(`cni:
   # This can be used to bind a preexisting ClusterRole to the istio/cni ServiceAccount
   # e.g. if you use PodSecurityPolicies
   psp_cluster_role: ""
-`)
+
+  repair:
+    enabled: true
+    hub: gcr.io/istio-testing
+    tag: latest
+
+    labelPods: "true"
+    createEvents: "true"
+    deletePods: "false"
+
+    brokenPodLabelKey: "cni.istio.io/uninitialized"
+    brokenPodLabelValue: "true"`)
 
 func chartsIstioCniValuesYamlBytes() ([]byte, error) {
 	return _chartsIstioCniValuesYaml, nil
@@ -8899,12 +8978,18 @@ func chartsIstioControlIstioAutoinjectNotesTxt() (*asset, error) {
 }
 
 var _chartsIstioControlIstioAutoinjectFilesInjectionTemplateYaml = []byte(`template: |
+  {{- $cniDisabled := (not .Values.istio_cni.enabled) }}
+  {{- $cniRepairEnabled := (and .Values.istio_cni.enabled .Values.istio_cni.repair.enabled) }}
+  {{- $enableInitContainer := (or $cniDisabled $cniRepairEnabled .Values.global.proxy.enableCoreDump) }}
   rewriteAppHTTPProbe: {{ valueOrDefault .Values.sidecarInjectorWebhook.rewriteAppHTTPProbe false }}
-  {{- if or (not .Values.istio_cni.enabled) .Values.global.proxy.enableCoreDump }}
+  {{- if $enableInitContainer }}
   initContainers:
   {{ if ne (annotation .ObjectMeta `+"`"+`sidecar.istio.io/interceptionMode`+"`"+` .ProxyConfig.InterceptionMode) `+"`"+`NONE`+"`"+` }}
-  {{- if not .Values.istio_cni.enabled }}
+  {{ if $cniRepairEnabled -}}
+  - name: istio-validation
+  {{ else -}}
   - name: istio-init
+  {{ end -}}
   {{- if contains "/" .Values.global.proxy_init.image }}
     image: "{{ .Values.global.proxy_init.image }}"
   {{- else }}
@@ -8936,6 +9021,10 @@ var _chartsIstioControlIstioAutoinjectFilesInjectionTemplateYaml = []byte(`templ
     - "-k"
     - "{{ index .ObjectMeta.Annotations `+"`"+`traffic.sidecar.istio.io/kubevirtInterfaces`+"`"+` }}"
     {{ end -}}
+    {{ if $cniRepairEnabled -}}
+    - "--run-validation"
+    - "--skip-rule-apply"
+    {{ end -}}
     imagePullPolicy: "{{ valueOrDefault .Values.global.imagePullPolicy `+"`"+`Always`+"`"+` }}"
   {{- if .Values.global.proxy_init.resources }}
     resources:
@@ -8945,20 +9034,27 @@ var _chartsIstioControlIstioAutoinjectFilesInjectionTemplateYaml = []byte(`templ
   {{- end }}
     securityContext:
       allowPrivilegeEscalation: {{ .Values.global.proxy.privileged }}
+      privileged: {{ .Values.global.proxy.privileged }}
       capabilities:
+    {{- if not $cniRepairEnabled }}
         add:
         - NET_ADMIN
         - NET_RAW
+    {{- end }}
         drop:
         - ALL
-      privileged: {{ .Values.global.proxy.privileged }}
       readOnlyRootFilesystem: false
+    {{- if not $cniRepairEnabled }}
       runAsGroup: 0
       runAsNonRoot: false
       runAsUser: 0
+    {{- else }}
+      runAsGroup: 1337
+      runAsUser: 1337
+      runAsNonRoot: true
+    {{- end }}
     restartPolicy: Always
-  {{- end }}
-  {{  end -}}
+  {{ end -}}
   {{- if eq .Values.global.proxy.enableCoreDump true }}
   - name: enable-core-dump
     args:
@@ -8986,7 +9082,7 @@ var _chartsIstioControlIstioAutoinjectFilesInjectionTemplateYaml = []byte(`templ
       runAsNonRoot: false
       runAsUser: 0
   {{ end }}
-  {{- end }}
+  {{ end }}
   containers:
   - name: istio-proxy
   {{- if contains "/" (annotation .ObjectMeta `+"`"+`sidecar.istio.io/proxyImage`+"`"+` .Values.global.proxy.image) }}
@@ -9070,6 +9166,7 @@ var _chartsIstioControlIstioAutoinjectFilesInjectionTemplateYaml = []byte(`templ
     - "{{ annotation .ObjectMeta `+"`"+`status.sidecar.istio.io/port`+"`"+` .Values.global.proxy.statusPort }}"
     - --applicationPorts
     - "{{ annotation .ObjectMeta `+"`"+`readiness.status.sidecar.istio.io/applicationPorts`+"`"+` (applicationPorts .Spec.Containers) }}"
+
   {{- end }}
   {{- if .Values.global.trustDomain }}
     - --trust-domain={{ .Values.global.trustDomain }}
@@ -10149,6 +10246,8 @@ var _chartsIstioControlIstioAutoinjectValuesYaml = []byte(`sidecarInjectorWebhoo
 # TODO: rename to 'enableIptables' or add 'interceptionMode: CNI'
 istio_cni:
   enabled: false
+  repair:
+    enabled: true
 `)
 
 func chartsIstioControlIstioAutoinjectValuesYamlBytes() ([]byte, error) {
