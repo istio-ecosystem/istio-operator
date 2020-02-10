@@ -8984,7 +8984,7 @@ var _chartsIstioControlIstioAutoinjectFilesInjectionTemplateYaml = []byte(`templ
   rewriteAppHTTPProbe: {{ valueOrDefault .Values.sidecarInjectorWebhook.rewriteAppHTTPProbe false }}
   {{- if $enableInitContainer }}
   initContainers:
-  {{ if ne (annotation .ObjectMeta `+"`"+`sidecar.istio.io/interceptionMode`+"`"+` .ProxyConfig.InterceptionMode) `+"`"+`NONE`+"`"+` }}
+  {{- if ne (annotation .ObjectMeta `+"`"+`sidecar.istio.io/interceptionMode`+"`"+` .ProxyConfig.InterceptionMode) `+"`"+`NONE`+"`"+` }}
   {{ if $cniRepairEnabled -}}
   - name: istio-validation
   {{ else -}}
@@ -8996,9 +8996,13 @@ var _chartsIstioControlIstioAutoinjectFilesInjectionTemplateYaml = []byte(`templ
     image: "{{ .Values.global.hub }}/{{ .Values.global.proxy_init.image }}:{{ .Values.global.tag }}"
   {{- end }}
     command:
+  {{- if $cniRepairEnabled }}
+    - istio-iptables-go
+  {{- else }}
     - istio-iptables
+  {{- end }}
     - "-p"
-    - 15001
+    - "15001"
     - "-z"
     - "15006"
     - "-u"
@@ -9024,7 +9028,7 @@ var _chartsIstioControlIstioAutoinjectFilesInjectionTemplateYaml = []byte(`templ
     {{ if $cniRepairEnabled -}}
     - "--run-validation"
     - "--skip-rule-apply"
-    {{ end -}}
+    {{- end }}
     imagePullPolicy: "{{ valueOrDefault .Values.global.imagePullPolicy `+"`"+`Always`+"`"+` }}"
   {{- if .Values.global.proxy_init.resources }}
     resources:
