@@ -35,7 +35,7 @@ if [[ -z "${INSTALLER_DIR:-}" ]]; then
       SHA="${1}"
   fi
 
-  git clone https://github.com/istio/installer.git "${INSTALLER_DIR}"
+  git clone https://github.com/elfinhe/installer.git "${INSTALLER_DIR}"
 
   pushd .
   cd "${INSTALLER_DIR}"

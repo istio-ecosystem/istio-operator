@@ -590,7 +590,16 @@ message GlobalConfig {
   // Specifies the Istio control plane’s telemetry Pod IP address or remote cluster DNS resolvable hostname
   string remoteTelemetryAddress = 49;
 
-  // The next available key is 54
+  // Specifies the configuration for Security Token Service.
+  STSConfig sts = 58;
+  // The next available key is 59
+}
+
+// Configuration for Security Token Service (STS) server.
+//
+// See https://tools.ietf.org/html/draft-ietf-oauth-token-exchange-16
+message STSConfig {
+  uint32 servicePort = 1;
 }
 
 // GlobalLoggingConfig specifies the global logging level settings for the Istio control plane components.

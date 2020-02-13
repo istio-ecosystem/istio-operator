@@ -418,6 +418,8 @@ values:
       token:
         aud: istio-ca
       udsPath: unix:/var/run/sds/uds_path
+    sts:
+      servicePort: 0
     tracer:
       datadog:
         address: $(HOST_IP):8126
