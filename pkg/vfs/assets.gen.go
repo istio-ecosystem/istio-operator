@@ -15,6 +15,18 @@
 // ../../data/charts/base/templates/serviceaccount.yaml
 // ../../data/charts/base/templates/services.yaml
 // ../../data/charts/base/values.yaml
+// ../../data/charts/crds/Chart.yaml
+// ../../data/charts/crds/files/crd-10.yaml
+// ../../data/charts/crds/files/crd-11.yaml
+// ../../data/charts/crds/files/crd-14.yaml
+// ../../data/charts/crds/files/crd-all.gen.yaml
+// ../../data/charts/crds/files/crd-certmanager-10.yaml
+// ../../data/charts/crds/files/crd-certmanager-11.yaml
+// ../../data/charts/crds/files/crd-mixer.yaml
+// ../../data/charts/crds/kustomization.yaml
+// ../../data/charts/crds/templates/crds.yaml
+// ../../data/charts/crds/templates/namespaces.yaml
+// ../../data/charts/crds/values.yaml
 // ../../data/charts/gateways/istio-egress/Chart.yaml
 // ../../data/charts/gateways/istio-egress/NOTES.txt
 // ../../data/charts/gateways/istio-egress/templates/_affinity.tpl
@@ -84,18 +96,22 @@
 // ../../data/charts/istio-control/istio-config/values.yaml
 // ../../data/charts/istio-control/istio-discovery/Chart.yaml
 // ../../data/charts/istio-control/istio-discovery/NOTES.txt
+// ../../data/charts/istio-control/istio-discovery/metadata-exchange-v2.yaml
+// ../../data/charts/istio-control/istio-discovery/stats-filter-v2.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/_affinity.tpl
 // ../../data/charts/istio-control/istio-discovery/templates/_helpers.tpl
 // ../../data/charts/istio-control/istio-discovery/templates/autoscale.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/clusterrole.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/clusterrolebinding.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/configmap-envoy.yaml
+// ../../data/charts/istio-control/istio-discovery/templates/configmap-jwks.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/configmap.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/deployment.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/enable-mesh-mtls.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/poddisruptionbudget.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/service.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/serviceaccount.yaml
+// ../../data/charts/istio-control/istio-discovery/templates/telemetryv2.yaml
 // ../../data/charts/istio-control/istio-discovery/templates/telemetryv2_1.4.yaml
 // ../../data/charts/istio-control/istio-discovery/values.yaml
 // ../../data/charts/istio-policy/Chart.yaml
@@ -125,6 +141,7 @@
 // ../../data/charts/istio-telemetry/grafana/templates/configmap-dashboards.yaml
 // ../../data/charts/istio-telemetry/grafana/templates/configmap.yaml
 // ../../data/charts/istio-telemetry/grafana/templates/deployment.yaml
+// ../../data/charts/istio-telemetry/grafana/templates/destination-rule.yaml
 // ../../data/charts/istio-telemetry/grafana/templates/grafana-policy.yaml
 // ../../data/charts/istio-telemetry/grafana/templates/pvc.yaml
 // ../../data/charts/istio-telemetry/grafana/templates/service.yaml
@@ -159,6 +176,7 @@
 // ../../data/charts/istio-telemetry/prometheus/templates/clusterrolebindings.yaml
 // ../../data/charts/istio-telemetry/prometheus/templates/configmap.yaml
 // ../../data/charts/istio-telemetry/prometheus/templates/deployment.yaml
+// ../../data/charts/istio-telemetry/prometheus/templates/destination-rule.yaml
 // ../../data/charts/istio-telemetry/prometheus/templates/ingress.yaml
 // ../../data/charts/istio-telemetry/prometheus/templates/service.yaml
 // ../../data/charts/istio-telemetry/prometheus/templates/serviceaccount.yaml
@@ -5993,6 +6011,10815 @@ func chartsBaseValuesYaml() (*asset, error) {
 	return a, nil
 }
 
+var _chartsCrdsChartYaml = []byte(`apiVersion: v1
+name: crds
+version: 1.1.0
+tillerVersion: ">=2.7.2"
+description: Helm chart for deploying Istio CRDs
+keywords:
+  - istio
+sources:
+  - http://github.com/istio/istio
+engine: gotpl
+icon: https://istio.io/favicons/android-192x192.png
+`)
+
+func chartsCrdsChartYamlBytes() ([]byte, error) {
+	return _chartsCrdsChartYaml, nil
+}
+
+func chartsCrdsChartYaml() (*asset, error) {
+	bytes, err := chartsCrdsChartYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/Chart.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsFilesCrd10Yaml = []byte(`apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: mixer
+    chart: istio
+    heritage: Tiller
+    istio: core
+    package: istio.io.mixer
+    release: istio
+  name: attributemanifests.config.istio.io
+spec:
+  group: config.istio.io
+  names:
+    categories:
+    - istio-io
+    - policy-istio-io
+    kind: attributemanifest
+    plural: attributemanifests
+    singular: attributemanifest
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Describes the rules used to configure Mixer''s policy and
+            telemetry features. See more details at: https://istio.io/docs/reference/config/policy-and-telemetry/istio.policy.v1beta1.html'
+          properties:
+            attributes:
+              additionalProperties:
+                properties:
+                  description:
+                    description: A human-readable description of the attribute's purpose.
+                    format: string
+                    type: string
+                  valueType:
+                    description: The type of data carried by this attribute.
+                    enum:
+                    - VALUE_TYPE_UNSPECIFIED
+                    - STRING
+                    - INT64
+                    - DOUBLE
+                    - BOOL
+                    - TIMESTAMP
+                    - IP_ADDRESS
+                    - EMAIL_ADDRESS
+                    - URI
+                    - DNS_NAME
+                    - DURATION
+                    - STRING_MAP
+                    type: string
+                type: object
+              description: The set of attributes this Istio component will be responsible
+                for producing at runtime.
+              type: object
+            name:
+              description: Name of the component producing these attributes.
+              format: string
+              type: string
+            revision:
+              description: The revision of this document.
+              format: string
+              type: string
+          type: object
+      type: object
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    heritage: Tiller
+    istio: rbac
+    release: istio
+  name: clusterrbacconfigs.rbac.istio.io
+spec:
+  group: rbac.istio.io
+  names:
+    categories:
+    - istio-io
+    - rbac-istio-io
+    kind: ClusterRbacConfig
+    plural: clusterrbacconfigs
+    singular: clusterrbacconfig
+  scope: Cluster
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration for Role Based Access Control. See more details
+            at: https://istio.io/docs/reference/config/authorization/istio.rbac.v1alpha1.html'
+          properties:
+            enforcementMode:
+              enum:
+              - ENFORCED
+              - PERMISSIVE
+              type: string
+            exclusion:
+              description: A list of services or namespaces that should not be enforced
+                by Istio RBAC policies.
+              properties:
+                namespaces:
+                  description: A list of namespaces.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+                services:
+                  description: A list of services.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+              type: object
+            inclusion:
+              description: A list of services or namespaces that should be enforced
+                by Istio RBAC policies.
+              properties:
+                namespaces:
+                  description: A list of namespaces.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+                services:
+                  description: A list of services.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+              type: object
+            mode:
+              description: Istio RBAC mode.
+              enum:
+              - "OFF"
+              - "ON"
+              - ON_WITH_INCLUSION
+              - ON_WITH_EXCLUSION
+              type: string
+          type: object
+      type: object
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: destinationrules.networking.istio.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.host
+    description: The name of a service from the service registry
+    name: Host
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    description: |-
+      CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+    name: Age
+    type: date
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: DestinationRule
+    listKind: DestinationRuleList
+    plural: destinationrules
+    shortNames:
+    - dr
+    singular: destinationrule
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration affecting load balancing, outlier detection,
+            etc. See more details at: https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule.html'
+          properties:
+            exportTo:
+              description: A list of namespaces to which this destination rule is
+                exported.
+              items:
+                format: string
+                type: string
+              type: array
+            host:
+              description: The name of a service from the service registry.
+              format: string
+              type: string
+            subsets:
+              items:
+                properties:
+                  labels:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    type: object
+                  name:
+                    description: Name of the subset.
+                    format: string
+                    type: string
+                  trafficPolicy:
+                    description: Traffic policies that apply to this subset.
+                    properties:
+                      connectionPool:
+                        properties:
+                          http:
+                            description: HTTP connection pool settings.
+                            properties:
+                              h2UpgradePolicy:
+                                description: Specify if http1.1 connection should
+                                  be upgraded to http2 for the associated destination.
+                                enum:
+                                - DEFAULT
+                                - DO_NOT_UPGRADE
+                                - UPGRADE
+                                type: string
+                              http1MaxPendingRequests:
+                                description: Maximum number of pending HTTP requests
+                                  to a destination.
+                                format: int32
+                                type: integer
+                              http2MaxRequests:
+                                description: Maximum number of requests to a backend.
+                                format: int32
+                                type: integer
+                              idleTimeout:
+                                description: The idle timeout for upstream connection
+                                  pool connections.
+                                type: string
+                              maxRequestsPerConnection:
+                                description: Maximum number of requests per connection
+                                  to a backend.
+                                format: int32
+                                type: integer
+                              maxRetries:
+                                format: int32
+                                type: integer
+                            type: object
+                          tcp:
+                            description: Settings common to both HTTP and TCP upstream
+                              connections.
+                            properties:
+                              connectTimeout:
+                                description: TCP connection timeout.
+                                type: string
+                              maxConnections:
+                                description: Maximum number of HTTP1 /TCP connections
+                                  to a destination host.
+                                format: int32
+                                type: integer
+                              tcpKeepalive:
+                                description: If set then set SO_KEEPALIVE on the socket
+                                  to enable TCP Keepalives.
+                                properties:
+                                  interval:
+                                    description: The time duration between keep-alive
+                                      probes.
+                                    type: string
+                                  probes:
+                                    type: integer
+                                  time:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                      loadBalancer:
+                        description: Settings controlling the load balancer algorithms.
+                        oneOf:
+                        - required:
+                          - simple
+                        - properties:
+                            consistentHash:
+                              oneOf:
+                              - required:
+                                - httpHeaderName
+                              - required:
+                                - httpCookie
+                              - required:
+                                - useSourceIp
+                          required:
+                          - consistentHash
+                        properties:
+                          consistentHash:
+                            properties:
+                              httpCookie:
+                                description: Hash based on HTTP cookie.
+                                properties:
+                                  name:
+                                    description: Name of the cookie.
+                                    format: string
+                                    type: string
+                                  path:
+                                    description: Path to set for the cookie.
+                                    format: string
+                                    type: string
+                                  ttl:
+                                    description: Lifetime of the cookie.
+                                    type: string
+                                type: object
+                              httpHeaderName:
+                                description: Hash based on a specific HTTP header.
+                                format: string
+                                type: string
+                              minimumRingSize:
+                                type: integer
+                              useSourceIp:
+                                description: Hash based on the source IP address.
+                                type: boolean
+                            type: object
+                          simple:
+                            enum:
+                            - ROUND_ROBIN
+                            - LEAST_CONN
+                            - RANDOM
+                            - PASSTHROUGH
+                            type: string
+                        type: object
+                      outlierDetection:
+                        properties:
+                          baseEjectionTime:
+                            description: Minimum ejection duration.
+                            type: string
+                          consecutiveErrors:
+                            format: int32
+                            type: integer
+                          interval:
+                            description: Time interval between ejection sweep analysis.
+                            type: string
+                          maxEjectionPercent:
+                            format: int32
+                            type: integer
+                          minHealthPercent:
+                            format: int32
+                            type: integer
+                        type: object
+                      portLevelSettings:
+                        description: Traffic policies specific to individual ports.
+                        items:
+                          properties:
+                            connectionPool:
+                              properties:
+                                http:
+                                  description: HTTP connection pool settings.
+                                  properties:
+                                    h2UpgradePolicy:
+                                      description: Specify if http1.1 connection should
+                                        be upgraded to http2 for the associated destination.
+                                      enum:
+                                      - DEFAULT
+                                      - DO_NOT_UPGRADE
+                                      - UPGRADE
+                                      type: string
+                                    http1MaxPendingRequests:
+                                      description: Maximum number of pending HTTP
+                                        requests to a destination.
+                                      format: int32
+                                      type: integer
+                                    http2MaxRequests:
+                                      description: Maximum number of requests to a
+                                        backend.
+                                      format: int32
+                                      type: integer
+                                    idleTimeout:
+                                      description: The idle timeout for upstream connection
+                                        pool connections.
+                                      type: string
+                                    maxRequestsPerConnection:
+                                      description: Maximum number of requests per
+                                        connection to a backend.
+                                      format: int32
+                                      type: integer
+                                    maxRetries:
+                                      format: int32
+                                      type: integer
+                                  type: object
+                                tcp:
+                                  description: Settings common to both HTTP and TCP
+                                    upstream connections.
+                                  properties:
+                                    connectTimeout:
+                                      description: TCP connection timeout.
+                                      type: string
+                                    maxConnections:
+                                      description: Maximum number of HTTP1 /TCP connections
+                                        to a destination host.
+                                      format: int32
+                                      type: integer
+                                    tcpKeepalive:
+                                      description: If set then set SO_KEEPALIVE on
+                                        the socket to enable TCP Keepalives.
+                                      properties:
+                                        interval:
+                                          description: The time duration between keep-alive
+                                            probes.
+                                          type: string
+                                        probes:
+                                          type: integer
+                                        time:
+                                          type: string
+                                      type: object
+                                  type: object
+                              type: object
+                            loadBalancer:
+                              description: Settings controlling the load balancer
+                                algorithms.
+                              oneOf:
+                              - required:
+                                - simple
+                              - properties:
+                                  consistentHash:
+                                    oneOf:
+                                    - required:
+                                      - httpHeaderName
+                                    - required:
+                                      - httpCookie
+                                    - required:
+                                      - useSourceIp
+                                required:
+                                - consistentHash
+                              properties:
+                                consistentHash:
+                                  properties:
+                                    httpCookie:
+                                      description: Hash based on HTTP cookie.
+                                      properties:
+                                        name:
+                                          description: Name of the cookie.
+                                          format: string
+                                          type: string
+                                        path:
+                                          description: Path to set for the cookie.
+                                          format: string
+                                          type: string
+                                        ttl:
+                                          description: Lifetime of the cookie.
+                                          type: string
+                                      type: object
+                                    httpHeaderName:
+                                      description: Hash based on a specific HTTP header.
+                                      format: string
+                                      type: string
+                                    minimumRingSize:
+                                      type: integer
+                                    useSourceIp:
+                                      description: Hash based on the source IP address.
+                                      type: boolean
+                                  type: object
+                                simple:
+                                  enum:
+                                  - ROUND_ROBIN
+                                  - LEAST_CONN
+                                  - RANDOM
+                                  - PASSTHROUGH
+                                  type: string
+                              type: object
+                            outlierDetection:
+                              properties:
+                                baseEjectionTime:
+                                  description: Minimum ejection duration.
+                                  type: string
+                                consecutiveErrors:
+                                  format: int32
+                                  type: integer
+                                interval:
+                                  description: Time interval between ejection sweep
+                                    analysis.
+                                  type: string
+                                maxEjectionPercent:
+                                  format: int32
+                                  type: integer
+                                minHealthPercent:
+                                  format: int32
+                                  type: integer
+                              type: object
+                            port:
+                              properties:
+                                number:
+                                  type: integer
+                              type: object
+                            tls:
+                              description: TLS related settings for connections to
+                                the upstream service.
+                              properties:
+                                caCertificates:
+                                  format: string
+                                  type: string
+                                clientCertificate:
+                                  description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                                  format: string
+                                  type: string
+                                mode:
+                                  enum:
+                                  - DISABLE
+                                  - SIMPLE
+                                  - MUTUAL
+                                  - ISTIO_MUTUAL
+                                  type: string
+                                privateKey:
+                                  description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                                  format: string
+                                  type: string
+                                sni:
+                                  description: SNI string to present to the server
+                                    during TLS handshake.
+                                  format: string
+                                  type: string
+                                subjectAltNames:
+                                  items:
+                                    format: string
+                                    type: string
+                                  type: array
+                              type: object
+                          type: object
+                        type: array
+                      tls:
+                        description: TLS related settings for connections to the upstream
+                          service.
+                        properties:
+                          caCertificates:
+                            format: string
+                            type: string
+                          clientCertificate:
+                            description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                            format: string
+                            type: string
+                          mode:
+                            enum:
+                            - DISABLE
+                            - SIMPLE
+                            - MUTUAL
+                            - ISTIO_MUTUAL
+                            type: string
+                          privateKey:
+                            description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                            format: string
+                            type: string
+                          sni:
+                            description: SNI string to present to the server during
+                              TLS handshake.
+                            format: string
+                            type: string
+                          subjectAltNames:
+                            items:
+                              format: string
+                              type: string
+                            type: array
+                        type: object
+                    type: object
+                type: object
+              type: array
+            trafficPolicy:
+              properties:
+                connectionPool:
+                  properties:
+                    http:
+                      description: HTTP connection pool settings.
+                      properties:
+                        h2UpgradePolicy:
+                          description: Specify if http1.1 connection should be upgraded
+                            to http2 for the associated destination.
+                          enum:
+                          - DEFAULT
+                          - DO_NOT_UPGRADE
+                          - UPGRADE
+                          type: string
+                        http1MaxPendingRequests:
+                          description: Maximum number of pending HTTP requests to
+                            a destination.
+                          format: int32
+                          type: integer
+                        http2MaxRequests:
+                          description: Maximum number of requests to a backend.
+                          format: int32
+                          type: integer
+                        idleTimeout:
+                          description: The idle timeout for upstream connection pool
+                            connections.
+                          type: string
+                        maxRequestsPerConnection:
+                          description: Maximum number of requests per connection to
+                            a backend.
+                          format: int32
+                          type: integer
+                        maxRetries:
+                          format: int32
+                          type: integer
+                      type: object
+                    tcp:
+                      description: Settings common to both HTTP and TCP upstream connections.
+                      properties:
+                        connectTimeout:
+                          description: TCP connection timeout.
+                          type: string
+                        maxConnections:
+                          description: Maximum number of HTTP1 /TCP connections to
+                            a destination host.
+                          format: int32
+                          type: integer
+                        tcpKeepalive:
+                          description: If set then set SO_KEEPALIVE on the socket
+                            to enable TCP Keepalives.
+                          properties:
+                            interval:
+                              description: The time duration between keep-alive probes.
+                              type: string
+                            probes:
+                              type: integer
+                            time:
+                              type: string
+                          type: object
+                      type: object
+                  type: object
+                loadBalancer:
+                  description: Settings controlling the load balancer algorithms.
+                  oneOf:
+                  - required:
+                    - simple
+                  - properties:
+                      consistentHash:
+                        oneOf:
+                        - required:
+                          - httpHeaderName
+                        - required:
+                          - httpCookie
+                        - required:
+                          - useSourceIp
+                    required:
+                    - consistentHash
+                  properties:
+                    consistentHash:
+                      properties:
+                        httpCookie:
+                          description: Hash based on HTTP cookie.
+                          properties:
+                            name:
+                              description: Name of the cookie.
+                              format: string
+                              type: string
+                            path:
+                              description: Path to set for the cookie.
+                              format: string
+                              type: string
+                            ttl:
+                              description: Lifetime of the cookie.
+                              type: string
+                          type: object
+                        httpHeaderName:
+                          description: Hash based on a specific HTTP header.
+                          format: string
+                          type: string
+                        minimumRingSize:
+                          type: integer
+                        useSourceIp:
+                          description: Hash based on the source IP address.
+                          type: boolean
+                      type: object
+                    simple:
+                      enum:
+                      - ROUND_ROBIN
+                      - LEAST_CONN
+                      - RANDOM
+                      - PASSTHROUGH
+                      type: string
+                  type: object
+                outlierDetection:
+                  properties:
+                    baseEjectionTime:
+                      description: Minimum ejection duration.
+                      type: string
+                    consecutiveErrors:
+                      format: int32
+                      type: integer
+                    interval:
+                      description: Time interval between ejection sweep analysis.
+                      type: string
+                    maxEjectionPercent:
+                      format: int32
+                      type: integer
+                    minHealthPercent:
+                      format: int32
+                      type: integer
+                  type: object
+                portLevelSettings:
+                  description: Traffic policies specific to individual ports.
+                  items:
+                    properties:
+                      connectionPool:
+                        properties:
+                          http:
+                            description: HTTP connection pool settings.
+                            properties:
+                              h2UpgradePolicy:
+                                description: Specify if http1.1 connection should
+                                  be upgraded to http2 for the associated destination.
+                                enum:
+                                - DEFAULT
+                                - DO_NOT_UPGRADE
+                                - UPGRADE
+                                type: string
+                              http1MaxPendingRequests:
+                                description: Maximum number of pending HTTP requests
+                                  to a destination.
+                                format: int32
+                                type: integer
+                              http2MaxRequests:
+                                description: Maximum number of requests to a backend.
+                                format: int32
+                                type: integer
+                              idleTimeout:
+                                description: The idle timeout for upstream connection
+                                  pool connections.
+                                type: string
+                              maxRequestsPerConnection:
+                                description: Maximum number of requests per connection
+                                  to a backend.
+                                format: int32
+                                type: integer
+                              maxRetries:
+                                format: int32
+                                type: integer
+                            type: object
+                          tcp:
+                            description: Settings common to both HTTP and TCP upstream
+                              connections.
+                            properties:
+                              connectTimeout:
+                                description: TCP connection timeout.
+                                type: string
+                              maxConnections:
+                                description: Maximum number of HTTP1 /TCP connections
+                                  to a destination host.
+                                format: int32
+                                type: integer
+                              tcpKeepalive:
+                                description: If set then set SO_KEEPALIVE on the socket
+                                  to enable TCP Keepalives.
+                                properties:
+                                  interval:
+                                    description: The time duration between keep-alive
+                                      probes.
+                                    type: string
+                                  probes:
+                                    type: integer
+                                  time:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                      loadBalancer:
+                        description: Settings controlling the load balancer algorithms.
+                        oneOf:
+                        - required:
+                          - simple
+                        - properties:
+                            consistentHash:
+                              oneOf:
+                              - required:
+                                - httpHeaderName
+                              - required:
+                                - httpCookie
+                              - required:
+                                - useSourceIp
+                          required:
+                          - consistentHash
+                        properties:
+                          consistentHash:
+                            properties:
+                              httpCookie:
+                                description: Hash based on HTTP cookie.
+                                properties:
+                                  name:
+                                    description: Name of the cookie.
+                                    format: string
+                                    type: string
+                                  path:
+                                    description: Path to set for the cookie.
+                                    format: string
+                                    type: string
+                                  ttl:
+                                    description: Lifetime of the cookie.
+                                    type: string
+                                type: object
+                              httpHeaderName:
+                                description: Hash based on a specific HTTP header.
+                                format: string
+                                type: string
+                              minimumRingSize:
+                                type: integer
+                              useSourceIp:
+                                description: Hash based on the source IP address.
+                                type: boolean
+                            type: object
+                          simple:
+                            enum:
+                            - ROUND_ROBIN
+                            - LEAST_CONN
+                            - RANDOM
+                            - PASSTHROUGH
+                            type: string
+                        type: object
+                      outlierDetection:
+                        properties:
+                          baseEjectionTime:
+                            description: Minimum ejection duration.
+                            type: string
+                          consecutiveErrors:
+                            format: int32
+                            type: integer
+                          interval:
+                            description: Time interval between ejection sweep analysis.
+                            type: string
+                          maxEjectionPercent:
+                            format: int32
+                            type: integer
+                          minHealthPercent:
+                            format: int32
+                            type: integer
+                        type: object
+                      port:
+                        properties:
+                          number:
+                            type: integer
+                        type: object
+                      tls:
+                        description: TLS related settings for connections to the upstream
+                          service.
+                        properties:
+                          caCertificates:
+                            format: string
+                            type: string
+                          clientCertificate:
+                            description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                            format: string
+                            type: string
+                          mode:
+                            enum:
+                            - DISABLE
+                            - SIMPLE
+                            - MUTUAL
+                            - ISTIO_MUTUAL
+                            type: string
+                          privateKey:
+                            description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                            format: string
+                            type: string
+                          sni:
+                            description: SNI string to present to the server during
+                              TLS handshake.
+                            format: string
+                            type: string
+                          subjectAltNames:
+                            items:
+                              format: string
+                              type: string
+                            type: array
+                        type: object
+                    type: object
+                  type: array
+                tls:
+                  description: TLS related settings for connections to the upstream
+                    service.
+                  properties:
+                    caCertificates:
+                      format: string
+                      type: string
+                    clientCertificate:
+                      description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                      format: string
+                      type: string
+                    mode:
+                      enum:
+                      - DISABLE
+                      - SIMPLE
+                      - MUTUAL
+                      - ISTIO_MUTUAL
+                      type: string
+                    privateKey:
+                      description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                      format: string
+                      type: string
+                    sni:
+                      description: SNI string to present to the server during TLS
+                        handshake.
+                      format: string
+                      type: string
+                    subjectAltNames:
+                      items:
+                        format: string
+                        type: string
+                      type: array
+                  type: object
+              type: object
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: envoyfilters.networking.istio.io
+spec:
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: EnvoyFilter
+    plural: envoyfilters
+    singular: envoyfilter
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Customizing Envoy configuration generated by Istio. See more
+            details at: https://istio.io/docs/reference/config/networking/v1alpha3/envoy-filter.html'
+          properties:
+            configPatches:
+              description: One or more patches with match conditions.
+              items:
+                properties:
+                  applyTo:
+                    enum:
+                    - INVALID
+                    - LISTENER
+                    - FILTER_CHAIN
+                    - NETWORK_FILTER
+                    - HTTP_FILTER
+                    - ROUTE_CONFIGURATION
+                    - VIRTUAL_HOST
+                    - HTTP_ROUTE
+                    - CLUSTER
+                    type: string
+                  match:
+                    description: Match on listener/route configuration/cluster.
+                    oneOf:
+                    - required:
+                      - listener
+                    - required:
+                      - routeConfiguration
+                    - required:
+                      - cluster
+                    properties:
+                      cluster:
+                        description: Match on envoy cluster attributes.
+                        properties:
+                          name:
+                            description: The exact name of the cluster to match.
+                            format: string
+                            type: string
+                          portNumber:
+                            description: The service port for which this cluster was
+                              generated.
+                            type: integer
+                          service:
+                            description: The fully qualified service name for this
+                              cluster.
+                            format: string
+                            type: string
+                          subset:
+                            description: The subset associated with the service.
+                            format: string
+                            type: string
+                        type: object
+                      context:
+                        description: The specific config generation context to match
+                          on.
+                        enum:
+                        - ANY
+                        - SIDECAR_INBOUND
+                        - SIDECAR_OUTBOUND
+                        - GATEWAY
+                        type: string
+                      listener:
+                        description: Match on envoy listener attributes.
+                        properties:
+                          filterChain:
+                            description: Match a specific filter chain in a listener.
+                            properties:
+                              applicationProtocols:
+                                description: Applies only to sidecars.
+                                format: string
+                                type: string
+                              filter:
+                                description: The name of a specific filter to apply
+                                  the patch to.
+                                properties:
+                                  name:
+                                    description: The filter name to match on.
+                                    format: string
+                                    type: string
+                                  subFilter:
+                                    properties:
+                                      name:
+                                        description: The filter name to match on.
+                                        format: string
+                                        type: string
+                                    type: object
+                                type: object
+                              name:
+                                description: The name assigned to the filter chain.
+                                format: string
+                                type: string
+                              sni:
+                                description: The SNI value used by a filter chain's
+                                  match condition.
+                                format: string
+                                type: string
+                              transportProtocol:
+                                description: Applies only to SIDECAR_INBOUND context.
+                                format: string
+                                type: string
+                            type: object
+                          name:
+                            description: Match a specific listener by its name.
+                            format: string
+                            type: string
+                          portName:
+                            format: string
+                            type: string
+                          portNumber:
+                            type: integer
+                        type: object
+                      proxy:
+                        description: Match on properties associated with a proxy.
+                        properties:
+                          metadata:
+                            additionalProperties:
+                              format: string
+                              type: string
+                            type: object
+                          proxyVersion:
+                            format: string
+                            type: string
+                        type: object
+                      routeConfiguration:
+                        description: Match on envoy HTTP route configuration attributes.
+                        properties:
+                          gateway:
+                            format: string
+                            type: string
+                          name:
+                            description: Route configuration name to match on.
+                            format: string
+                            type: string
+                          portName:
+                            description: Applicable only for GATEWAY context.
+                            format: string
+                            type: string
+                          portNumber:
+                            type: integer
+                          vhost:
+                            properties:
+                              name:
+                                format: string
+                                type: string
+                              route:
+                                description: Match a specific route within the virtual
+                                  host.
+                                properties:
+                                  action:
+                                    description: Match a route with specific action
+                                      type.
+                                    enum:
+                                    - ANY
+                                    - ROUTE
+                                    - REDIRECT
+                                    - DIRECT_RESPONSE
+                                    type: string
+                                  name:
+                                    format: string
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                    type: object
+                  patch:
+                    description: The patch to apply along with the operation.
+                    properties:
+                      operation:
+                        description: Determines how the patch should be applied.
+                        enum:
+                        - INVALID
+                        - MERGE
+                        - ADD
+                        - REMOVE
+                        - INSERT_BEFORE
+                        - INSERT_AFTER
+                        type: string
+                      value:
+                        description: The JSON config of the object being patched.
+                        type: object
+                    type: object
+                type: object
+              type: array
+            filters:
+              items:
+                properties:
+                  filterConfig:
+                    type: object
+                  filterName:
+                    description: The name of the filter to instantiate.
+                    format: string
+                    type: string
+                  filterType:
+                    description: The type of filter to instantiate.
+                    enum:
+                    - INVALID
+                    - HTTP
+                    - NETWORK
+                    type: string
+                  insertPosition:
+                    description: Insert position in the filter chain.
+                    properties:
+                      index:
+                        description: Position of this filter in the filter chain.
+                        enum:
+                        - FIRST
+                        - LAST
+                        - BEFORE
+                        - AFTER
+                        type: string
+                      relativeTo:
+                        format: string
+                        type: string
+                    type: object
+                  listenerMatch:
+                    properties:
+                      address:
+                        description: One or more IP addresses to which the listener
+                          is bound.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      listenerProtocol:
+                        description: Selects a class of listeners for the same protocol.
+                        enum:
+                        - ALL
+                        - HTTP
+                        - TCP
+                        type: string
+                      listenerType:
+                        description: Inbound vs outbound sidecar listener or gateway
+                          listener.
+                        enum:
+                        - ANY
+                        - SIDECAR_INBOUND
+                        - SIDECAR_OUTBOUND
+                        - GATEWAY
+                        type: string
+                      portNamePrefix:
+                        format: string
+                        type: string
+                      portNumber:
+                        type: integer
+                    type: object
+                type: object
+              type: array
+            workloadLabels:
+              additionalProperties:
+                format: string
+                type: string
+              description: Deprecated.
+              type: object
+            workloadSelector:
+              properties:
+                labels:
+                  additionalProperties:
+                    format: string
+                    type: string
+                  type: object
+              type: object
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: gateways.networking.istio.io
+spec:
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: Gateway
+    plural: gateways
+    shortNames:
+    - gw
+    singular: gateway
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration affecting edge load balancer. See more details
+            at: https://istio.io/docs/reference/config/networking/v1alpha3/gateway.html'
+          properties:
+            selector:
+              additionalProperties:
+                format: string
+                type: string
+              type: object
+            servers:
+              description: A list of server specifications.
+              items:
+                properties:
+                  bind:
+                    format: string
+                    type: string
+                  defaultEndpoint:
+                    format: string
+                    type: string
+                  hosts:
+                    description: One or more hosts exposed by this gateway.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  port:
+                    properties:
+                      name:
+                        description: Label assigned to the port.
+                        format: string
+                        type: string
+                      number:
+                        description: A valid non-negative integer port number.
+                        type: integer
+                      protocol:
+                        description: The protocol exposed on the port.
+                        format: string
+                        type: string
+                    type: object
+                  tls:
+                    description: Set of TLS related options that govern the server's
+                      behavior.
+                    properties:
+                      caCertificates:
+                        description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                        format: string
+                        type: string
+                      cipherSuites:
+                        description: 'Optional: If specified, only support the specified
+                          cipher list.'
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      credentialName:
+                        format: string
+                        type: string
+                      httpsRedirect:
+                        type: boolean
+                      maxProtocolVersion:
+                        description: 'Optional: Maximum TLS protocol version.'
+                        enum:
+                        - TLS_AUTO
+                        - TLSV1_0
+                        - TLSV1_1
+                        - TLSV1_2
+                        - TLSV1_3
+                        type: string
+                      minProtocolVersion:
+                        description: 'Optional: Minimum TLS protocol version.'
+                        enum:
+                        - TLS_AUTO
+                        - TLSV1_0
+                        - TLSV1_1
+                        - TLSV1_2
+                        - TLSV1_3
+                        type: string
+                      mode:
+                        enum:
+                        - PASSTHROUGH
+                        - SIMPLE
+                        - MUTUAL
+                        - AUTO_PASSTHROUGH
+                        - ISTIO_MUTUAL
+                        type: string
+                      privateKey:
+                        description: REQUIRED if mode is `+"`"+`SIMPLE`+"`"+` or `+"`"+`MUTUAL`+"`"+`.
+                        format: string
+                        type: string
+                      serverCertificate:
+                        description: REQUIRED if mode is `+"`"+`SIMPLE`+"`"+` or `+"`"+`MUTUAL`+"`"+`.
+                        format: string
+                        type: string
+                      subjectAltNames:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      verifyCertificateHash:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      verifyCertificateSpki:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                    type: object
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-mixer
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: httpapispecbindings.config.istio.io
+spec:
+  group: config.istio.io
+  names:
+    categories:
+    - istio-io
+    - apim-istio-io
+    kind: HTTPAPISpecBinding
+    plural: httpapispecbindings
+    singular: httpapispecbinding
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            api_specs:
+              items:
+                properties:
+                  name:
+                    description: The short name of the HTTPAPISpec.
+                    format: string
+                    type: string
+                  namespace:
+                    description: Optional namespace of the HTTPAPISpec.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            apiSpecs:
+              items:
+                properties:
+                  name:
+                    description: The short name of the HTTPAPISpec.
+                    format: string
+                    type: string
+                  namespace:
+                    description: Optional namespace of the HTTPAPISpec.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            services:
+              description: One or more services to map the listed HTTPAPISpec onto.
+              items:
+                properties:
+                  domain:
+                    description: Domain suffix used to construct the service FQDN
+                      in implementations that support such specification.
+                    format: string
+                    type: string
+                  labels:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    description: Optional one or more labels that uniquely identify
+                      the service version.
+                    type: object
+                  name:
+                    description: The short name of the service such as "foo".
+                    format: string
+                    type: string
+                  namespace:
+                    description: Optional namespace of the service.
+                    format: string
+                    type: string
+                  service:
+                    description: The service FQDN.
+                    format: string
+                    type: string
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-mixer
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: httpapispecs.config.istio.io
+spec:
+  group: config.istio.io
+  names:
+    categories:
+    - istio-io
+    - apim-istio-io
+    kind: HTTPAPISpec
+    plural: httpapispecs
+    singular: httpapispec
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            api_keys:
+              items:
+                oneOf:
+                - required:
+                  - query
+                - required:
+                  - header
+                - required:
+                  - cookie
+                properties:
+                  cookie:
+                    format: string
+                    type: string
+                  header:
+                    description: API key is sent in a request header.
+                    format: string
+                    type: string
+                  query:
+                    description: API Key is sent as a query parameter.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            apiKeys:
+              items:
+                oneOf:
+                - required:
+                  - query
+                - required:
+                  - header
+                - required:
+                  - cookie
+                properties:
+                  cookie:
+                    format: string
+                    type: string
+                  header:
+                    description: API key is sent in a request header.
+                    format: string
+                    type: string
+                  query:
+                    description: API Key is sent as a query parameter.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            attributes:
+              properties:
+                attributes:
+                  additionalProperties:
+                    oneOf:
+                    - required:
+                      - stringValue
+                    - required:
+                      - int64Value
+                    - required:
+                      - doubleValue
+                    - required:
+                      - boolValue
+                    - required:
+                      - bytesValue
+                    - required:
+                      - timestampValue
+                    - required:
+                      - durationValue
+                    - required:
+                      - stringMapValue
+                    properties:
+                      boolValue:
+                        type: boolean
+                      bytesValue:
+                        format: binary
+                        type: string
+                      doubleValue:
+                        format: double
+                        type: number
+                      durationValue:
+                        type: string
+                      int64Value:
+                        format: int64
+                        type: integer
+                      stringMapValue:
+                        properties:
+                          entries:
+                            additionalProperties:
+                              format: string
+                              type: string
+                            description: Holds a set of name/value pairs.
+                            type: object
+                        type: object
+                      stringValue:
+                        format: string
+                        type: string
+                      timestampValue:
+                        format: dateTime
+                        type: string
+                    type: object
+                  description: A map of attribute name to its value.
+                  type: object
+              type: object
+            patterns:
+              description: List of HTTP patterns to match.
+              items:
+                oneOf:
+                - required:
+                  - uriTemplate
+                - required:
+                  - regex
+                properties:
+                  attributes:
+                    properties:
+                      attributes:
+                        additionalProperties:
+                          oneOf:
+                          - required:
+                            - stringValue
+                          - required:
+                            - int64Value
+                          - required:
+                            - doubleValue
+                          - required:
+                            - boolValue
+                          - required:
+                            - bytesValue
+                          - required:
+                            - timestampValue
+                          - required:
+                            - durationValue
+                          - required:
+                            - stringMapValue
+                          properties:
+                            boolValue:
+                              type: boolean
+                            bytesValue:
+                              format: binary
+                              type: string
+                            doubleValue:
+                              format: double
+                              type: number
+                            durationValue:
+                              type: string
+                            int64Value:
+                              format: int64
+                              type: integer
+                            stringMapValue:
+                              properties:
+                                entries:
+                                  additionalProperties:
+                                    format: string
+                                    type: string
+                                  description: Holds a set of name/value pairs.
+                                  type: object
+                              type: object
+                            stringValue:
+                              format: string
+                              type: string
+                            timestampValue:
+                              format: dateTime
+                              type: string
+                          type: object
+                        description: A map of attribute name to its value.
+                        type: object
+                    type: object
+                  httpMethod:
+                    format: string
+                    type: string
+                  regex:
+                    format: string
+                    type: string
+                  uriTemplate:
+                    format: string
+                    type: string
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-citadel
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: meshpolicies.authentication.istio.io
+spec:
+  group: authentication.istio.io
+  names:
+    categories:
+    - istio-io
+    - authentication-istio-io
+    kind: MeshPolicy
+    listKind: MeshPolicyList
+    plural: meshpolicies
+    singular: meshpolicy
+  scope: Cluster
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Authentication policy for Istio services. See more details
+            at: https://istio.io/docs/reference/config/istio.authentication.v1alpha1.html'
+          properties:
+            originIsOptional:
+              type: boolean
+            origins:
+              description: List of authentication methods that can be used for origin
+                authentication.
+              items:
+                properties:
+                  jwt:
+                    description: Jwt params for the method.
+                    properties:
+                      audiences:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      issuer:
+                        description: Identifies the issuer that issued the JWT.
+                        format: string
+                        type: string
+                      jwks:
+                        description: JSON Web Key Set of public keys to validate signature
+                          of the JWT.
+                        format: string
+                        type: string
+                      jwks_uri:
+                        format: string
+                        type: string
+                      jwksUri:
+                        format: string
+                        type: string
+                      jwt_headers:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtHeaders:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtParams:
+                        description: JWT is sent in a query parameter.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      trigger_rules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                      triggerRules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                type: object
+              type: array
+            peerIsOptional:
+              type: boolean
+            peers:
+              description: List of authentication methods that can be used for peer
+                authentication.
+              items:
+                oneOf:
+                - required:
+                  - mtls
+                - required:
+                  - jwt
+                properties:
+                  jwt:
+                    properties:
+                      audiences:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      issuer:
+                        description: Identifies the issuer that issued the JWT.
+                        format: string
+                        type: string
+                      jwks:
+                        description: JSON Web Key Set of public keys to validate signature
+                          of the JWT.
+                        format: string
+                        type: string
+                      jwks_uri:
+                        format: string
+                        type: string
+                      jwksUri:
+                        format: string
+                        type: string
+                      jwt_headers:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtHeaders:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtParams:
+                        description: JWT is sent in a query parameter.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      trigger_rules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                      triggerRules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                  mtls:
+                    description: Set if mTLS is used.
+                    properties:
+                      allowTls:
+                        description: WILL BE DEPRECATED, if set, will translates to
+                          `+"`"+`TLS_PERMISSIVE`+"`"+` mode.
+                        type: boolean
+                      mode:
+                        description: Defines the mode of mTLS authentication.
+                        enum:
+                        - STRICT
+                        - PERMISSIVE
+                        type: string
+                    type: object
+                type: object
+              type: array
+            principalBinding:
+              description: Define whether peer or origin identity should be use for
+                principal.
+              enum:
+              - USE_PEER
+              - USE_ORIGIN
+              type: string
+            targets:
+              description: List rules to select workloads that the policy should be
+                applied on.
+              items:
+                properties:
+                  labels:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    type: object
+                  name:
+                    description: The name must be a short name from the service registry.
+                    format: string
+                    type: string
+                  ports:
+                    description: Specifies the ports.
+                    items:
+                      oneOf:
+                      - required:
+                        - number
+                      - required:
+                        - name
+                      properties:
+                        name:
+                          format: string
+                          type: string
+                        number:
+                          type: integer
+                      type: object
+                    type: array
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-citadel
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: policies.authentication.istio.io
+spec:
+  group: authentication.istio.io
+  names:
+    categories:
+    - istio-io
+    - authentication-istio-io
+    kind: Policy
+    plural: policies
+    singular: policy
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Authentication policy for Istio services. See more details
+            at: https://istio.io/docs/reference/config/istio.authentication.v1alpha1.html'
+          properties:
+            originIsOptional:
+              type: boolean
+            origins:
+              description: List of authentication methods that can be used for origin
+                authentication.
+              items:
+                properties:
+                  jwt:
+                    description: Jwt params for the method.
+                    properties:
+                      audiences:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      issuer:
+                        description: Identifies the issuer that issued the JWT.
+                        format: string
+                        type: string
+                      jwks:
+                        description: JSON Web Key Set of public keys to validate signature
+                          of the JWT.
+                        format: string
+                        type: string
+                      jwks_uri:
+                        format: string
+                        type: string
+                      jwksUri:
+                        format: string
+                        type: string
+                      jwt_headers:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtHeaders:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtParams:
+                        description: JWT is sent in a query parameter.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      trigger_rules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                      triggerRules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                type: object
+              type: array
+            peerIsOptional:
+              type: boolean
+            peers:
+              description: List of authentication methods that can be used for peer
+                authentication.
+              items:
+                oneOf:
+                - required:
+                  - mtls
+                - required:
+                  - jwt
+                properties:
+                  jwt:
+                    properties:
+                      audiences:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      issuer:
+                        description: Identifies the issuer that issued the JWT.
+                        format: string
+                        type: string
+                      jwks:
+                        description: JSON Web Key Set of public keys to validate signature
+                          of the JWT.
+                        format: string
+                        type: string
+                      jwks_uri:
+                        format: string
+                        type: string
+                      jwksUri:
+                        format: string
+                        type: string
+                      jwt_headers:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtHeaders:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtParams:
+                        description: JWT is sent in a query parameter.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      trigger_rules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                      triggerRules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                  mtls:
+                    description: Set if mTLS is used.
+                    properties:
+                      allowTls:
+                        description: WILL BE DEPRECATED, if set, will translates to
+                          `+"`"+`TLS_PERMISSIVE`+"`"+` mode.
+                        type: boolean
+                      mode:
+                        description: Defines the mode of mTLS authentication.
+                        enum:
+                        - STRICT
+                        - PERMISSIVE
+                        type: string
+                    type: object
+                type: object
+              type: array
+            principalBinding:
+              description: Define whether peer or origin identity should be use for
+                principal.
+              enum:
+              - USE_PEER
+              - USE_ORIGIN
+              type: string
+            targets:
+              description: List rules to select workloads that the policy should be
+                applied on.
+              items:
+                properties:
+                  labels:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    type: object
+                  name:
+                    description: The name must be a short name from the service registry.
+                    format: string
+                    type: string
+                  ports:
+                    description: Specifies the ports.
+                    items:
+                      oneOf:
+                      - required:
+                        - number
+                      - required:
+                        - name
+                      properties:
+                        name:
+                          format: string
+                          type: string
+                        number:
+                          type: integer
+                      type: object
+                    type: array
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-mixer
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: quotaspecbindings.config.istio.io
+spec:
+  group: config.istio.io
+  names:
+    categories:
+    - istio-io
+    - apim-istio-io
+    kind: QuotaSpecBinding
+    plural: quotaspecbindings
+    singular: quotaspecbinding
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            quotaSpecs:
+              items:
+                properties:
+                  name:
+                    description: The short name of the QuotaSpec.
+                    format: string
+                    type: string
+                  namespace:
+                    description: Optional namespace of the QuotaSpec.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            services:
+              description: One or more services to map the listed QuotaSpec onto.
+              items:
+                properties:
+                  domain:
+                    description: Domain suffix used to construct the service FQDN
+                      in implementations that support such specification.
+                    format: string
+                    type: string
+                  labels:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    description: Optional one or more labels that uniquely identify
+                      the service version.
+                    type: object
+                  name:
+                    description: The short name of the service such as "foo".
+                    format: string
+                    type: string
+                  namespace:
+                    description: Optional namespace of the service.
+                    format: string
+                    type: string
+                  service:
+                    description: The service FQDN.
+                    format: string
+                    type: string
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-mixer
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: quotaspecs.config.istio.io
+spec:
+  group: config.istio.io
+  names:
+    categories:
+    - istio-io
+    - apim-istio-io
+    kind: QuotaSpec
+    plural: quotaspecs
+    singular: quotaspec
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: Determines the quotas used for individual requests.
+          properties:
+            rules:
+              description: A list of Quota rules.
+              items:
+                properties:
+                  match:
+                    description: If empty, match all request.
+                    items:
+                      properties:
+                        clause:
+                          additionalProperties:
+                            oneOf:
+                            - required:
+                              - exact
+                            - required:
+                              - prefix
+                            - required:
+                              - regex
+                            properties:
+                              exact:
+                                format: string
+                                type: string
+                              prefix:
+                                format: string
+                                type: string
+                              regex:
+                                format: string
+                                type: string
+                            type: object
+                          description: Map of attribute names to StringMatch type.
+                          type: object
+                      type: object
+                    type: array
+                  quotas:
+                    description: The list of quotas to charge.
+                    items:
+                      properties:
+                        charge:
+                          format: int32
+                          type: integer
+                        quota:
+                          format: string
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: mixer
+    chart: istio
+    heritage: Tiller
+    istio: rbac
+    package: istio.io.mixer
+    release: istio
+  name: rbacconfigs.rbac.istio.io
+spec:
+  group: rbac.istio.io
+  names:
+    categories:
+    - istio-io
+    - rbac-istio-io
+    kind: RbacConfig
+    plural: rbacconfigs
+    singular: rbacconfig
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration for Role Based Access Control. See more details
+            at: https://istio.io/docs/reference/config/authorization/istio.rbac.v1alpha1.html'
+          properties:
+            enforcementMode:
+              enum:
+              - ENFORCED
+              - PERMISSIVE
+              type: string
+            exclusion:
+              description: A list of services or namespaces that should not be enforced
+                by Istio RBAC policies.
+              properties:
+                namespaces:
+                  description: A list of namespaces.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+                services:
+                  description: A list of services.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+              type: object
+            inclusion:
+              description: A list of services or namespaces that should be enforced
+                by Istio RBAC policies.
+              properties:
+                namespaces:
+                  description: A list of namespaces.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+                services:
+                  description: A list of services.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+              type: object
+            mode:
+              description: Istio RBAC mode.
+              enum:
+              - "OFF"
+              - "ON"
+              - ON_WITH_INCLUSION
+              - ON_WITH_EXCLUSION
+              type: string
+          type: object
+      type: object
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: mixer
+    chart: istio
+    heritage: Tiller
+    istio: core
+    package: istio.io.mixer
+    release: istio
+  name: rules.config.istio.io
+spec:
+  group: config.istio.io
+  names:
+    categories:
+    - istio-io
+    - policy-istio-io
+    kind: rule
+    plural: rules
+    singular: rule
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Describes the rules used to configure Mixer''s policy and
+            telemetry features. See more details at: https://istio.io/docs/reference/config/policy-and-telemetry/istio.policy.v1beta1.html'
+          properties:
+            actions:
+              description: The actions that will be executed when match evaluates
+                to `+"`"+`true`+"`"+`.
+              items:
+                properties:
+                  handler:
+                    description: Fully qualified name of the handler to invoke.
+                    format: string
+                    type: string
+                  instances:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  name:
+                    description: A handle to refer to the results of the action.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            match:
+              description: Match is an attribute based predicate.
+              format: string
+              type: string
+            requestHeaderOperations:
+              items:
+                properties:
+                  name:
+                    description: Header name literal value.
+                    format: string
+                    type: string
+                  operation:
+                    description: Header operation type.
+                    enum:
+                    - REPLACE
+                    - REMOVE
+                    - APPEND
+                    type: string
+                  values:
+                    description: Header value expressions.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                type: object
+              type: array
+            responseHeaderOperations:
+              items:
+                properties:
+                  name:
+                    description: Header name literal value.
+                    format: string
+                    type: string
+                  operation:
+                    description: Header operation type.
+                    enum:
+                    - REPLACE
+                    - REMOVE
+                    - APPEND
+                    type: string
+                  values:
+                    description: Header value expressions.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                type: object
+              type: array
+            sampling:
+              properties:
+                random:
+                  description: Provides filtering of actions based on random selection
+                    per request.
+                  properties:
+                    attributeExpression:
+                      description: Specifies an attribute expression to use to override
+                        the numerator in the `+"`"+`percent_sampled`+"`"+` field.
+                      format: string
+                      type: string
+                    percentSampled:
+                      description: The default sampling rate, expressed as a percentage.
+                      properties:
+                        denominator:
+                          description: Specifies the denominator.
+                          enum:
+                          - HUNDRED
+                          - TEN_THOUSAND
+                          type: string
+                        numerator:
+                          description: Specifies the numerator.
+                          type: integer
+                      type: object
+                    useIndependentRandomness:
+                      description: By default sampling will be based on the value
+                        of the request header `+"`"+`x-request-id`+"`"+`.
+                      type: boolean
+                  type: object
+                rateLimit:
+                  properties:
+                    maxUnsampledEntries:
+                      description: Number of entries to allow during the `+"`"+`sampling_duration`+"`"+`
+                        before sampling is enforced.
+                      format: int64
+                      type: integer
+                    samplingDuration:
+                      description: Window in which to enforce the sampling rate.
+                      type: string
+                    samplingRate:
+                      description: The rate at which to sample entries once the unsampled
+                        limit has been reached.
+                      format: int64
+                      type: integer
+                  type: object
+              type: object
+          type: object
+      type: object
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: serviceentries.networking.istio.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.hosts
+    description: The hosts associated with the ServiceEntry
+    name: Hosts
+    type: string
+  - JSONPath: .spec.location
+    description: Whether the service is external to the mesh or part of the mesh (MESH_EXTERNAL
+      or MESH_INTERNAL)
+    name: Location
+    type: string
+  - JSONPath: .spec.resolution
+    description: Service discovery mode for the hosts (NONE, STATIC, or DNS)
+    name: Resolution
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    description: |-
+      CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+    name: Age
+    type: date
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: ServiceEntry
+    listKind: ServiceEntryList
+    plural: serviceentries
+    shortNames:
+    - se
+    singular: serviceentry
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration affecting service registry. See more details
+            at: https://istio.io/docs/reference/config/networking/v1alpha3/service-entry.html'
+          properties:
+            addresses:
+              description: The virtual IP addresses associated with the service.
+              items:
+                format: string
+                type: string
+              type: array
+            endpoints:
+              description: One or more endpoints associated with the service.
+              items:
+                properties:
+                  address:
+                    format: string
+                    type: string
+                  labels:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    description: One or more labels associated with the endpoint.
+                    type: object
+                  locality:
+                    description: The locality associated with the endpoint.
+                    format: string
+                    type: string
+                  network:
+                    format: string
+                    type: string
+                  ports:
+                    additionalProperties:
+                      type: integer
+                    description: Set of ports associated with the endpoint.
+                    type: object
+                  weight:
+                    description: The load balancing weight associated with the endpoint.
+                    type: integer
+                type: object
+              type: array
+            exportTo:
+              description: A list of namespaces to which this service is exported.
+              items:
+                format: string
+                type: string
+              type: array
+            hosts:
+              description: The hosts associated with the ServiceEntry.
+              items:
+                format: string
+                type: string
+              type: array
+            location:
+              enum:
+              - MESH_EXTERNAL
+              - MESH_INTERNAL
+              type: string
+            ports:
+              description: The ports associated with the external service.
+              items:
+                properties:
+                  name:
+                    description: Label assigned to the port.
+                    format: string
+                    type: string
+                  number:
+                    description: A valid non-negative integer port number.
+                    type: integer
+                  protocol:
+                    description: The protocol exposed on the port.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            resolution:
+              description: Service discovery mode for the hosts.
+              enum:
+              - NONE
+              - STATIC
+              - DNS
+              type: string
+            subjectAltNames:
+              items:
+                format: string
+                type: string
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: mixer
+    chart: istio
+    heritage: Tiller
+    istio: rbac
+    package: istio.io.mixer
+    release: istio
+  name: servicerolebindings.rbac.istio.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.roleRef.name
+    description: The name of the ServiceRole object being referenced
+    name: Reference
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    description: |-
+      CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+    name: Age
+    type: date
+  group: rbac.istio.io
+  names:
+    categories:
+    - istio-io
+    - rbac-istio-io
+    kind: ServiceRoleBinding
+    plural: servicerolebindings
+    singular: servicerolebinding
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration for Role Based Access Control. See more details
+            at: https://istio.io/docs/reference/config/authorization/istio.rbac.v1alpha1.html'
+          properties:
+            actions:
+              items:
+                properties:
+                  constraints:
+                    description: Optional.
+                    items:
+                      properties:
+                        key:
+                          description: Key of the constraint.
+                          format: string
+                          type: string
+                        values:
+                          description: List of valid values for the constraint.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                      type: object
+                    type: array
+                  hosts:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  methods:
+                    description: Optional.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notHosts:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notMethods:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notPaths:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notPorts:
+                    items:
+                      format: int32
+                      type: integer
+                    type: array
+                  paths:
+                    description: Optional.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  ports:
+                    items:
+                      format: int32
+                      type: integer
+                    type: array
+                  services:
+                    description: A list of service names.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                type: object
+              type: array
+            mode:
+              enum:
+              - ENFORCED
+              - PERMISSIVE
+              type: string
+            role:
+              format: string
+              type: string
+            roleRef:
+              description: Reference to the ServiceRole object.
+              properties:
+                kind:
+                  description: The type of the role being referenced.
+                  format: string
+                  type: string
+                name:
+                  description: The name of the ServiceRole object being referenced.
+                  format: string
+                  type: string
+              type: object
+            subjects:
+              description: List of subjects that are assigned the ServiceRole object.
+              items:
+                properties:
+                  group:
+                    format: string
+                    type: string
+                  groups:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  ips:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  names:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  namespaces:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notGroups:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notIps:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notNames:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notNamespaces:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  properties:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    description: Optional.
+                    type: object
+                  user:
+                    description: Optional.
+                    format: string
+                    type: string
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: mixer
+    chart: istio
+    heritage: Tiller
+    istio: rbac
+    package: istio.io.mixer
+    release: istio
+  name: serviceroles.rbac.istio.io
+spec:
+  group: rbac.istio.io
+  names:
+    categories:
+    - istio-io
+    - rbac-istio-io
+    kind: ServiceRole
+    plural: serviceroles
+    singular: servicerole
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration for Role Based Access Control. See more details
+            at: https://istio.io/docs/reference/config/authorization/istio.rbac.v1alpha1.html'
+          properties:
+            rules:
+              description: The set of access rules (permissions) that the role has.
+              items:
+                properties:
+                  constraints:
+                    description: Optional.
+                    items:
+                      properties:
+                        key:
+                          description: Key of the constraint.
+                          format: string
+                          type: string
+                        values:
+                          description: List of valid values for the constraint.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                      type: object
+                    type: array
+                  hosts:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  methods:
+                    description: Optional.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notHosts:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notMethods:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notPaths:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notPorts:
+                    items:
+                      format: int32
+                      type: integer
+                    type: array
+                  paths:
+                    description: Optional.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  ports:
+                    items:
+                      format: int32
+                      type: integer
+                    type: array
+                  services:
+                    description: A list of service names.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: virtualservices.networking.istio.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.gateways
+    description: The names of gateways and sidecars that should apply these routes
+    name: Gateways
+    type: string
+  - JSONPath: .spec.hosts
+    description: The destination hosts to which traffic is being sent
+    name: Hosts
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    description: |-
+      CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+    name: Age
+    type: date
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: VirtualService
+    listKind: VirtualServiceList
+    plural: virtualservices
+    shortNames:
+    - vs
+    singular: virtualservice
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration affecting label/content routing, sni routing,
+            etc. See more details at: https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service.html'
+          properties:
+            exportTo:
+              description: A list of namespaces to which this virtual service is exported.
+              items:
+                format: string
+                type: string
+              type: array
+            gateways:
+              description: The names of gateways and sidecars that should apply these
+                routes.
+              items:
+                format: string
+                type: string
+              type: array
+            hosts:
+              description: The destination hosts to which traffic is being sent.
+              items:
+                format: string
+                type: string
+              type: array
+            http:
+              description: An ordered list of route rules for HTTP traffic.
+              items:
+                properties:
+                  appendHeaders:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    type: object
+                  appendRequestHeaders:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    type: object
+                  appendResponseHeaders:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    type: object
+                  corsPolicy:
+                    description: Cross-Origin Resource Sharing policy (CORS).
+                    properties:
+                      allowCredentials:
+                        nullable: true
+                        type: boolean
+                      allowHeaders:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      allowMethods:
+                        description: List of HTTP methods allowed to access the resource.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      allowOrigin:
+                        description: The list of origins that are allowed to perform
+                          CORS requests.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      exposeHeaders:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      maxAge:
+                        type: string
+                    type: object
+                  fault:
+                    description: Fault injection policy to apply on HTTP traffic at
+                      the client side.
+                    properties:
+                      abort:
+                        oneOf:
+                        - properties:
+                            percent: {}
+                          required:
+                          - httpStatus
+                        - properties:
+                            percent: {}
+                          required:
+                          - grpcStatus
+                        - properties:
+                            percent: {}
+                          required:
+                          - http2Error
+                        properties:
+                          grpcStatus:
+                            format: string
+                            type: string
+                          http2Error:
+                            format: string
+                            type: string
+                          httpStatus:
+                            description: HTTP status code to use to abort the Http
+                              request.
+                            format: int32
+                            type: integer
+                          percent:
+                            description: Percentage of requests to be aborted with
+                              the error code provided (0-100).
+                            format: int32
+                            type: integer
+                          percentage:
+                            description: Percentage of requests to be aborted with
+                              the error code provided.
+                            properties:
+                              value:
+                                format: double
+                                type: number
+                            type: object
+                        type: object
+                      delay:
+                        oneOf:
+                        - properties:
+                            percent: {}
+                          required:
+                          - fixedDelay
+                        - properties:
+                            percent: {}
+                          required:
+                          - exponentialDelay
+                        properties:
+                          exponentialDelay:
+                            type: string
+                          fixedDelay:
+                            description: Add a fixed delay before forwarding the request.
+                            type: string
+                          percent:
+                            description: Percentage of requests on which the delay
+                              will be injected (0-100).
+                            format: int32
+                            type: integer
+                          percentage:
+                            description: Percentage of requests on which the delay
+                              will be injected.
+                            properties:
+                              value:
+                                format: double
+                                type: number
+                            type: object
+                        type: object
+                    type: object
+                  headers:
+                    properties:
+                      request:
+                        properties:
+                          add:
+                            additionalProperties:
+                              format: string
+                              type: string
+                            type: object
+                          remove:
+                            items:
+                              format: string
+                              type: string
+                            type: array
+                          set:
+                            additionalProperties:
+                              format: string
+                              type: string
+                            type: object
+                        type: object
+                      response:
+                        properties:
+                          add:
+                            additionalProperties:
+                              format: string
+                              type: string
+                            type: object
+                          remove:
+                            items:
+                              format: string
+                              type: string
+                            type: array
+                          set:
+                            additionalProperties:
+                              format: string
+                              type: string
+                            type: object
+                        type: object
+                    type: object
+                  match:
+                    items:
+                      properties:
+                        authority:
+                          oneOf:
+                          - required:
+                            - exact
+                          - required:
+                            - prefix
+                          - required:
+                            - regex
+                          properties:
+                            exact:
+                              format: string
+                              type: string
+                            prefix:
+                              format: string
+                              type: string
+                            regex:
+                              format: string
+                              type: string
+                          type: object
+                        gateways:
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        headers:
+                          additionalProperties:
+                            oneOf:
+                            - required:
+                              - exact
+                            - required:
+                              - prefix
+                            - required:
+                              - regex
+                            properties:
+                              exact:
+                                format: string
+                                type: string
+                              prefix:
+                                format: string
+                                type: string
+                              regex:
+                                format: string
+                                type: string
+                            type: object
+                          type: object
+                        ignoreUriCase:
+                          description: Flag to specify whether the URI matching should
+                            be case-insensitive.
+                          type: boolean
+                        method:
+                          oneOf:
+                          - required:
+                            - exact
+                          - required:
+                            - prefix
+                          - required:
+                            - regex
+                          properties:
+                            exact:
+                              format: string
+                              type: string
+                            prefix:
+                              format: string
+                              type: string
+                            regex:
+                              format: string
+                              type: string
+                          type: object
+                        name:
+                          description: The name assigned to a match.
+                          format: string
+                          type: string
+                        port:
+                          description: Specifies the ports on the host that is being
+                            addressed.
+                          type: integer
+                        queryParams:
+                          additionalProperties:
+                            oneOf:
+                            - required:
+                              - exact
+                            - required:
+                              - prefix
+                            - required:
+                              - regex
+                            properties:
+                              exact:
+                                format: string
+                                type: string
+                              prefix:
+                                format: string
+                                type: string
+                              regex:
+                                format: string
+                                type: string
+                            type: object
+                          description: Query parameters for matching.
+                          type: object
+                        scheme:
+                          oneOf:
+                          - required:
+                            - exact
+                          - required:
+                            - prefix
+                          - required:
+                            - regex
+                          properties:
+                            exact:
+                              format: string
+                              type: string
+                            prefix:
+                              format: string
+                              type: string
+                            regex:
+                              format: string
+                              type: string
+                          type: object
+                        sourceLabels:
+                          additionalProperties:
+                            format: string
+                            type: string
+                          type: object
+                        uri:
+                          oneOf:
+                          - required:
+                            - exact
+                          - required:
+                            - prefix
+                          - required:
+                            - regex
+                          properties:
+                            exact:
+                              format: string
+                              type: string
+                            prefix:
+                              format: string
+                              type: string
+                            regex:
+                              format: string
+                              type: string
+                          type: object
+                      type: object
+                    type: array
+                  mirror:
+                    properties:
+                      host:
+                        description: The name of a service from the service registry.
+                        format: string
+                        type: string
+                      port:
+                        description: Specifies the port on the host that is being
+                          addressed.
+                        properties:
+                          number:
+                            type: integer
+                        type: object
+                      subset:
+                        description: The name of a subset within the service.
+                        format: string
+                        type: string
+                    type: object
+                  mirror_percent:
+                    description: Percentage of the traffic to be mirrored by the `+"`"+`mirror`+"`"+`
+                      field.
+                    nullable: true
+                    type: integer
+                  mirrorPercent:
+                    description: Percentage of the traffic to be mirrored by the `+"`"+`mirror`+"`"+`
+                      field.
+                    nullable: true
+                    type: integer
+                  name:
+                    description: The name assigned to the route for debugging purposes.
+                    format: string
+                    type: string
+                  redirect:
+                    description: A http rule can either redirect or forward (default)
+                      traffic.
+                    properties:
+                      authority:
+                        format: string
+                        type: string
+                      redirectCode:
+                        type: integer
+                      uri:
+                        format: string
+                        type: string
+                    type: object
+                  removeRequestHeaders:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  removeResponseHeaders:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  retries:
+                    description: Retry policy for HTTP requests.
+                    properties:
+                      attempts:
+                        description: Number of retries for a given request.
+                        format: int32
+                        type: integer
+                      perTryTimeout:
+                        description: Timeout per retry attempt for a given request.
+                        type: string
+                      retryOn:
+                        description: Specifies the conditions under which retry takes
+                          place.
+                        format: string
+                        type: string
+                    type: object
+                  rewrite:
+                    description: Rewrite HTTP URIs and Authority headers.
+                    properties:
+                      authority:
+                        description: rewrite the Authority/Host header with this value.
+                        format: string
+                        type: string
+                      uri:
+                        format: string
+                        type: string
+                    type: object
+                  route:
+                    description: A http rule can either redirect or forward (default)
+                      traffic.
+                    items:
+                      properties:
+                        appendRequestHeaders:
+                          additionalProperties:
+                            format: string
+                            type: string
+                          description: Use of `+"`"+`append_request_headers`+"`"+` is deprecated.
+                          type: object
+                        appendResponseHeaders:
+                          additionalProperties:
+                            format: string
+                            type: string
+                          description: Use of `+"`"+`append_response_headers`+"`"+` is deprecated.
+                          type: object
+                        destination:
+                          properties:
+                            host:
+                              description: The name of a service from the service
+                                registry.
+                              format: string
+                              type: string
+                            port:
+                              description: Specifies the port on the host that is
+                                being addressed.
+                              properties:
+                                number:
+                                  type: integer
+                              type: object
+                            subset:
+                              description: The name of a subset within the service.
+                              format: string
+                              type: string
+                          type: object
+                        headers:
+                          properties:
+                            request:
+                              properties:
+                                add:
+                                  additionalProperties:
+                                    format: string
+                                    type: string
+                                  type: object
+                                remove:
+                                  items:
+                                    format: string
+                                    type: string
+                                  type: array
+                                set:
+                                  additionalProperties:
+                                    format: string
+                                    type: string
+                                  type: object
+                              type: object
+                            response:
+                              properties:
+                                add:
+                                  additionalProperties:
+                                    format: string
+                                    type: string
+                                  type: object
+                                remove:
+                                  items:
+                                    format: string
+                                    type: string
+                                  type: array
+                                set:
+                                  additionalProperties:
+                                    format: string
+                                    type: string
+                                  type: object
+                              type: object
+                          type: object
+                        removeRequestHeaders:
+                          description: Use of `+"`"+`remove_request_headers`+"`"+` is deprecated.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        removeResponseHeaders:
+                          description: Use of `+"`"+`remove_response_header`+"`"+` is deprecated.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        weight:
+                          format: int32
+                          type: integer
+                      type: object
+                    type: array
+                  timeout:
+                    description: Timeout for HTTP requests.
+                    type: string
+                  websocketUpgrade:
+                    description: Deprecated.
+                    type: boolean
+                type: object
+              type: array
+            tcp:
+              description: An ordered list of route rules for opaque TCP traffic.
+              items:
+                properties:
+                  match:
+                    items:
+                      properties:
+                        destinationSubnets:
+                          description: IPv4 or IPv6 ip addresses of destination with
+                            optional subnet.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        gateways:
+                          description: Names of gateways where the rule should be
+                            applied to.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        port:
+                          description: Specifies the port on the host that is being
+                            addressed.
+                          type: integer
+                        sourceLabels:
+                          additionalProperties:
+                            format: string
+                            type: string
+                          type: object
+                        sourceSubnet:
+                          description: IPv4 or IPv6 ip address of source with optional
+                            subnet.
+                          format: string
+                          type: string
+                      type: object
+                    type: array
+                  route:
+                    description: The destination to which the connection should be
+                      forwarded to.
+                    items:
+                      properties:
+                        destination:
+                          properties:
+                            host:
+                              description: The name of a service from the service
+                                registry.
+                              format: string
+                              type: string
+                            port:
+                              description: Specifies the port on the host that is
+                                being addressed.
+                              properties:
+                                number:
+                                  type: integer
+                              type: object
+                            subset:
+                              description: The name of a subset within the service.
+                              format: string
+                              type: string
+                          type: object
+                        weight:
+                          format: int32
+                          type: integer
+                      type: object
+                    type: array
+                type: object
+              type: array
+            tls:
+              items:
+                properties:
+                  match:
+                    items:
+                      properties:
+                        destinationSubnets:
+                          description: IPv4 or IPv6 ip addresses of destination with
+                            optional subnet.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        gateways:
+                          description: Names of gateways where the rule should be
+                            applied to.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        port:
+                          description: Specifies the port on the host that is being
+                            addressed.
+                          type: integer
+                        sniHosts:
+                          description: SNI (server name indicator) to match on.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        sourceLabels:
+                          additionalProperties:
+                            format: string
+                            type: string
+                          type: object
+                        sourceSubnet:
+                          description: IPv4 or IPv6 ip address of source with optional
+                            subnet.
+                          format: string
+                          type: string
+                      type: object
+                    type: array
+                  route:
+                    description: The destination to which the connection should be
+                      forwarded to.
+                    items:
+                      properties:
+                        destination:
+                          properties:
+                            host:
+                              description: The name of a service from the service
+                                registry.
+                              format: string
+                              type: string
+                            port:
+                              description: Specifies the port on the host that is
+                                being addressed.
+                              properties:
+                                number:
+                                  type: integer
+                              type: object
+                            subset:
+                              description: The name of a subset within the service.
+                              format: string
+                              type: string
+                          type: object
+                        weight:
+                          format: int32
+                          type: integer
+                      type: object
+                    type: array
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: adapters.config.istio.io
+  labels:
+    app: mixer
+    package: adapter
+    istio: mixer-adapter
+    chart: istio
+    heritage: Tiller
+    release: istio
+spec:
+  group: config.istio.io
+  names:
+    kind: adapter
+    plural: adapters
+    singular: adapter
+    categories:
+    - istio-io
+    - policy-istio-io
+  scope: Namespaced
+  subresources:
+    status: {}
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+---
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: instances.config.istio.io
+  labels:
+    app: mixer
+    package: instance
+    istio: mixer-instance
+    chart: istio
+    heritage: Tiller
+    release: istio
+spec:
+  group: config.istio.io
+  names:
+    kind: instance
+    plural: instances
+    singular: instance
+    categories:
+    - istio-io
+    - policy-istio-io
+  scope: Namespaced
+  subresources:
+    status: {}
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+---
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: templates.config.istio.io
+  labels:
+    app: mixer
+    package: template
+    istio: mixer-template
+    chart: istio
+    heritage: Tiller
+    release: istio
+spec:
+  group: config.istio.io
+  names:
+    kind: template
+    plural: templates
+    singular: template
+    categories:
+    - istio-io
+    - policy-istio-io
+  scope: Namespaced
+  subresources:
+    status: {}
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+---
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: handlers.config.istio.io
+  labels:
+    app: mixer
+    package: handler
+    istio: mixer-handler
+    chart: istio
+    heritage: Tiller
+    release: istio
+spec:
+  group: config.istio.io
+  names:
+    kind: handler
+    plural: handlers
+    singular: handler
+    categories:
+    - istio-io
+    - policy-istio-io
+  scope: Namespaced
+  subresources:
+    status: {}
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+---
+`)
+
+func chartsCrdsFilesCrd10YamlBytes() ([]byte, error) {
+	return _chartsCrdsFilesCrd10Yaml, nil
+}
+
+func chartsCrdsFilesCrd10Yaml() (*asset, error) {
+	bytes, err := chartsCrdsFilesCrd10YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/files/crd-10.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsFilesCrd11Yaml = []byte(`apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: sidecars.networking.istio.io
+spec:
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: Sidecar
+    plural: sidecars
+    singular: sidecar
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration affecting network reachability of a sidecar.
+            See more details at: https://istio.io/docs/reference/config/networking/v1alpha3/sidecar.html'
+          properties:
+            egress:
+              items:
+                properties:
+                  bind:
+                    format: string
+                    type: string
+                  captureMode:
+                    enum:
+                    - DEFAULT
+                    - IPTABLES
+                    - NONE
+                    type: string
+                  hosts:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  port:
+                    description: The port associated with the listener.
+                    properties:
+                      name:
+                        description: Label assigned to the port.
+                        format: string
+                        type: string
+                      number:
+                        description: A valid non-negative integer port number.
+                        type: integer
+                      protocol:
+                        description: The protocol exposed on the port.
+                        format: string
+                        type: string
+                    type: object
+                type: object
+              type: array
+            ingress:
+              items:
+                properties:
+                  bind:
+                    description: The ip to which the listener should be bound.
+                    format: string
+                    type: string
+                  captureMode:
+                    enum:
+                    - DEFAULT
+                    - IPTABLES
+                    - NONE
+                    type: string
+                  defaultEndpoint:
+                    format: string
+                    type: string
+                  port:
+                    description: The port associated with the listener.
+                    properties:
+                      name:
+                        description: Label assigned to the port.
+                        format: string
+                        type: string
+                      number:
+                        description: A valid non-negative integer port number.
+                        type: integer
+                      protocol:
+                        description: The protocol exposed on the port.
+                        format: string
+                        type: string
+                    type: object
+                type: object
+              type: array
+            outboundTrafficPolicy:
+              description: This allows to configure the outbound traffic policy.
+              properties:
+                mode:
+                  enum:
+                  - REGISTRY_ONLY
+                  - ALLOW_ANY
+                  type: string
+              type: object
+            workloadSelector:
+              properties:
+                labels:
+                  additionalProperties:
+                    format: string
+                    type: string
+                  type: object
+              type: object
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+`)
+
+func chartsCrdsFilesCrd11YamlBytes() ([]byte, error) {
+	return _chartsCrdsFilesCrd11Yaml, nil
+}
+
+func chartsCrdsFilesCrd11Yaml() (*asset, error) {
+	bytes, err := chartsCrdsFilesCrd11YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/files/crd-11.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsFilesCrd14Yaml = []byte(`apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    heritage: Tiller
+    istio: security
+    release: istio
+  name: authorizationpolicies.security.istio.io
+spec:
+  group: security.istio.io
+  names:
+    categories:
+    - istio-io
+    - security-istio-io
+    kind: AuthorizationPolicy
+    plural: authorizationpolicies
+    singular: authorizationpolicy
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration for access control on workloads. See more details
+            at: https://istio.io/docs/reference/config/security/v1beta1/authorization-policy.html'
+          properties:
+            rules:
+              description: Optional.
+              items:
+                properties:
+                  from:
+                    description: Optional.
+                    items:
+                      properties:
+                        source:
+                          description: Source specifies the source of a request.
+                          properties:
+                            ipBlocks:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            namespaces:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            principals:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            requestPrincipals:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                          type: object
+                      type: object
+                    type: array
+                  to:
+                    description: Optional.
+                    items:
+                      properties:
+                        operation:
+                          description: Operation specifies the operation of a request.
+                          properties:
+                            hosts:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            methods:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            paths:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            ports:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                          type: object
+                      type: object
+                    type: array
+                  when:
+                    description: Optional.
+                    items:
+                      properties:
+                        key:
+                          description: The name of an Istio attribute.
+                          format: string
+                          type: string
+                        values:
+                          description: The allowed values for the attribute.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                      type: object
+                    type: array
+                type: object
+              type: array
+            selector:
+              description: Optional.
+              properties:
+                matchLabels:
+                  additionalProperties:
+                    format: string
+                    type: string
+                  type: object
+              type: object
+          type: object
+      type: object
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+`)
+
+func chartsCrdsFilesCrd14YamlBytes() ([]byte, error) {
+	return _chartsCrdsFilesCrd14Yaml, nil
+}
+
+func chartsCrdsFilesCrd14Yaml() (*asset, error) {
+	bytes, err := chartsCrdsFilesCrd14YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/files/crd-14.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsFilesCrdAllGenYaml = []byte(`# DO NOT EDIT - Generated by Cue OpenAPI generator.
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: mixer
+    chart: istio
+    heritage: Tiller
+    istio: core
+    package: istio.io.mixer
+    release: istio
+  name: attributemanifests.config.istio.io
+spec:
+  group: config.istio.io
+  names:
+    categories:
+    - istio-io
+    - policy-istio-io
+    kind: attributemanifest
+    plural: attributemanifests
+    singular: attributemanifest
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Describes the rules used to configure Mixer''s policy and
+            telemetry features. See more details at: https://istio.io/docs/reference/config/policy-and-telemetry/istio.policy.v1beta1.html'
+          properties:
+            attributes:
+              additionalProperties:
+                properties:
+                  description:
+                    description: A human-readable description of the attribute's purpose.
+                    format: string
+                    type: string
+                  valueType:
+                    description: The type of data carried by this attribute.
+                    enum:
+                    - VALUE_TYPE_UNSPECIFIED
+                    - STRING
+                    - INT64
+                    - DOUBLE
+                    - BOOL
+                    - TIMESTAMP
+                    - IP_ADDRESS
+                    - EMAIL_ADDRESS
+                    - URI
+                    - DNS_NAME
+                    - DURATION
+                    - STRING_MAP
+                    type: string
+                type: object
+              description: The set of attributes this Istio component will be responsible
+                for producing at runtime.
+              type: object
+            name:
+              description: Name of the component producing these attributes.
+              format: string
+              type: string
+            revision:
+              description: The revision of this document.
+              format: string
+              type: string
+          type: object
+      type: object
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    heritage: Tiller
+    istio: security
+    release: istio
+  name: authorizationpolicies.security.istio.io
+spec:
+  group: security.istio.io
+  names:
+    categories:
+    - istio-io
+    - security-istio-io
+    kind: AuthorizationPolicy
+    plural: authorizationpolicies
+    singular: authorizationpolicy
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration for access control on workloads. See more details
+            at: https://istio.io/docs/reference/config/security/v1beta1/authorization-policy.html'
+          properties:
+            rules:
+              description: Optional.
+              items:
+                properties:
+                  from:
+                    description: Optional.
+                    items:
+                      properties:
+                        source:
+                          description: Source specifies the source of a request.
+                          properties:
+                            ipBlocks:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            namespaces:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            principals:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            requestPrincipals:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                          type: object
+                      type: object
+                    type: array
+                  to:
+                    description: Optional.
+                    items:
+                      properties:
+                        operation:
+                          description: Operation specifies the operation of a request.
+                          properties:
+                            hosts:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            methods:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            paths:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                            ports:
+                              description: Optional.
+                              items:
+                                format: string
+                                type: string
+                              type: array
+                          type: object
+                      type: object
+                    type: array
+                  when:
+                    description: Optional.
+                    items:
+                      properties:
+                        key:
+                          description: The name of an Istio attribute.
+                          format: string
+                          type: string
+                        values:
+                          description: The allowed values for the attribute.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                      type: object
+                    type: array
+                type: object
+              type: array
+            selector:
+              description: Optional.
+              properties:
+                matchLabels:
+                  additionalProperties:
+                    format: string
+                    type: string
+                  type: object
+              type: object
+          type: object
+      type: object
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    heritage: Tiller
+    istio: rbac
+    release: istio
+  name: clusterrbacconfigs.rbac.istio.io
+spec:
+  group: rbac.istio.io
+  names:
+    categories:
+    - istio-io
+    - rbac-istio-io
+    kind: ClusterRbacConfig
+    plural: clusterrbacconfigs
+    singular: clusterrbacconfig
+  scope: Cluster
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration for Role Based Access Control. See more details
+            at: https://istio.io/docs/reference/config/authorization/istio.rbac.v1alpha1.html'
+          properties:
+            enforcementMode:
+              enum:
+              - ENFORCED
+              - PERMISSIVE
+              type: string
+            exclusion:
+              description: A list of services or namespaces that should not be enforced
+                by Istio RBAC policies.
+              properties:
+                namespaces:
+                  description: A list of namespaces.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+                services:
+                  description: A list of services.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+              type: object
+            inclusion:
+              description: A list of services or namespaces that should be enforced
+                by Istio RBAC policies.
+              properties:
+                namespaces:
+                  description: A list of namespaces.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+                services:
+                  description: A list of services.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+              type: object
+            mode:
+              description: Istio RBAC mode.
+              enum:
+              - "OFF"
+              - "ON"
+              - ON_WITH_INCLUSION
+              - ON_WITH_EXCLUSION
+              type: string
+          type: object
+      type: object
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: destinationrules.networking.istio.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.host
+    description: The name of a service from the service registry
+    name: Host
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    description: |-
+      CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+    name: Age
+    type: date
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: DestinationRule
+    listKind: DestinationRuleList
+    plural: destinationrules
+    shortNames:
+    - dr
+    singular: destinationrule
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration affecting load balancing, outlier detection,
+            etc. See more details at: https://istio.io/docs/reference/config/networking/destination-rule.html'
+          properties:
+            exportTo:
+              description: A list of namespaces to which this destination rule is
+                exported.
+              items:
+                format: string
+                type: string
+              type: array
+            host:
+              description: The name of a service from the service registry.
+              format: string
+              type: string
+            subsets:
+              items:
+                properties:
+                  labels:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    type: object
+                  name:
+                    description: Name of the subset.
+                    format: string
+                    type: string
+                  trafficPolicy:
+                    description: Traffic policies that apply to this subset.
+                    properties:
+                      connectionPool:
+                        properties:
+                          http:
+                            description: HTTP connection pool settings.
+                            properties:
+                              h2UpgradePolicy:
+                                description: Specify if http1.1 connection should
+                                  be upgraded to http2 for the associated destination.
+                                enum:
+                                - DEFAULT
+                                - DO_NOT_UPGRADE
+                                - UPGRADE
+                                type: string
+                              http1MaxPendingRequests:
+                                description: Maximum number of pending HTTP requests
+                                  to a destination.
+                                format: int32
+                                type: integer
+                              http2MaxRequests:
+                                description: Maximum number of requests to a backend.
+                                format: int32
+                                type: integer
+                              idleTimeout:
+                                description: The idle timeout for upstream connection
+                                  pool connections.
+                                type: string
+                              maxRequestsPerConnection:
+                                description: Maximum number of requests per connection
+                                  to a backend.
+                                format: int32
+                                type: integer
+                              maxRetries:
+                                format: int32
+                                type: integer
+                            type: object
+                          tcp:
+                            description: Settings common to both HTTP and TCP upstream
+                              connections.
+                            properties:
+                              connectTimeout:
+                                description: TCP connection timeout.
+                                type: string
+                              maxConnections:
+                                description: Maximum number of HTTP1 /TCP connections
+                                  to a destination host.
+                                format: int32
+                                type: integer
+                              tcpKeepalive:
+                                description: If set then set SO_KEEPALIVE on the socket
+                                  to enable TCP Keepalives.
+                                properties:
+                                  interval:
+                                    description: The time duration between keep-alive
+                                      probes.
+                                    type: string
+                                  probes:
+                                    type: integer
+                                  time:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                      loadBalancer:
+                        description: Settings controlling the load balancer algorithms.
+                        oneOf:
+                        - required:
+                          - simple
+                        - properties:
+                            consistentHash:
+                              oneOf:
+                              - required:
+                                - httpHeaderName
+                              - required:
+                                - httpCookie
+                              - required:
+                                - useSourceIp
+                          required:
+                          - consistentHash
+                        properties:
+                          consistentHash:
+                            properties:
+                              httpCookie:
+                                description: Hash based on HTTP cookie.
+                                properties:
+                                  name:
+                                    description: Name of the cookie.
+                                    format: string
+                                    type: string
+                                  path:
+                                    description: Path to set for the cookie.
+                                    format: string
+                                    type: string
+                                  ttl:
+                                    description: Lifetime of the cookie.
+                                    type: string
+                                type: object
+                              httpHeaderName:
+                                description: Hash based on a specific HTTP header.
+                                format: string
+                                type: string
+                              minimumRingSize:
+                                type: integer
+                              useSourceIp:
+                                description: Hash based on the source IP address.
+                                type: boolean
+                            type: object
+                          simple:
+                            enum:
+                            - ROUND_ROBIN
+                            - LEAST_CONN
+                            - RANDOM
+                            - PASSTHROUGH
+                            type: string
+                        type: object
+                      outlierDetection:
+                        properties:
+                          baseEjectionTime:
+                            description: Minimum ejection duration.
+                            type: string
+                          consecutiveErrors:
+                            format: int32
+                            type: integer
+                          interval:
+                            description: Time interval between ejection sweep analysis.
+                            type: string
+                          maxEjectionPercent:
+                            format: int32
+                            type: integer
+                          minHealthPercent:
+                            format: int32
+                            type: integer
+                        type: object
+                      portLevelSettings:
+                        description: Traffic policies specific to individual ports.
+                        items:
+                          properties:
+                            connectionPool:
+                              properties:
+                                http:
+                                  description: HTTP connection pool settings.
+                                  properties:
+                                    h2UpgradePolicy:
+                                      description: Specify if http1.1 connection should
+                                        be upgraded to http2 for the associated destination.
+                                      enum:
+                                      - DEFAULT
+                                      - DO_NOT_UPGRADE
+                                      - UPGRADE
+                                      type: string
+                                    http1MaxPendingRequests:
+                                      description: Maximum number of pending HTTP
+                                        requests to a destination.
+                                      format: int32
+                                      type: integer
+                                    http2MaxRequests:
+                                      description: Maximum number of requests to a
+                                        backend.
+                                      format: int32
+                                      type: integer
+                                    idleTimeout:
+                                      description: The idle timeout for upstream connection
+                                        pool connections.
+                                      type: string
+                                    maxRequestsPerConnection:
+                                      description: Maximum number of requests per
+                                        connection to a backend.
+                                      format: int32
+                                      type: integer
+                                    maxRetries:
+                                      format: int32
+                                      type: integer
+                                  type: object
+                                tcp:
+                                  description: Settings common to both HTTP and TCP
+                                    upstream connections.
+                                  properties:
+                                    connectTimeout:
+                                      description: TCP connection timeout.
+                                      type: string
+                                    maxConnections:
+                                      description: Maximum number of HTTP1 /TCP connections
+                                        to a destination host.
+                                      format: int32
+                                      type: integer
+                                    tcpKeepalive:
+                                      description: If set then set SO_KEEPALIVE on
+                                        the socket to enable TCP Keepalives.
+                                      properties:
+                                        interval:
+                                          description: The time duration between keep-alive
+                                            probes.
+                                          type: string
+                                        probes:
+                                          type: integer
+                                        time:
+                                          type: string
+                                      type: object
+                                  type: object
+                              type: object
+                            loadBalancer:
+                              description: Settings controlling the load balancer
+                                algorithms.
+                              oneOf:
+                              - required:
+                                - simple
+                              - properties:
+                                  consistentHash:
+                                    oneOf:
+                                    - required:
+                                      - httpHeaderName
+                                    - required:
+                                      - httpCookie
+                                    - required:
+                                      - useSourceIp
+                                required:
+                                - consistentHash
+                              properties:
+                                consistentHash:
+                                  properties:
+                                    httpCookie:
+                                      description: Hash based on HTTP cookie.
+                                      properties:
+                                        name:
+                                          description: Name of the cookie.
+                                          format: string
+                                          type: string
+                                        path:
+                                          description: Path to set for the cookie.
+                                          format: string
+                                          type: string
+                                        ttl:
+                                          description: Lifetime of the cookie.
+                                          type: string
+                                      type: object
+                                    httpHeaderName:
+                                      description: Hash based on a specific HTTP header.
+                                      format: string
+                                      type: string
+                                    minimumRingSize:
+                                      type: integer
+                                    useSourceIp:
+                                      description: Hash based on the source IP address.
+                                      type: boolean
+                                  type: object
+                                simple:
+                                  enum:
+                                  - ROUND_ROBIN
+                                  - LEAST_CONN
+                                  - RANDOM
+                                  - PASSTHROUGH
+                                  type: string
+                              type: object
+                            outlierDetection:
+                              properties:
+                                baseEjectionTime:
+                                  description: Minimum ejection duration.
+                                  type: string
+                                consecutiveErrors:
+                                  format: int32
+                                  type: integer
+                                interval:
+                                  description: Time interval between ejection sweep
+                                    analysis.
+                                  type: string
+                                maxEjectionPercent:
+                                  format: int32
+                                  type: integer
+                                minHealthPercent:
+                                  format: int32
+                                  type: integer
+                              type: object
+                            port:
+                              properties:
+                                number:
+                                  type: integer
+                              type: object
+                            tls:
+                              description: TLS related settings for connections to
+                                the upstream service.
+                              properties:
+                                caCertificates:
+                                  format: string
+                                  type: string
+                                clientCertificate:
+                                  description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                                  format: string
+                                  type: string
+                                mode:
+                                  enum:
+                                  - DISABLE
+                                  - SIMPLE
+                                  - MUTUAL
+                                  - ISTIO_MUTUAL
+                                  type: string
+                                privateKey:
+                                  description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                                  format: string
+                                  type: string
+                                sni:
+                                  description: SNI string to present to the server
+                                    during TLS handshake.
+                                  format: string
+                                  type: string
+                                subjectAltNames:
+                                  items:
+                                    format: string
+                                    type: string
+                                  type: array
+                              type: object
+                          type: object
+                        type: array
+                      tls:
+                        description: TLS related settings for connections to the upstream
+                          service.
+                        properties:
+                          caCertificates:
+                            format: string
+                            type: string
+                          clientCertificate:
+                            description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                            format: string
+                            type: string
+                          mode:
+                            enum:
+                            - DISABLE
+                            - SIMPLE
+                            - MUTUAL
+                            - ISTIO_MUTUAL
+                            type: string
+                          privateKey:
+                            description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                            format: string
+                            type: string
+                          sni:
+                            description: SNI string to present to the server during
+                              TLS handshake.
+                            format: string
+                            type: string
+                          subjectAltNames:
+                            items:
+                              format: string
+                              type: string
+                            type: array
+                        type: object
+                    type: object
+                type: object
+              type: array
+            trafficPolicy:
+              properties:
+                connectionPool:
+                  properties:
+                    http:
+                      description: HTTP connection pool settings.
+                      properties:
+                        h2UpgradePolicy:
+                          description: Specify if http1.1 connection should be upgraded
+                            to http2 for the associated destination.
+                          enum:
+                          - DEFAULT
+                          - DO_NOT_UPGRADE
+                          - UPGRADE
+                          type: string
+                        http1MaxPendingRequests:
+                          description: Maximum number of pending HTTP requests to
+                            a destination.
+                          format: int32
+                          type: integer
+                        http2MaxRequests:
+                          description: Maximum number of requests to a backend.
+                          format: int32
+                          type: integer
+                        idleTimeout:
+                          description: The idle timeout for upstream connection pool
+                            connections.
+                          type: string
+                        maxRequestsPerConnection:
+                          description: Maximum number of requests per connection to
+                            a backend.
+                          format: int32
+                          type: integer
+                        maxRetries:
+                          format: int32
+                          type: integer
+                      type: object
+                    tcp:
+                      description: Settings common to both HTTP and TCP upstream connections.
+                      properties:
+                        connectTimeout:
+                          description: TCP connection timeout.
+                          type: string
+                        maxConnections:
+                          description: Maximum number of HTTP1 /TCP connections to
+                            a destination host.
+                          format: int32
+                          type: integer
+                        tcpKeepalive:
+                          description: If set then set SO_KEEPALIVE on the socket
+                            to enable TCP Keepalives.
+                          properties:
+                            interval:
+                              description: The time duration between keep-alive probes.
+                              type: string
+                            probes:
+                              type: integer
+                            time:
+                              type: string
+                          type: object
+                      type: object
+                  type: object
+                loadBalancer:
+                  description: Settings controlling the load balancer algorithms.
+                  oneOf:
+                  - required:
+                    - simple
+                  - properties:
+                      consistentHash:
+                        oneOf:
+                        - required:
+                          - httpHeaderName
+                        - required:
+                          - httpCookie
+                        - required:
+                          - useSourceIp
+                    required:
+                    - consistentHash
+                  properties:
+                    consistentHash:
+                      properties:
+                        httpCookie:
+                          description: Hash based on HTTP cookie.
+                          properties:
+                            name:
+                              description: Name of the cookie.
+                              format: string
+                              type: string
+                            path:
+                              description: Path to set for the cookie.
+                              format: string
+                              type: string
+                            ttl:
+                              description: Lifetime of the cookie.
+                              type: string
+                          type: object
+                        httpHeaderName:
+                          description: Hash based on a specific HTTP header.
+                          format: string
+                          type: string
+                        minimumRingSize:
+                          type: integer
+                        useSourceIp:
+                          description: Hash based on the source IP address.
+                          type: boolean
+                      type: object
+                    simple:
+                      enum:
+                      - ROUND_ROBIN
+                      - LEAST_CONN
+                      - RANDOM
+                      - PASSTHROUGH
+                      type: string
+                  type: object
+                outlierDetection:
+                  properties:
+                    baseEjectionTime:
+                      description: Minimum ejection duration.
+                      type: string
+                    consecutiveErrors:
+                      format: int32
+                      type: integer
+                    interval:
+                      description: Time interval between ejection sweep analysis.
+                      type: string
+                    maxEjectionPercent:
+                      format: int32
+                      type: integer
+                    minHealthPercent:
+                      format: int32
+                      type: integer
+                  type: object
+                portLevelSettings:
+                  description: Traffic policies specific to individual ports.
+                  items:
+                    properties:
+                      connectionPool:
+                        properties:
+                          http:
+                            description: HTTP connection pool settings.
+                            properties:
+                              h2UpgradePolicy:
+                                description: Specify if http1.1 connection should
+                                  be upgraded to http2 for the associated destination.
+                                enum:
+                                - DEFAULT
+                                - DO_NOT_UPGRADE
+                                - UPGRADE
+                                type: string
+                              http1MaxPendingRequests:
+                                description: Maximum number of pending HTTP requests
+                                  to a destination.
+                                format: int32
+                                type: integer
+                              http2MaxRequests:
+                                description: Maximum number of requests to a backend.
+                                format: int32
+                                type: integer
+                              idleTimeout:
+                                description: The idle timeout for upstream connection
+                                  pool connections.
+                                type: string
+                              maxRequestsPerConnection:
+                                description: Maximum number of requests per connection
+                                  to a backend.
+                                format: int32
+                                type: integer
+                              maxRetries:
+                                format: int32
+                                type: integer
+                            type: object
+                          tcp:
+                            description: Settings common to both HTTP and TCP upstream
+                              connections.
+                            properties:
+                              connectTimeout:
+                                description: TCP connection timeout.
+                                type: string
+                              maxConnections:
+                                description: Maximum number of HTTP1 /TCP connections
+                                  to a destination host.
+                                format: int32
+                                type: integer
+                              tcpKeepalive:
+                                description: If set then set SO_KEEPALIVE on the socket
+                                  to enable TCP Keepalives.
+                                properties:
+                                  interval:
+                                    description: The time duration between keep-alive
+                                      probes.
+                                    type: string
+                                  probes:
+                                    type: integer
+                                  time:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                      loadBalancer:
+                        description: Settings controlling the load balancer algorithms.
+                        oneOf:
+                        - required:
+                          - simple
+                        - properties:
+                            consistentHash:
+                              oneOf:
+                              - required:
+                                - httpHeaderName
+                              - required:
+                                - httpCookie
+                              - required:
+                                - useSourceIp
+                          required:
+                          - consistentHash
+                        properties:
+                          consistentHash:
+                            properties:
+                              httpCookie:
+                                description: Hash based on HTTP cookie.
+                                properties:
+                                  name:
+                                    description: Name of the cookie.
+                                    format: string
+                                    type: string
+                                  path:
+                                    description: Path to set for the cookie.
+                                    format: string
+                                    type: string
+                                  ttl:
+                                    description: Lifetime of the cookie.
+                                    type: string
+                                type: object
+                              httpHeaderName:
+                                description: Hash based on a specific HTTP header.
+                                format: string
+                                type: string
+                              minimumRingSize:
+                                type: integer
+                              useSourceIp:
+                                description: Hash based on the source IP address.
+                                type: boolean
+                            type: object
+                          simple:
+                            enum:
+                            - ROUND_ROBIN
+                            - LEAST_CONN
+                            - RANDOM
+                            - PASSTHROUGH
+                            type: string
+                        type: object
+                      outlierDetection:
+                        properties:
+                          baseEjectionTime:
+                            description: Minimum ejection duration.
+                            type: string
+                          consecutiveErrors:
+                            format: int32
+                            type: integer
+                          interval:
+                            description: Time interval between ejection sweep analysis.
+                            type: string
+                          maxEjectionPercent:
+                            format: int32
+                            type: integer
+                          minHealthPercent:
+                            format: int32
+                            type: integer
+                        type: object
+                      port:
+                        properties:
+                          number:
+                            type: integer
+                        type: object
+                      tls:
+                        description: TLS related settings for connections to the upstream
+                          service.
+                        properties:
+                          caCertificates:
+                            format: string
+                            type: string
+                          clientCertificate:
+                            description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                            format: string
+                            type: string
+                          mode:
+                            enum:
+                            - DISABLE
+                            - SIMPLE
+                            - MUTUAL
+                            - ISTIO_MUTUAL
+                            type: string
+                          privateKey:
+                            description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                            format: string
+                            type: string
+                          sni:
+                            description: SNI string to present to the server during
+                              TLS handshake.
+                            format: string
+                            type: string
+                          subjectAltNames:
+                            items:
+                              format: string
+                              type: string
+                            type: array
+                        type: object
+                    type: object
+                  type: array
+                tls:
+                  description: TLS related settings for connections to the upstream
+                    service.
+                  properties:
+                    caCertificates:
+                      format: string
+                      type: string
+                    clientCertificate:
+                      description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                      format: string
+                      type: string
+                    mode:
+                      enum:
+                      - DISABLE
+                      - SIMPLE
+                      - MUTUAL
+                      - ISTIO_MUTUAL
+                      type: string
+                    privateKey:
+                      description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                      format: string
+                      type: string
+                    sni:
+                      description: SNI string to present to the server during TLS
+                        handshake.
+                      format: string
+                      type: string
+                    subjectAltNames:
+                      items:
+                        format: string
+                        type: string
+                      type: array
+                  type: object
+              type: object
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: envoyfilters.networking.istio.io
+spec:
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: EnvoyFilter
+    plural: envoyfilters
+    singular: envoyfilter
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Customizing Envoy configuration generated by Istio. See more
+            details at: https://istio.io/docs/reference/config/networking/envoy-filter.html'
+          properties:
+            configPatches:
+              description: One or more patches with match conditions.
+              items:
+                properties:
+                  applyTo:
+                    enum:
+                    - INVALID
+                    - LISTENER
+                    - FILTER_CHAIN
+                    - NETWORK_FILTER
+                    - HTTP_FILTER
+                    - ROUTE_CONFIGURATION
+                    - VIRTUAL_HOST
+                    - HTTP_ROUTE
+                    - CLUSTER
+                    type: string
+                  match:
+                    description: Match on listener/route configuration/cluster.
+                    oneOf:
+                    - required:
+                      - listener
+                    - required:
+                      - routeConfiguration
+                    - required:
+                      - cluster
+                    properties:
+                      cluster:
+                        description: Match on envoy cluster attributes.
+                        properties:
+                          name:
+                            description: The exact name of the cluster to match.
+                            format: string
+                            type: string
+                          portNumber:
+                            description: The service port for which this cluster was
+                              generated.
+                            type: integer
+                          service:
+                            description: The fully qualified service name for this
+                              cluster.
+                            format: string
+                            type: string
+                          subset:
+                            description: The subset associated with the service.
+                            format: string
+                            type: string
+                        type: object
+                      context:
+                        description: The specific config generation context to match
+                          on.
+                        enum:
+                        - ANY
+                        - SIDECAR_INBOUND
+                        - SIDECAR_OUTBOUND
+                        - GATEWAY
+                        type: string
+                      listener:
+                        description: Match on envoy listener attributes.
+                        properties:
+                          filterChain:
+                            description: Match a specific filter chain in a listener.
+                            properties:
+                              applicationProtocols:
+                                description: Applies only to sidecars.
+                                format: string
+                                type: string
+                              filter:
+                                description: The name of a specific filter to apply
+                                  the patch to.
+                                properties:
+                                  name:
+                                    description: The filter name to match on.
+                                    format: string
+                                    type: string
+                                  subFilter:
+                                    properties:
+                                      name:
+                                        description: The filter name to match on.
+                                        format: string
+                                        type: string
+                                    type: object
+                                type: object
+                              name:
+                                description: The name assigned to the filter chain.
+                                format: string
+                                type: string
+                              sni:
+                                description: The SNI value used by a filter chain's
+                                  match condition.
+                                format: string
+                                type: string
+                              transportProtocol:
+                                description: Applies only to SIDECAR_INBOUND context.
+                                format: string
+                                type: string
+                            type: object
+                          name:
+                            description: Match a specific listener by its name.
+                            format: string
+                            type: string
+                          portName:
+                            format: string
+                            type: string
+                          portNumber:
+                            type: integer
+                        type: object
+                      proxy:
+                        description: Match on properties associated with a proxy.
+                        properties:
+                          metadata:
+                            additionalProperties:
+                              format: string
+                              type: string
+                            type: object
+                          proxyVersion:
+                            format: string
+                            type: string
+                        type: object
+                      routeConfiguration:
+                        description: Match on envoy HTTP route configuration attributes.
+                        properties:
+                          gateway:
+                            format: string
+                            type: string
+                          name:
+                            description: Route configuration name to match on.
+                            format: string
+                            type: string
+                          portName:
+                            description: Applicable only for GATEWAY context.
+                            format: string
+                            type: string
+                          portNumber:
+                            type: integer
+                          vhost:
+                            properties:
+                              name:
+                                format: string
+                                type: string
+                              route:
+                                description: Match a specific route within the virtual
+                                  host.
+                                properties:
+                                  action:
+                                    description: Match a route with specific action
+                                      type.
+                                    enum:
+                                    - ANY
+                                    - ROUTE
+                                    - REDIRECT
+                                    - DIRECT_RESPONSE
+                                    type: string
+                                  name:
+                                    format: string
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                    type: object
+                  patch:
+                    description: The patch to apply along with the operation.
+                    properties:
+                      operation:
+                        description: Determines how the patch should be applied.
+                        enum:
+                        - INVALID
+                        - MERGE
+                        - ADD
+                        - REMOVE
+                        - INSERT_BEFORE
+                        - INSERT_AFTER
+                        type: string
+                      value:
+                        description: The JSON config of the object being patched.
+                        type: object
+                    type: object
+                type: object
+              type: array
+            filters:
+              items:
+                properties:
+                  filterConfig:
+                    type: object
+                  filterName:
+                    description: The name of the filter to instantiate.
+                    format: string
+                    type: string
+                  filterType:
+                    description: The type of filter to instantiate.
+                    enum:
+                    - INVALID
+                    - HTTP
+                    - NETWORK
+                    type: string
+                  insertPosition:
+                    description: Insert position in the filter chain.
+                    properties:
+                      index:
+                        description: Position of this filter in the filter chain.
+                        enum:
+                        - FIRST
+                        - LAST
+                        - BEFORE
+                        - AFTER
+                        type: string
+                      relativeTo:
+                        format: string
+                        type: string
+                    type: object
+                  listenerMatch:
+                    properties:
+                      address:
+                        description: One or more IP addresses to which the listener
+                          is bound.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      listenerProtocol:
+                        description: Selects a class of listeners for the same protocol.
+                        enum:
+                        - ALL
+                        - HTTP
+                        - TCP
+                        type: string
+                      listenerType:
+                        description: Inbound vs outbound sidecar listener or gateway
+                          listener.
+                        enum:
+                        - ANY
+                        - SIDECAR_INBOUND
+                        - SIDECAR_OUTBOUND
+                        - GATEWAY
+                        type: string
+                      portNamePrefix:
+                        format: string
+                        type: string
+                      portNumber:
+                        type: integer
+                    type: object
+                type: object
+              type: array
+            workloadLabels:
+              additionalProperties:
+                format: string
+                type: string
+              description: Deprecated.
+              type: object
+            workloadSelector:
+              properties:
+                labels:
+                  additionalProperties:
+                    format: string
+                    type: string
+                  type: object
+              type: object
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: gateways.networking.istio.io
+spec:
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: Gateway
+    plural: gateways
+    shortNames:
+    - gw
+    singular: gateway
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration affecting edge load balancer. See more details
+            at: https://istio.io/docs/reference/config/networking/gateway.html'
+          properties:
+            selector:
+              additionalProperties:
+                format: string
+                type: string
+              type: object
+            servers:
+              description: A list of server specifications.
+              items:
+                properties:
+                  bind:
+                    format: string
+                    type: string
+                  defaultEndpoint:
+                    format: string
+                    type: string
+                  hosts:
+                    description: One or more hosts exposed by this gateway.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  port:
+                    properties:
+                      name:
+                        description: Label assigned to the port.
+                        format: string
+                        type: string
+                      number:
+                        description: A valid non-negative integer port number.
+                        type: integer
+                      protocol:
+                        description: The protocol exposed on the port.
+                        format: string
+                        type: string
+                    type: object
+                  tls:
+                    description: Set of TLS related options that govern the server's
+                      behavior.
+                    properties:
+                      caCertificates:
+                        description: REQUIRED if mode is `+"`"+`MUTUAL`+"`"+`.
+                        format: string
+                        type: string
+                      cipherSuites:
+                        description: 'Optional: If specified, only support the specified
+                          cipher list.'
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      credentialName:
+                        format: string
+                        type: string
+                      httpsRedirect:
+                        type: boolean
+                      maxProtocolVersion:
+                        description: 'Optional: Maximum TLS protocol version.'
+                        enum:
+                        - TLS_AUTO
+                        - TLSV1_0
+                        - TLSV1_1
+                        - TLSV1_2
+                        - TLSV1_3
+                        type: string
+                      minProtocolVersion:
+                        description: 'Optional: Minimum TLS protocol version.'
+                        enum:
+                        - TLS_AUTO
+                        - TLSV1_0
+                        - TLSV1_1
+                        - TLSV1_2
+                        - TLSV1_3
+                        type: string
+                      mode:
+                        enum:
+                        - PASSTHROUGH
+                        - SIMPLE
+                        - MUTUAL
+                        - AUTO_PASSTHROUGH
+                        - ISTIO_MUTUAL
+                        type: string
+                      privateKey:
+                        description: REQUIRED if mode is `+"`"+`SIMPLE`+"`"+` or `+"`"+`MUTUAL`+"`"+`.
+                        format: string
+                        type: string
+                      serverCertificate:
+                        description: REQUIRED if mode is `+"`"+`SIMPLE`+"`"+` or `+"`"+`MUTUAL`+"`"+`.
+                        format: string
+                        type: string
+                      subjectAltNames:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      verifyCertificateHash:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      verifyCertificateSpki:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                    type: object
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-mixer
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: httpapispecbindings.config.istio.io
+spec:
+  group: config.istio.io
+  names:
+    categories:
+    - istio-io
+    - apim-istio-io
+    kind: HTTPAPISpecBinding
+    plural: httpapispecbindings
+    singular: httpapispecbinding
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            api_specs:
+              items:
+                properties:
+                  name:
+                    description: The short name of the HTTPAPISpec.
+                    format: string
+                    type: string
+                  namespace:
+                    description: Optional namespace of the HTTPAPISpec.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            apiSpecs:
+              items:
+                properties:
+                  name:
+                    description: The short name of the HTTPAPISpec.
+                    format: string
+                    type: string
+                  namespace:
+                    description: Optional namespace of the HTTPAPISpec.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            services:
+              description: One or more services to map the listed HTTPAPISpec onto.
+              items:
+                properties:
+                  domain:
+                    description: Domain suffix used to construct the service FQDN
+                      in implementations that support such specification.
+                    format: string
+                    type: string
+                  labels:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    description: Optional one or more labels that uniquely identify
+                      the service version.
+                    type: object
+                  name:
+                    description: The short name of the service such as "foo".
+                    format: string
+                    type: string
+                  namespace:
+                    description: Optional namespace of the service.
+                    format: string
+                    type: string
+                  service:
+                    description: The service FQDN.
+                    format: string
+                    type: string
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-mixer
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: httpapispecs.config.istio.io
+spec:
+  group: config.istio.io
+  names:
+    categories:
+    - istio-io
+    - apim-istio-io
+    kind: HTTPAPISpec
+    plural: httpapispecs
+    singular: httpapispec
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            api_keys:
+              items:
+                oneOf:
+                - required:
+                  - query
+                - required:
+                  - header
+                - required:
+                  - cookie
+                properties:
+                  cookie:
+                    format: string
+                    type: string
+                  header:
+                    description: API key is sent in a request header.
+                    format: string
+                    type: string
+                  query:
+                    description: API Key is sent as a query parameter.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            apiKeys:
+              items:
+                oneOf:
+                - required:
+                  - query
+                - required:
+                  - header
+                - required:
+                  - cookie
+                properties:
+                  cookie:
+                    format: string
+                    type: string
+                  header:
+                    description: API key is sent in a request header.
+                    format: string
+                    type: string
+                  query:
+                    description: API Key is sent as a query parameter.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            attributes:
+              properties:
+                attributes:
+                  additionalProperties:
+                    oneOf:
+                    - required:
+                      - stringValue
+                    - required:
+                      - int64Value
+                    - required:
+                      - doubleValue
+                    - required:
+                      - boolValue
+                    - required:
+                      - bytesValue
+                    - required:
+                      - timestampValue
+                    - required:
+                      - durationValue
+                    - required:
+                      - stringMapValue
+                    properties:
+                      boolValue:
+                        type: boolean
+                      bytesValue:
+                        format: binary
+                        type: string
+                      doubleValue:
+                        format: double
+                        type: number
+                      durationValue:
+                        type: string
+                      int64Value:
+                        format: int64
+                        type: integer
+                      stringMapValue:
+                        properties:
+                          entries:
+                            additionalProperties:
+                              format: string
+                              type: string
+                            description: Holds a set of name/value pairs.
+                            type: object
+                        type: object
+                      stringValue:
+                        format: string
+                        type: string
+                      timestampValue:
+                        format: dateTime
+                        type: string
+                    type: object
+                  description: A map of attribute name to its value.
+                  type: object
+              type: object
+            patterns:
+              description: List of HTTP patterns to match.
+              items:
+                oneOf:
+                - required:
+                  - uriTemplate
+                - required:
+                  - regex
+                properties:
+                  attributes:
+                    properties:
+                      attributes:
+                        additionalProperties:
+                          oneOf:
+                          - required:
+                            - stringValue
+                          - required:
+                            - int64Value
+                          - required:
+                            - doubleValue
+                          - required:
+                            - boolValue
+                          - required:
+                            - bytesValue
+                          - required:
+                            - timestampValue
+                          - required:
+                            - durationValue
+                          - required:
+                            - stringMapValue
+                          properties:
+                            boolValue:
+                              type: boolean
+                            bytesValue:
+                              format: binary
+                              type: string
+                            doubleValue:
+                              format: double
+                              type: number
+                            durationValue:
+                              type: string
+                            int64Value:
+                              format: int64
+                              type: integer
+                            stringMapValue:
+                              properties:
+                                entries:
+                                  additionalProperties:
+                                    format: string
+                                    type: string
+                                  description: Holds a set of name/value pairs.
+                                  type: object
+                              type: object
+                            stringValue:
+                              format: string
+                              type: string
+                            timestampValue:
+                              format: dateTime
+                              type: string
+                          type: object
+                        description: A map of attribute name to its value.
+                        type: object
+                    type: object
+                  httpMethod:
+                    format: string
+                    type: string
+                  regex:
+                    format: string
+                    type: string
+                  uriTemplate:
+                    format: string
+                    type: string
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-citadel
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: meshpolicies.authentication.istio.io
+spec:
+  group: authentication.istio.io
+  names:
+    categories:
+    - istio-io
+    - authentication-istio-io
+    kind: MeshPolicy
+    listKind: MeshPolicyList
+    plural: meshpolicies
+    singular: meshpolicy
+  scope: Cluster
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Authentication policy for Istio services. See more details
+            at: https://istio.io/docs/reference/config/istio.authentication.v1alpha1.html'
+          properties:
+            originIsOptional:
+              type: boolean
+            origins:
+              description: List of authentication methods that can be used for origin
+                authentication.
+              items:
+                properties:
+                  jwt:
+                    description: Jwt params for the method.
+                    properties:
+                      audiences:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      issuer:
+                        description: Identifies the issuer that issued the JWT.
+                        format: string
+                        type: string
+                      jwks:
+                        description: JSON Web Key Set of public keys to validate signature
+                          of the JWT.
+                        format: string
+                        type: string
+                      jwks_uri:
+                        format: string
+                        type: string
+                      jwksUri:
+                        format: string
+                        type: string
+                      jwt_headers:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtHeaders:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtParams:
+                        description: JWT is sent in a query parameter.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      trigger_rules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                      triggerRules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                type: object
+              type: array
+            peerIsOptional:
+              type: boolean
+            peers:
+              description: List of authentication methods that can be used for peer
+                authentication.
+              items:
+                oneOf:
+                - required:
+                  - mtls
+                - required:
+                  - jwt
+                properties:
+                  jwt:
+                    properties:
+                      audiences:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      issuer:
+                        description: Identifies the issuer that issued the JWT.
+                        format: string
+                        type: string
+                      jwks:
+                        description: JSON Web Key Set of public keys to validate signature
+                          of the JWT.
+                        format: string
+                        type: string
+                      jwks_uri:
+                        format: string
+                        type: string
+                      jwksUri:
+                        format: string
+                        type: string
+                      jwt_headers:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtHeaders:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtParams:
+                        description: JWT is sent in a query parameter.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      trigger_rules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                      triggerRules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                  mtls:
+                    description: Set if mTLS is used.
+                    properties:
+                      allowTls:
+                        description: WILL BE DEPRECATED, if set, will translates to
+                          `+"`"+`TLS_PERMISSIVE`+"`"+` mode.
+                        type: boolean
+                      mode:
+                        description: Defines the mode of mTLS authentication.
+                        enum:
+                        - STRICT
+                        - PERMISSIVE
+                        type: string
+                    type: object
+                type: object
+              type: array
+            principalBinding:
+              description: Define whether peer or origin identity should be use for
+                principal.
+              enum:
+              - USE_PEER
+              - USE_ORIGIN
+              type: string
+            targets:
+              description: List rules to select workloads that the policy should be
+                applied on.
+              items:
+                properties:
+                  name:
+                    description: The name must be a short name from the service registry.
+                    format: string
+                    type: string
+                  ports:
+                    description: Specifies the ports.
+                    items:
+                      oneOf:
+                      - required:
+                        - number
+                      - required:
+                        - name
+                      properties:
+                        name:
+                          format: string
+                          type: string
+                        number:
+                          type: integer
+                      type: object
+                    type: array
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-citadel
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: policies.authentication.istio.io
+spec:
+  group: authentication.istio.io
+  names:
+    categories:
+    - istio-io
+    - authentication-istio-io
+    kind: Policy
+    plural: policies
+    singular: policy
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Authentication policy for Istio services. See more details
+            at: https://istio.io/docs/reference/config/istio.authentication.v1alpha1.html'
+          properties:
+            originIsOptional:
+              type: boolean
+            origins:
+              description: List of authentication methods that can be used for origin
+                authentication.
+              items:
+                properties:
+                  jwt:
+                    description: Jwt params for the method.
+                    properties:
+                      audiences:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      issuer:
+                        description: Identifies the issuer that issued the JWT.
+                        format: string
+                        type: string
+                      jwks:
+                        description: JSON Web Key Set of public keys to validate signature
+                          of the JWT.
+                        format: string
+                        type: string
+                      jwks_uri:
+                        format: string
+                        type: string
+                      jwksUri:
+                        format: string
+                        type: string
+                      jwt_headers:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtHeaders:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtParams:
+                        description: JWT is sent in a query parameter.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      trigger_rules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                      triggerRules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                type: object
+              type: array
+            peerIsOptional:
+              type: boolean
+            peers:
+              description: List of authentication methods that can be used for peer
+                authentication.
+              items:
+                oneOf:
+                - required:
+                  - mtls
+                - required:
+                  - jwt
+                properties:
+                  jwt:
+                    properties:
+                      audiences:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      issuer:
+                        description: Identifies the issuer that issued the JWT.
+                        format: string
+                        type: string
+                      jwks:
+                        description: JSON Web Key Set of public keys to validate signature
+                          of the JWT.
+                        format: string
+                        type: string
+                      jwks_uri:
+                        format: string
+                        type: string
+                      jwksUri:
+                        format: string
+                        type: string
+                      jwt_headers:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtHeaders:
+                        description: JWT is sent in a request header.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      jwtParams:
+                        description: JWT is sent in a query parameter.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      trigger_rules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                      triggerRules:
+                        items:
+                          properties:
+                            excluded_paths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            excludedPaths:
+                              description: List of paths to be excluded from the request.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            included_paths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                            includedPaths:
+                              description: List of paths that the request must include.
+                              items:
+                                oneOf:
+                                - required:
+                                  - exact
+                                - required:
+                                  - prefix
+                                - required:
+                                  - suffix
+                                - required:
+                                  - regex
+                                properties:
+                                  exact:
+                                    description: exact string match.
+                                    format: string
+                                    type: string
+                                  prefix:
+                                    description: prefix-based match.
+                                    format: string
+                                    type: string
+                                  regex:
+                                    description: ECMAscript style regex-based match
+                                      as defined by [EDCA-262](http://en.cppreference.com/w/cpp/regex/ecmascript).
+                                    format: string
+                                    type: string
+                                  suffix:
+                                    description: suffix-based match.
+                                    format: string
+                                    type: string
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                    type: object
+                  mtls:
+                    description: Set if mTLS is used.
+                    properties:
+                      allowTls:
+                        description: WILL BE DEPRECATED, if set, will translates to
+                          `+"`"+`TLS_PERMISSIVE`+"`"+` mode.
+                        type: boolean
+                      mode:
+                        description: Defines the mode of mTLS authentication.
+                        enum:
+                        - STRICT
+                        - PERMISSIVE
+                        type: string
+                    type: object
+                type: object
+              type: array
+            principalBinding:
+              description: Define whether peer or origin identity should be use for
+                principal.
+              enum:
+              - USE_PEER
+              - USE_ORIGIN
+              type: string
+            targets:
+              description: List rules to select workloads that the policy should be
+                applied on.
+              items:
+                properties:
+                  name:
+                    description: The name must be a short name from the service registry.
+                    format: string
+                    type: string
+                  ports:
+                    description: Specifies the ports.
+                    items:
+                      oneOf:
+                      - required:
+                        - number
+                      - required:
+                        - name
+                      properties:
+                        name:
+                          format: string
+                          type: string
+                        number:
+                          type: integer
+                      type: object
+                    type: array
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-mixer
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: quotaspecbindings.config.istio.io
+spec:
+  group: config.istio.io
+  names:
+    categories:
+    - istio-io
+    - apim-istio-io
+    kind: QuotaSpecBinding
+    plural: quotaspecbindings
+    singular: quotaspecbinding
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            quotaSpecs:
+              items:
+                properties:
+                  name:
+                    description: The short name of the QuotaSpec.
+                    format: string
+                    type: string
+                  namespace:
+                    description: Optional namespace of the QuotaSpec.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            services:
+              description: One or more services to map the listed QuotaSpec onto.
+              items:
+                properties:
+                  domain:
+                    description: Domain suffix used to construct the service FQDN
+                      in implementations that support such specification.
+                    format: string
+                    type: string
+                  labels:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    description: Optional one or more labels that uniquely identify
+                      the service version.
+                    type: object
+                  name:
+                    description: The short name of the service such as "foo".
+                    format: string
+                    type: string
+                  namespace:
+                    description: Optional namespace of the service.
+                    format: string
+                    type: string
+                  service:
+                    description: The service FQDN.
+                    format: string
+                    type: string
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-mixer
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: quotaspecs.config.istio.io
+spec:
+  group: config.istio.io
+  names:
+    categories:
+    - istio-io
+    - apim-istio-io
+    kind: QuotaSpec
+    plural: quotaspecs
+    singular: quotaspec
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: Determines the quotas used for individual requests.
+          properties:
+            rules:
+              description: A list of Quota rules.
+              items:
+                properties:
+                  match:
+                    description: If empty, match all request.
+                    items:
+                      properties:
+                        clause:
+                          additionalProperties:
+                            oneOf:
+                            - required:
+                              - exact
+                            - required:
+                              - prefix
+                            - required:
+                              - regex
+                            properties:
+                              exact:
+                                format: string
+                                type: string
+                              prefix:
+                                format: string
+                                type: string
+                              regex:
+                                format: string
+                                type: string
+                            type: object
+                          description: Map of attribute names to StringMatch type.
+                          type: object
+                      type: object
+                    type: array
+                  quotas:
+                    description: The list of quotas to charge.
+                    items:
+                      properties:
+                        charge:
+                          format: int32
+                          type: integer
+                        quota:
+                          format: string
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: mixer
+    chart: istio
+    heritage: Tiller
+    istio: rbac
+    package: istio.io.mixer
+    release: istio
+  name: rbacconfigs.rbac.istio.io
+spec:
+  group: rbac.istio.io
+  names:
+    categories:
+    - istio-io
+    - rbac-istio-io
+    kind: RbacConfig
+    plural: rbacconfigs
+    singular: rbacconfig
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration for Role Based Access Control. See more details
+            at: https://istio.io/docs/reference/config/authorization/istio.rbac.v1alpha1.html'
+          properties:
+            enforcementMode:
+              enum:
+              - ENFORCED
+              - PERMISSIVE
+              type: string
+            exclusion:
+              description: A list of services or namespaces that should not be enforced
+                by Istio RBAC policies.
+              properties:
+                namespaces:
+                  description: A list of namespaces.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+                services:
+                  description: A list of services.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+              type: object
+            inclusion:
+              description: A list of services or namespaces that should be enforced
+                by Istio RBAC policies.
+              properties:
+                namespaces:
+                  description: A list of namespaces.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+                services:
+                  description: A list of services.
+                  items:
+                    format: string
+                    type: string
+                  type: array
+              type: object
+            mode:
+              description: Istio RBAC mode.
+              enum:
+              - "OFF"
+              - "ON"
+              - ON_WITH_INCLUSION
+              - ON_WITH_EXCLUSION
+              type: string
+          type: object
+      type: object
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: mixer
+    chart: istio
+    heritage: Tiller
+    istio: core
+    package: istio.io.mixer
+    release: istio
+  name: rules.config.istio.io
+spec:
+  group: config.istio.io
+  names:
+    categories:
+    - istio-io
+    - policy-istio-io
+    kind: rule
+    plural: rules
+    singular: rule
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Describes the rules used to configure Mixer''s policy and
+            telemetry features. See more details at: https://istio.io/docs/reference/config/policy-and-telemetry/istio.policy.v1beta1.html'
+          properties:
+            actions:
+              description: The actions that will be executed when match evaluates
+                to `+"`"+`true`+"`"+`.
+              items:
+                properties:
+                  handler:
+                    description: Fully qualified name of the handler to invoke.
+                    format: string
+                    type: string
+                  instances:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  name:
+                    description: A handle to refer to the results of the action.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            match:
+              description: Match is an attribute based predicate.
+              format: string
+              type: string
+            requestHeaderOperations:
+              items:
+                properties:
+                  name:
+                    description: Header name literal value.
+                    format: string
+                    type: string
+                  operation:
+                    description: Header operation type.
+                    enum:
+                    - REPLACE
+                    - REMOVE
+                    - APPEND
+                    type: string
+                  values:
+                    description: Header value expressions.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                type: object
+              type: array
+            responseHeaderOperations:
+              items:
+                properties:
+                  name:
+                    description: Header name literal value.
+                    format: string
+                    type: string
+                  operation:
+                    description: Header operation type.
+                    enum:
+                    - REPLACE
+                    - REMOVE
+                    - APPEND
+                    type: string
+                  values:
+                    description: Header value expressions.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                type: object
+              type: array
+            sampling:
+              properties:
+                random:
+                  description: Provides filtering of actions based on random selection
+                    per request.
+                  properties:
+                    attributeExpression:
+                      description: Specifies an attribute expression to use to override
+                        the numerator in the `+"`"+`percent_sampled`+"`"+` field.
+                      format: string
+                      type: string
+                    percentSampled:
+                      description: The default sampling rate, expressed as a percentage.
+                      properties:
+                        denominator:
+                          description: Specifies the denominator.
+                          enum:
+                          - HUNDRED
+                          - TEN_THOUSAND
+                          type: string
+                        numerator:
+                          description: Specifies the numerator.
+                          type: integer
+                      type: object
+                    useIndependentRandomness:
+                      description: By default sampling will be based on the value
+                        of the request header `+"`"+`x-request-id`+"`"+`.
+                      type: boolean
+                  type: object
+                rateLimit:
+                  properties:
+                    maxUnsampledEntries:
+                      description: Number of entries to allow during the `+"`"+`sampling_duration`+"`"+`
+                        before sampling is enforced.
+                      format: int64
+                      type: integer
+                    samplingDuration:
+                      description: Window in which to enforce the sampling rate.
+                      type: string
+                    samplingRate:
+                      description: The rate at which to sample entries once the unsampled
+                        limit has been reached.
+                      format: int64
+                      type: integer
+                  type: object
+              type: object
+          type: object
+      type: object
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: serviceentries.networking.istio.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.hosts
+    description: The hosts associated with the ServiceEntry
+    name: Hosts
+    type: string
+  - JSONPath: .spec.location
+    description: Whether the service is external to the mesh or part of the mesh (MESH_EXTERNAL
+      or MESH_INTERNAL)
+    name: Location
+    type: string
+  - JSONPath: .spec.resolution
+    description: Service discovery mode for the hosts (NONE, STATIC, or DNS)
+    name: Resolution
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    description: |-
+      CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+    name: Age
+    type: date
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: ServiceEntry
+    listKind: ServiceEntryList
+    plural: serviceentries
+    shortNames:
+    - se
+    singular: serviceentry
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration affecting service registry. See more details
+            at: https://istio.io/docs/reference/config/networking/service-entry.html'
+          properties:
+            addresses:
+              description: The virtual IP addresses associated with the service.
+              items:
+                format: string
+                type: string
+              type: array
+            endpoints:
+              description: One or more endpoints associated with the service.
+              items:
+                properties:
+                  address:
+                    format: string
+                    type: string
+                  labels:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    description: One or more labels associated with the endpoint.
+                    type: object
+                  locality:
+                    description: The locality associated with the endpoint.
+                    format: string
+                    type: string
+                  network:
+                    format: string
+                    type: string
+                  ports:
+                    additionalProperties:
+                      type: integer
+                    description: Set of ports associated with the endpoint.
+                    type: object
+                  weight:
+                    description: The load balancing weight associated with the endpoint.
+                    type: integer
+                type: object
+              type: array
+            exportTo:
+              description: A list of namespaces to which this service is exported.
+              items:
+                format: string
+                type: string
+              type: array
+            hosts:
+              description: The hosts associated with the ServiceEntry.
+              items:
+                format: string
+                type: string
+              type: array
+            location:
+              enum:
+              - MESH_EXTERNAL
+              - MESH_INTERNAL
+              type: string
+            ports:
+              description: The ports associated with the external service.
+              items:
+                properties:
+                  name:
+                    description: Label assigned to the port.
+                    format: string
+                    type: string
+                  number:
+                    description: A valid non-negative integer port number.
+                    type: integer
+                  protocol:
+                    description: The protocol exposed on the port.
+                    format: string
+                    type: string
+                type: object
+              type: array
+            resolution:
+              description: Service discovery mode for the hosts.
+              enum:
+              - NONE
+              - STATIC
+              - DNS
+              type: string
+            subjectAltNames:
+              items:
+                format: string
+                type: string
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: mixer
+    chart: istio
+    heritage: Tiller
+    istio: rbac
+    package: istio.io.mixer
+    release: istio
+  name: servicerolebindings.rbac.istio.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.roleRef.name
+    description: The name of the ServiceRole object being referenced
+    name: Reference
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    description: |-
+      CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+    name: Age
+    type: date
+  group: rbac.istio.io
+  names:
+    categories:
+    - istio-io
+    - rbac-istio-io
+    kind: ServiceRoleBinding
+    plural: servicerolebindings
+    singular: servicerolebinding
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration for Role Based Access Control. See more details
+            at: https://istio.io/docs/reference/config/authorization/istio.rbac.v1alpha1.html'
+          properties:
+            actions:
+              items:
+                properties:
+                  constraints:
+                    description: Optional.
+                    items:
+                      properties:
+                        key:
+                          description: Key of the constraint.
+                          format: string
+                          type: string
+                        values:
+                          description: List of valid values for the constraint.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                      type: object
+                    type: array
+                  hosts:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  methods:
+                    description: Optional.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notHosts:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notMethods:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notPaths:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notPorts:
+                    items:
+                      format: int32
+                      type: integer
+                    type: array
+                  paths:
+                    description: Optional.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  ports:
+                    items:
+                      format: int32
+                      type: integer
+                    type: array
+                  services:
+                    description: A list of service names.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                type: object
+              type: array
+            mode:
+              enum:
+              - ENFORCED
+              - PERMISSIVE
+              type: string
+            role:
+              format: string
+              type: string
+            roleRef:
+              description: Reference to the ServiceRole object.
+              properties:
+                kind:
+                  description: The type of the role being referenced.
+                  format: string
+                  type: string
+                name:
+                  description: The name of the ServiceRole object being referenced.
+                  format: string
+                  type: string
+              type: object
+            subjects:
+              description: List of subjects that are assigned the ServiceRole object.
+              items:
+                properties:
+                  group:
+                    format: string
+                    type: string
+                  groups:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  ips:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  names:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  namespaces:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notGroups:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notIps:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notNames:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notNamespaces:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  properties:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    description: Optional.
+                    type: object
+                  user:
+                    description: Optional.
+                    format: string
+                    type: string
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: mixer
+    chart: istio
+    heritage: Tiller
+    istio: rbac
+    package: istio.io.mixer
+    release: istio
+  name: serviceroles.rbac.istio.io
+spec:
+  group: rbac.istio.io
+  names:
+    categories:
+    - istio-io
+    - rbac-istio-io
+    kind: ServiceRole
+    plural: serviceroles
+    singular: servicerole
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration for Role Based Access Control. See more details
+            at: https://istio.io/docs/reference/config/authorization/istio.rbac.v1alpha1.html'
+          properties:
+            rules:
+              description: The set of access rules (permissions) that the role has.
+              items:
+                properties:
+                  constraints:
+                    description: Optional.
+                    items:
+                      properties:
+                        key:
+                          description: Key of the constraint.
+                          format: string
+                          type: string
+                        values:
+                          description: List of valid values for the constraint.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                      type: object
+                    type: array
+                  hosts:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  methods:
+                    description: Optional.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notHosts:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notMethods:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notPaths:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  notPorts:
+                    items:
+                      format: int32
+                      type: integer
+                    type: array
+                  paths:
+                    description: Optional.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  ports:
+                    items:
+                      format: int32
+                      type: integer
+                    type: array
+                  services:
+                    description: A list of service names.
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: sidecars.networking.istio.io
+spec:
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: Sidecar
+    plural: sidecars
+    singular: sidecar
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration affecting network reachability of a sidecar.
+            See more details at: https://istio.io/docs/reference/config/networking/sidecar.html'
+          properties:
+            egress:
+              items:
+                properties:
+                  bind:
+                    format: string
+                    type: string
+                  captureMode:
+                    enum:
+                    - DEFAULT
+                    - IPTABLES
+                    - NONE
+                    type: string
+                  hosts:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  port:
+                    description: The port associated with the listener.
+                    properties:
+                      name:
+                        description: Label assigned to the port.
+                        format: string
+                        type: string
+                      number:
+                        description: A valid non-negative integer port number.
+                        type: integer
+                      protocol:
+                        description: The protocol exposed on the port.
+                        format: string
+                        type: string
+                    type: object
+                type: object
+              type: array
+            ingress:
+              items:
+                properties:
+                  bind:
+                    description: The IP to which the listener should be bound.
+                    format: string
+                    type: string
+                  captureMode:
+                    enum:
+                    - DEFAULT
+                    - IPTABLES
+                    - NONE
+                    type: string
+                  defaultEndpoint:
+                    format: string
+                    type: string
+                  port:
+                    description: The port associated with the listener.
+                    properties:
+                      name:
+                        description: Label assigned to the port.
+                        format: string
+                        type: string
+                      number:
+                        description: A valid non-negative integer port number.
+                        type: integer
+                      protocol:
+                        description: The protocol exposed on the port.
+                        format: string
+                        type: string
+                    type: object
+                type: object
+              type: array
+            outboundTrafficPolicy:
+              description: This allows to configure the outbound traffic policy.
+              properties:
+                mode:
+                  enum:
+                  - REGISTRY_ONLY
+                  - ALLOW_ANY
+                  type: string
+              type: object
+            workloadSelector:
+              properties:
+                labels:
+                  additionalProperties:
+                    format: string
+                    type: string
+                  type: object
+              type: object
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  creationTimestamp: null
+  labels:
+    app: istio-pilot
+    chart: istio
+    heritage: Tiller
+    release: istio
+  name: virtualservices.networking.istio.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.gateways
+    description: The names of gateways and sidecars that should apply these routes
+    name: Gateways
+    type: string
+  - JSONPath: .spec.hosts
+    description: The destination hosts to which traffic is being sent
+    name: Hosts
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    description: |-
+      CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+      Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+    name: Age
+    type: date
+  group: networking.istio.io
+  names:
+    categories:
+    - istio-io
+    - networking-istio-io
+    kind: VirtualService
+    listKind: VirtualServiceList
+    plural: virtualservices
+    shortNames:
+    - vs
+    singular: virtualservice
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          description: 'Configuration affecting label/content routing, sni routing,
+            etc. See more details at: https://istio.io/docs/reference/config/networking/virtual-service.html'
+          properties:
+            exportTo:
+              description: A list of namespaces to which this virtual service is exported.
+              items:
+                format: string
+                type: string
+              type: array
+            gateways:
+              description: The names of gateways and sidecars that should apply these
+                routes.
+              items:
+                format: string
+                type: string
+              type: array
+            hosts:
+              description: The destination hosts to which traffic is being sent.
+              items:
+                format: string
+                type: string
+              type: array
+            http:
+              description: An ordered list of route rules for HTTP traffic.
+              items:
+                properties:
+                  appendHeaders:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    type: object
+                  appendRequestHeaders:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    type: object
+                  appendResponseHeaders:
+                    additionalProperties:
+                      format: string
+                      type: string
+                    type: object
+                  corsPolicy:
+                    description: Cross-Origin Resource Sharing policy (CORS).
+                    properties:
+                      allowCredentials:
+                        nullable: true
+                        type: boolean
+                      allowHeaders:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      allowMethods:
+                        description: List of HTTP methods allowed to access the resource.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      allowOrigin:
+                        description: The list of origins that are allowed to perform
+                          CORS requests.
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      exposeHeaders:
+                        items:
+                          format: string
+                          type: string
+                        type: array
+                      maxAge:
+                        type: string
+                    type: object
+                  fault:
+                    description: Fault injection policy to apply on HTTP traffic at
+                      the client side.
+                    properties:
+                      abort:
+                        oneOf:
+                        - properties:
+                            percent: {}
+                          required:
+                          - httpStatus
+                        - properties:
+                            percent: {}
+                          required:
+                          - grpcStatus
+                        - properties:
+                            percent: {}
+                          required:
+                          - http2Error
+                        properties:
+                          grpcStatus:
+                            format: string
+                            type: string
+                          http2Error:
+                            format: string
+                            type: string
+                          httpStatus:
+                            description: HTTP status code to use to abort the Http
+                              request.
+                            format: int32
+                            type: integer
+                          percent:
+                            description: Percentage of requests to be aborted with
+                              the error code provided (0-100).
+                            format: int32
+                            type: integer
+                          percentage:
+                            description: Percentage of requests to be aborted with
+                              the error code provided.
+                            properties:
+                              value:
+                                format: double
+                                type: number
+                            type: object
+                        type: object
+                      delay:
+                        oneOf:
+                        - properties:
+                            percent: {}
+                          required:
+                          - fixedDelay
+                        - properties:
+                            percent: {}
+                          required:
+                          - exponentialDelay
+                        properties:
+                          exponentialDelay:
+                            type: string
+                          fixedDelay:
+                            description: Add a fixed delay before forwarding the request.
+                            type: string
+                          percent:
+                            description: Percentage of requests on which the delay
+                              will be injected (0-100).
+                            format: int32
+                            type: integer
+                          percentage:
+                            description: Percentage of requests on which the delay
+                              will be injected.
+                            properties:
+                              value:
+                                format: double
+                                type: number
+                            type: object
+                        type: object
+                    type: object
+                  headers:
+                    properties:
+                      request:
+                        properties:
+                          add:
+                            additionalProperties:
+                              format: string
+                              type: string
+                            type: object
+                          remove:
+                            items:
+                              format: string
+                              type: string
+                            type: array
+                          set:
+                            additionalProperties:
+                              format: string
+                              type: string
+                            type: object
+                        type: object
+                      response:
+                        properties:
+                          add:
+                            additionalProperties:
+                              format: string
+                              type: string
+                            type: object
+                          remove:
+                            items:
+                              format: string
+                              type: string
+                            type: array
+                          set:
+                            additionalProperties:
+                              format: string
+                              type: string
+                            type: object
+                        type: object
+                    type: object
+                  match:
+                    items:
+                      properties:
+                        authority:
+                          oneOf:
+                          - required:
+                            - exact
+                          - required:
+                            - prefix
+                          - required:
+                            - regex
+                          properties:
+                            exact:
+                              format: string
+                              type: string
+                            prefix:
+                              format: string
+                              type: string
+                            regex:
+                              format: string
+                              type: string
+                          type: object
+                        gateways:
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        headers:
+                          additionalProperties:
+                            oneOf:
+                            - required:
+                              - exact
+                            - required:
+                              - prefix
+                            - required:
+                              - regex
+                            properties:
+                              exact:
+                                format: string
+                                type: string
+                              prefix:
+                                format: string
+                                type: string
+                              regex:
+                                format: string
+                                type: string
+                            type: object
+                          type: object
+                        ignoreUriCase:
+                          description: Flag to specify whether the URI matching should
+                            be case-insensitive.
+                          type: boolean
+                        method:
+                          oneOf:
+                          - required:
+                            - exact
+                          - required:
+                            - prefix
+                          - required:
+                            - regex
+                          properties:
+                            exact:
+                              format: string
+                              type: string
+                            prefix:
+                              format: string
+                              type: string
+                            regex:
+                              format: string
+                              type: string
+                          type: object
+                        name:
+                          description: The name assigned to a match.
+                          format: string
+                          type: string
+                        port:
+                          description: Specifies the ports on the host that is being
+                            addressed.
+                          type: integer
+                        queryParams:
+                          additionalProperties:
+                            oneOf:
+                            - required:
+                              - exact
+                            - required:
+                              - prefix
+                            - required:
+                              - regex
+                            properties:
+                              exact:
+                                format: string
+                                type: string
+                              prefix:
+                                format: string
+                                type: string
+                              regex:
+                                format: string
+                                type: string
+                            type: object
+                          description: Query parameters for matching.
+                          type: object
+                        scheme:
+                          oneOf:
+                          - required:
+                            - exact
+                          - required:
+                            - prefix
+                          - required:
+                            - regex
+                          properties:
+                            exact:
+                              format: string
+                              type: string
+                            prefix:
+                              format: string
+                              type: string
+                            regex:
+                              format: string
+                              type: string
+                          type: object
+                        sourceLabels:
+                          additionalProperties:
+                            format: string
+                            type: string
+                          type: object
+                        uri:
+                          oneOf:
+                          - required:
+                            - exact
+                          - required:
+                            - prefix
+                          - required:
+                            - regex
+                          properties:
+                            exact:
+                              format: string
+                              type: string
+                            prefix:
+                              format: string
+                              type: string
+                            regex:
+                              format: string
+                              type: string
+                          type: object
+                      type: object
+                    type: array
+                  mirror:
+                    properties:
+                      host:
+                        description: The name of a service from the service registry.
+                        format: string
+                        type: string
+                      port:
+                        description: Specifies the port on the host that is being
+                          addressed.
+                        properties:
+                          number:
+                            type: integer
+                        type: object
+                      subset:
+                        description: The name of a subset within the service.
+                        format: string
+                        type: string
+                    type: object
+                  mirror_percent:
+                    description: Percentage of the traffic to be mirrored by the `+"`"+`mirror`+"`"+`
+                      field.
+                    nullable: true
+                    type: integer
+                  mirrorPercent:
+                    description: Percentage of the traffic to be mirrored by the `+"`"+`mirror`+"`"+`
+                      field.
+                    nullable: true
+                    type: integer
+                  name:
+                    description: The name assigned to the route for debugging purposes.
+                    format: string
+                    type: string
+                  redirect:
+                    description: A http rule can either redirect or forward (default)
+                      traffic.
+                    properties:
+                      authority:
+                        format: string
+                        type: string
+                      redirectCode:
+                        type: integer
+                      uri:
+                        format: string
+                        type: string
+                    type: object
+                  removeRequestHeaders:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  removeResponseHeaders:
+                    items:
+                      format: string
+                      type: string
+                    type: array
+                  retries:
+                    description: Retry policy for HTTP requests.
+                    properties:
+                      attempts:
+                        description: Number of retries for a given request.
+                        format: int32
+                        type: integer
+                      perTryTimeout:
+                        description: Timeout per retry attempt for a given request.
+                        type: string
+                      retryOn:
+                        description: Specifies the conditions under which retry takes
+                          place.
+                        format: string
+                        type: string
+                    type: object
+                  rewrite:
+                    description: Rewrite HTTP URIs and Authority headers.
+                    properties:
+                      authority:
+                        description: rewrite the Authority/Host header with this value.
+                        format: string
+                        type: string
+                      uri:
+                        format: string
+                        type: string
+                    type: object
+                  route:
+                    description: A http rule can either redirect or forward (default)
+                      traffic.
+                    items:
+                      properties:
+                        appendRequestHeaders:
+                          additionalProperties:
+                            format: string
+                            type: string
+                          description: Use of `+"`"+`append_request_headers`+"`"+` is deprecated.
+                          type: object
+                        appendResponseHeaders:
+                          additionalProperties:
+                            format: string
+                            type: string
+                          description: Use of `+"`"+`append_response_headers`+"`"+` is deprecated.
+                          type: object
+                        destination:
+                          properties:
+                            host:
+                              description: The name of a service from the service
+                                registry.
+                              format: string
+                              type: string
+                            port:
+                              description: Specifies the port on the host that is
+                                being addressed.
+                              properties:
+                                number:
+                                  type: integer
+                              type: object
+                            subset:
+                              description: The name of a subset within the service.
+                              format: string
+                              type: string
+                          type: object
+                        headers:
+                          properties:
+                            request:
+                              properties:
+                                add:
+                                  additionalProperties:
+                                    format: string
+                                    type: string
+                                  type: object
+                                remove:
+                                  items:
+                                    format: string
+                                    type: string
+                                  type: array
+                                set:
+                                  additionalProperties:
+                                    format: string
+                                    type: string
+                                  type: object
+                              type: object
+                            response:
+                              properties:
+                                add:
+                                  additionalProperties:
+                                    format: string
+                                    type: string
+                                  type: object
+                                remove:
+                                  items:
+                                    format: string
+                                    type: string
+                                  type: array
+                                set:
+                                  additionalProperties:
+                                    format: string
+                                    type: string
+                                  type: object
+                              type: object
+                          type: object
+                        removeRequestHeaders:
+                          description: Use of `+"`"+`remove_request_headers`+"`"+` is deprecated.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        removeResponseHeaders:
+                          description: Use of `+"`"+`remove_response_header`+"`"+` is deprecated.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        weight:
+                          format: int32
+                          type: integer
+                      type: object
+                    type: array
+                  timeout:
+                    description: Timeout for HTTP requests.
+                    type: string
+                  websocketUpgrade:
+                    description: Deprecated.
+                    type: boolean
+                type: object
+              type: array
+            tcp:
+              description: An ordered list of route rules for opaque TCP traffic.
+              items:
+                properties:
+                  match:
+                    items:
+                      properties:
+                        destinationSubnets:
+                          description: IPv4 or IPv6 ip addresses of destination with
+                            optional subnet.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        gateways:
+                          description: Names of gateways where the rule should be
+                            applied to.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        port:
+                          description: Specifies the port on the host that is being
+                            addressed.
+                          type: integer
+                        sourceLabels:
+                          additionalProperties:
+                            format: string
+                            type: string
+                          type: object
+                        sourceSubnet:
+                          description: IPv4 or IPv6 ip address of source with optional
+                            subnet.
+                          format: string
+                          type: string
+                      type: object
+                    type: array
+                  route:
+                    description: The destination to which the connection should be
+                      forwarded to.
+                    items:
+                      properties:
+                        destination:
+                          properties:
+                            host:
+                              description: The name of a service from the service
+                                registry.
+                              format: string
+                              type: string
+                            port:
+                              description: Specifies the port on the host that is
+                                being addressed.
+                              properties:
+                                number:
+                                  type: integer
+                              type: object
+                            subset:
+                              description: The name of a subset within the service.
+                              format: string
+                              type: string
+                          type: object
+                        weight:
+                          format: int32
+                          type: integer
+                      type: object
+                    type: array
+                type: object
+              type: array
+            tls:
+              items:
+                properties:
+                  match:
+                    items:
+                      properties:
+                        destinationSubnets:
+                          description: IPv4 or IPv6 ip addresses of destination with
+                            optional subnet.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        gateways:
+                          description: Names of gateways where the rule should be
+                            applied to.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        port:
+                          description: Specifies the port on the host that is being
+                            addressed.
+                          type: integer
+                        sniHosts:
+                          description: SNI (server name indicator) to match on.
+                          items:
+                            format: string
+                            type: string
+                          type: array
+                        sourceLabels:
+                          additionalProperties:
+                            format: string
+                            type: string
+                          type: object
+                        sourceSubnet:
+                          description: IPv4 or IPv6 ip address of source with optional
+                            subnet.
+                          format: string
+                          type: string
+                      type: object
+                    type: array
+                  route:
+                    description: The destination to which the connection should be
+                      forwarded to.
+                    items:
+                      properties:
+                        destination:
+                          properties:
+                            host:
+                              description: The name of a service from the service
+                                registry.
+                              format: string
+                              type: string
+                            port:
+                              description: Specifies the port on the host that is
+                                being addressed.
+                              properties:
+                                number:
+                                  type: integer
+                              type: object
+                            subset:
+                              description: The name of a subset within the service.
+                              format: string
+                              type: string
+                          type: object
+                        weight:
+                          format: int32
+                          type: integer
+                      type: object
+                    type: array
+                type: object
+              type: array
+          type: object
+      type: object
+  versions:
+  - name: v1alpha3
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
+---`)
+
+func chartsCrdsFilesCrdAllGenYamlBytes() ([]byte, error) {
+	return _chartsCrdsFilesCrdAllGenYaml, nil
+}
+
+func chartsCrdsFilesCrdAllGenYaml() (*asset, error) {
+	bytes, err := chartsCrdsFilesCrdAllGenYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/files/crd-all.gen.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsFilesCrdCertmanager10Yaml = []byte(`apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: clusterissuers.certmanager.k8s.io
+  labels:
+    app: certmanager
+    chart: certmanager
+    heritage: Tiller
+    release: istio
+spec:
+  group: certmanager.k8s.io
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+  names:
+    kind: ClusterIssuer
+    plural: clusterissuers
+  scope: Cluster
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: issuers.certmanager.k8s.io
+  labels:
+    app: certmanager
+    chart: certmanager
+    heritage: Tiller
+    release: istio
+spec:
+  group: certmanager.k8s.io
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+  names:
+    kind: Issuer
+    plural: issuers
+  scope: Namespaced
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: certificates.certmanager.k8s.io
+  labels:
+    app: certmanager
+    chart: certmanager
+    heritage: Tiller
+    release: istio
+spec:
+  additionalPrinterColumns:
+    - JSONPath: .status.conditions[?(@.type=="Ready")].status
+      name: Ready
+      type: string
+    - JSONPath: .spec.secretName
+      name: Secret
+      type: string
+    - JSONPath: .spec.issuerRef.name
+      name: Issuer
+      type: string
+      priority: 1
+    - JSONPath: .status.conditions[?(@.type=="Ready")].message
+      name: Status
+      type: string
+      priority: 1
+    - JSONPath: .metadata.creationTimestamp
+      description: |-
+        CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+
+        Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+      name: Age
+      type: date
+  group: certmanager.k8s.io
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+  scope: Namespaced
+  names:
+    kind: Certificate
+    plural: certificates
+    shortNames:
+      - cert
+      - certs
+---
+`)
+
+func chartsCrdsFilesCrdCertmanager10YamlBytes() ([]byte, error) {
+	return _chartsCrdsFilesCrdCertmanager10Yaml, nil
+}
+
+func chartsCrdsFilesCrdCertmanager10Yaml() (*asset, error) {
+	bytes, err := chartsCrdsFilesCrdCertmanager10YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/files/crd-certmanager-10.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsFilesCrdCertmanager11Yaml = []byte(`apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: orders.certmanager.k8s.io
+  labels:
+    app: certmanager
+    chart: certmanager
+    heritage: Tiller
+    release: istio
+spec:
+  additionalPrinterColumns:
+    - JSONPath: .status.state
+      name: State
+      type: string
+    - JSONPath: .spec.issuerRef.name
+      name: Issuer
+      type: string
+      priority: 1
+    - JSONPath: .status.reason
+      name: Reason
+      type: string
+      priority: 1
+    - JSONPath: .metadata.creationTimestamp
+      description: |-
+        CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+
+        Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+      name: Age
+      type: date
+  group: certmanager.k8s.io
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+  names:
+    kind: Order
+    plural: orders
+  scope: Namespaced
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: challenges.certmanager.k8s.io
+  labels:
+    app: certmanager
+    chart: certmanager
+    heritage: Tiller
+    release: istio
+spec:
+  additionalPrinterColumns:
+    - JSONPath: .status.state
+      name: State
+      type: string
+    - JSONPath: .spec.dnsName
+      name: Domain
+      type: string
+    - JSONPath: .status.reason
+      name: Reason
+      type: string
+    - JSONPath: .metadata.creationTimestamp
+      description: |-
+        CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+
+        Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+      name: Age
+      type: date
+  group: certmanager.k8s.io
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+  names:
+    kind: Challenge
+    plural: challenges
+  scope: Namespaced
+---
+`)
+
+func chartsCrdsFilesCrdCertmanager11YamlBytes() ([]byte, error) {
+	return _chartsCrdsFilesCrdCertmanager11Yaml, nil
+}
+
+func chartsCrdsFilesCrdCertmanager11Yaml() (*asset, error) {
+	bytes, err := chartsCrdsFilesCrdCertmanager11YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/files/crd-certmanager-11.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsFilesCrdMixerYaml = []byte(`kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: adapters.config.istio.io
+  labels:
+    app: mixer
+    package: adapter
+    istio: mixer-adapter
+    chart: istio
+    heritage: Tiller
+    release: istio
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  group: config.istio.io
+  names:
+    kind: adapter
+    plural: adapters
+    singular: adapter
+    categories:
+    - istio-io
+    - policy-istio-io
+  scope: Namespaced
+  subresources:
+    status: {}
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+---
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: instances.config.istio.io
+  labels:
+    app: mixer
+    package: instance
+    istio: mixer-instance
+    chart: istio
+    heritage: Tiller
+    release: istio
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  group: config.istio.io
+  names:
+    kind: instance
+    plural: instances
+    singular: instance
+    categories:
+    - istio-io
+    - policy-istio-io
+  scope: Namespaced
+  subresources:
+    status: {}
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+---
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: templates.config.istio.io
+  labels:
+    app: mixer
+    package: template
+    istio: mixer-template
+    chart: istio
+    heritage: Tiller
+    release: istio
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  group: config.istio.io
+  names:
+    kind: template
+    plural: templates
+    singular: template
+    categories:
+    - istio-io
+    - policy-istio-io
+  scope: Namespaced
+  subresources:
+    status: {}
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+---
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: handlers.config.istio.io
+  labels:
+    app: mixer
+    package: handler
+    istio: mixer-handler
+    chart: istio
+    heritage: Tiller
+    release: istio
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  group: config.istio.io
+  names:
+    kind: handler
+    plural: handlers
+    singular: handler
+    categories:
+    - istio-io
+    - policy-istio-io
+  scope: Namespaced
+  subresources:
+    status: {}
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+---
+`)
+
+func chartsCrdsFilesCrdMixerYamlBytes() ([]byte, error) {
+	return _chartsCrdsFilesCrdMixerYaml, nil
+}
+
+func chartsCrdsFilesCrdMixerYaml() (*asset, error) {
+	bytes, err := chartsCrdsFilesCrdMixerYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/files/crd-mixer.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsKustomizationYaml = []byte(`apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - files/crd-10.yaml
+  - files/crd-11.yaml
+  - files/crd-14.yaml
+  - files/crd-certmanager-10.yaml
+  - files/crd-certmanager-11.yaml
+`)
+
+func chartsCrdsKustomizationYamlBytes() ([]byte, error) {
+	return _chartsCrdsKustomizationYaml, nil
+}
+
+func chartsCrdsKustomizationYaml() (*asset, error) {
+	bytes, err := chartsCrdsKustomizationYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/kustomization.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsTemplatesCrdsYaml = []byte(`{{ .Files.Get "files/crd-10.yaml" }}
+{{ .Files.Get "files/crd-11.yaml" }}
+{{ .Files.Get "files/crd-14.yaml" }}
+{{- if .Values.certmanager }}
+{{- if .Values.certmanager.enabled }}
+{{ .Files.Get "files/crd-certmanager-10.yaml" }}
+{{ .Files.Get "files/crd-certmanager-11.yaml" }}
+{{- end }}
+{{- end }}
+`)
+
+func chartsCrdsTemplatesCrdsYamlBytes() ([]byte, error) {
+	return _chartsCrdsTemplatesCrdsYaml, nil
+}
+
+func chartsCrdsTemplatesCrdsYaml() (*asset, error) {
+	bytes, err := chartsCrdsTemplatesCrdsYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/templates/crds.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsTemplatesNamespacesYaml = []byte(`# To prevent accidental injection into istio control plane namespaces.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Release.Namespace }}
+  labels:
+    istio-operator-managed: Reconcile
+    istio-injection: disabled
+---
+
+{{- if ne .Values.global.istioNamespace .Release.Namespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.istioNamespace }}
+  labels:
+    istio-operator-managed: Reconcile
+    istio-injection: disabled
+---
+{{- end }}
+
+{{- if and (ne .Values.global.configNamespace .Release.Namespace) (ne .Values.global.configNamespace .Values.global.istioNamespace) }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.configNamespace }}
+  labels:
+    istio-operator-managed: Reconcile
+    istio-injection: disabled
+---
+{{- end }}
+
+{{- if ne .Values.global.telemetryNamespace .Release.Namespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.telemetryNamespace }}
+  labels:
+    istio-operator-managed: Reconcile
+    istio-injection: disabled
+---
+{{- end }}
+
+{{- if and (ne .Values.global.prometheusNamespace .Release.Namespace) (ne .Values.global.prometheusNamespace .Values.global.telemetryNamespace) }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.prometheusNamespace }}
+  labels:
+    istio-operator-managed: Reconcile
+    istio-injection: disabled
+---
+{{- end }}
+
+{{- if ne .Values.global.policyNamespace .Release.Namespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.policyNamespace }}
+  labels:
+    istio-operator-managed: Reconcile
+    istio-injection: disabled
+---
+{{- end }}
+`)
+
+func chartsCrdsTemplatesNamespacesYamlBytes() ([]byte, error) {
+	return _chartsCrdsTemplatesNamespacesYaml, nil
+}
+
+func chartsCrdsTemplatesNamespacesYaml() (*asset, error) {
+	bytes, err := chartsCrdsTemplatesNamespacesYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/templates/namespaces.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsCrdsValuesYaml = []byte(``)
+
+func chartsCrdsValuesYamlBytes() ([]byte, error) {
+	return _chartsCrdsValuesYaml, nil
+}
+
+func chartsCrdsValuesYaml() (*asset, error) {
+	bytes, err := chartsCrdsValuesYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/crds/values.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _chartsGatewaysIstioEgressChartYaml = []byte(`apiVersion: v1
 name: istio-egress
 version: 1.1.0
@@ -10579,9 +21406,8 @@ rules:
   - apiGroups: ["extensions"]
     resources: ["ingresses"]
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["extensions"]
-    resources: ["deployments/finalizers"]
-    resourceNames: ["istio-galley"]
+  - apiGroups: [""]
+    resources: ["namespaces/finalizers"]
     verbs: ["update"]
   - apiGroups: ["apiextensions.k8s.io"]
     resources: ["customresourcedefinitions"]
@@ -11475,6 +22301,146 @@ func chartsIstioControlIstioDiscoveryNotesTxt() (*asset, error) {
 	return a, nil
 }
 
+var _chartsIstioControlIstioDiscoveryMetadataExchangeV2Yaml = []byte(`apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: metadata-exchange
+spec:
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: ANY # inbound, outbound, and gateway
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.http_connection_manager"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.wasm
+          config:
+            config:
+              configuration: envoy.wasm.metadata_exchange
+              vm_config:
+                runtime: envoy.wasm.runtime.null
+                code:
+                  inline_string: envoy.wasm.metadata_exchange`)
+
+func chartsIstioControlIstioDiscoveryMetadataExchangeV2YamlBytes() ([]byte, error) {
+	return _chartsIstioControlIstioDiscoveryMetadataExchangeV2Yaml, nil
+}
+
+func chartsIstioControlIstioDiscoveryMetadataExchangeV2Yaml() (*asset, error) {
+	bytes, err := chartsIstioControlIstioDiscoveryMetadataExchangeV2YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/metadata-exchange-v2.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsIstioControlIstioDiscoveryStatsFilterV2Yaml = []byte(`apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: stats-filter
+spec:
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_OUTBOUND
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.http_connection_manager"
+              subFilter:
+                name: "envoy.router"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.wasm
+          config:
+            config:
+              root_id: stats_outbound
+              configuration: |
+                {
+                  "debug": "false",
+                  "stat_prefix": "istio",
+                }
+              vm_config:
+                vm_id: stats_outbound
+                runtime: envoy.wasm.runtime.null
+                code:
+                  inline_string: envoy.wasm.stats
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.http_connection_manager"
+              subFilter:
+                name: "envoy.router"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.wasm
+          config:
+            config:
+              root_id: stats_inbound
+              configuration: |
+                {
+                  "debug": "false",
+                  "stat_prefix": "istio",
+                }
+              vm_config:
+                vm_id: stats_inbound
+                runtime: envoy.wasm.runtime.null
+                code:
+                  inline_string: envoy.wasm.stats
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: "envoy.http_connection_manager"
+              subFilter:
+                name: "envoy.router"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.wasm
+          config:
+            config:
+              root_id: stats_outbound
+              configuration: |
+                {
+                  "debug": "false",
+                  "stat_prefix": "istio",
+                }
+              vm_config:
+                vm_id: stats_outbound
+                runtime: envoy.wasm.runtime.null
+                code:
+                  inline_string: envoy.wasm.stats`)
+
+func chartsIstioControlIstioDiscoveryStatsFilterV2YamlBytes() ([]byte, error) {
+	return _chartsIstioControlIstioDiscoveryStatsFilterV2Yaml, nil
+}
+
+func chartsIstioControlIstioDiscoveryStatsFilterV2Yaml() (*asset, error) {
+	bytes, err := chartsIstioControlIstioDiscoveryStatsFilterV2YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/stats-filter-v2.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _chartsIstioControlIstioDiscoveryTemplates_affinityTpl = []byte(`{{/* affinity - https://kubernetes.io/docs/concepts/configuration/assign-pod-node/ */}}
 
 {{- define "nodeaffinity" }}
@@ -12017,6 +22983,34 @@ func chartsIstioControlIstioDiscoveryTemplatesConfigmapEnvoyYaml() (*asset, erro
 	}
 
 	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/templates/configmap-envoy.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml = []byte(`{{- if .Values.pilot.jwksResolverExtraRootCA }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pilot-jwks-extra-cacerts{{ .Values.version }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    release: {{ .Release.Name }}
+data:
+  extra.pem: {{ .Values.pilot.jwksResolverExtraRootCA | quote }}
+{{- end }}
+`)
+
+func chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYamlBytes() ([]byte, error) {
+	return _chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml, nil
+}
+
+func chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml() (*asset, error) {
+	bytes, err := chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/templates/configmap-jwks.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -12797,6 +23791,27 @@ func chartsIstioControlIstioDiscoveryTemplatesServiceaccountYaml() (*asset, erro
 	}
 
 	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/templates/serviceaccount.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsIstioControlIstioDiscoveryTemplatesTelemetryv2Yaml = []byte(`{{- if and .Values.telemetry.enabled .Values.telemetry.v2.enabled }}
+{{ .Files.Get "metadata-exchange-v2.yaml" }}
+---
+{{ .Files.Get "stats-filter-v2.yaml" }}
+{{- end }}`)
+
+func chartsIstioControlIstioDiscoveryTemplatesTelemetryv2YamlBytes() ([]byte, error) {
+	return _chartsIstioControlIstioDiscoveryTemplatesTelemetryv2Yaml, nil
+}
+
+func chartsIstioControlIstioDiscoveryTemplatesTelemetryv2Yaml() (*asset, error) {
+	bytes, err := chartsIstioControlIstioDiscoveryTemplatesTelemetryv2YamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-control/istio-discovery/templates/telemetryv2.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -16405,14 +27420,14 @@ var _chartsIstioTelemetryGrafanaDashboardsGalleyDashboardJson = []byte(`{
           "refId": "A"
         },
         {
-          "expr": "galley_mcp_source_clients_total",
+          "expr": "istio_mcp_clients_total{component=\"galley\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "clients_total",
           "refId": "B"
         },
         {
-          "expr": "go_goroutines{job=\"galley\"}/galley_mcp_source_clients_total",
+          "expr": "go_goroutines{job=\"galley\"}/sum(istio_mcp_clients_total{component=\"galley\"}) without (component)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "avg_goroutines_per_client",
@@ -17384,7 +28399,7 @@ var _chartsIstioTelemetryGrafanaDashboardsGalleyDashboardJson = []byte(`{
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(galley_mcp_source_clients_total)",
+          "expr": "sum(istio_mcp_clients_total{component=\"galley\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Clients",
@@ -17469,7 +28484,7 @@ var _chartsIstioTelemetryGrafanaDashboardsGalleyDashboardJson = []byte(`{
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by(collection)(irate(galley_mcp_source_request_acks_total[1m]) * 60)",
+          "expr": "sum by(collection)(irate(istio_mcp_request_acks_total{component=\"galley\"}[1m]) * 60)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "",
@@ -17554,7 +28569,7 @@ var _chartsIstioTelemetryGrafanaDashboardsGalleyDashboardJson = []byte(`{
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(galley_mcp_source_request_nacks_total[1m]) * 60",
+          "expr": "rate(istio_mcp_request_nacks_total{component=\"galley\"}[1m]) * 60",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -17582,6 +28597,95 @@ var _chartsIstioTelemetryGrafanaDashboardsGalleyDashboardJson = []byte(`{
         {
           "format": "short",
           "label": "NACKs/min",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 48
+      },
+      "id": 48,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(increase(istio_mcp_message_sizes_bytes_bucket[5m])) by (le)",
+          "format": "heatmap",
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{le}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Response message sizes",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "none",
+          "label": null,
           "logBase": 1,
           "max": null,
           "min": null,
@@ -29221,6 +40325,33 @@ func chartsIstioTelemetryGrafanaTemplatesDeploymentYaml() (*asset, error) {
 	return a, nil
 }
 
+var _chartsIstioTelemetryGrafanaTemplatesDestinationRuleYaml = []byte(`apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: grafana
+  namespace: {{ .Release.Namespace }}
+spec:
+  host: grafana.{{ .Release.Namespace }}
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+`)
+
+func chartsIstioTelemetryGrafanaTemplatesDestinationRuleYamlBytes() ([]byte, error) {
+	return _chartsIstioTelemetryGrafanaTemplatesDestinationRuleYaml, nil
+}
+
+func chartsIstioTelemetryGrafanaTemplatesDestinationRuleYaml() (*asset, error) {
+	bytes, err := chartsIstioTelemetryGrafanaTemplatesDestinationRuleYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-telemetry/grafana/templates/destination-rule.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _chartsIstioTelemetryGrafanaTemplatesGrafanaPolicyYaml = []byte(`apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -33902,6 +45033,33 @@ func chartsIstioTelemetryPrometheusTemplatesDeploymentYaml() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "charts/istio-telemetry/prometheus/templates/deployment.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _chartsIstioTelemetryPrometheusTemplatesDestinationRuleYaml = []byte(`apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: prometheus
+  namespace: {{ .Release.Namespace }}
+spec:
+  host: prometheus
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+`)
+
+func chartsIstioTelemetryPrometheusTemplatesDestinationRuleYamlBytes() ([]byte, error) {
+	return _chartsIstioTelemetryPrometheusTemplatesDestinationRuleYaml, nil
+}
+
+func chartsIstioTelemetryPrometheusTemplatesDestinationRuleYaml() (*asset, error) {
+	bytes, err := chartsIstioTelemetryPrometheusTemplatesDestinationRuleYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "charts/istio-telemetry/prometheus/templates/destination-rule.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -39438,6 +50596,18 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/base/templates/serviceaccount.yaml": chartsBaseTemplatesServiceaccountYaml,
 	"charts/base/templates/services.yaml": chartsBaseTemplatesServicesYaml,
 	"charts/base/values.yaml": chartsBaseValuesYaml,
+	"charts/crds/Chart.yaml": chartsCrdsChartYaml,
+	"charts/crds/files/crd-10.yaml": chartsCrdsFilesCrd10Yaml,
+	"charts/crds/files/crd-11.yaml": chartsCrdsFilesCrd11Yaml,
+	"charts/crds/files/crd-14.yaml": chartsCrdsFilesCrd14Yaml,
+	"charts/crds/files/crd-all.gen.yaml": chartsCrdsFilesCrdAllGenYaml,
+	"charts/crds/files/crd-certmanager-10.yaml": chartsCrdsFilesCrdCertmanager10Yaml,
+	"charts/crds/files/crd-certmanager-11.yaml": chartsCrdsFilesCrdCertmanager11Yaml,
+	"charts/crds/files/crd-mixer.yaml": chartsCrdsFilesCrdMixerYaml,
+	"charts/crds/kustomization.yaml": chartsCrdsKustomizationYaml,
+	"charts/crds/templates/crds.yaml": chartsCrdsTemplatesCrdsYaml,
+	"charts/crds/templates/namespaces.yaml": chartsCrdsTemplatesNamespacesYaml,
+	"charts/crds/values.yaml": chartsCrdsValuesYaml,
 	"charts/gateways/istio-egress/Chart.yaml": chartsGatewaysIstioEgressChartYaml,
 	"charts/gateways/istio-egress/NOTES.txt": chartsGatewaysIstioEgressNotesTxt,
 	"charts/gateways/istio-egress/templates/_affinity.tpl": chartsGatewaysIstioEgressTemplates_affinityTpl,
@@ -39507,18 +50677,22 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/istio-control/istio-config/values.yaml": chartsIstioControlIstioConfigValuesYaml,
 	"charts/istio-control/istio-discovery/Chart.yaml": chartsIstioControlIstioDiscoveryChartYaml,
 	"charts/istio-control/istio-discovery/NOTES.txt": chartsIstioControlIstioDiscoveryNotesTxt,
+	"charts/istio-control/istio-discovery/metadata-exchange-v2.yaml": chartsIstioControlIstioDiscoveryMetadataExchangeV2Yaml,
+	"charts/istio-control/istio-discovery/stats-filter-v2.yaml": chartsIstioControlIstioDiscoveryStatsFilterV2Yaml,
 	"charts/istio-control/istio-discovery/templates/_affinity.tpl": chartsIstioControlIstioDiscoveryTemplates_affinityTpl,
 	"charts/istio-control/istio-discovery/templates/_helpers.tpl": chartsIstioControlIstioDiscoveryTemplates_helpersTpl,
 	"charts/istio-control/istio-discovery/templates/autoscale.yaml": chartsIstioControlIstioDiscoveryTemplatesAutoscaleYaml,
 	"charts/istio-control/istio-discovery/templates/clusterrole.yaml": chartsIstioControlIstioDiscoveryTemplatesClusterroleYaml,
 	"charts/istio-control/istio-discovery/templates/clusterrolebinding.yaml": chartsIstioControlIstioDiscoveryTemplatesClusterrolebindingYaml,
 	"charts/istio-control/istio-discovery/templates/configmap-envoy.yaml": chartsIstioControlIstioDiscoveryTemplatesConfigmapEnvoyYaml,
+	"charts/istio-control/istio-discovery/templates/configmap-jwks.yaml": chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml,
 	"charts/istio-control/istio-discovery/templates/configmap.yaml": chartsIstioControlIstioDiscoveryTemplatesConfigmapYaml,
 	"charts/istio-control/istio-discovery/templates/deployment.yaml": chartsIstioControlIstioDiscoveryTemplatesDeploymentYaml,
 	"charts/istio-control/istio-discovery/templates/enable-mesh-mtls.yaml": chartsIstioControlIstioDiscoveryTemplatesEnableMeshMtlsYaml,
 	"charts/istio-control/istio-discovery/templates/poddisruptionbudget.yaml": chartsIstioControlIstioDiscoveryTemplatesPoddisruptionbudgetYaml,
 	"charts/istio-control/istio-discovery/templates/service.yaml": chartsIstioControlIstioDiscoveryTemplatesServiceYaml,
 	"charts/istio-control/istio-discovery/templates/serviceaccount.yaml": chartsIstioControlIstioDiscoveryTemplatesServiceaccountYaml,
+	"charts/istio-control/istio-discovery/templates/telemetryv2.yaml": chartsIstioControlIstioDiscoveryTemplatesTelemetryv2Yaml,
 	"charts/istio-control/istio-discovery/templates/telemetryv2_1.4.yaml": chartsIstioControlIstioDiscoveryTemplatesTelemetryv2_14Yaml,
 	"charts/istio-control/istio-discovery/values.yaml": chartsIstioControlIstioDiscoveryValuesYaml,
 	"charts/istio-policy/Chart.yaml": chartsIstioPolicyChartYaml,
@@ -39548,6 +50722,7 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/istio-telemetry/grafana/templates/configmap-dashboards.yaml": chartsIstioTelemetryGrafanaTemplatesConfigmapDashboardsYaml,
 	"charts/istio-telemetry/grafana/templates/configmap.yaml": chartsIstioTelemetryGrafanaTemplatesConfigmapYaml,
 	"charts/istio-telemetry/grafana/templates/deployment.yaml": chartsIstioTelemetryGrafanaTemplatesDeploymentYaml,
+	"charts/istio-telemetry/grafana/templates/destination-rule.yaml": chartsIstioTelemetryGrafanaTemplatesDestinationRuleYaml,
 	"charts/istio-telemetry/grafana/templates/grafana-policy.yaml": chartsIstioTelemetryGrafanaTemplatesGrafanaPolicyYaml,
 	"charts/istio-telemetry/grafana/templates/pvc.yaml": chartsIstioTelemetryGrafanaTemplatesPvcYaml,
 	"charts/istio-telemetry/grafana/templates/service.yaml": chartsIstioTelemetryGrafanaTemplatesServiceYaml,
@@ -39582,6 +50757,7 @@ var _bindata = map[string]func() (*asset, error){
 	"charts/istio-telemetry/prometheus/templates/clusterrolebindings.yaml": chartsIstioTelemetryPrometheusTemplatesClusterrolebindingsYaml,
 	"charts/istio-telemetry/prometheus/templates/configmap.yaml": chartsIstioTelemetryPrometheusTemplatesConfigmapYaml,
 	"charts/istio-telemetry/prometheus/templates/deployment.yaml": chartsIstioTelemetryPrometheusTemplatesDeploymentYaml,
+	"charts/istio-telemetry/prometheus/templates/destination-rule.yaml": chartsIstioTelemetryPrometheusTemplatesDestinationRuleYaml,
 	"charts/istio-telemetry/prometheus/templates/ingress.yaml": chartsIstioTelemetryPrometheusTemplatesIngressYaml,
 	"charts/istio-telemetry/prometheus/templates/service.yaml": chartsIstioTelemetryPrometheusTemplatesServiceYaml,
 	"charts/istio-telemetry/prometheus/templates/serviceaccount.yaml": chartsIstioTelemetryPrometheusTemplatesServiceaccountYaml,
@@ -39714,6 +50890,24 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			}},
 			"values.yaml": &bintree{chartsBaseValuesYaml, map[string]*bintree{}},
 		}},
+		"crds": &bintree{nil, map[string]*bintree{
+			"Chart.yaml": &bintree{chartsCrdsChartYaml, map[string]*bintree{}},
+			"files": &bintree{nil, map[string]*bintree{
+				"crd-10.yaml": &bintree{chartsCrdsFilesCrd10Yaml, map[string]*bintree{}},
+				"crd-11.yaml": &bintree{chartsCrdsFilesCrd11Yaml, map[string]*bintree{}},
+				"crd-14.yaml": &bintree{chartsCrdsFilesCrd14Yaml, map[string]*bintree{}},
+				"crd-all.gen.yaml": &bintree{chartsCrdsFilesCrdAllGenYaml, map[string]*bintree{}},
+				"crd-certmanager-10.yaml": &bintree{chartsCrdsFilesCrdCertmanager10Yaml, map[string]*bintree{}},
+				"crd-certmanager-11.yaml": &bintree{chartsCrdsFilesCrdCertmanager11Yaml, map[string]*bintree{}},
+				"crd-mixer.yaml": &bintree{chartsCrdsFilesCrdMixerYaml, map[string]*bintree{}},
+			}},
+			"kustomization.yaml": &bintree{chartsCrdsKustomizationYaml, map[string]*bintree{}},
+			"templates": &bintree{nil, map[string]*bintree{
+				"crds.yaml": &bintree{chartsCrdsTemplatesCrdsYaml, map[string]*bintree{}},
+				"namespaces.yaml": &bintree{chartsCrdsTemplatesNamespacesYaml, map[string]*bintree{}},
+			}},
+			"values.yaml": &bintree{chartsCrdsValuesYaml, map[string]*bintree{}},
+		}},
 		"gateways": &bintree{nil, map[string]*bintree{
 			"istio-egress": &bintree{nil, map[string]*bintree{
 				"Chart.yaml": &bintree{chartsGatewaysIstioEgressChartYaml, map[string]*bintree{}},
@@ -39809,6 +51003,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"istio-discovery": &bintree{nil, map[string]*bintree{
 				"Chart.yaml": &bintree{chartsIstioControlIstioDiscoveryChartYaml, map[string]*bintree{}},
 				"NOTES.txt": &bintree{chartsIstioControlIstioDiscoveryNotesTxt, map[string]*bintree{}},
+				"metadata-exchange-v2.yaml": &bintree{chartsIstioControlIstioDiscoveryMetadataExchangeV2Yaml, map[string]*bintree{}},
+				"stats-filter-v2.yaml": &bintree{chartsIstioControlIstioDiscoveryStatsFilterV2Yaml, map[string]*bintree{}},
 				"templates": &bintree{nil, map[string]*bintree{
 					"_affinity.tpl": &bintree{chartsIstioControlIstioDiscoveryTemplates_affinityTpl, map[string]*bintree{}},
 					"_helpers.tpl": &bintree{chartsIstioControlIstioDiscoveryTemplates_helpersTpl, map[string]*bintree{}},
@@ -39816,12 +51012,14 @@ var _bintree = &bintree{nil, map[string]*bintree{
 					"clusterrole.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesClusterroleYaml, map[string]*bintree{}},
 					"clusterrolebinding.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesClusterrolebindingYaml, map[string]*bintree{}},
 					"configmap-envoy.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesConfigmapEnvoyYaml, map[string]*bintree{}},
+					"configmap-jwks.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesConfigmapJwksYaml, map[string]*bintree{}},
 					"configmap.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesConfigmapYaml, map[string]*bintree{}},
 					"deployment.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesDeploymentYaml, map[string]*bintree{}},
 					"enable-mesh-mtls.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesEnableMeshMtlsYaml, map[string]*bintree{}},
 					"poddisruptionbudget.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesPoddisruptionbudgetYaml, map[string]*bintree{}},
 					"service.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesServiceYaml, map[string]*bintree{}},
 					"serviceaccount.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesServiceaccountYaml, map[string]*bintree{}},
+					"telemetryv2.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesTelemetryv2Yaml, map[string]*bintree{}},
 					"telemetryv2_1.4.yaml": &bintree{chartsIstioControlIstioDiscoveryTemplatesTelemetryv2_14Yaml, map[string]*bintree{}},
 				}},
 				"values.yaml": &bintree{chartsIstioControlIstioDiscoveryValuesYaml, map[string]*bintree{}},
@@ -39863,6 +51061,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 					"configmap-dashboards.yaml": &bintree{chartsIstioTelemetryGrafanaTemplatesConfigmapDashboardsYaml, map[string]*bintree{}},
 					"configmap.yaml": &bintree{chartsIstioTelemetryGrafanaTemplatesConfigmapYaml, map[string]*bintree{}},
 					"deployment.yaml": &bintree{chartsIstioTelemetryGrafanaTemplatesDeploymentYaml, map[string]*bintree{}},
+					"destination-rule.yaml": &bintree{chartsIstioTelemetryGrafanaTemplatesDestinationRuleYaml, map[string]*bintree{}},
 					"grafana-policy.yaml": &bintree{chartsIstioTelemetryGrafanaTemplatesGrafanaPolicyYaml, map[string]*bintree{}},
 					"pvc.yaml": &bintree{chartsIstioTelemetryGrafanaTemplatesPvcYaml, map[string]*bintree{}},
 					"service.yaml": &bintree{chartsIstioTelemetryGrafanaTemplatesServiceYaml, map[string]*bintree{}},
@@ -39911,6 +51110,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 					"clusterrolebindings.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesClusterrolebindingsYaml, map[string]*bintree{}},
 					"configmap.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesConfigmapYaml, map[string]*bintree{}},
 					"deployment.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesDeploymentYaml, map[string]*bintree{}},
+					"destination-rule.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesDestinationRuleYaml, map[string]*bintree{}},
 					"ingress.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesIngressYaml, map[string]*bintree{}},
 					"service.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesServiceYaml, map[string]*bintree{}},
 					"serviceaccount.yaml": &bintree{chartsIstioTelemetryPrometheusTemplatesServiceaccountYaml, map[string]*bintree{}},
