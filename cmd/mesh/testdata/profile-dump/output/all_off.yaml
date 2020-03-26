@@ -426,13 +426,13 @@ values:
         address: ""
         cacertPath: ""
         secure: true
-      zipkin:
-        address: ""
       stackdriver:
         debug: false
-        maxNumberOfAttributes: 200
         maxNumberOfAnnotations: 200
+        maxNumberOfAttributes: 200
         maxNumberOfMessageEvents: 200
+      zipkin:
+        address: ""
     trustDomain: cluster.local
     useMCP: true
   grafana:
@@ -516,7 +516,7 @@ values:
       cert_file: /kiali-cert/cert-chain.pem
       enabled: false
       private_key_file: /kiali-cert/key.pem
-    tag: v1.9
+    tag: v1.15
   mixer:
     adapters:
       kubernetesenv:

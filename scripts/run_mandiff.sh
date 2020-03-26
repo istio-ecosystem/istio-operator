@@ -66,7 +66,8 @@ NAMESPACES_MAP["security/nodeagent"]="istio-system"
 # define the ingored resource list for manifest comparison
 MANDIFF_IGNORE_RESOURCE_LIST="ConfigMap::istio:data.values.yaml,\
 ConfigMap::istio-sidecar-injector:data.values,\
-Deployment::istio-pilot:metadata.annotations.checksum/config-volume"
+Deployment::istio-pilot:metadata.annotations.checksum/config-volume,\
+ConfigMap::kiali:data.config.yaml"
 
 # No unset vars, print commands as they're executed, and exit on any non-zero
 # return code
