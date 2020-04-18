@@ -8591,6 +8591,8 @@ data:
   # values in this config will be automatically populated.
   cni_network_config: |-
         {
+          "cniVersion": "0.3.1",
+          "name": "istio-cni",
           "type": "istio-cni",
           "log_level": {{ quote .Values.cni.logLevel }},
           "kubernetes": {
