@@ -38,7 +38,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // For kubeclient GCP auth
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	kubectlutil "k8s.io/kubectl/pkg/util/deployment"
@@ -46,7 +46,7 @@ import (
 	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/name"
-	"istio.io/operator/pkg/object" // For kubeclient GCP auth
+	"istio.io/operator/pkg/object"
 	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/version"
 	"istio.io/pkg/log"
