@@ -15,6 +15,7 @@
 package manifest
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -25,16 +26,6 @@ import (
 	"time"
 
 	"github.com/ghodss/yaml"
-
-	"istio.io/operator/pkg/util"
-
-	"istio.io/operator/pkg/apis/istio/v1alpha2"
-
-	"istio.io/operator/pkg/object"
-
-	// For kubeclient GCP auth
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
@@ -47,13 +38,16 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-
 	kubectlutil "k8s.io/kubectl/pkg/util/deployment"
 
+	"istio.io/operator/pkg/apis/istio/v1alpha2"
 	"istio.io/operator/pkg/kubectlcmd"
 	"istio.io/operator/pkg/name"
+	"istio.io/operator/pkg/object" // For kubeclient GCP auth
+	"istio.io/operator/pkg/util"
 	"istio.io/operator/pkg/version"
 	"istio.io/pkg/log"
 )
@@ -556,6 +550,8 @@ func waitForResources(objects object.K8sObjects, opts *InstallOptions) error {
 		return fmt.Errorf("k8s client error: %s", err)
 	}
 
+	var notReady []string
+
 	errPoll := wait.Poll(2*time.Second, opts.WaitTimeout, func() (bool, error) {
 		pods := []v1.Pod{}
 		services := []v1.Service{}
@@ -639,16 +635,22 @@ func waitForResources(objects object.K8sObjects, opts *InstallOptions) error {
 				services = append(services, *svc)
 			}
 		}
-		isReady := namespacesReady(namespaces) && podsReady(pods) && deploymentsReady(deployments) && servicesReady(services)
+
+		dr, dnr := deploymentsReady(deployments)
+		nsr, nnr := namespacesReady(namespaces)
+		pr, pnr := podsReady(pods)
+		sr, snr := servicesReady(services)
+		isReady := dr && nsr && pr && sr
 		if !isReady {
-			logAndPrint("Waiting for resources ready with timeout of %v", opts.WaitTimeout)
+			logAndPrint("  Waiting for resources to become ready...")
 		}
+		notReady = joinStringSlices(nnr, dnr, pnr, snr)
 		return isReady, nil
 	})
 
 	if errPoll != nil {
-		logAndPrint("Failed to wait for resources ready: %v", errPoll)
-		return fmt.Errorf("failed to wait for resources ready: %s", errPoll)
+		msg := fmt.Sprintf("resources not ready after %v: %v\n%s", opts.WaitTimeout, errPoll, strings.Join(notReady, "\n"))
+		return errors.New(msg)
 	}
 	return nil
 }
@@ -661,24 +663,24 @@ func getPods(client kubernetes.Interface, namespace string, selector map[string]
 	return list.Items, err
 }
 
-func namespacesReady(namespaces []v1.Namespace) bool {
+func namespacesReady(namespaces []v1.Namespace) (bool, []string) {
+	var notReady []string
 	for _, namespace := range namespaces {
 		if !isNamespaceReady(&namespace) {
-			logAndPrint("Namespace is not ready: %s/%s", namespace.GetName())
-			return false
+			notReady = append(notReady, "Namespace/"+namespace.Name)
 		}
 	}
-	return true
+	return len(notReady) == 0, notReady
 }
 
-func podsReady(pods []v1.Pod) bool {
+func podsReady(pods []v1.Pod) (bool, []string) {
+	var notReady []string
 	for _, pod := range pods {
 		if !isPodReady(&pod) {
-			logAndPrint("Pod is not ready: %s/%s", pod.GetNamespace(), pod.GetName())
-			return false
+			notReady = append(notReady, "Pod/"+pod.Namespace+"/"+pod.Name)
 		}
 	}
-	return true
+	return len(notReady) == 0, notReady
 }
 
 func isNamespaceReady(namespace *v1.Namespace) bool {
@@ -697,31 +699,32 @@ func isPodReady(pod *v1.Pod) bool {
 	return false
 }
 
-func deploymentsReady(deployments []deployment) bool {
+func deploymentsReady(deployments []deployment) (bool, []string) {
+	var notReady []string
 	for _, v := range deployments {
 		if v.replicaSets.Status.ReadyReplicas < *v.deployment.Spec.Replicas {
-			logAndPrint("Deployment is not ready: %s/%s", v.deployment.GetNamespace(), v.deployment.GetName())
-			return false
+			notReady = append(notReady, "Deployment/"+v.deployment.Namespace+"/"+v.deployment.Name)
 		}
 	}
-	return true
+	return len(notReady) == 0, notReady
 }
 
-func servicesReady(svc []v1.Service) bool {
+func servicesReady(svc []v1.Service) (bool, []string) {
+	var notReady []string
 	for _, s := range svc {
 		if s.Spec.Type == v1.ServiceTypeExternalName {
 			continue
 		}
 		if s.Spec.ClusterIP != v1.ClusterIPNone && s.Spec.ClusterIP == "" {
-			logAndPrint("Service is not ready: %s/%s", s.GetNamespace(), s.GetName())
-			return false
+			notReady = append(notReady, "Service/"+s.Namespace+"/"+s.Name)
+			continue
 		}
 		if s.Spec.Type == v1.ServiceTypeLoadBalancer && s.Status.LoadBalancer.Ingress == nil {
-			logAndPrint("Service is not ready: %s/%s", s.GetNamespace(), s.GetName())
-			return false
+			notReady = append(notReady, "Service/"+s.Namespace+"/"+s.Name)
+			continue
 		}
 	}
-	return true
+	return len(notReady) == 0, notReady
 }
 
 func buildInstallTree() {
@@ -810,4 +813,12 @@ func logAndPrint(v ...interface{}) {
 	s := fmt.Sprintf(v[0].(string), v[1:]...)
 	log.Infof(s)
 	fmt.Println(s)
+}
+
+func joinStringSlices(s ...[]string) []string {
+	var out []string
+	for _, ss := range s {
+		out = append(out, ss...)
+	}
+	return out
 }
