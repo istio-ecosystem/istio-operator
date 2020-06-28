@@ -1,5 +1,4 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/istio/operator)](https://goreportcard.com/report/github.com/istio/operator)
-[![GolangCI](https://golangci.com/badges/github.com/istio/operator.svg)](https://golangci.com/r/github.com/istio/operator)
 
 Note: This repo has been merged to [istio.io/istio/operator](https://github.com/istio/istio/blob/master/operator/).
 Please go to that repo to make any changes to operator or installer charts. The only exception is bug backports to the
